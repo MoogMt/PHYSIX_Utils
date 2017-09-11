@@ -20,6 +20,8 @@ struct atom
   double x;
   double y;
   double z;
+  // index
+  int index;
 };
 //------------------------------
 
@@ -159,7 +161,7 @@ double distance_avg(vector<molecule> mols, int n)
     {
       return 0;
     }
-  for( int i=0; i < mols.size() ; i++)
+   for( int i=0; i < mols.size() ; i++)
     {      distance = distance + distance_avg(mols[i], n);
     }
   return distance/((double)(mols.size()));
@@ -177,6 +179,8 @@ double distance_avg(vector<molecule> mols)
   return distance/(double)count;
 }
 
+//================
+// MAIN PROGRAM
 //=====================================================================
 int main(void)
 {
@@ -185,6 +189,7 @@ int main(void)
   vector<atom> atom_list;
   atom atom_buff;
   vector<molecule> mols;
+  vector<molecule> mols_mem;
   vector<molecule> mols2;
   vector<molecule> mols3;
   vector<molecule> mols4;
@@ -193,17 +198,32 @@ int main(void)
   
   // Input
   //------------------------------------
-  ifstream fichier("traj.xyz");
+  ifstream fichier("TRAJEC.xyz");
   // Input Flux Iterator
   istream_iterator<string> it(fichier);
   istream_iterator<string> end;
   //------------------------------------
-  
+
+  // output flux
+  //-------------
+  ofstream length;
+  ofstream COn;
+  ofstream diff;
+  //---------------
+
+  // Opening files
+  //--------------------------
+  length.open ("length.dat");
+  COn.open ("COn.dat");
+  diff.open("diff.dat");
+  //--------------------------
+   
   // Count
   //--------------------
   int n=0;
   int step=0;
   int poscount=0;
+  int atom_count=1;
   //-------------------
 
   // Data
@@ -211,7 +231,8 @@ int main(void)
   vector<double> distances;
   vector<double> coordC;
   vector<double> coordO;
-
+  double diff_dist;
+  
   // Reading the file 
   while(it != end )   
     {
@@ -220,7 +241,7 @@ int main(void)
       //------------------------
       ++n;
       //------------------------
-      if ( n > 4 )
+      if ( n > 3 )
 	{
 	  if( string(*it).compare("C") == 0 ||  string(*it).compare("O") == 0 )
 	    {
@@ -232,6 +253,7 @@ int main(void)
 	      switch(poscount)
 		{
 		case 1:
+		  atom_buff.index=atom_count;
 		  atom_buff.x = atof(string(*it).c_str());
 		  break;
 		case 2:
@@ -239,6 +261,7 @@ int main(void)
 		  break;
 		case 3:
 		  atom_buff.z = atof(string(*it).c_str());
+		  atom_count++;
 		  atom_list.push_back(atom_buff);
 		  poscount=0;
 		  break;
@@ -254,25 +277,42 @@ int main(void)
       //--------------------------------------------------------
       if ( n == 32*3*4+3 )
 	{
+	  //------------------
 	  // Making molecules
 	  //------------------------------
 	  mols=make_molecule(atom_list);
+	  if( step == 1 )
+	    {
+	      mols_mem=mols;
+	    }
+	  diff_dist=0;
+	  int count2=0;
+	  for( int i=0; i < mols.mem())
+	    {
+	      for()
+		{
+		  
+		}
+	    }
 	  //------------------------------
 	  // Crunching data
 	  //---------------------------------------------------
+	  // Get different types of molecules
 	  mols2=getCOn(mols,3);
 	  mols3=getCOn(mols,4);
 	  mols4=getCOn(mols,5);
-	  //cout << step << " " << mols.size() << " " << mols2.size() << " " << mols3.size() << " " << mols4.size() << endl;
-	  //cout << step << " " <<  distance_avg(mols2,2) << " " << distance_avg(mols3,3) << " " << distance_avg(mols4,4) << endl;
+	  // Output coordinance values
+	  //------------------------------------------------------
+	  COn << step << " " << mols.size() << " " << mols2.size() << " " << mols3.size() << " " << mols4.size() << endl;
 	  if ( distance_avg(mols4,4) != 0 )
 	    {
-	      cout << step << " " <<  distance_avg(mols2,2) << " " << distance_avg(mols3,3) << " " <<  distance_avg(mols) << " " << distance_avg(mols4,4)  << endl;
+	      length << step << " " <<  distance_avg(mols2,2) << " " << distance_avg(mols3,3) << " " <<  distance_avg(mols) << " " << distance_avg(mols4,4)  << endl;
 	    }
 	  else
 	    {
-	      cout << step << " " <<  distance_avg(mols2,2) << " " << distance_avg(mols3,3) << " " <<  distance_avg(mols) << endl; 
+	      length << step << " " <<  distance_avg(mols2,2) << " " << distance_avg(mols3,3) << " " <<  distance_avg(mols) << endl; 
 	    }
+	  atom_count=1;
 	  //---------------------------------------------------
 	  // Clear
 	  //------------------
@@ -288,16 +328,20 @@ int main(void)
       //------------------
       // Go to next item
       //------------------
+
       ++it;
       //------------------
     }
   //---------------
   // Data averages
   //-------------------------
-
+  length.close();
+  COn.close();
+  diff.close();
   //-------------------------
   // Printing data
   //---------------
   //---------------
   return 0;
 }
+//=========================================================================
