@@ -33,8 +33,17 @@ struct molecule
 };
 //-------------------
 
+// Cell
+//---------------------------
+struct cell
+{
+  double a, b, c;
+  double alpha, beta, gamma;
+};
+f//----------------------------
 
-// Print for debug
+// prinatoms
+// Prints all informations on a given atoms in the console
 //-------------------------------------------------------------------
 void printatoms( vector<atom> atoms )
 {
@@ -49,7 +58,8 @@ void printatoms( vector<atom> atoms )
 //--------------------------------------------------------------------
 
 // Min
-//--------------------------------------------
+// Returns the minimum of value of vector containing doubles
+//-----------------------------------------------------------
 double min(vector<double> vector)
 {
   double min=vector[0];
@@ -65,6 +75,8 @@ double min(vector<double> vector)
 //-------------------------------------------
 
 // PBC
+// returns the shortest squared distance in 1D taking acount of pbc a
+//------------------------------------------
 double pbc(double x1, double x2, double a)
 {
   vector<double> x;
@@ -75,8 +87,9 @@ double pbc(double x1, double x2, double a)
 }
 
 // Distance
+// returns the distance between two atoms in a given cell 
 //------------------------------------------------------
-double distance2(vector<atom> atoms, int i, int j, double a, double b, double c)
+double distance_atoms(vector<atom> atoms, int i, int j, double a, double b, double c)
 {
   double x=pbc(atoms[i].x,atoms[j].x,a);
   double y=pbc(atoms[i].y,atoms[j].y,b);
@@ -87,113 +100,128 @@ double distance2(vector<atom> atoms, int i, int j, double a, double b, double c)
 
 
 // Average
-//---------------------------------------
+// Returns the average distance between two atoms
+//----------------------------------------------------------
 double average(vector<double> data)
 {
-  double average=0;
-  for( int i=0; i<data.size(); i++)
+  double average=0;                   // Average
+  for( int i=0; i<data.size(); i++)   
     {
       average=average+data[i];
     }
-  return average=average/data.size();
+  return average=average/data.size(); // Returning the average
 }
 //--------------------------------------
 
 // Make molecules
+// returns a molecule group using a list of atom and a given cut-off radius
 //-------------------------------------------------------
-vector<molecule> make_molecule( vector<atom> atom_list)
+vector<molecule> make_molecules( vector<atom> atom_list, double cut_off_radius)
 {
-  // Variables
-  vector<molecule> molecules;
-  molecule molecule_buff;
+  vector<molecule> molecule_group; // Storing the molecules
+  molecule molecule_temp;          // Temp storage for molecules
   // Loop over atoms
   for ( int i=0 ; i < atom_list.size() ; i++ )
     {
-      if ( (atom_list[i].name).compare("C") == 0 )
+      if ( atom_list[i].name.compare("C") == 0 )
 	{
-	  (molecule_buff.list).push_back(atom_list[i]);
+	  molecule_temp.list.push_back(atom_list[i]); // Adding the C to the molecule
 	  for ( int j=0 ; j < atom_list.size() ; j++)
 	    {
-	      if ( (atom_list[j].name).compare("O") == 0 && distance2(atom_list,i,j,9.0,9.0,9.0) < 1.75 && i!=j )
+	      if ( (atom_list[j].name).compare("O") == 0 && distance_atoms(atom_list,i,j,10.112,10.112,10.112) < cut_off_radius && i!=j )
 		{
-		  (molecule_buff.list).push_back(atom_list[j]);
+		  molecule_buff.list.push_back(atom_list[j]); // Adding the O atoms
 		}
 	    }
-	  molecules.push_back(molecule_buff);
-	  (molecule_buff.list).clear();
+	  molecules_group.push_back(molecule_buff);
+	  molecule_temp.list.clear(); // Clearing the buffer
 	}
     }
-  return molecules;
+  return molecule_group; // Return the molecules group
 }
 //-----------------------------------------------------
 
 
-// GetMols
+// GetMoleculesWithN
+// Extract the molecules that have only N atoms from a molecule group
 //--------------------------------------------------------
-vector<molecule> getCOn(vector<molecule> mols, int n)
+vector<molecule> getMoleculeWithN(vector<molecule> molecule_group, int n)
 {
-  vector<molecule> mols2;
-  for( int i=0; i<mols.size(); i++)
+  vector<molecule> molecule_n_atoms;            // Group of molecules with only n atoms
+  for( int i=0; i<molecule_group.size(); i++)   // For each molecules in the group
     {
-      if( (mols[i].list).size() == n)
+      if( (molecule_group[i].list).size() == n) // If the molecule has n atoms...
 	{
-	  mols2.push_back(mols[i]);
+	  molecule_n_atoms.push_back(mols[i]); // ... add molecule to the group
 	}
     }
-  return mols2;
+  return mols2; // ... and finally return the group
 }
 //--------------------------------------------------------
 
-double distance_avg(molecule mol, int n)
+// distance_avg_mol
+// Return the average distance for a given molecule
+//--------------------------------------------------------------------------
+double distance_avg_mol(molecule mol, double a, double b, double c)
 {
   double distance=0;
   for ( int i=1; i < (mol.list).size() ; i ++ )
     {
-      distance=distance + distance2(mol.list,0,2,9.0,9.0,9.0);
+      distance =+ distance2(mol.list,0,i,a,b,c);
     }
-  return distance/(double)(n);
+  return distance/(double)(mol.list.size());
 }
+//--------------------------------------------------------------------------
 
-double distance_avg(vector<molecule> mols, int n)
+// 
+// Returns the average distances for a group of molecules
+//-----------------------------------------------------------------------------
+double distance_avg_mols(vector<molecule> molecule_group,double a, double b, double c)
 {
   double distance=0;
-  if ( mols.size() == 0 )
+  int count = 0;
+  for( int i=0; i < mols.size() ; i++)
     {
-      return 0;
-    }
-   for( int i=0; i < mols.size() ; i++)
-    {      distance = distance + distance_avg(mols[i], n);
-    }
-  return distance/((double)(mols.size()));
-}
-
-double distance_avg(vector<molecule> mols)
-{
-  double distance=0;
-  int count=0;
-  for (int i=0; i<mols.size(); i++)
-    {
-      distance = distance + distance_avg(mols[i],(mols[i].list).size()-1);
-      count++;
+      for ( int j=1; j < mols[i].list.size(); j++ )
+	{
+	  distance =+ distance2(mols[i].list,0,j,a,b,c);
+	}
     }
   return distance/(double)count;
 }
+//----------------------------------------------------------------------------
+
+
+// Gives the average distance for a molecule of with a given number of atoms
+//---------------------------------------------------------------------------------------
+double distance_avg_molsn(vector<molecule> molecules_group, int n, double a, double b, double c)
+{
+  vector<molecules> molecules_n_atoms = getMoleculeWithN(vector<molecule> molecule_group, int n);
+  if( molecules_n_atoms.size() != 0 )
+    {
+      return distance_avg_molecules(molecules_n_atoms,a,b,c)
+    }
+  else
+    {
+      return 0;
+    }
+}
+//---------------------------------------------------------------------------------------
 
 //================
 // MAIN PROGRAM
 //=====================================================================
 int main(void)
 {
-  // Tab
+  // Atoms and molecules
   //-----------------------
-  vector<atom> atom_list;
-  atom atom_buff;
-  vector<molecule> mols;
-  vector<molecule> mols_mem;
-  vector<molecule> mols2;
-  vector<molecule> mols3;
-  vector<molecule> mols4;
-  
+  atom atom; // Temp variable that creates atoms
+  vector<atom> atom_list; // Temp Variable that contains the atoms of the system
+  vector<molecule> mols;  // Contains all the molecules of the system
+  vector<molecule> mols_mem; // Contains all the molecules of the system at step 1
+  vector<molecule> mols2;    // Contains all molecules with 2 atoms
+  vector<molecule> mols3;    //  ""      ""     ""       "" 3 "" 
+  vector<molecule> mols4;    //  ""      ""     ""       "" 4 "" 
   //-----------------------
   
   // Input
@@ -204,35 +232,41 @@ int main(void)
   istream_iterator<string> end;
   //------------------------------------
 
-  // output flux
+  // Output
   //-------------
   ofstream length;
   ofstream COn;
   ofstream diff;
-  //---------------
-
+  ofstream diffper;
   // Opening files
   //--------------------------
   length.open ("length.dat");
   COn.open ("COn.dat");
   diff.open("diff.dat");
+  diffper.open("diff_per.dat");
   //--------------------------
+
+  //---------------
+
+  // CELL length
+  double a=9.0, b=9.0, c=9.0;
+  // Stuff
+  double cut_off_radius = 1.75;
+  
    
   // Count
-  //--------------------
-  int n=0;
-  int step=0;
-  int poscount=0;
-  int atom_count=1;
-  //-------------------
+  //---------------------------------------------
+  int n=0;           // Number of elements
+  int step=0;        // Step number
+  int poscount=0;    // Position count for x,y,z
+  int atom_count=1;  // number of atoms
+  //----------------------------------------------
 
   // Data
-  vector<double> angles;
-  vector<double> distances;
-  vector<double> coordC;
-  vector<double> coordO;
+  //vector<double> angles;
   double diff_dist;
-  
+  //
+   
   // Reading the file 
   while(it != end )   
     {
@@ -245,7 +279,7 @@ int main(void)
 	{
 	  if( string(*it).compare("C") == 0 ||  string(*it).compare("O") == 0 )
 	    {
-	      atom_buff.name=string(*it);
+	      atom.name=string(*it);
 	    }
 	  else
 	    {
@@ -253,16 +287,16 @@ int main(void)
 	      switch(poscount)
 		{
 		case 1:
-		  atom_buff.index=atom_count;
-		  atom_buff.x = atof(string(*it).c_str());
+		  atom.index=atom_count;
+		  atom.x = atof(string(*it).c_str());
 		  break;
 		case 2:
-		  atom_buff.y = atof(string(*it).c_str());
+		  atom.y = atof(string(*it).c_str());
 		  break;
 		case 3:
-		  atom_buff.z = atof(string(*it).c_str());
+		  atom.z = atof(string(*it).c_str());
 		  atom_count++;
-		  atom_list.push_back(atom_buff);
+		  atom.push_back(atom_buff);
 		  poscount=0;
 		  break;
 		default:
@@ -275,73 +309,55 @@ int main(void)
       //-----------------
       // Compiling data
       //--------------------------------------------------------
+      int count_bond=0;
+      int count_diff=0;
       if ( n == 32*3*4+3 )
 	{
-	  //------------------
-	  // Making molecules
-	  //------------------------------
-	  mols=make_molecule(atom_list);
-	  if( step == 1 )
+	  mols=make_molecule(atom_list); // Making molecules from atom list
+	  if( step == 1 ) // Bookeeping original molecules for diffusion 
 	    {
 	      mols_mem=mols;
 	    }
-	  diff_dist=0;
-	  int count2=0;
-	  for( int i=0; i < mols.mem())
+	  diff_dist  = 0; // Reinitialize diffusion distance
+	  count_bond = 0; // Reinitialize the number of bonds in the system
+	  for( int i=0; i < mols_mem.size() ; i++)
 	    {
-	      for()
+	      for( int j=1; j < mols_mem[i].list.size(); j++)
 		{
-		  
+		  double d=distance_atoms(atom_list,mols_mem[i].list[0].index-1,mols_mem[i].list[j].index-1,a,b,c);
+		  if ( d > 1.75)
+		    {
+		      count_diff++;
+		    }
+		  diff_dist =+ d;
+		  count_bond++;
 		}
 	    }
-	  //------------------------------
-	  // Crunching data
-	  //---------------------------------------------------
+	  // 
+	  diff_dist=diff_dist/((double)count_bond);
+	  diffper << step << " " << count_diff << endl;
+	  diff << step << " " << diff_dist << endl;
 	  // Get different types of molecules
 	  mols2=getCOn(mols,3);
 	  mols3=getCOn(mols,4);
 	  mols4=getCOn(mols,5);
 	  // Output coordinance values
-	  //------------------------------------------------------
 	  COn << step << " " << mols.size() << " " << mols2.size() << " " << mols3.size() << " " << mols4.size() << endl;
-	  if ( distance_avg(mols4,4) != 0 )
-	    {
-	      length << step << " " <<  distance_avg(mols2,2) << " " << distance_avg(mols3,3) << " " <<  distance_avg(mols) << " " << distance_avg(mols4,4)  << endl;
-	    }
-	  else
-	    {
-	      length << step << " " <<  distance_avg(mols2,2) << " " << distance_avg(mols3,3) << " " <<  distance_avg(mols) << endl; 
-	    }
-	  atom_count=1;
-	  //---------------------------------------------------
-	  // Clear
-	  //------------------
-	  atom_list.clear();
-	  //------------------
-	  // Boost
-	  //-------------------
-	  step++;  // Next step
-	  n=0;     // reinitialize atoms
-	  //-------------------
+	  // Distances count for different molecules
+	  length << step << " " <<  distance_avg_mols(mols2,2) << " " << distance_avg_mols(mols3,3) << " " <<  distance_avg_mols(mols) << " " << distance_avg_mols(mols4,4)  << endl;
+	  // Iteration stuff
+	  atom_count=1; // Reinitialize count for atoms
+	  atom_list.clear(); // Clear the list of atoms, for next step
+	  step++;  // Incrementing step count
+	  n=0;     // Reinitialize the element number for reading
 	}
-      //-------------------------------------------------------
-      //------------------
-      // Go to next item
-      //------------------
-
-      ++it;
-      //------------------
+      ++it; // Reads next element
     }
-  //---------------
-  // Data averages
-  //-------------------------
+  // Closing fluxes
   length.close();
   COn.close();
   diff.close();
-  //-------------------------
-  // Printing data
-  //---------------
-  //---------------
+  diffper.close();
+  // END 
   return 0;
 }
-//=========================================================================
