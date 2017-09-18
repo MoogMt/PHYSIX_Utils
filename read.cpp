@@ -124,11 +124,11 @@ vector<Atom> pbc(Atom atom, cell box)
   pbc.push_back(atom); // Atom at the center
 
   // All the images
-  for ( int i = -1 ; i <= 1 ; i=i+2 )
+  for ( int i = -1 ; i <= 1 ; i++ )
     {
-        for ( int j = -1 ; j <= 1 ; j=j+2 )
+        for ( int j = -1 ; j <= 1 ; j++ )
 	  {
-	      for ( int k = -1 ; k <= 1 ; k=k+2 )
+	      for ( int k = -1 ; k <= 1 ; k++ )
 		{
 		  atom_image.x = atom.x + i*box.a;
 		  atom_image.y = atom.y + j*box.b;
