@@ -17,26 +17,34 @@ struct Atom
   // name
   string name;
   // position
-  double x;
-  double y;
-  double z;
+  double x, y, z;
   // index
   int index;
 };
 //------------------------------
 
+
+// Bond between two molecules
+struct Bond
+{
+  int index_i, index_j;   // Index of atoms i and j
+  int time;               // Nb of steps the bond lives
+};
+
 // molecules
 //--------------------
-struct molecule
+struct Molecule
 {
-  // atom list
-  vector<Atom> list;
+  string name;        // Name of molecule
+  vector<Atom> atoms; // Atoms
 };
 //-------------------
 
+
+
 // Cell
 //---------------------------
-struct cell
+struct Cell
 {
   // lengths parameters
   double a, b, c;
@@ -48,8 +56,8 @@ struct cell
 
 struct Contact_Matrix
 {
-  vector<string> types;  // types of the atoms
-  vector<double> matrix; // contact matrix
+  vector<string> types;  // Types of the atoms
+  vector<double> matrix; // Contact matrix
 };
 
 // prinatoms
@@ -101,7 +109,7 @@ double backIn(double x, double a)
   return x;
 }
 
-Atom wrapPBC(Atom atom_in, cell box)
+Atom wrapPBC(Atom atom_in, Cell box)
 {
   Atom atom_out;
   atom_out.x = backIn( atom_in.x , box.a );
@@ -113,7 +121,7 @@ Atom wrapPBC(Atom atom_in, cell box)
 // PBC
 // Generates all the pbc image of an atom
 //------------------------------------------
-vector<Atom> pbc(Atom atom, cell box)
+vector<Atom> pbc(Atom atom, Cell box)
 {
   Atom atom_image;
   vector<Atom> pbc;
@@ -144,42 +152,43 @@ vector<Atom> pbc(Atom atom, cell box)
 // Distance between two atoms
 double distanceAtoms(Atom i, Atom j)
 {
-  double x = i.x - j.x;
-  double y = i.y - j.y;
-  double z = i.z - j.z;
+  double x2 = i.x - j.x;
+  double y2 = i.y - j.y;
+  double z2 = i.z - j.z;
 
-  double dist=sqrt( pow(x,2.0) + pow(y,2.0) + pow(z,2.0) );
-  if ( dist > 9 )
-    {
-      cout << "AHAH" << endl;
-      cout << "x = " << x << endl;
-      cout << "x = "<< i.x << " x'=" << j.x << endl;
-      cout << "y = " << y << endl;
-      cout << "y = "<< i.y << " y'=" << j.y << endl;
-      cout << "z = " << z << endl;
-      cout << "z = "<< i.z << " z'=" << j.z << endl;
-    }
+  double dist=sqrt( pow(x2,2.0) + pow(y2,2.0) + pow(z2,2.0) );
+
   return dist;
 }
 
 // Distance
 // returns the distance between two atoms in a given cell 
 //------------------------------------------------------
-double distanceAtoms(vector<Atom> atoms, int i, int j, cell box)
+double distanceAtoms(vector<Atom> atoms, int i, int j, Cell box)
 {
+  Atom atom = wrapPBC(atoms[i],box);
   vector<Atom> pbc_images = pbc(atoms[j],box);
   vector<double> distances;
-  for (int i=0; i < pbc_images.size(); i++ )
+  for (int l=0; l < pbc_images.size(); l++ )
     {
-      distances.push_back(distanceAtoms(wrapPBC(atoms[i],box),pbc_images[i]));
+      distances.push_back(distanceAtoms(atom,pbc_images[l]));
     }
   return min(distances);
-  }
+}
 //------------------------------------------------------
 
 // Average
 // Returns the average distance between two atoms
 //----------------------------------------------------------
+double average(vector<int> data)
+{
+  double average=0;
+  for( int i=0; i<data.size(); i++)   
+    {
+      average=average+(double)(data[i]);
+    }
+  return average=average/(double)(data.size()); // Returning the average
+}
 double average(vector<double> data)
 {
   double average=0;                   // Average
@@ -192,7 +201,7 @@ double average(vector<double> data)
 //--------------------------------------
 
 // Creates a contact matrix from a list of atoms
-Contact_Matrix makeContactMatrix(vector<Atom> atom_list, cell box)
+Contact_Matrix makeContactMatrix(vector<Atom> atom_list, Cell box)
 {
   Contact_Matrix contact_matrix;
   for ( int i=0 ; i < atom_list.size() ; i++ )
@@ -206,15 +215,18 @@ Contact_Matrix makeContactMatrix(vector<Atom> atom_list, cell box)
   return contact_matrix;
 }
 
-//
-int computeSep(int atom_index,int nb_atoms)
+int sumFromO(int integer)
 {
-  int sep=0;
-  for (int i=1 ; i < atom_index+1; i++ )
+  int sum=0;
+  for ( int i=0 ; i <= integer ; i++ )
     {
-      sep += nb_atoms -i;
+      sum += i;
     }
-  return sep;
+  return sum;
+}
+int computeSep(int atom_index, int nb_atoms)
+{
+  return atom_index*nb_atoms-sumFromO(atom_index);
 }
 
 //
@@ -222,16 +234,41 @@ vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index)
 {
   vector<double> contact_atom;
   int nb_atoms = contact_matrix.types.size();
-  int sep = computeSep(atom_index,nb_atoms);
-  for ( int i=1; i < sep; i=i+nb_atoms-2 )
+  int sep=computeSep(atom_index,nb_atoms);
+  if ( atom_index != 0 )
     {
-      contact_atom.push_back(contact_matrix.matrix[i]);
+      for ( int i=0; i < atom_index; i++ )
+	{
+	  contact_atom.push_back(contact_matrix.matrix[atom_index+sumFromO(i)-1]);
+	}
     }
-  for ( int i=sep; i < sep + nb_atoms - atom_index ; i++ )
+  for ( int i=0; i < nb_atoms-atom_index ; i++ )
     {
-      contact_atom.push_back(contact_matrix.matrix[i]);
+      contact_atom.push_back(contact_matrix.matrix[i+sep-1]);
     }
   return contact_atom;
+}
+
+vector<int> getCoordinances(string type, Contact_Matrix contact_matrix, double cut_off_radius)
+{
+  vector<int> coord;
+  for ( int i=0 ; i < contact_matrix.types.size() ; i++ )
+    {
+      if ( contact_matrix.types[i] == type )
+	{
+	  int neighbours=0;
+	  vector<double> contact = getAtomContact(contact_matrix,i);
+	  for ( int j = 0 ; j < contact.size() ; j++ )
+	    {
+	      if (  contact[j] < cut_off_radius)
+		{
+		  neighbours++;
+		}
+	    }
+	  coord.push_back(neighbours);
+	}
+    }
+  return coord;
 }
 
 vector<Atom> readstepXYZ(ifstream& file)
@@ -291,37 +328,30 @@ int main(void)
   //----------------------
   // Physical parameters
   //----------------------
-  cell box = {9.0,9.0,9.0,90,90,90};
-  double cut_off_radius = 1.75;
-  int n_atoms =  96;
-  int step=1;
-  vector<Atom> atom_list;
+  Cell box = {9.0,9.0,9.0,90,90,90}; // Definition of simulation box
+  double cut_off_radius = 1.75;      // Cut-Off for molecules
+  int step = 1;                      // Step counter
+  int comp_step=5;                   // The number of step you wait to compute CM
+  vector<Atom> atom_list;            // Atoms in cell
   //----------------------------
 
   // Reading XYZ file
   //---------------------------------------
   do
     {
-      atom_list=readstepXYZ( input );
-      if( step % 5 == 0 )
+      atom_list=readstepXYZ( input ); // Read one line
+      if( step==2) //step % comp_step == 0 )
 	{
-	  Contact_Matrix contact_matrix=makeContactMatrix(atom_list,box);
-	  vector<double> contact=getAtomContact(contact_matrix,1);
-	  for ( int i=contact.size()-64 ; i < contact.size() ; i++ )
-	    {
-	      if ( contact[i] > 5 )
-		{
-		  //		  cout << step << " " << contact[i] << " " << i << endl;
-		}
-	    }
-	  cout << endl;
+	  Contact_Matrix contact_matrix = makeContactMatrix(atom_list,box);
+	  vector<int> coordC  = getCoordinances("C",contact_matrix,cut_off_radius);
+	  vector<int> coordO  = getCoordinances("O",contact_matrix,cut_off_radius);
+	  cout << step << " "<< average(coordO) << endl;
 	}
       step++;
     } while( atom_list.size() != 0 );
   //--------------------------------------
 
-  // Closing flux
-  input.close();
+  input.close(); // Closing flux
  
   return 0;
 }
