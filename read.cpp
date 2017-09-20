@@ -229,22 +229,41 @@ int computeSep(int atom_index, int nb_atoms)
   return atom_index*nb_atoms-sumFromO(atom_index);
 }
 
+int max( int int1, int int2 )
+{
+  if (int1 > int2) return int1;
+  else return int2;
+}
+
+int min( int int1, int int2 )
+{
+  if (int1 < int2) return int1;
+  else return int2;
+}
+
+int sumBtw(int int1, int int2)
+{
+  int sum=0;
+  for ( int i=min(int1,int2) ; i <= max(int1,int2) ; i++ )
+    {
+      sum += i;
+    }
+  return sum;
+}
+
 //
 vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index)
 {
   vector<double> contact_atom;
   int nb_atoms = contact_matrix.types.size();
   int sep=computeSep(atom_index,nb_atoms);
-  if ( atom_index != 0 )
+  for ( int i=0 ; i < atom_index ; i++ )
     {
-      for ( int i=0; i < atom_index; i++ )
-	{
-	  contact_atom.push_back(contact_matrix.matrix[atom_index+sumFromO(i)-1]);
-	}
+      contact_atom.push_back(contact_matrix.matrix[atom_index+sumBtw(nb_atoms-2,nb_atoms-(i+3))]);
     }
-  for ( int i=0; i < nb_atoms-atom_index ; i++ )
+  for ( int i=0; i < nb_atoms-atom_index-1 ; i++ )
     {
-      contact_atom.push_back(contact_matrix.matrix[i+sep-1]);
+      contact_atom.push_back(contact_matrix.matrix[sep+i]);
     }
   return contact_atom;
 }
@@ -257,10 +276,10 @@ vector<int> getCoordinances(string type, Contact_Matrix contact_matrix, double c
       if ( contact_matrix.types[i] == type )
 	{
 	  int neighbours=0;
-	  vector<double> contact = getAtomContact(contact_matrix,i);
+	  vector<double> contact = getAtomContact( contact_matrix, i );
 	  for ( int j = 0 ; j < contact.size() ; j++ )
 	    {
-	      if (  contact[j] < cut_off_radius)
+	      if ( contact[j] < cut_off_radius )
 		{
 		  neighbours++;
 		}
@@ -268,6 +287,7 @@ vector<int> getCoordinances(string type, Contact_Matrix contact_matrix, double c
 	  coord.push_back(neighbours);
 	}
     }
+
   return coord;
 }
 
@@ -329,7 +349,7 @@ int main(void)
   // Physical parameters
   //----------------------
   Cell box = {9.0,9.0,9.0,90,90,90}; // Definition of simulation box
-  double cut_off_radius = 1.75;      // Cut-Off for molecules
+  double cut_off_radius = 1.6;      // Cut-Off for molecules
   int step = 1;                      // Step counter
   int comp_step=5;                   // The number of step you wait to compute CM
   vector<Atom> atom_list;            // Atoms in cell
@@ -340,12 +360,20 @@ int main(void)
   do
     {
       atom_list=readstepXYZ( input ); // Read one line
-      if( step==2) //step % comp_step == 0 )
+      if( step == 5)//% comp_step == 0 )
 	{
 	  Contact_Matrix contact_matrix = makeContactMatrix(atom_list,box);
-	  vector<int> coordC  = getCoordinances("C",contact_matrix,cut_off_radius);
 	  vector<int> coordO  = getCoordinances("O",contact_matrix,cut_off_radius);
-	  cout << step << " "<< average(coordO) << endl;
+	  vector<int> coordC  = getCoordinances("C",contact_matrix,cut_off_radius);
+	  for ( int i=0; i < coordO.size() ; i++ )
+	    {
+	      cout << "coord: " << coordO[i] << endl;
+	    }
+	  cout << "----------------------" << endl;
+	  cout << "test = "  << contact_matrix.matrix[80] << endl;
+	  cout << "----------------------" << endl;
+	  cout << "test3 = " << getAtomContact(contact_matrix,0)[80] << endl;
+	  cout << "----------------------" << endl;
 	}
       step++;
     } while( atom_list.size() != 0 );
