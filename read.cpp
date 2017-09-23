@@ -20,7 +20,6 @@
 int main(void)
 {
   // Input
-  //------------------------------------
   std::ifstream input("TRAJEC.xyz");
 
   //----------------------
@@ -30,6 +29,7 @@ int main(void)
   double cut_off_radius = 1.6;      // Cut-Off for molecules
   int step = 1;                      // Step counter
   int comp_step=5;                   // The number of step you wait to compute CM
+
   std::vector<Atom> atom_list;            // Atoms in cell
   //----------------------------
 
