@@ -53,3 +53,22 @@ std::vector<int> getCoordinances(std::string type, Contact_Matrix contact_matrix
   return coord;
 }
 
+void writeCoordinance( std::ofstream& file_handle, Contact_Matrix contact_matrix,  std::string atom_type, double cut_off_radius, int step, bool alone)
+{
+  std::vector<int> coord_type  = getCoordinances(atom_type,contact_matrix,cut_off_radius);
+  if ( !alone )
+    {
+      file_handle << step << " ";
+    }
+  for ( int i=0 ; i < coord_type.size() ; i++ )
+    {
+      file_handle << coord_type[0] << " ";
+    }
+  file_handle << average(coord_type) << " ";
+  if ( !alone )
+    {
+      file_handle << std::endl;
+    }
+ 
+  return;
+}

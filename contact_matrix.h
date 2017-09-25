@@ -33,6 +33,8 @@ Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box);
 std::vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index);
 // Gets the coordinance of an atom
 std::vector<int> getCoordinances(std::string type, Contact_Matrix contact_matrix, double cut_off_radius);
+// Writes the coordinance in file 
+void writeCoordinance( std::ofstream& file_handle, Contact_Matrix contact_matrix,  std::string atom_type, double cut_off_radius, int step, bool alone);
 //====================================================================
 
 #endif 

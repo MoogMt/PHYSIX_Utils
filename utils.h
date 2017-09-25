@@ -29,4 +29,7 @@ int sumBtw(int int1, int int2);
 // Compute separator
 int computeSep(int atom_index, int nb_atoms);
 
+// String related
+bool fileExists(const std::string file_name, const bool message );
+
 #endif 
