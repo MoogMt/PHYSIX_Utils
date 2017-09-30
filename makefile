@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-I. 
+CFLAGS=-I.
 DEPS = contact_matrix.h cell.h atom.h xyz.h utils.h
 OBJ = read.o contact_matrix.o cell.o atom.o xyz.o utils.o
 
@@ -8,3 +8,6 @@ OBJ = read.o contact_matrix.o cell.o atom.o xyz.o utils.o
 
 read_xyz: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
+
+clean:
+	rm -rf *.o 

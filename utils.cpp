@@ -61,7 +61,7 @@ int sumBtw(int int1, int int2)
   return sum;
 }
 
-//----------------------------------------------------
+
 int computeSep(int atom_index, int nb_atoms)
 {
   return atom_index*nb_atoms-sumFromO(atom_index);
@@ -78,16 +78,13 @@ int min( int int1, int int2 )
   if (int1 < int2) return int1;
   else return int2;
 }
-//--------------------------------------------------------
 
-// Check File Exists
-//--------------------------------------
-bool fileExists(const std::string file_name, const bool message )
+std::vector<int> makeVec(int init, int final)
 {
-  std::ifstream f(file_name.c_str());
-  if ( message ) {
-    std::cout << "Error: File " << file_name << " does not exists!" << std::endl;
-  }
-  return f.good();
+  std::vector<int> vector;
+  for ( int i = init ; i < final ; i++ )
+    {
+      vector.push_back(i);
+    }
+  return vector;
 }
-//--------------------------------------

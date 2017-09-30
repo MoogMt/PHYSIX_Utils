@@ -30,7 +30,7 @@ std::vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index
   return contact_atom;
 }
 
-std::vector<int> getCoordinances(std::string type, Contact_Matrix contact_matrix, double cut_off_radius)
+std::vector<int> getTypeCoordinances(std::string type, Contact_Matrix contact_matrix, double cut_off_radius)
 {
   std::vector<int> coord;
   for ( int i=0 ; i < contact_matrix.types.size() ; i++ )
@@ -53,22 +53,54 @@ std::vector<int> getCoordinances(std::string type, Contact_Matrix contact_matrix
   return coord;
 }
 
-void writeCoordinance( std::ofstream& file_handle, Contact_Matrix contact_matrix,  std::string atom_type, double cut_off_radius, int step, bool alone)
+void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_indexes )
 {
-  std::vector<int> coord_type  = getCoordinances(atom_type,contact_matrix,cut_off_radius);
-  if ( !alone )
+
+  for ( int i=0 ; i < atom_indexes.size() ; i++ )
     {
-      file_handle << step << " ";
+      std::vector<double> contact = getAtomContact(contact_matrix,atom_indexes[i]);
+      
+      for ( int j=0 ; j < contact.size() ; j++ )
+	{
+	  file << contact[j] << std::endl ;
+	}
+      file << "-----------------------" << std::endl;
+      
     }
-  for ( int i=0 ; i < coord_type.size() ; i++ )
-    {
-      file_handle << coord_type[0] << " ";
-    }
-  file_handle << average(coord_type) << " ";
-  if ( !alone )
-    {
-      file_handle << std::endl;
-    }
- 
+  
   return;
+}
+
+void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box)
+{
+  for ( int i=0 ; i < atom_index.size() ; i++ )
+    {
+      for ( int j=0 ; j < atom_list.size() ; j++ )
+	{
+	  if ( atom_index[i] != j )
+	    {
+	      file << distanceAtoms(atom_list,atom_index[i],j,box) << std::endl;
+	    }
+	}
+      file << "-----------------------" << std::endl;
+    }
+
+  return;
+}
+
+void writeFirstNN( std::ofstream & file , Contact_Matrix contact_matrix , int atom_index)
+{
+  std::vector<double> contact = getAtomContact(contact_matrix,atom_index);
+  file << min(contact) << " ";
+  return;
+}
+
+void writeFirstNN( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_indexes, int step )
+{
+  file << step << " ";
+  for ( int i=0 ; i < atom_indexes.size() ; i++ )
+    {
+      writeFirstNN(file,contact_matrix,atom_indexes[i]);
+    }
+  file << std::endl;
 }
