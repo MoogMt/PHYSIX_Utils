@@ -38,9 +38,9 @@ void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , st
 // 
 void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box);
 //
-void writeFirstNN( std::ofstream & file , Contact_Matrix contact_matrix , int atom_index);
-//
-void writeFirstNN( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_indexes, int step );
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
+void writeNearest( std::vector<std::ofstream> files , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
 //====================================================================
 
 #endif 

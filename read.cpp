@@ -24,7 +24,7 @@ int main(void)
   //------------------------------------
   std::ifstream input("TRAJEC.xyz");
   std::ofstream output_contact  ("contact.dat",  std::ios::out | std::ios::app );
-  std::ofstream output_fnn ("first_nearest.dat",  std::ios::out | std::ios::app );
+  std::ofstream output_nn ("nearest.dat",  std::ios::out | std::ios::app );
 
   //----------------------
   // Physical parameters
@@ -32,8 +32,10 @@ int main(void)
   Cell box = {9.0,9.0,9.0,90,90,90}; // Definition of simulation box
   double cut_off_radius = 1.6;       // Cut-Off for molecules
   int step = 1;                      // Step counter
-  int comp_step=1;                   // The number of step you wait to compute CM
+  int comp_step=5;                   // The number of step you wait to compute CM
   std::vector<Atom> atom_list;            // Atoms in cell
+  std::vector<int> atom_indexes;
+  std::vector<int> nearest = makeVec(1,4+1);
   //----------------------------
 
   // Reading XYZ file
@@ -41,12 +43,15 @@ int main(void)
   do
     {
       atom_list=readstepXYZ( input ); // Read one line
+      if ( step == 1 )
+	{
+	  atom_indexes = makeVec(0,atom_list.size());
+	}
       if( step % comp_step == 0 )
 	{
-	  std::vector<int> atom_indexes = makeVec(0,atom_list.size());
-	  Contact_Matrix contact_matrix = makeContactMatrix(atom_list,box);
+	  Contact_Matrix contact_matrix = makeContactMatrix( atom_list , box );
 	  writeAtomContact( output_contact , contact_matrix , atom_indexes );
-	  writeFirstNN( output_fnn , contact_matrix , atom_indexes , step);
+	  writeNearest( output_nn, contact_matrix , nearest, atom_indexes , step );
 	  std::cout << "step " << step << std::endl;
 	}
       step++;
@@ -55,7 +60,7 @@ int main(void)
 
   //closing fluxes
   input.close(); 
-  output_fnn.close();
+  output_nn.close();
   
   return 0;
 }

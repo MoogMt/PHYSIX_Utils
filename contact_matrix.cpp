@@ -62,12 +62,10 @@ void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , st
       
       for ( int j=0 ; j < contact.size() ; j++ )
 	{
-	  file << contact[j] << std::endl ;
+	  file << contact[j] << " " ;
 	}
-      file << "-----------------------" << std::endl;
-      
     }
-  
+  file << std::endl;
   return;
 }
 
@@ -76,31 +74,57 @@ void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , st
   for ( int i=0 ; i < atom_index.size() ; i++ )
     {
       for ( int j=0 ; j < atom_list.size() ; j++ )
-	{
+ 	{
 	  if ( atom_index[i] != j )
 	    {
 	      file << distanceAtoms(atom_list,atom_index[i],j,box) << std::endl;
 	    }
 	}
-      file << "-----------------------" << std::endl;
     }
-
+  file << std::endl;
   return;
 }
 
-void writeFirstNN( std::ofstream & file , Contact_Matrix contact_matrix , int atom_index)
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index )
 {
-  std::vector<double> contact = getAtomContact(contact_matrix,atom_index);
-  file << min(contact) << " ";
+  return sortVector(getAtomContact(contact_matrix,atom_index))[n_nearest-1];
+}
+
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index)
+{
+  for( int i=0; i < nearest.size() ; i++ )
+    {
+      file << getNNearest(file,nearest[i],atom_index) << " " ;
+    }
   return;
 }
 
-void writeFirstNN( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_indexes, int step )
+
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step)
 {
   file << step << " ";
   for ( int i=0 ; i < atom_indexes.size() ; i++ )
     {
-      writeFirstNN(file,contact_matrix,atom_indexes[i]);
+      writeNearest( file , contact_matrix , nearest, atom_indexes[i] );
     }
   file << std::endl;
+  return;
 }
+
+void writeNearest( std::vector<std::ofstream> files , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step)
+{
+  if ( files.size() == nearest.size() )
+    {
+      for ( int i=0 ; i < nearest.size() ; i++ )
+	{
+	  writeNearest( files[i] , contact_matrix , nearest[i], atom_indexes[i] );
+	}
+      return;
+    }
+  else
+    {
+      std::cout << "Size of the file vector and number of nearest neighbours do not match." << std::endl;
+      return; 
+    }
+}
+
