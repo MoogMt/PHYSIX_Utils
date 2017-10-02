@@ -31,18 +31,21 @@ struct Contact_Matrix
 Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box);
 double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index );
 double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_index_2 );
-// Gets the list of distances of all atoms with regard to an atom
+// Contact
 std::vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index);
-// Gets the coordinance of an atom
-std::vector<int> getTypeCoordinances(std::string type, Contact_Matrix contact_matrix, double cut_off_radius);
-// 
 void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_index );
-// 
 void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box);
-//
+// Coordinance
+int getAtomNeighboursNb( Contact_Matrix contact_matrix, int atom_index, double cut_off_radius );
+std::vector<int> getAtomsNeighboursNb( Contact_Matrix contact_matrix , std::vector<int> atom_index_list , double cut_off_radius );
+std::vector<int> getTypeNeighboursNb(Contact_Matrix contact_matrix, std::string type, double cut_off_radius ) ;
+double getTypeCoordinance( Contact_Matrix contact_matrix, std::string type, double cut_off_radius );
+// Nearest Neighbours
+double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index );
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> n_nearest, int atom_index);
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes , int step);
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
-void writeNearest( std::vector<std::ofstream> files , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
 //====================================================================
 
 #endif 

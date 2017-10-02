@@ -27,7 +27,7 @@ double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_ind
   int nb_atoms = contact_matrix.types.size();
   int mini=min(atom_index_1,atom_index_2);
   int maxi=max(atom_index_1,atom_index_2);
-  return contact_matrix.matrix[computeSep(mini,nb_atoms)+maxi];
+  return contact_matrix.matrix[computeSep(mini,nb_atoms)-mini+maxi];
 }
 //----------------------------
 
@@ -83,27 +83,44 @@ void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , st
 //---------------
 // COORDINANCE
 //-----------------------------------------------------------------------------------------------------------
-std::vector<int> getTypeCoordinances(std::string type, Contact_Matrix contact_matrix, double cut_off_radius)
+int getAtomNeighboursNb( Contact_Matrix contact_matrix, int atom_index, double cut_off_radius )
 {
-  std::vector<int> coord;
-  for ( int i=0 ; i < contact_matrix.types.size() ; i++ )
+  int neighbours = 0;
+  std::vector<double> contact = getAtomContact( contact_matrix, atom_index );
+  for ( int i=0 ; i < contact.size() ; i++ )
+    {
+      if ( contact[i] < cut_off_radius )
+	{
+	  neighbours++;
+	}
+    }
+  return neighbours;
+}
+std::vector<int> getAtomsNeighboursNb( Contact_Matrix contact_matrix , std::vector<int> atom_index_list , double cut_off_radius )
+{
+  std::vector<int> neighbours_nb_list;
+  for ( int i=0 ; i < atom_index_list.size() ; i++ )
+    {
+      neighbours_nb_list.push_back( getAtomNeighboursNb( contact_matrix , atom_index_list[i] , cut_off_radius ) );
+    }
+  return neighbours_nb_list;
+}
+std::vector<int> getTypeNeighboursNb(Contact_Matrix contact_matrix, std::string type, double cut_off_radius ) 
+{
+  int nb_atoms = contact_matrix.types.size();
+  std::vector<int> neighbours_nb_list;
+  for ( int i=0 ; i <  nb_atoms ; i++ )
     {
       if ( contact_matrix.types[i] == type )
 	{
-	  int neighbours=0;
-	  std::vector<double> contact = getAtomContact( contact_matrix, i );
-	  for ( int j = 0 ; j < contact.size() ; j++ )
-	    {
-	      if ( contact[j] < cut_off_radius )
-		{
-		  neighbours++;
-		}
-	    }
-	  coord.push_back(neighbours);
+	  neighbours_nb_list.push_back( getAtomNeighboursNb( contact_matrix , i , cut_off_radius) );
 	}
     }
-
-  return coord;
+  return neighbours_nb_list;
+}
+double getTypeCoordinance( Contact_Matrix contact_matrix, std::string type, double cut_off_radius )
+{
+  return average( getTypeNeighboursNb( contact_matrix , type , cut_off_radius ) );
 }
 //----------------------------------------------------------------------------------------------------------------
 
@@ -114,6 +131,26 @@ std::vector<int> getTypeCoordinances(std::string type, Contact_Matrix contact_ma
 double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index )
 {
   return sortVector(getAtomContact(contact_matrix,atom_index),true)[n_nearest-1];
+}
+//
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> n_nearest, int atom_index)
+{
+  std::vector<double> n_nearest_list;
+  for( int i=0; i < n_nearest.size() ; i++ )
+    {
+      n_nearest_list.push_back( getNNearest( contact_matrix , n_nearest[i] , atom_index ) );
+    }
+  return n_nearest_list;
+}
+//
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes , int step)
+{
+  std::vector<double> n_nearest;
+  for ( int i=0 ; i < atom_indexes.size() ; i++ )
+    {
+      n_nearest.push_back( getNNearest( contact_matrix , nearest, atom_indexes[i] ) );
+    }
+  return n_nearest;
 }
 // Writes the n_nearest atoms of atoms with index atom_index in file using contact matrix
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> n_nearest, int atom_index)

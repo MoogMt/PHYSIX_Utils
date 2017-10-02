@@ -47,15 +47,15 @@ int main(void)
       if ( step == 1 )
 	{
 	  atom_indexes = makeVec(0,atom_list.size());
-	  contact_matrix_init = makeContactMatrix( atom_list, box);
+	  contact_matrix_init = makeContactMatrix( atom_list, box );
 	}
-      if( step % comp_step == 0 )
+      if( step % comp_step == 0 && false )
 	{
 	  Contact_Matrix contact_matrix = makeContactMatrix( atom_list , box );
 	  writeAtomContact( output_contact , contact_matrix , atom_indexes );
 	  writeNearest( output_nn, contact_matrix , nearest, atom_indexes , step );
 	  std::cout << "step " << step << std::endl;
-	}
+	  }
       step++;
     } while( atom_list.size() != 0 );
   //--------------------------------------
