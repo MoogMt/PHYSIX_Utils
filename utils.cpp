@@ -88,3 +88,51 @@ std::vector<int> makeVec(int init, int final)
     }
   return vector;
 }
+
+//----------
+// SORT
+//---------------------------------------------------------------------------
+std::vector<double> sortVector(std::vector<double> to_sort, bool increasing)
+{
+  if ( increasing )
+    {
+      return sortVectorIncreasing(to_sort);
+    }
+  else
+    {
+      return sortVectorDecreasing(to_sort);
+    }
+}
+std::vector<double> sortVectorIncreasing(std::vector<double> to_sort)
+{
+  for ( int i=0 ; i < to_sort.size()-1 ; i++ )
+    {
+      for ( int j=i ; j < to_sort.size() ; j++ )
+	{
+	  if ( to_sort[i] > to_sort[j] )
+	    {
+	      double stock = to_sort[i];
+	      to_sort[i] = to_sort[j];
+	      to_sort[j] = stock;
+	    }
+	}
+    }
+  return to_sort;
+}
+std::vector<double> sortVectorDecreasing(std::vector<double> to_sort)
+{
+  for ( int i=0 ; i < to_sort.size()-1 ; i++ )
+    {
+      for ( int j=i ; j < to_sort.size() ; j++ )
+	{
+	  if ( to_sort[i] < to_sort[j] )
+	    {
+	      double stock = to_sort[i];
+	      to_sort[i] = to_sort[j];
+	      to_sort[j] = stock;
+	    }
+	}
+    }
+  return to_sort;
+}
+//----------------------------------------------------------------

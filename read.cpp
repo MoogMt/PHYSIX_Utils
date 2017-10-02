@@ -25,7 +25,7 @@ int main(void)
   std::ifstream input("TRAJEC.xyz");
   std::ofstream output_contact  ("contact.dat",  std::ios::out | std::ios::app );
   std::ofstream output_nn ("nearest.dat",  std::ios::out | std::ios::app );
-
+  
   //----------------------
   // Physical parameters
   //----------------------
@@ -36,6 +36,7 @@ int main(void)
   std::vector<Atom> atom_list;            // Atoms in cell
   std::vector<int> atom_indexes;
   std::vector<int> nearest = makeVec(1,4+1);
+  Contact_Matrix contact_matrix_init;
   //----------------------------
 
   // Reading XYZ file
@@ -46,6 +47,7 @@ int main(void)
       if ( step == 1 )
 	{
 	  atom_indexes = makeVec(0,atom_list.size());
+	  contact_matrix_init = makeContactMatrix( atom_list, box);
 	}
       if( step % comp_step == 0 )
 	{

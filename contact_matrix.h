@@ -29,6 +29,8 @@ struct Contact_Matrix
 //====================================================================
 // Computes the contact matrix from an atom list and a cell
 Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box);
+double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index );
+double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_index_2 );
 // Gets the list of distances of all atoms with regard to an atom
 std::vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index);
 // Gets the coordinance of an atom
