@@ -6,7 +6,7 @@ OBJ = read.o contact_matrix.o cell.o atom.o xyz.o utils.o
 %.o: %.c $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-read_xyz: $(OBJ)
+co2_analysis: $(OBJ)
 	$(CC) -o $@ $^ $(CFLAGS)
 
 clean:

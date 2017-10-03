@@ -82,7 +82,7 @@ int min( int int1, int int2 )
 std::vector<int> makeVec(int init, int final)
 {
   std::vector<int> vector;
-  for ( int i = init ; i < final ; i++ )
+  for ( int i = init ; i <= final ; i++ )
     {
       vector.push_back(i);
     }

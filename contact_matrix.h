@@ -41,9 +41,15 @@ std::vector<int> getAtomsNeighboursNb( Contact_Matrix contact_matrix , std::vect
 std::vector<int> getTypeNeighboursNb(Contact_Matrix contact_matrix, std::string type, double cut_off_radius ) ;
 double getTypeCoordinance( Contact_Matrix contact_matrix, std::string type, double cut_off_radius );
 // Nearest Neighbours
+//-------------------------------------------------------------------------------------------------
+// -> Get
 double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index );
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> n_nearest, int atom_index);
-std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes , int step);
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes );
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::string atom_type );
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::vector<std::string> atom_types );
+// -> Write
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , int n_nearest , std::vector<int> atom_indexes , int step );
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
 //====================================================================
