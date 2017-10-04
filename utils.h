@@ -13,14 +13,17 @@
 
 // Min
 //------------------------------------------
-double min(std::vector<double> vector);
 int min( int int1, int int2 );
+double min ( double real1, double real2 );
+double min(std::vector<double> vector);
 //-------------------------------------------
 
 // Max
-//------------------------------
+//----------------------------------------
 int max( int int1, int int2 );
-//------------------------------
+double max ( double real1, double real2 );
+double max(std::vector<double> vector);
+//----------------------------------------
 
 //----------
 // Averages

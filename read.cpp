@@ -19,6 +19,7 @@
 #include "cell.h"
 #include "contact_matrix.h"
 #include "xyz.h"
+#include "histogram.h"
 //-------------------------
 
 //================
@@ -41,15 +42,9 @@ int main(void)
   //--------
   // Output
   //--------------------------------------------------------------------------------
-  std::ofstream outputC_contact  ("contactC.dat",  std::ios::out | std::ios::app );
-  std::ofstream outputO_contact  ("contactO.dat",  std::ios::out | std::ios::app );
-  //--------------------------------------------------------------------------------
-  std::ofstream outputC_1nn ("1nearestC.dat",  std::ios::out | std::ios::app );
-  std::ofstream outputC_2nn ("2nearestC.dat",  std::ios::out | std::ios::app );
   std::ofstream outputC_3nn ("3nearestC.dat",  std::ios::out | std::ios::app );
   std::ofstream outputC_4nn ("4nearestC.dat",  std::ios::out | std::ios::app );
   //--------------------------------------------------------------------------------
-  std::ofstream outputO_1nn ("1nearestO.dat",  std::ios::out | std::ios::app );
   std::ofstream outputO_2nn ("2nearestO.dat",  std::ios::out | std::ios::app );
   //--------------------------------------------------------------------------------
   
@@ -63,7 +58,10 @@ int main(void)
   std::vector<Atom> atom_list;          // Atoms in cell
   std::vector<int> atom_indexesC;       // Indexes of the atoms to study
   std::vector<int> atom_indexesO;       // Indexes of the atoms to study
-  Contact_Matrix contact_matrix_init;   // Initial Contact Matrix 
+  Contact_Matrix contact_matrix_init;   // Initial Contact Matrix
+  std::vector<Bin> hist_3C;
+  std::vector<Bin> hist_4C;
+  std::vector<Bin> hist_2O;
   //----------------------------------------------------------------------------------
 
   //-------------------
@@ -77,29 +75,22 @@ int main(void)
 	  atom_indexesC = makeVec(0,32);
 	  atom_indexesO = makeVec(32,atom_list.size());
 	  contact_matrix_init = makeContactMatrix( atom_list, box );
+	  hist_3C = makeRegularHistogram( getNNearest( contact_matrix_init , 3 , atom_indexesC ) , 1.0 , 4.0 , 50 );
+	  hist_4C = makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC ) , 1.0 , 4.0 , 50 );
+	  hist_2O = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO ) , 1.0 , 4.0 , 50 );
 	}
-      if( step % comp_step == 0 && !(debug) )
+      if( step % comp_step == 0 && !(debug) && step != 1 )
 	{
 	  //----------------
 	  // Contact Matrix
 	  //-------------------------------------------------------------------
 	  Contact_Matrix contact_matrix = makeContactMatrix( atom_list , box );
 	  //-------------------------------------------------------------------
-	  // Atom Contact
-	  //-------------------------------------------------------------------
-	  writeAtomContact( outputC_contact , contact_matrix , atom_indexesC );
-	  writeAtomContact( outputO_contact , contact_matrix , atom_indexesO );
-	  //-------------------------------------------------------------------
 	  // Nearest Neighbours
 	  //--------------------------------------------------------------------
-	  // Carbon
-	  writeNearest( outputC_1nn , contact_matrix , 1 , atom_indexesC , step );
-	  writeNearest( outputC_2nn , contact_matrix , 2 , atom_indexesC , step );
-	  writeNearest( outputC_3nn , contact_matrix , 3 , atom_indexesC , step );
-	  writeNearest( outputC_4nn , contact_matrix , 4 , atom_indexesC , step );
-	  // Oxygen
-	  writeNearest( outputO_1nn , contact_matrix , 1 , atom_indexesO , step );
-	  writeNearest( outputO_2nn , contact_matrix , 2 , atom_indexesO , step );
+	  hist_3C = addHistograms( hist_3C, makeRegularHistogram( getNNearest( contact_matrix_init , 3 , atom_indexesC ) , 1.0 , 4.0 , 50 ) );
+	  hist_4C = addHistograms( hist_4C, makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC ) , 1.0 , 4.0 , 50 ) );
+	  hist_2O = addHistograms( hist_2O, makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO ) , 1.0 , 4.0 , 50 ) );
 	  //--------------------------------------------------------------------
 	  // Print step
 	  //-----------------------------------------
@@ -110,16 +101,15 @@ int main(void)
     } while( atom_list.size() != 0 );
   //-----------------------------------------------------------------------------
 
+  writeHistogram( outputC_3nn , hist_3C );
+  writeHistogram( outputC_4nn , hist_4C );
+  writeHistogram( outputO_2nn , hist_2O );
+  
   //Closing fluxes
   //----------------------
   input.close();
-  outputC_contact.close();
-  outputO_contact.close();
-  outputC_1nn.close();
-  outputC_2nn.close();
   outputC_3nn.close();
   outputC_4nn.close();
-  outputO_1nn.close();
   outputO_2nn.close();
   //----------------------
   

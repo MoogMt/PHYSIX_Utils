@@ -3,6 +3,17 @@
 // Min
 // Returns the minimum of value of vector containing doubles
 //-----------------------------------------------------------
+// MIN
+int min( int int1, int int2 )
+{
+  if (int1 < int2) return int1;
+  else return int2;
+}
+double min ( double real1, double real2 )
+{
+  if ( real1 < real2 ) return real1;
+  else return real2;
+}
 double min(std::vector<double> vector)
 {
   double min=vector[0];
@@ -14,6 +25,29 @@ double min(std::vector<double> vector)
 	}
     }
   return min;
+}
+// MAX
+int max( int int1, int int2 )
+{
+  if (int1 > int2) return int1;
+  else return int2;
+}
+double max ( double real1, double real2 )
+{
+  if ( real1 > real2 ) return real1;
+  else return real2;
+}
+double max(std::vector<double> vector)
+{
+  double max=vector[0];
+  for( int i=0 ; i < vector.size() ; i++ )
+    {
+      if( max < vector[i] )
+	{
+	  max=vector[i];
+	}
+    }
+  return max;
 }
 //-------------------------------------------
 
@@ -67,17 +101,7 @@ int computeSep(int atom_index, int nb_atoms)
   return atom_index*nb_atoms-sumFromO(atom_index);
 }
 
-int max( int int1, int int2 )
-{
-  if (int1 > int2) return int1;
-  else return int2;
-}
 
-int min( int int1, int int2 )
-{
-  if (int1 < int2) return int1;
-  else return int2;
-}
 
 std::vector<int> makeVec(int init, int final)
 {
