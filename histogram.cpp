@@ -80,7 +80,7 @@ std::vector<Bin> makeRegularHistogram( std::vector<double> data , double x_min ,
     }
   for ( int i=0 ; i < number_bins ; i++ )
     {
-      bins_hist.push_back( makeBin( x_min + i*delta, x_min + (i+1)*delta , data ) );
+      bins_hist.push_back( makeBin( x_min + i*delta , x_min + (i+1)*delta , data ) );
     }
   return bins_hist;
 }
@@ -93,8 +93,7 @@ std::vector<Bin> makeRegularHistogram( std::vector<double> data_x , std::vector<
   double delta = (x_max-x_min)/(double)(number_bins);
   for ( int i=0 ; i < number_bins ; i++ )
     {
-      bins_hist.push_back( makeBin( x_min + delta, x_max + delta, data_y ) );
-      delta += delta;
+      bins_hist.push_back( makeBin( x_min + i*delta , x_min + (i+1)*delta , data_y ) );
     }
   return bins_hist;
 }
@@ -121,9 +120,9 @@ std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 
   std::vector<Bin> sum_hist;
   for ( int i=0 ; i < hist1.size() ; i++ )
     {
-      for ( int j=0 ; j < hist2.size() ; j++ )
+      for ( int j=0 ; j  < hist2.size() ; j++ )
 	{
-	  if( overlap(hist1[i],hist2[j]) )
+	  if ( overlap( hist1[i] , hist2[j] ) )
 	    {
 	      sum_hist.push_back( addBinsMin( hist1[i] , hist2[j] ) );
 	    }

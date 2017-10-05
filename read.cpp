@@ -62,6 +62,7 @@ int main(void)
   std::vector<Bin> hist_3C;
   std::vector<Bin> hist_4C;
   std::vector<Bin> hist_2O;
+  int start_step = 5000;
   //----------------------------------------------------------------------------------
 
   //-------------------
@@ -79,7 +80,7 @@ int main(void)
 	  hist_4C = makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC ) , 1.0 , 4.0 , 50 );
 	  hist_2O = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO ) , 1.0 , 4.0 , 50 );
 	}
-      if( step % comp_step == 0 && !(debug) && step != 1 )
+      if( step % comp_step == 0 && !(debug) && step >= 10000 && step <= 30000 )
 	{
 	  //----------------
 	  // Contact Matrix
@@ -88,9 +89,9 @@ int main(void)
 	  //-------------------------------------------------------------------
 	  // Nearest Neighbours
 	  //--------------------------------------------------------------------
-	  hist_3C = addHistograms( hist_3C, makeRegularHistogram( getNNearest( contact_matrix_init , 3 , atom_indexesC ) , 1.0 , 4.0 , 50 ) );
-	  hist_4C = addHistograms( hist_4C, makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC ) , 1.0 , 4.0 , 50 ) );
-	  hist_2O = addHistograms( hist_2O, makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO ) , 1.0 , 4.0 , 50 ) );
+	  hist_3C = addHistograms( hist_3C, makeRegularHistogram( getNNearest( contact_matrix , 3 , atom_indexesC ) , 1.0 , 3.0 , 100 ) );
+	  hist_4C = addHistograms( hist_4C, makeRegularHistogram( getNNearest( contact_matrix , 4 , atom_indexesC ) , 1.0 , 3.0 , 100 ) );
+	  hist_2O = addHistograms( hist_2O, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesO ) , 1.0 , 3.0 , 100 ) );
 	  //--------------------------------------------------------------------
 	  // Print step
 	  //-----------------------------------------
@@ -100,7 +101,6 @@ int main(void)
       step++;
     } while( atom_list.size() != 0 );
   //-----------------------------------------------------------------------------
-
   writeHistogram( outputC_3nn , hist_3C );
   writeHistogram( outputC_4nn , hist_4C );
   writeHistogram( outputO_2nn , hist_2O );

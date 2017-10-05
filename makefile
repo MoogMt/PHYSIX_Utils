@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-I.
+CFLAGS=-Wall -I.
 DEPS = contact_matrix.h cell.h atom.h xyz.h utils.h histogram.h
 OBJ = read.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o
 

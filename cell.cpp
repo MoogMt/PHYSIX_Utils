@@ -79,3 +79,8 @@ double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box)
 }
 //------------------------------------------------------
 
+// READING FILES
+Cell readParamCellStep(void)
+{
+  
+}
