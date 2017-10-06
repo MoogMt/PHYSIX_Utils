@@ -80,7 +80,39 @@ double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box)
 //------------------------------------------------------
 
 // READING FILES
-Cell readParamCellStep(void)
+// Custom Cell File - By Step
+Cell readParamCellStep( std::ifstream& file )
 {
+  std::istream_iterator<std::string> read(file);
+  std::istream_iterator<std::string> end;
+
+  Cell cell;
+
+  int count = 0;
+  while( read != end && count < 6 )
+    {
+      switch(count)
+	{
+	case 0:
+	  cell.a = atof(std::string(*read).c_str()); ++read;
+	  break;
+	case 1:
+	  cell.b = atof(std::string(*read).c_str()); ++read;
+	  break;
+	case 2:
+	  cell.c = atof(std::string(*read).c_str()); ++read;
+	  break;
+	case 3:
+	  cell.alpha = atof(std::string(*read).c_str()); ++read;
+	  break;
+	case 4:
+	  cell.beta = atof(std::string(*read).c_str()); ++read;
+	  break;
+	case 5:
+	  cell.gamma = atof(std::string(*read).c_str()); ++read;
+	  break;
+	}
+    }
   
+  return cell;
 }

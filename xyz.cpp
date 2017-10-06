@@ -1,3 +1,4 @@
+
 #include "xyz.h"
 
 std::vector<Atom> readstepXYZ(std::ifstream& file)
