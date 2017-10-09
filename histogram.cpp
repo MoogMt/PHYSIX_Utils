@@ -130,18 +130,121 @@ std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 
     }
   return sum_hist;
 }
-//--------------------------------------------------------------------------------------------------
-
-// WRITE HISTOGRAMS
-//------------------------------------------------------------------------------------------------
+double getTotalValue( std::vector<Bin> hist )
+{
+  double total_value = 0;
+  for ( int i=0 ; i < hist.size() ; i++ )
+    {
+      total_value += hist[i].value;
+    }
+  return total_value;
+}
+//
 void writeHistogram( std::ofstream & file , std::vector<Bin> hist )
 {
   for ( int i = 0 ; i < hist.size() ; i++ )
     {
       file  << center(hist[i]) << " " << hist[i].value << std::endl;
     }
-  
+  return;
+}
+//--------------------------------------------------------------------------------------------------
+
+
+// Bin Real
+//-------------------------------------------------------------------------------------------------
+BinReal emptyBinReal()
+{
+  BinReal bin = { 0, 0, 0};
+  return bin;
+}
+//
+BinReal makeBinReal( double begin , double end , double value )
+{
+  BinReal bin = { begin , end , value };
+  return bin;
+}
+//
+double center( BinReal bin )
+{
+  return ( bin.begin + bin.end )/2;
+}
+//
+bool overlap( BinReal bin1 , BinReal bin2 )
+{ 
+  if ( max(bin1.begin,bin2.begin) <  min(bin1.end,bin2.end) )
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
+}
+//
+void fillBin( BinReal &bin , std::vector<double> data )
+{
+  for ( int i=0 ; i < data.size() ; i++ )
+    {
+      if ( data[i] > bin.begin && data[i] < bin.end )
+	{
+	  bin.value++;
+	}
+    }
+  return ;
+}
+//
+BinReal makeBinReal( double bin_min, double bin_max, std::vector<double> data)
+{
+  BinReal bin = { bin_min , bin_max , 0 };
+  fillBin( bin , data );
+  return bin;
+}
+//
+BinReal addBinsMin( BinReal bin1, BinReal bin2)
+{
+  BinReal bin_final;
+  if ( overlap(bin1,bin2) )
+    {
+      bin_final.begin = max(bin1.begin,bin2.begin);
+      bin_final.end   = min(bin1.end,bin2.end);
+      bin_final.value = bin1.value + bin2.value;
+      return bin_final;
+    }
+  else
+    {
+      return emptyBinReal();
+    }
+}
+//
+BinReal addBinsMax( BinReal bin1, BinReal bin2 )
+{
+  BinReal bin_final = { min(bin1.begin,bin2.begin) , max(bin1.end,bin2.end) , bin1.value + bin2.value };
+  return bin_final;
+}
+//-------------------------------------------------------------------------------------------------
+
+// Bin Real Histogram
+//-------------------------------------------------------------------------------------------------
+std::vector<BinReal> normalizeHistogram( std::vector<Bin> hist )
+{
+  std::vector<BinReal> hist_real;
+  double norm = getTotalValue( hist );
+  for ( int i=0 ; i < hist.size() ; i++ )
+    {
+      hist_real.push_back( makeBinReal( hist[i].begin , hist[i].end , hist[i].value/norm ) );
+    }
+  return hist_real;
+}
+void writeHistogram( std::ofstream & file , std::vector<BinReal> hist )
+{
+  for ( int i=0 ; i < hist.size() ; i++ )
+    {
+      file << center(hist[i]) << " " << hist[i].value << std::endl;
+    }
   return;
 }
 //-------------------------------------------------------------------------------------------------
+
+
 

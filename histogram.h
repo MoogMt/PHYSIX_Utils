@@ -21,6 +21,12 @@ struct Bin
   int value;         // Number of elements inside the bin
 };
 //----------------------
+struct BinReal
+{
+  double begin, end; // Inner and Outer bound of the bin
+  double value;         // Number of elements inside the bin
+};
+//----------------------
 
 
 // FUNCTIONS
@@ -41,8 +47,20 @@ std::vector<Bin> makeRegularHistogram( std::vector<double> data_x , std::vector<
 std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<double> bins_limits);
 std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<Bin> bins);
 std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 );
-// Write histogram
+double getTotalValue( std::vector<Bin> hist );
 void writeHistogram( std::ofstream & file , std::vector<Bin> hist );
+// Bin Real
+BinReal emptyBinReal();
+double center( BinReal bin );
+bool overlap( BinReal bin1 , BinReal bin2 );
+BinReal makeBinReal( double begin , double end , double value );
+void fillBin( BinReal &bin , std::vector<double> data );
+BinReal makeBinReal( double bin_min, double bin_max, std::vector<double> dat);
+BinReal addBinsMin( BinReal bin1, BinReal bin2);
+BinReal addBinsMax( BinReal bin1, BinReal bin2 );
+// Real Histogram
+std::vector<BinReal> normalizeHistogram( std::vector<Bin> hist );
+void writeHistogram( std::ofstream & file , std::vector<BinReal> hist );
 //------------------------------------------------------------------------------
 
 #endif 
