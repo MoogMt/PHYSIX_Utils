@@ -57,7 +57,9 @@ int main(void)
   int step = 1;                            // Step counter
   int comp_step=2;                         // The number of step you wait to compute CM
   int start_step = 5000, end_step = 30000; // Start and end step for datanalysis
-  double hist_start = 0.95;  double hist_end   = 3.50; int nb_box = 100;
+  double hist_start  = 0.95;  double hist_end    = 2.00; int nb_box = 200;
+  double hist_start2 = 1.00;  double hist_end2   = 3.00;
+  double hist_end3   = 2.5;
   //----------------------------------------------------------------------------------
 
   //---------
@@ -89,13 +91,13 @@ int main(void)
 	  atom_indexesO = makeVec(32,atom_list.size());
 	  contact_matrix_init = makeContactMatrix( atom_list, box );
 	  hist_1C = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesC ) , hist_start , hist_end , nb_box );
-	  hist_2C = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesC ) , hist_start , hist_end , nb_box );
-	  hist_3C = makeRegularHistogram( getNNearest( contact_matrix_init , 3 , atom_indexesC ) , hist_start , hist_end , nb_box );
-	  hist_4C = makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC ) , hist_start , hist_end , nb_box );
-	  hist_1O = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesO ) , hist_start , hist_end , nb_box );
-	  hist_2O = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO ) , hist_start , hist_end , nb_box );
+	  hist_2C = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesC ) , hist_start , hist_end3 , nb_box );
+	  hist_3C = makeRegularHistogram( getNNearest( contact_matrix_init , 3 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box );
+	  hist_4C = makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box );
+	  hist_1O = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box );
+	  hist_2O = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box );
 	}
-      if( step % comp_step == 0 && !(debug) && step >= 10000 && step <= 30000 )
+      if( step % comp_step == 0 && !(debug) && step >= start_step && step <=  end_step )
 	{
 	  //----------------
 	  // Contact Matrix
@@ -105,11 +107,11 @@ int main(void)
 	  // Nearest Neighbours
 	  //--------------------------------------------------------------------
 	  hist_1C = addHistograms( hist_1C, makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesC ) , hist_start , hist_end , nb_box ) );
-	  hist_2C = addHistograms( hist_2C, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesC ) , hist_start , hist_end , nb_box ) );
-	  hist_3C = addHistograms( hist_3C, makeRegularHistogram( getNNearest( contact_matrix , 3 , atom_indexesC ) , hist_start , hist_end , nb_box ) );
-	  hist_4C = addHistograms( hist_4C, makeRegularHistogram( getNNearest( contact_matrix , 4 , atom_indexesC ) , hist_start , hist_end , nb_box ) );
-	  hist_1O = addHistograms( hist_1O, makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesO ) , hist_start , hist_end , nb_box ) );
-	  hist_2O = addHistograms( hist_2O, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesO ) , hist_start , hist_end , nb_box ) );
+	  hist_2C = addHistograms( hist_2C, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesC ) , hist_start , hist_end3 , nb_box ) );
+	  hist_3C = addHistograms( hist_3C, makeRegularHistogram( getNNearest( contact_matrix , 3 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_4C = addHistograms( hist_4C, makeRegularHistogram( getNNearest( contact_matrix , 4 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_1O = addHistograms( hist_1O, makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_2O = addHistograms( hist_2O, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box ) );
 	  //--------------------------------------------------------------------
 	  // Print step
 	  //-----------------------------------------

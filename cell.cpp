@@ -126,7 +126,6 @@ Cell readParamCell( std::string file_name )
   std::istream_iterator<std::string> end;
 
   Cell cell;
-
   int count = 0;
   while( read != end && count < 6 )
     {
@@ -154,6 +153,5 @@ Cell readParamCell( std::string file_name )
       ++read;
       count++;
     }
-  
   return cell;
 }
