@@ -51,4 +51,9 @@ std::vector<double> sortVectorIncreasing(std::vector<double> unsorted);
 std::vector<double> sortVectorDecreasing(std::vector<double> unsorted);
 //----------------------------------------------------------------------------
 
+// Conversion
+//----------------------------------------------------------------------------
+double it2real (  std::istream_iterator<std::string> iterator );
+//----------------------------------------------------------------------------
+  
 #endif 

@@ -94,24 +94,65 @@ Cell readParamCellStep( std::ifstream& file )
       switch(count)
 	{
 	case 0:
-	  cell.a = atof(std::string(*read).c_str()); ++read;
+	  cell.a = it2real(read);
 	  break;
 	case 1:
-	  cell.b = atof(std::string(*read).c_str()); ++read;
+	  cell.b = it2real(read);
 	  break;
 	case 2:
-	  cell.c = atof(std::string(*read).c_str()); ++read;
+	  cell.c = it2real(read);
 	  break;
 	case 3:
-	  cell.alpha = atof(std::string(*read).c_str()); ++read;
+	  cell.alpha = it2real(read);
 	  break;
 	case 4:
-	  cell.beta = atof(std::string(*read).c_str()); ++read;
+	  cell.beta  = it2real(read);
 	  break;
 	case 5:
-	  cell.gamma = atof(std::string(*read).c_str()); ++read;
+	  cell.gamma = it2real(read);
 	  break;
 	}
+      ++read;
+      count++;
+    }
+  return cell;
+}
+
+Cell readParamCell( std::string file_name )
+{
+
+  std::ifstream file( file_name.c_str() );
+  std::istream_iterator<std::string> read( file );
+  std::istream_iterator<std::string> end;
+
+  Cell cell;
+
+  int count = 0;
+  while( read != end && count < 6 )
+    {
+      switch(count)
+	{
+	case 0:
+	  cell.a = it2real(read);
+	  break;
+	case 1:
+	  cell.b = it2real(read);
+	  break;
+	case 2:
+	  cell.c = it2real(read);
+	  break;
+	case 3:
+	  cell.alpha = it2real(read);
+	  break;
+	case 4:
+	  cell.beta  = it2real(read);
+	  break;
+	case 5:
+	  cell.gamma = it2real(read);
+	  break;
+	}
+      ++read;
+      count++;
     }
   
   return cell;

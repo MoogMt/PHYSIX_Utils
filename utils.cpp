@@ -160,3 +160,11 @@ std::vector<double> sortVectorDecreasing(std::vector<double> to_sort)
   return to_sort;
 }
 //----------------------------------------------------------------
+
+//--------------
+// CONVERSION
+//---------------------------------------------------------------
+double it2real (  std::istream_iterator<std::string> iterator )
+{
+  return atof(std::string(*iterator).c_str());
+}

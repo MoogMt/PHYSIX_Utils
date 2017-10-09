@@ -26,11 +26,12 @@ struct Cell
 //==========
 // FUNCTIONS
 //========================================
-double backIn(double x, double a);
-Atom wrapPBC(Atom atom_in, Cell box);
-std::vector<Atom> pbc(Atom atom, Cell box);
-double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box);
+double backIn( double x, double a );
+Atom wrapPBC(Atom atom_in, Cell box );
+std::vector<Atom> pbc( Atom atom, Cell box );
+double distanceAtoms( std::vector<Atom> atoms , int i , int j , Cell box );
 Cell readParamCellStep( std::ofstream & file );
+Cell readParamCell( std::string file_name );
 //=======================================
 
 #endif 

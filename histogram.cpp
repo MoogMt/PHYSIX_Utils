@@ -8,6 +8,12 @@ Bin emptyBin()
   return bin;
 }
 //
+Bin makeBinReal( double begin , double end , int value )
+{
+  Bin bin = { begin , end , value };
+  return bin;
+}
+//
 double center( Bin bin )
 {
   return (bin.end+bin.begin)/2.0;
@@ -148,6 +154,16 @@ void writeHistogram( std::ofstream & file , std::vector<Bin> hist )
     }
   return;
 }
+void writeHistogram( std::string file_name , std::vector<Bin> hist )
+{
+  std::ofstream file ( file_name.c_str() ,  std::ios::out | std::ios::app );
+  for ( int i=0 ; i < hist.size() ; i++ )
+    {
+      file << center(hist[i]) << " " << hist[i].value << std::endl;
+    }
+  file.close();
+  return;
+}
 //--------------------------------------------------------------------------------------------------
 
 
@@ -242,6 +258,16 @@ void writeHistogram( std::ofstream & file , std::vector<BinReal> hist )
     {
       file << center(hist[i]) << " " << hist[i].value << std::endl;
     }
+  return;
+}
+void writeHistogram( std::string file_name , std::vector<BinReal> hist )
+{
+  std::ofstream file ( file_name.c_str() ,  std::ios::out | std::ios::app );
+  for ( int i=0 ; i < hist.size() ; i++ )
+    {
+      file << center(hist[i]) << " " << hist[i].value << std::endl;
+    }
+  file.close();
   return;
 }
 //-------------------------------------------------------------------------------------------------
