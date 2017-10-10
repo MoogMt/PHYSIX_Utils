@@ -20,6 +20,8 @@
 #include "contact_matrix.h"
 #include "xyz.h"
 #include "histogram.h"
+#include "pdb.h"
+#include "sim.h"
 //-------------------------
 
 //================
@@ -48,6 +50,7 @@ int main(void)
   std::ofstream outputC_4nn ("4nearestC.dat",  std::ios::out | std::ios::app );
   std::ofstream outputO_1nn ("1nearestO.dat",  std::ios::out | std::ios::app );
   std::ofstream outputO_2nn ("2nearestO.dat",  std::ios::out | std::ios::app );
+  std::ofstream test ("test.dat",  std::ios::out | std::ios::app );
   //--------------------------------------------------------------------------------
   
   //----------------------
@@ -137,6 +140,7 @@ int main(void)
   outputC_4nn.close();
   outputO_1nn.close();
   outputO_2nn.close();
+  test.close();
   //----------------------
   
   return 0;

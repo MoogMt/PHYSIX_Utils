@@ -1,5 +1,5 @@
-#ifndef XYZ_H
-#define XYZ_H
+#ifndef PDB_H
+#define PDB_H
 
 #include <fstream>
 #include <iterator>
@@ -10,8 +10,12 @@
 #include <stdlib.h>    
 #include <math.h>
 
-#include "atom.h"
+#include "utils.h"
 
-std::vector<Atom> readstepXYZ( std::ifstream& file );
+
+// PDB
+//==================================
+//Sim readPDB( std::ifstream & file );
+//==================================
 
 #endif 
