@@ -44,13 +44,15 @@ int main(void)
   //--------
   // Output
   //--------------------------------------------------------------------------------
-  std::ofstream outputC_1nn ("1nearestC.dat",  std::ios::out | std::ios::app );
-  std::ofstream outputC_2nn ("2nearestC.dat",  std::ios::out | std::ios::app );
-  std::ofstream outputC_3nn ("3nearestC.dat",  std::ios::out | std::ios::app );
-  std::ofstream outputC_4nn ("4nearestC.dat",  std::ios::out | std::ios::app );
-  std::ofstream outputO_1nn ("1nearestO.dat",  std::ios::out | std::ios::app );
-  std::ofstream outputO_2nn ("2nearestO.dat",  std::ios::out | std::ios::app );
-  std::ofstream test ("test.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputCC_1nn ("1nearestCC.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputCC_2nn ("2nearestCC.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputCO_1nn ("1nearestCO.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputCO_2nn ("2nearestCO.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputCO_3nn ("3nearestCO.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputCO_4nn ("4nearestCO.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputOC_1nn ("1nearestOC.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputOC_2nn ("2nearestOC.dat",  std::ios::out | std::ios::app );
+  std::ofstream outputOO_1nn ("1nearestOO.dat",  std::ios::out | std::ios::app );
   //--------------------------------------------------------------------------------
   
   //----------------------
@@ -71,9 +73,18 @@ int main(void)
   std::vector<Atom> atom_list;                                    // Atoms in cell
   std::vector<int> atom_indexesC; std::vector<int> atom_indexesO; // Indexes of atoms
   Contact_Matrix contact_matrix_init;                             // Initial Contact Matrix
-  std::vector<Bin> hist_1C;  std::vector<Bin> hist_2C;   // Histograms
-  std::vector<Bin> hist_3C;  std::vector<Bin> hist_4C;   // Histograms
-  std::vector<Bin> hist_1O;  std::vector<Bin> hist_2O;   // Histograms
+  // Histograms
+  std::vector<Bin> hist_1CO;
+  std::vector<Bin> hist_2CO;
+  std::vector<Bin> hist_3CO;
+  std::vector<Bin> hist_4CO;
+  std::vector<Bin> hist_1CC; 
+  std::vector<Bin> hist_2CC;
+  std::vector<Bin> hist_1OC;
+  std::vector<Bin> hist_2OC; 
+  std::vector<Bin> hist_1OO;
+  std::string Cname = "C";
+  std::string Oname = "O";
   //----------------------------------------------------------------------------------
 
   //---------------
@@ -88,17 +99,25 @@ int main(void)
   do
     {
       atom_list=readstepXYZ( input ); // Read one line
+      // Computation at step 1
       if ( step == 1 )
 	{
+	  // Getting index of C and O atoms
 	  atom_indexesC = makeVec(0,32);
 	  atom_indexesO = makeVec(32,atom_list.size());
+
+	  // Calculating first step contact matrix
 	  contact_matrix_init = makeContactMatrix( atom_list, box );
-	  hist_1C = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesC ) , hist_start , hist_end , nb_box );
-	  hist_2C = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesC ) , hist_start , hist_end3 , nb_box );
-	  hist_3C = makeRegularHistogram( getNNearest( contact_matrix_init , 3 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box );
-	  hist_4C = makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box );
-	  hist_1O = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box );
-	  hist_2O = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box );
+	  // Creating Histograms
+ 	  hist_1CC = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesC , Cname ) , hist_start , hist_end2 , nb_box );
+	  hist_2CC = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesC , Cname ) , hist_start2 , hist_end2 , nb_box );
+	  hist_1CO = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesC , Oname ) , hist_start , hist_end , nb_box );
+	  hist_2CO = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesC , Oname ) , hist_start , hist_end2 , nb_box );
+	  hist_3CO = makeRegularHistogram( getNNearest( contact_matrix_init , 3 , atom_indexesC , Oname ) , hist_start2 , hist_end2 , nb_box );
+	  hist_4CO = makeRegularHistogram( getNNearest( contact_matrix_init , 4 , atom_indexesC , Oname ) , hist_start2 , hist_end2 , nb_box );
+	  hist_1OC = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesO , Cname ) , hist_start2 , hist_end2 , nb_box );
+	  hist_2OC = makeRegularHistogram( getNNearest( contact_matrix_init , 2 , atom_indexesO , Cname ) , hist_start2 , hist_end2 , nb_box );
+	  hist_1OO = makeRegularHistogram( getNNearest( contact_matrix_init , 1 , atom_indexesO , Oname ) , hist_start2 , hist_end2 , nb_box );
 	}
       if( step % comp_step == 0 && !(debug) && step >= start_step && step <=  end_step )
 	{
@@ -109,12 +128,15 @@ int main(void)
 	  //-------------------------------------------------------------------
 	  // Nearest Neighbours
 	  //--------------------------------------------------------------------
-	  hist_1C = addHistograms( hist_1C, makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesC ) , hist_start , hist_end , nb_box ) );
-	  hist_2C = addHistograms( hist_2C, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesC ) , hist_start , hist_end3 , nb_box ) );
-	  hist_3C = addHistograms( hist_3C, makeRegularHistogram( getNNearest( contact_matrix , 3 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box ) );
-	  hist_4C = addHistograms( hist_4C, makeRegularHistogram( getNNearest( contact_matrix , 4 , atom_indexesC ) , hist_start2 , hist_end2 , nb_box ) );
-	  hist_1O = addHistograms( hist_1O, makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box ) );
-	  hist_2O = addHistograms( hist_2O, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesO ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_1CO = addHistograms( hist_1CO , makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesC , Oname ) , hist_start , hist_end , nb_box ) );
+	  hist_2CO = addHistograms( hist_2CO , makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesC , Oname ) , hist_start , hist_end2 , nb_box ) );
+	  hist_3CO = addHistograms( hist_3CO , makeRegularHistogram( getNNearest( contact_matrix , 3 , atom_indexesC , Oname ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_4CO = addHistograms( hist_4CO , makeRegularHistogram( getNNearest( contact_matrix , 4 , atom_indexesC , Oname  ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_1CC = addHistograms( hist_1CC , makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesC , Cname ) , hist_start , hist_end2 , nb_box ) );
+	  hist_2CC = addHistograms( hist_2CC , makeRegularHistogram( getNNearest( contact_matrix , 2, atom_indexesC , Cname ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_1OC = addHistograms( hist_1OC, makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesO ,  Cname ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_2OC = addHistograms( hist_2OC, makeRegularHistogram( getNNearest( contact_matrix , 2 , atom_indexesO ,  Cname ) , hist_start2 , hist_end2 , nb_box ) );
+	  hist_1OO = addHistograms( hist_1OO, makeRegularHistogram( getNNearest( contact_matrix , 1 , atom_indexesO ,  Oname ) , hist_start2 , hist_end2 , nb_box ) );
 	  //--------------------------------------------------------------------
 	  // Print step
 	  //-----------------------------------------
@@ -124,23 +146,28 @@ int main(void)
       step++;
     } while( atom_list.size() != 0 );
   //-----------------------------------------------------------------------------
-  writeHistogram( outputC_1nn , normalizeHistogram( hist_1C ) );
-  writeHistogram( outputC_2nn , normalizeHistogram( hist_2C ) );
-  writeHistogram( outputC_3nn , normalizeHistogram( hist_3C ) );
-  writeHistogram( outputC_4nn , normalizeHistogram( hist_4C ) );
-  writeHistogram( outputO_1nn , normalizeHistogram( hist_1O ) );
-  writeHistogram( outputO_2nn , normalizeHistogram( hist_2O ) );
+  writeHistogram( outputCO_1nn , normalizeHistogram( hist_1CO ) );
+  writeHistogram( outputCO_2nn , normalizeHistogram( hist_2CO ) );
+  writeHistogram( outputCO_3nn , normalizeHistogram( hist_3CO ) );
+  writeHistogram( outputCO_4nn , normalizeHistogram( hist_4CO ) );
+  writeHistogram( outputCC_1nn , normalizeHistogram( hist_1CC ) );
+  writeHistogram( outputCC_2nn , normalizeHistogram( hist_2CC ) );
+  writeHistogram( outputOC_1nn , normalizeHistogram( hist_1OC ) );
+  writeHistogram( outputOC_2nn , normalizeHistogram( hist_2OC ) );
+  writeHistogram( outputOO_1nn , normalizeHistogram( hist_1OO ) );
     
   //Closing fluxes
   //----------------------
   input.close();
-  outputC_1nn.close();
-  outputC_2nn.close();
-  outputC_3nn.close();
-  outputC_4nn.close();
-  outputO_1nn.close();
-  outputO_2nn.close();
-  test.close();
+  outputCO_1nn.close();
+  outputCO_2nn.close();
+  outputCO_3nn.close();
+  outputCO_4nn.close();
+  outputCC_1nn.close();
+  outputCC_2nn.close();
+  outputOC_1nn.close();
+  outputOC_2nn.close();
+  outputOO_1nn.close();
   //----------------------
   
   return 0;

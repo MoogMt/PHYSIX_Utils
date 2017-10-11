@@ -47,7 +47,8 @@ double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom
 //-----------------
 // ATOMIC CONTACT
 //--------------------------------------------------------------------------------------------------
-std::vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index)
+//
+std::vector<double> getAtomContact( Contact_Matrix contact_matrix , int atom_index )
 {
   std::vector<double> contact_atom;
   int nb_atoms = contact_matrix.types.size();
@@ -61,6 +62,20 @@ std::vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index
       contact_atom.push_back(contact_matrix.matrix[sep+i]);
     }
   return contact_atom;
+}
+//
+std::vector<double> getAtomContact( Contact_Matrix contact_matrix , int atom_index, std::string specie ) 
+{
+  std::vector<double> contact_atom;
+  int nb_atoms = contact_matrix.types.size();
+  for(int i=0 ; i < nb_atoms ; i++ )
+    {
+      if ( i != atom_index && contact_matrix.types[i] == specie )
+	{
+	  contact_atom.push_back( getDistance(contact_matrix, atom_index , i ) );
+	}
+    }
+  return contact_atom ;
 }
 // Writes the atomic contact of a set of atoms in file
 void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_indexes )
@@ -132,7 +147,11 @@ double getTypeCoordinance( Contact_Matrix contact_matrix, std::string type, doub
 // Gets the n_nearest neighbours distance from atom with index atom_index using a contact matrix
 double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index )
 {
-  return sortVector(getAtomContact(contact_matrix,atom_index),true)[n_nearest-1];
+  return sortVector( getAtomContact( contact_matrix , atom_index ) , true )[n_nearest-1];
+}
+double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index, std::string specie )
+{
+  return sortVector( getAtomContact( contact_matrix , atom_index, specie ) , true )[n_nearest-1];
 }
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> n_nearest, int atom_index)
 {
@@ -152,8 +171,19 @@ std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, st
     }
   return n_nearest;
 }
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes , std::string specie )
+{
+  std::vector<double> n_nearest;
+  for ( int i=0 ; i < atom_indexes.size() ; i++ )
+    {
+      n_nearest.push_back( getNNearest( contact_matrix , nearest, atom_indexes[i] , specie) );
+    }
+  return n_nearest;
+}
+//
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::string atom_type )
 {
+
   std::vector<double> n_nearest_list;
   int nb_atoms = contact_matrix.types.size();
   for ( int i=0 ; i < nb_atoms ; i++ )
