@@ -28,6 +28,7 @@ struct Sim
 // Function
 //===========================
 Sim emptySim();
+Sim compressBox( Sim sim_set , double frac_a , double frac_b , double frac_c );
 //===========================
 
 #endif 

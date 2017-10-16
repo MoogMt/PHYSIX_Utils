@@ -47,6 +47,8 @@ struct Molecule
 //================================================
 void printAtoms( std::vector<Atom> atoms );
 double distanceAtoms(Atom i, Atom j);
+std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double frac_b , double frac_c );
+void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
 //================================================
 
 #endif 

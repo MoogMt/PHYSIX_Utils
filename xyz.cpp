@@ -1,7 +1,6 @@
-
 #include "xyz.h"
 
-std::vector<Atom> readstepXYZ(std::ifstream& file)
+std::vector<Atom> readstepXYZ(std::ifstream & file)
 {
   // Stream Handling
   std::istream_iterator<std::string> read(file);
@@ -44,4 +43,14 @@ std::vector<Atom> readstepXYZ(std::ifstream& file)
 
   // Return atom list
   return atom_list;
+}
+
+void writeXYZ( std::ofstream & file , std::vector<Atom> atom_list )
+{
+  file << atom_list.size() << std::endl;
+  file << "STEP LOUTRE" << std::endl;
+  for ( int i=0 ; i < atom_list.size() ; i++ )
+    {
+      file << atom_list[i].name << " " << atom_list[i].x <<  " " << atom_list[i].y <<  " " << atom_list[i].z << std::endl;
+    }
 }
