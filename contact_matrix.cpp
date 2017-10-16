@@ -27,7 +27,7 @@ double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_ind
   int nb_atoms = contact_matrix.types.size();
   int mini=min(atom_index_1,atom_index_2);
   int maxi=max(atom_index_1,atom_index_2);
-  return contact_matrix.matrix[computeSep(mini,nb_atoms)-mini+maxi];
+  return contact_matrix.matrix[computeSep(mini,nb_atoms)-mini+maxi-1];
 }
 //----------------------------
 
@@ -111,6 +111,19 @@ int getAtomNeighboursNb( Contact_Matrix contact_matrix, int atom_index, double c
     }
   return neighbours;
 }
+int getAtomNeighboursNb( Contact_Matrix contact_matrix, int atom_index, std::string specie, double cut_off_radius )
+{
+  int neighbours = 0;
+  std::vector<double> contact = getAtomContact( contact_matrix, atom_index );
+  for ( int i=0 ; i < contact.size() ; i++ )
+    {
+      if ( contact[i] < cut_off_radius && contact_matrix.types[i] == specie )
+	{
+	  neighbours++;
+	}
+    }
+  return neighbours;
+}
 std::vector<int> getAtomsNeighboursNb( Contact_Matrix contact_matrix , std::vector<int> atom_index_list , double cut_off_radius )
 {
   std::vector<int> neighbours_nb_list;
@@ -179,6 +192,11 @@ std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, st
       n_nearest.push_back( getNNearest( contact_matrix , nearest, atom_indexes[i] , specie) );
     }
   return n_nearest;
+}
+//
+std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , std::string specie )
+{
+  
 }
 //
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::string atom_type )
