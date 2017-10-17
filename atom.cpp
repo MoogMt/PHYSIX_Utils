@@ -4,7 +4,7 @@
 // DISTANCES
 //======================================================================
 double distanceAtoms(Atom i, Atom j)
-// Distance between two atoms
+// Returns the distance between two atoms
 {
   double x2 = i.x - j.x;
   double y2 = i.y - j.y;
@@ -17,9 +17,10 @@ double distanceAtoms(Atom i, Atom j)
 //===========
 // TYPES LUT
 //======================================================================
-bool typeExist( std::string type, std::string type_vector[] , int size )
+bool typeExist( std::string type, std::vector<std::string> type_vector )
+// Check that a specific type is present in a vector
 {
-  for ( int i=0 ; i < size ; i++ )
+  for ( int i=0 ; i < type_vector.size() ; i++ )
     {
       if ( type_vector[i] == type )
 	{
@@ -29,20 +30,44 @@ bool typeExist( std::string type, std::string type_vector[] , int size )
   return false;
 }
 //----------------------------------------------------------------
-template <int N> typeLUT<N> makeLUT ( std::vector<Atom> atoms)
+typeLUT makeLUT ( std::vector<Atom> atoms)
+// Creates a LUT table for types from an atom list
 {
-  int count_type = 0;
-  std::string types[N];
+  std::vector<std::string> types;
   for ( int i=0 ; i < atoms.size() ; i++ )
     {
-      if ( ! typeExist( atoms[i].name , types , count_type ) )
+      if ( ! typeExist( atoms[i].name , types ) )
 	{
-	  types[i] =  atoms[i].name;
-	  count_type++;
+	  types.push_back( atoms[i].name );
 	}
-      if ( count_type == N ) break;
     }
   return { types };
+}
+//----------------------------------------------------------------
+typeLUT makeLUT ( std::vector<Atom> atoms, int n_type)
+// Creates a LUT table for types from an atom list, with extra information about the number of types that are present in the table
+{
+  std::vector<std::string> types;
+  for ( int i=0 ; i < atoms.size() ; i++ )
+    {
+      if ( ! typeExist( atoms[i].name , types ) )
+	{
+	  types.push_back( atoms[i].name );
+	}
+      if ( types.size() == n_type ) break;
+    }
+  return { types };
+}
+//----------------------------------------------------------------
+int getTypeId( std::string type , typeLUT type_LUT, bool msg )
+// Returns the type id of a specific type
+{
+  for ( int i=0 ; i < type_LUT.type.size() ; i++ )
+    {
+      if ( type == type_LUT.type[i] ) return i;
+    }
+  if ( msg ) std::cout << "No such specie in the atom list!" << std::endl;
+  return -1;
 }
 //======================================================================
 
@@ -64,8 +89,11 @@ std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double
 
 
 //=======
+// IO
+//======================================================================================
+//-------
 // PRINT
-//======================================================================
+//--------------------------------------------------------------------------------------
 void printAtoms( std::vector<Atom> atoms )
 // Prints all informations on a given atoms in the console
 {
@@ -75,11 +103,9 @@ void printAtoms( std::vector<Atom> atoms )
     }
   return ;
 }
-//======================================================================
-
-//=======
+//--------
 // WRITE
-//=======================================================================================
+//--------------------------------------------------------------------------------------
 void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie )
 {
   for ( int i=0 ; i < atoms.size() ; i++ )

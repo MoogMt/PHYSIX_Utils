@@ -34,20 +34,41 @@ struct Molecule
 //===========
 // TYPES LUT
 //=============================================
-template <int N>
+struct indexes
+{
+  std::vector<int> list;
+};
 struct typeLUT
 {
-  std::string types[N];
+  std::vector<std::string> type;
+  std::vector<std::list> type_lists;
 };
 //=============================================
 
-//============
-// FUNCTIONS
+//===========
+// Distances
 //=============================================================================================
 double distanceAtoms(Atom i, Atom j);
+//=============================================================================================
+
+//=====
+// LUT
+//=============================================================================================
 bool typeExist( std::string type, std::string type_vector[] , int size );
-template <int N> typeLUT<N> makeLUT ( std::vector<Atom> atoms);
+typeLUT makeLUT ( std::vector<Atom> atoms);
+typeLUT makeLUT ( std::vector<Atom> atoms, int n_type);
+int getTypeId( std::string specie , typeLUT type_LUT , bool msg = false );
+//=============================================================================================
+
+//=======
+// MOVE 
+//=============================================================================================
 std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double frac_b , double frac_c );
+//=============================================================================================
+
+//=====
+// IO
+//=============================================================================================
 void printAtoms( std::vector<Atom> atoms );
 void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
 //=============================================================================================
