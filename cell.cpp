@@ -8,11 +8,11 @@ double backIn(double x, double a)
   int sign;
   if( x > 0)
     {
-      sign=-1;
+      sign = -1;
     }
   else
     {
-      sign=+1;
+      sign = +1;
     }
 
   while( x > a || x < 0 )
@@ -23,6 +23,10 @@ double backIn(double x, double a)
 }
 //-----------------------------------------
 
+//-----------------------
+// Wrapping atoms in box
+//-----------------------------------------------------------------------
+//
 Atom wrapPBC(Atom atom_in, Cell box)
 {
   Atom atom_out;
@@ -31,11 +35,22 @@ Atom wrapPBC(Atom atom_in, Cell box)
   atom_out.z = backIn( atom_in.z , box.c );
   return atom_out;
 }
+// 
+std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell )
+{
+  for ( int i=0 ; i < atoms.size() ; i++ )
+    {
+      atoms[i] = wrapPBC( atoms[i] , cell );
+    }
+  return atoms;
+}
+//-----------------------------------------------------------------------
 
+//----
 // PBC
 // Generates all the pbc image of an atom
 //------------------------------------------
-std::vector<Atom> pbc(Atom atom, Cell box)
+std::vector<Atom> pbcImages(Atom atom, Cell box)
 {
   Atom atom_image;
   std::vector<Atom> pbc;
@@ -63,24 +78,41 @@ std::vector<Atom> pbc(Atom atom, Cell box)
   return pbc;
 }
 
-// Distance
+//----------
+// DISTANCE
+//----------------------------------------------------------------------------
 // returns the distance between two atoms in a given cell 
 //------------------------------------------------------
-double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box)
+double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box , bool wrap )
 {
-  Atom atom = wrapPBC(atoms[i],box);
-  std::vector<Atom> pbc_images = pbc(atoms[j],box);
-  std::vector<double> distances;
-  for (int l=0; l < pbc_images.size(); l++ )
+  Atom atom_i = atom[i] ; Atom atom_j =  atom[j] ;
+  if ( wrap )
     {
-      distances.push_back(distanceAtoms(atom,pbc_images[l]));
+      Atom atom_i = wrapPBC(atoms[i],box);
+      Atom atom_j = wrapPBC(atoms[j],box);
     }
-  return min(distances);
+  
+  return dist()
 }
-//------------------------------------------------------
+//---------------------------------------------------------------------------
 
-// READING FILES
-// Custom Cell File - By Step
+//--------------------
+// MODIFY BOX
+//----------------------------------------------------------------------------
+Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c )
+{
+  cell.a *= frac_a;
+  cell.b *= frac_b;
+  cell.b *= frac_c;
+  return cell;
+}
+//----------------------------------------------------------------------------
+
+//--------
+// FILES
+//---------------------------------------------------------------------------
+// => Reading from files
+//----------------------------------------------------
 Cell readParamCellStep( std::ifstream& file )
 {
   std::istream_iterator<std::string> read(file);
@@ -117,7 +149,7 @@ Cell readParamCellStep( std::ifstream& file )
     }
   return cell;
 }
-
+//--------------------------------------------------------------
 Cell readParamCell( std::string file_name )
 {
 
@@ -155,3 +187,4 @@ Cell readParamCell( std::string file_name )
     }
   return cell;
 }
+//------------------------------------------------

@@ -25,3 +25,38 @@ double distanceAtoms(Atom i, Atom j)
   return dist;
 }
 //----------------------------------------------------------------------
+
+
+// MOVE
+//--------------------------------------------------------------------------------------------------
+std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double frac_b , double frac_c )
+{
+  for ( int i=0 ; i < atoms.size() ; i++ )
+    {
+      atoms[i].x *= frac_a;
+      atoms[i].y *= frac_b;
+      atoms[i].z *= frac_c;
+    }
+  return atoms;
+}
+//-------------------------------------------------------------------------------------------------
+
+//-------
+// WRITE
+//----------------------------------------------------------------------------------------
+void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie )
+{
+  for ( int i=0 ; i < atoms.size() ; i++ )
+    {
+      if ( atoms[i].name == specie )
+	{
+	  file << atoms[i].x << " ";
+	  file << atoms[i].y << " ";
+	  file << atoms[i].z << " ";
+	  file << std::endl;
+	}
+    }
+  file << std::endl;
+  return;
+}
+//----------------------------------------------------------------------------------------

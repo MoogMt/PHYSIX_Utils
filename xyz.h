@@ -12,6 +12,16 @@
 
 #include "atom.h"
 
-std::vector<Atom> readstepXYZ(std::ifstream& file);
+//-------
+// READ
+//-----------------------------------------------------
+std::vector<Atom> readstepXYZ( std::ifstream & file );
+//-----------------------------------------------------
 
+//-------
+// WRITE
+//--------------------------------------------------------------------
+void writeXYZ( std::ofstream & file , std::vector<Atom> atom_list );
+//--------------------------------------------------------------------
+  
 #endif 

@@ -81,6 +81,13 @@ BinReal addBinsMax( BinReal bin1, BinReal bin2 );
 std::vector<BinReal> normalizeHistogram( std::vector<Bin> hist );
 void writeHistogram( std::ofstream & file , std::vector<BinReal> hist );
 void writeHistogram( std::string file_name , std::vector<BinReal> hist );
+bool checkSizeHists( std::vector<BinReal> hist , std::vector<BinReal> hist2 );
+bool checkSizeHists( std::vector< std::vector<BinReal> > hist_list );
+void writeBinReal( std::ofstream & file , BinReal bin, bool wcenter);
+void writeBinRealCenter( std::ofstream & file, BinReal bin );
+void writeHistBinCenter( std::ofstream & file , std::vector<BinReal> hist , int index );
+void writeHistBin( std::ofstream & file , std::vector<BinReal> hist, int index , bool wcenter );
+void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> > hist_list );
 //------------------------------------------------------------------------------
 
 //==============================================================================

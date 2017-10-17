@@ -5,6 +5,7 @@
 Bin emptyBin()
 {
   Bin bin = { 0, 0, 0};
+
   return bin;
 }
 //
@@ -252,6 +253,7 @@ std::vector<BinReal> normalizeHistogram( std::vector<Bin> hist )
     }
   return hist_real;
 }
+//
 void writeHistogram( std::ofstream & file , std::vector<BinReal> hist )
 {
   for ( int i=0 ; i < hist.size() ; i++ )
@@ -260,6 +262,7 @@ void writeHistogram( std::ofstream & file , std::vector<BinReal> hist )
     }
   return;
 }
+//
 void writeHistogram( std::string file_name , std::vector<BinReal> hist )
 {
   std::ofstream file ( file_name.c_str() ,  std::ios::out | std::ios::app );
@@ -269,6 +272,81 @@ void writeHistogram( std::string file_name , std::vector<BinReal> hist )
     }
   file.close();
   return;
+}
+//
+bool checkSizeHists( std::vector<BinReal> hist , std::vector<BinReal> hist2 )
+{
+  if ( hist.size() == hist2.size() )
+    {
+      return true;
+    }
+  else
+    {
+      return false;
+    }
+}
+//
+bool checkSizeHists( std::vector< std::vector<BinReal> > hist_list )
+{
+  for ( int i=0 ; i < hist_list.size()-1 ; i++ )
+    {
+      for ( int j=0 ; j < hist_list.size() ; j++ )
+	{
+	  if ( ! checkSizeHists( hist_list[i] , hist_list[j] ) )
+	    {
+	      return false;
+	    }
+	}
+    }
+  return true;
+}
+//
+void writeBinReal( std::ofstream & file , BinReal bin, bool wcenter)
+{
+  if ( wcenter )
+    {
+      file << center(bin) <<  " " << bin.value << " ";
+    }
+  else
+    {
+      file << bin.value << " ";
+    }
+  return ;
+}
+//
+void writeBinRealCenter( std::ofstream & file, BinReal bin )
+{
+  file << center(bin) << " ";
+  return;
+}
+//
+void writeHistBinCenter( std::ofstream & file , std::vector<BinReal> hist , int index )
+{
+  writeBinRealCenter( file, hist[index] );
+}  
+//
+void writeHistBin( std::ofstream & file , std::vector<BinReal> hist, int index , bool wcenter )
+{
+  writeBinReal( file , hist[index] , wcenter );
+}
+//
+void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> > hist_list )
+{
+  if ( checkSizeHists( hist_list ) )
+    {
+      std::cout << "Error: Some histograms do not have the same size." << std::endl;
+      return;
+    }
+  for ( int i=0 ; i < hist_list[0].size() ; i++ )
+    {
+      writeHistBinCenter( file, hist_list[0] , i );
+      for ( int j=0 ; j < hist_list.size() ; j++ )
+	{
+	  writeHistBin( file , hist_list[j] , i , false );
+	}
+      file << std::endl;
+    }  
+  return ;
 }
 //-------------------------------------------------------------------------------------------------
 
