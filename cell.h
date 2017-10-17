@@ -29,8 +29,10 @@ struct Cell
 double backIn( double x, double a );
 Atom wrapPBC(Atom atom_in, Cell box );
 std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell );
-std::vector<Atom> pbc( Atom atom, Cell box );
-double distanceAtoms( std::vector<Atom> atoms , int i , int j , Cell box );
+std::vector<Atom> pbcImages( Atom atom, Cell box );
+double distAtoms1D( double x1, double x2, double a );
+double distanceAtoms( std::vector<Atom> atoms, int i, int j, Cell box , bool wrap = true , bool sqrt_test = true );
+void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box);
 Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c );
 Cell readParamCellStep( std::ofstream & file );
 Cell readParamCell( std::string file_name );

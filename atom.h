@@ -10,45 +10,46 @@
 #include <stdlib.h>    
 #include <math.h>
 
-//-------
+//======
 // ATOM
-//------------------------------
+//==============================
 struct Atom
 {
   std::string name;    // name
   double x, y, z; // position
   int index;      // index
 };
-//------------------------------
+//==============================
 
-//-------
-// BOND
-//--------------------------------
-struct Bond
-{
-  int index_i, index_j;  // Index of atoms i and j
-  int time;              // Nb of steps the bond lives
-};
-//--------------------------------
-
-//-----------
+//==========
 // MOLECULE
-//--------------------
+//=============================================
 struct Molecule
 {
   std::string name;        // Name of molecule
   std::vector<Atom> atoms; // Atoms
 };
-//-------------------
+//=============================================
 
+//===========
+// TYPES LUT
+//=============================================
+template <int N>
+struct typeLUT
+{
+  std::string types[N];
+};
+//=============================================
 
 //============
 // FUNCTIONS
-//================================================
-void printAtoms( std::vector<Atom> atoms );
+//=============================================================================================
 double distanceAtoms(Atom i, Atom j);
+bool typeExist( std::string type, std::string type_vector[] , int size );
+template <int N> typeLUT<N> makeLUT ( std::vector<Atom> atoms);
 std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double frac_b , double frac_c );
+void printAtoms( std::vector<Atom> atoms );
 void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
-//================================================
+//=============================================================================================
 
 #endif 
