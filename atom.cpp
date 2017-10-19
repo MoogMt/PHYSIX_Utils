@@ -1,4 +1,3 @@
-
 #include "atom.h"
 
 //===========
@@ -48,13 +47,27 @@ bool typeExists( std::vector<typeLUT> list , int index )
   return false;
 }
 //--------------------------------------------------------------
+void addAtom2LUT( std::vector<typeLUT> & list , Atom atom )
+{
+  for ( int i=0 ; i < list.size() ; i++ )
+    {
+      if ( atom.name == list.type_name )
+	{
+	  list[i].atom_index.push_back( atom.index );
+	  return;
+	}
+    }
+  std::vector<int> atom_index = atom.index ;
+  typeLUT lut = { atom.name, list.size() , atom_index };
+  return ;
+}
+//--------------------------------------------------------------
 std::vector<typeLUT> makeLUT( std::vector<Atom> atoms )
 {
   std::vector<typeLUT> list_lut;
   for ( int i=0 ; i < atoms.size() ; i++ )
     {
-      if ( typeExists( list_lut , atoms[i].name) ) list_lust.push_back( );
-      else addAtom2LUT( list_lut , )
+      addAtom2LUT( list_lut, atoms[i] );
     }
   return list_lust;
 }
