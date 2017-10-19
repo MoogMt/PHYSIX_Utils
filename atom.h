@@ -36,7 +36,8 @@ struct Molecule
 //=============================================
 struct typeLUT
 {
-  std::string atom_name;
+  std::string type_name;
+  int type_index;
   std::vector<int> atom_index;
 };
 struct listType
@@ -54,10 +55,10 @@ double distanceAtoms(Atom i, Atom j);
 //=====
 // LUT
 //=============================================================================================
-//bool typeExist( std::string type, std::string type_vector[] , int size );
-//typeLUT makeLUT ( std::vector<Atom> atoms);
-//typeLUT makeLUT ( std::vector<Atom> atoms, int n_type);
-int getTypeId( std::string specie , typeLUT type_LUT , bool msg = false );
+bool testType ( typeLUT lut , std::string specie );
+bool testType ( typeLUT lut , int index );
+bool typeExists ( std::vector<typeLUT> list , std::string specie );
+bool typeExists( std::vector<typeLUT> list , int index );
 //=============================================================================================
 
 //=======
@@ -69,12 +70,19 @@ std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double
 //=====
 // IO
 //=============================================================================================
-
+//-------
+// File
+//-----------------------------------------------------------------------------------------
+// -> Write
+//-----------------------------------------------------------------------------------------
+void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
+//-----------------------------------------------------------------------------------------
+// -> Read
+//-----------------------------------------------------------------------------------------
+//----------
+// Console
+//-----------------------------------------------------------------------------------------
 void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
 //=============================================================================================
-double distanceAtoms(Atom i, Atom j);
-std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double frac_b , double frac_c );
-void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
-//================================================
 
 #endif 

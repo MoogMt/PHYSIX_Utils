@@ -1,3 +1,4 @@
+
 #include "atom.h"
 
 //===========
@@ -17,58 +18,37 @@ double distanceAtoms(Atom i, Atom j)
 //===========
 // TYPES LUT
 //======================================================================
-bool typeExist( std::string type, std::vector<std::string> type_vector )
-// Check that a specific type is present in a vector
+bool testType( typeLUT lut , std::string specie )
 {
-  for ( int i=0 ; i < type_vector.size() ; i++ )
+  if ( lut.type_name == specie ) return true;
+  else return false;
+}
+//---------------------------------------------------------------
+bool testType( typeLUT lut , int index )
+{
+  if ( lut.type_index == index ) return true;
+  else return false;
+}
+//---------------------------------------------------------------
+bool typeExists( std::vector<typeLUT> list , std::string specie )
+{
+  for ( int i = 0 ; i < list.size() ; i++ )
     {
-      if ( type_vector[i] == type )
-	{
-	  return true;
-	}
+      if ( testType( list[i], specie ) ) return true;
     }
   return false;
 }
-//----------------------------------------------------------------
-/*typeLUT makeLUT ( std::vector<Atom> atoms)
-// Creates a LUT table for types from an atom list
+//---------------------------------------------------------------
+bool typeExists( std::vector<typeLUT> list , int index )
 {
-  std::vector<std::string> types;
-  for ( int i=0 ; i < atoms.size() ; i++ )
+  for ( int i = 0 ; i < list.size() ; i++ )
     {
-      if ( ! typeExist( atoms[i].name , types ) )
-	{
-	  types.push_back( atoms[i].name );
-	}
+      if ( testType( list[i], index ) ) return true;
     }
-  return { types };
-  }*/
-//----------------------------------------------------------------
-/*typeLUT makeLUT ( std::vector<Atom> atoms, int n_type)
-// Creates a LUT table for types from an atom list, with extra information about the number of types that are present in the table
-{
-  std::vector<std::string> types;
-  for ( int i=0 ; i < atoms.size() ; i++ )
-    {
-      if ( ! typeExist( atoms[i].name , types ) )
-	{
-	  types.push_back( atoms[i].name );
-	}
-      if ( types.size() == n_type ) break;
-    }
-  return { types };
-  }
-//----------------------------------------------------------------
-int getTypeId( std::string type , typeLUT type_LUT, bool msg )
-// Returns the type id of a specific type
-{
-  for ( int i=0 ; i < type_LUT.type.size() ; i++ )
-    {
-      if ( type == type_LUT.type[i] ) return i;
-    }
-  if ( msg ) std::cout << "No such specie in the atom list!" << std::endl;
-  return -1;
-  }*/
+  return false;
+}
+//======================================================================
+
 //======================================================================
 
 //=======
