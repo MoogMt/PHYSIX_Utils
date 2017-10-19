@@ -51,13 +51,14 @@ void addAtom2LUT( std::vector<typeLUT> & list , Atom atom )
 {
   for ( int i=0 ; i < list.size() ; i++ )
     {
-      if ( atom.name == list.type_name )
+      if ( atom.name == list[i].type_name )
 	{
 	  list[i].atom_index.push_back( atom.index );
 	  return;
 	}
     }
-  std::vector<int> atom_index = atom.index ;
+  std::vector<int> atom_index;
+  atom_index.push_back(atom.index);
   typeLUT lut = { atom.name, list.size() , atom_index };
   return ;
 }
@@ -69,7 +70,7 @@ std::vector<typeLUT> makeLUT( std::vector<Atom> atoms )
     {
       addAtom2LUT( list_lut, atoms[i] );
     }
-  return list_lust;
+  return list_lut;
 }
 //======================================================================
 
