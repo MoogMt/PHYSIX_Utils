@@ -14,15 +14,32 @@
 #include "atom.h"
 #include "cell.h"
 
-//----------------
+//================
 // CONTACT MATRIX
-//---------------------------------------------
+//====================================================================
+// Restricted Contact Matrix
 struct Contact_Matrix
 {
   std::vector<std::string> types;  // Types of the atoms
-  std::vector<double> matrix; // Contact matrix
+  std::vector<double> matrix;      // Contact matrix
 };
-//---------------------------------------------
+//---------------------------------------------------------
+// Full Contact Matrix
+template <int nb_atoms>
+struct ContactMatrix
+{
+  int types[nb_atoms];           // Atom types
+  int matrix[nb_atoms*nb_atoms]; // Contact_Matrix
+};
+//---------------------------------------------------------
+// Cut-Off Matrix
+template <int n_type>
+struct CutOffMatrix
+{
+  std::string types1[n_type]; std::string types2[n_type];
+  double cut_offs_matrix[n_type];
+};
+//====================================================================
 
 //===========
 // FUNCTIONS
@@ -30,7 +47,8 @@ struct Contact_Matrix
 // MAKE
 //--------------------------------------------------------------------------------
 // Computes the contact matrix from an atom list and a cell
-Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box);
+Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list, Cell box );
+template <int N> ContactMatrix<N> makeContactMatrix ( std::vector<Atom> atom_list, Cell box );
 //--------------------------------------------------------------------------------
 // ANGLES ET DISTANCE
 //------------------------------------------------------------------------------------
@@ -59,7 +77,10 @@ double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_inde
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> n_nearest, int atom_index);
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes );
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes , std::string specie );
-std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , std::string specie );
+//-------------------------------------------------------------------------------
+// TO BE REPLACED 
+std::vector<std::vector<double> > getNNearest( Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , std::string specie );
+//-------------------------------------------------------------------------------
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::string atom_type );
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::vector<std::string> atom_types );
 // -> Write

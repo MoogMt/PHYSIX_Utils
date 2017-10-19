@@ -1,42 +1,40 @@
 #include "cell.h"
 
-
-//
-//----------------------------------------
-double backIn(double x, double a)
+//===========
+// WRAP PBC
+//====================================================================
+double backIn ( double x , double a )
+// Wraps a single position dimension inside PBC  
 {
+  // Determining sign
   int sign;
-  if( x > 0)
-    {
-      sign = -1;
-    }
-  else
-    {
-      sign = +1;
-    }
-
-  while( x > a || x < 0 )
+  if ( x > 0) sign = -1;
+  else        sign = +1;
+  // Going back inside the box
+  while ( x > a || x < 0 )
     {
       x += sign*a;
     }
+  // Returning
   return x;
 }
-//-----------------------------------------
 
-//-----------------------
-// Wrapping atoms in box
-//-----------------------------------------------------------------------
-//
+//------------------------------------------------------
 Atom wrapPBC(Atom atom_in, Cell box)
-{
+// Wraps a signle atom inside cell
+// In:
+// Out:
+{ 
   Atom atom_out;
   atom_out.x = backIn( atom_in.x , box.a );
   atom_out.y = backIn( atom_in.y , box.b );
   atom_out.z = backIn( atom_in.z , box.c );
   return atom_out;
 }
-// 
+l
+//--------------------------------------------------------------
 std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell )
+// Wraps all atoms in PBC
 {
   for ( int i=0 ; i < atoms.size() ; i++ )
     {
@@ -44,22 +42,23 @@ std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell )
     }
   return atoms;
 }
+//=======================================================================
+
+//======================
+// PBC IMAGES (legacy)
+//===========================================================================================
+std::vector<Atom> pbcImages(Atom atom, Cell box)
 //-----------------------------------------------------------------------
 
 //----
 // PBC
 // Generates all the pbc image of an atom
-//------------------------------------------
-std::vector<Atom> pbc(Atom atom, Cell box)
 {
   Atom atom_image;
   std::vector<Atom> pbc;
-  
   // Wrapping PBC
   atom=wrapPBC(atom,box);
-  
   pbc.push_back(atom); // Atom at the center
-
   // All the images
   for ( int i = -1 ; i <= 1 ; i++ )
     {
@@ -77,28 +76,59 @@ std::vector<Atom> pbc(Atom atom, Cell box)
   // returns the vector
   return pbc;
 }
+//===========================================================================================
 
-//----------
+//===========
 // DISTANCE
-//----------------------------------------------------------------------------
+//===========================================================================================
+double distAtoms1D( double x1, double x2, double a )
 // returns the distance between two atoms in a given cell 
-//------------------------------------------------------
-double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box)
 {
-  Atom atom = wrapPBC(atoms[i],box);
-  std::vector<Atom> pbc_images = pbc(atoms[j],box);
-  std::vector<double> distances;
-  for (int l=0; l < pbc_images.size(); l++ )
-    {
-      distances.push_back(distanceAtoms(atom,pbc_images[l]));
-    }
-  return min(distances);
+  double dx = x1 - x2;
+  double a2 = a*0.5;
+  if ( dx >  a2 ) dx -= a;
+  if ( dx < -a2 ) dx += a;
+  return dx;
 }
-//---------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
+double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box , bool wrap , bool sqrt_test )
+// returns the distance ( square of the distance ) between two atoms 
+{
+  Atom atom_i = atoms[i] ; Atom atom_j =  atoms[j] ;
+  if ( wrap )
+    {
+      atom_i = wrapPBC( atom_i , box ) ; 
+      atom_j = wrapPBC( atom_j , box ) ;
+    }
+  double dist = 0 ;
+  dist += distAtoms1D( atom_i.x , atom_j.x, box.a ) ;
+  dist += distAtoms1D( atom_i.y , atom_j.y, box.b ) ;
+  dist += distAtoms1D( atom_i.z , atom_j.z, box.c ) ;
+  if ( sqrt_test ) return sqrt( dist );
+  else return dist;
+}
 
-//--------------------
+//-----------------------------------------------------------------------------------------------
+void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box)
+{
+  for ( int i=0 ; i < atom_index.size() ; i++ )
+    {
+      for ( int j=0 ; j < atom_list.size() ; j++ )
+ 	{
+	  if ( atom_index[i] != j )
+	    {
+	      file << distanceAtoms(atom_list,atom_index[i],j,box) << std::endl;
+	    }
+	}
+    }
+  file << std::endl;
+  return;
+}
+//===========================================================================================
+
+//============
 // MODIFY BOX
-//----------------------------------------------------------------------------
+//===========================================================================================
 Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c )
 {
   cell.a *= frac_a;
@@ -106,14 +136,15 @@ Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c )
   cell.b *= frac_c;
   return cell;
 }
-//----------------------------------------------------------------------------
+//===========================================================================================
 
-//--------
+//========
 // FILES
-//---------------------------------------------------------------------------
-// => Reading from files
-//----------------------------------------------------
+//===========================================================================================
+// READS
+//------------------------------------------------------------------------------------------
 Cell readParamCellStep( std::ifstream& file )
+// => Reading from files
 {
   std::istream_iterator<std::string> read(file);
   std::istream_iterator<std::string> end;
@@ -151,6 +182,7 @@ Cell readParamCellStep( std::ifstream& file )
 }
 //--------------------------------------------------------------
 Cell readParamCell( std::string file_name )
+//
 {
 
   std::ifstream file( file_name.c_str() );
@@ -187,4 +219,4 @@ Cell readParamCell( std::string file_name )
     }
   return cell;
 }
-//------------------------------------------------
+//==============================================================================================
