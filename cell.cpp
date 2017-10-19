@@ -31,7 +31,6 @@ Atom wrapPBC(Atom atom_in, Cell box)
   atom_out.z = backIn( atom_in.z , box.c );
   return atom_out;
 }
-l
 //--------------------------------------------------------------
 std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell )
 // Wraps all atoms in PBC

@@ -34,14 +34,14 @@ struct Molecule
 //===========
 // TYPES LUT
 //=============================================
-struct indexes
-{
-  std::vector<int> list;
-};
 struct typeLUT
 {
-  std::vector<std::string> type;
-  std::vector<std::list> type_lists;
+  std::string atom_name;
+  std::vector<int> atom_index;
+};
+struct listType
+{
+  std::vector<typeLUT> type_LUT;
 };
 //=============================================
 
@@ -54,9 +54,9 @@ double distanceAtoms(Atom i, Atom j);
 //=====
 // LUT
 //=============================================================================================
-bool typeExist( std::string type, std::string type_vector[] , int size );
-typeLUT makeLUT ( std::vector<Atom> atoms);
-typeLUT makeLUT ( std::vector<Atom> atoms, int n_type);
+//bool typeExist( std::string type, std::string type_vector[] , int size );
+//typeLUT makeLUT ( std::vector<Atom> atoms);
+//typeLUT makeLUT ( std::vector<Atom> atoms, int n_type);
 int getTypeId( std::string specie , typeLUT type_LUT , bool msg = false );
 //=============================================================================================
 

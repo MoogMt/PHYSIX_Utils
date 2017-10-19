@@ -30,7 +30,7 @@ bool typeExist( std::string type, std::vector<std::string> type_vector )
   return false;
 }
 //----------------------------------------------------------------
-typeLUT makeLUT ( std::vector<Atom> atoms)
+/*typeLUT makeLUT ( std::vector<Atom> atoms)
 // Creates a LUT table for types from an atom list
 {
   std::vector<std::string> types;
@@ -42,9 +42,9 @@ typeLUT makeLUT ( std::vector<Atom> atoms)
 	}
     }
   return { types };
-}
+  }*/
 //----------------------------------------------------------------
-typeLUT makeLUT ( std::vector<Atom> atoms, int n_type)
+/*typeLUT makeLUT ( std::vector<Atom> atoms, int n_type)
 // Creates a LUT table for types from an atom list, with extra information about the number of types that are present in the table
 {
   std::vector<std::string> types;
@@ -57,7 +57,7 @@ typeLUT makeLUT ( std::vector<Atom> atoms, int n_type)
       if ( types.size() == n_type ) break;
     }
   return { types };
-}
+  }
 //----------------------------------------------------------------
 int getTypeId( std::string type , typeLUT type_LUT, bool msg )
 // Returns the type id of a specific type
@@ -68,7 +68,7 @@ int getTypeId( std::string type , typeLUT type_LUT, bool msg )
     }
   if ( msg ) std::cout << "No such specie in the atom list!" << std::endl;
   return -1;
-}
+  }*/
 //======================================================================
 
 //=======
@@ -122,39 +122,3 @@ void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string
   return;
 }
 //----------------------------------------------------------------------
-
-
-// MOVE
-//--------------------------------------------------------------------------------------------------
-std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double frac_b , double frac_c )
-{
-  for ( int i=0 ; i < atoms.size() ; i++ )
-    {
-      atoms[i].x *= frac_a;
-      atoms[i].y *= frac_b;
-      atoms[i].z *= frac_c;
-    }
-  return atoms;
-}
-//-------------------------------------------------------------------------------------------------
-
-//-------
-// WRITE
-//----------------------------------------------------------------------------------------
-void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie )
-{
-  for ( int i=0 ; i < atoms.size() ; i++ )
-    {
-      if ( atoms[i].name == specie )
-	{
-	  file << atoms[i].x << " ";
-	  file << atoms[i].y << " ";
-	  file << atoms[i].z << " ";
-	  file << std::endl;
-	}
-    }
-  file << std::endl;
-  return;
-}
-//----------------------------------------------------------------------------------------
-
