@@ -253,6 +253,7 @@ std::vector<std::vector<double> > getNNearest( Contact_Matrix contact_matrix , s
 //------------------------------------------------------------------------------------------------
 std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::string atom_type )
 {
+
   std::vector<double> n_nearest_list;
   int nb_atoms = contact_matrix.types.size();
   for ( int i=0 ; i < nb_atoms ; i++ )

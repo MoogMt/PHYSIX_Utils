@@ -18,6 +18,7 @@ double backIn ( double x , double a )
   // Returning
   return x;
 }
+
 //------------------------------------------------------
 Atom wrapPBC(Atom atom_in, Cell box)
 // Wraps a signle atom inside cell
@@ -30,6 +31,7 @@ Atom wrapPBC(Atom atom_in, Cell box)
   atom_out.z = backIn( atom_in.z , box.c );
   return atom_out;
 }
+l
 //--------------------------------------------------------------
 std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell )
 // Wraps all atoms in PBC
@@ -46,6 +48,10 @@ std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell )
 // PBC IMAGES (legacy)
 //===========================================================================================
 std::vector<Atom> pbcImages(Atom atom, Cell box)
+//-----------------------------------------------------------------------
+
+//----
+// PBC
 // Generates all the pbc image of an atom
 {
   Atom atom_image;
@@ -101,6 +107,7 @@ double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box , bool wrap
   if ( sqrt_test ) return sqrt( dist );
   else return dist;
 }
+
 //-----------------------------------------------------------------------------------------------
 void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box)
 {
