@@ -47,6 +47,17 @@ bool typeExists( std::vector<typeLUT> list , int index )
     }
   return false;
 }
+//--------------------------------------------------------------
+std::vector<typeLUT> makeLUT( std::vector<Atom> atoms )
+{
+  std::vector<typeLUT> list_lut;
+  for ( int i=0 ; i < atoms.size() ; i++ )
+    {
+      if ( typeExists( list_lut , atoms[i].name) ) list_lust.push_back( );
+      else addAtom2LUT( list_lut , )
+    }
+  return list_lust;
+}
 //======================================================================
 
 //======================================================================
