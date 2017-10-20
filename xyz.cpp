@@ -59,7 +59,7 @@ bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector
 	    }
 	  atom.index = atoms.size();
 	  atoms.push_back( atom );
-	  if ( same_type ) addAtom2LUT( lut_list , atom );
+	  if ( ! same_type ) addAtom2LUT( lut_list , atom );
 	}
     }
   //---------------------------------------------------------------

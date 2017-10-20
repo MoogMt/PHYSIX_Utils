@@ -30,12 +30,6 @@ struct ContactMatrix
   std::vector<typeLUT> lut_list;  // LUT list
   std::vector<double> matrix;     // Contact_Matrix
 };
-//---------------------------------------------------------
-// Cut-Off Matrix
-struct CutOffMatrix
-{
-  std::vector<double> cut_offs_matrix;
-};
 //====================================================================
 
 //===========
@@ -85,5 +79,20 @@ void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , int n_
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
 //================================================================================================
+
+//================
+// Cut-Off Matrix
+//====================================================================
+struct CutOffMatrix
+{
+  std::vector<double> cut_offs_matrix;
+};
+//====================================================================
+
+//=============
+// FUNCTIONS
+//=======================================================================================
+CutOffMatrix readCutOff( std::string file );
+//=======================================================================================
 
 #endif 
