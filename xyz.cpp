@@ -1,5 +1,72 @@
 #include "xyz.h"
 
+//======
+// READ
+//==================================================================================
+bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector<typeLUT> & lut_list , bool verbose )
+// Reads a step of XYZ file and build atom list and LUT for types
+{
+
+  // Clearing previous values
+  //---------------------------------------------------------------
+  atoms.clear();
+  lut_list.clear();
+  //---------------------------------------------------------------
+
+  // Physical Parameters
+  //---------------------------------------------------------------
+  int nb_atoms = 0 ; // Numbers
+  Atom atom ;        // Stock a temporary atom
+  std::string line ; // Contains one line
+  //---------------------------------------------------------------
+
+  // Getting the number of atoms in the step
+  //-----------------------------------------------------------------------------------
+  if ( std::getline( file , line ) )
+    {
+      std::istringstream it_string(line);
+      if ( ! ( it_string >> nb_atoms ) )
+	{
+	  if ( verbose ) std::cout << "Problem with file format at line 1." << std::endl;
+	  return false;
+	}
+    }
+  //-----------------------------------------------------------------------------------
+
+  // Jumps next comment line
+  //----------------------------------------------------------------------------------
+  if( ! std::getline( file , line ) )
+    {
+      if ( verbose && line != "" )
+	{
+	  std::cout << "Problem with file format at line 2" << std::endl;
+	}
+      return false;
+    }
+  //----------------------------------------------------------------------------------
+
+  // Reads atoms by atoms
+  //---------------------------------------------------------------
+  while ( atoms.size() < nb_atoms )
+    {
+      if ( std::getline( file , line ) )
+	{
+	  std::istringstream it_string(line);
+	  if ( ! ( it_string >> atom.name >> atom.x >> atom.y >> atom.z ) )
+	    {
+	      if ( verbose ) std::cout << "Problem with file format at line " << 2 + atoms.size() << "."<< std::endl;
+	      return false;
+	    }
+	  atom.index = atoms.size();
+	  atoms.push_back( atom );
+	  addAtom2LUT( lut_list , atom );
+	}
+    }
+  //---------------------------------------------------------------
+  
+  return true; 
+}
+//-----------------------------------------------------------------------------------
 std::vector<Atom> readstepXYZ(std::ifstream & file)
 {
   // Stream Handling
@@ -44,7 +111,11 @@ std::vector<Atom> readstepXYZ(std::ifstream & file)
   // Return atom list
   return atom_list;
 }
+//==================================================================================
 
+//=======
+// WRITE
+//==================================================================================
 void writeXYZ( std::ofstream & file , std::vector<Atom> atom_list )
 {
   file << atom_list.size() << std::endl;
@@ -54,3 +125,14 @@ void writeXYZ( std::ofstream & file , std::vector<Atom> atom_list )
       file << atom_list[i].name << " " << atom_list[i].x <<  " " << atom_list[i].y <<  " " << atom_list[i].z << std::endl;
     }
 }
+//-----------------------------------------------------------------------------------
+void writeXYZ( std::ofstream & file , std::vector<Atom> atom_list , int step )
+{
+  file << atom_list.size() << std::endl;
+  file << "STEP " << step << std::endl;
+  for ( int i=0 ; i < atom_list.size() ; i++ )
+    {
+      file << atom_list[i].name << " " << atom_list[i].x <<  " " << atom_list[i].y <<  " " << atom_list[i].z << std::endl;
+    }
+}
+//==================================================================================

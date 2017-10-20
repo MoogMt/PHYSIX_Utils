@@ -25,15 +25,13 @@ struct Contact_Matrix
 };
 //---------------------------------------------------------
 // Full Contact Matrix
-template <int nb_atoms>
 struct ContactMatrix
 {
-  int types[nb_atoms];           // Atom types
-  int matrix[nb_atoms*nb_atoms]; // Contact_Matrix
+  std::vector<typeLUT> lut_list;  // LUT list
+  std::vector<double> matrix;     // Contact_Matrix
 };
 //---------------------------------------------------------
 // Cut-Off Matrix
-template <int n_type>
 struct CutOffMatrix
 {
   std::string types1[n_type]; std::string types2[n_type];
@@ -43,12 +41,12 @@ struct CutOffMatrix
 
 //===========
 // FUNCTIONS
-//====================================================================
+//==================================================================================================
 // MAKE
 //--------------------------------------------------------------------------------
 // Computes the contact matrix from an atom list and a cell
 Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list, Cell box );
-template <int N> ContactMatrix<N> makeContactMatrix ( std::vector<Atom> atom_list, Cell box );
+ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list, std::vector<typeLUT> lut_list ,Cell box );
 //--------------------------------------------------------------------------------
 // ANGLES ET DISTANCE
 //------------------------------------------------------------------------------------
@@ -87,6 +85,6 @@ std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, 
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , int n_nearest , std::vector<int> atom_indexes , int step );
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
-//====================================================================
+//================================================================================================
 
 #endif 

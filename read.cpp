@@ -35,23 +35,17 @@ int main(void)
   std::ifstream input("TRAJEC.xyz");
   //---------------------------------
 
-  //--------
-  // Output
-  //-------------------------------------------------------------
-  std::ofstream compStruc("compressedBox.xyz",  std::ios::out );
-  //-------------------------------------------------------------
-  
   //----------------------
   // Physical parameters
-  //----------------------------------------------------------------
-  int step = 1;                            // Step counter
-  double frac_a = 0.98; double frac_b = 0.98;   double frac_c = 0.98;
+  //---------------------------------------------------------------
+  int step = 1;  // Step counter
   //----------------------------------------------------------------
 
   //---------------
   // Initializers
   //----------------------------------------------
   std::vector<Atom> atom_list;   // Atoms in cell
+  std::vector<typeLUT> list_lut;
   //----------------------------------------------
 
   //---------------
@@ -63,24 +57,17 @@ int main(void)
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
-  do
-    {
-      atom_list=readstepXYZ( input ); // Read one line
-      if ( step == 8000 )
-	{
-	  compressBox( { wrapPBC(atom_list,box) , box } , frac_a , frac_b , frac_c);
-	  writePositions( compStruc , atom_list , "C" );
-	  writePositions( compStruc , atom_list , "O" );
-	}
+  while( readStepXYZ( input , atom_list , list_lut, true ) )
+    {      
+     
       step++;
-    } while( atom_list.size() != 0 );
+     }
   //----------------------------------------------------
 
   //Closing fluxes
   //----------------------
   input.close();
-  compStruc.close();
-  //----------------------
+   //----------------------
   
   return 0;
 }
