@@ -17,41 +17,10 @@ Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
     }
   return contact_matrix;
 }
-//---------------------------------------------------------------------------------
-template <int n_type>
-Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box , CutOffMatrix<n_type> cut_off_matrix )
+ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list, std::vector<typeLUT> lut_list ,Cell box )
 {
-  std::vector<std::string> types;
-  std::vector<double> distance_matrix;
-  for ( int i=0 ; i < atom_list.size()-1 ; i++ )
-    {
-      types.push_back( atom_list[i].name );
-      for (int j=i+1; j < atom_list.size() ; j++ )
-	{
-	  int value = 0 ;
-	  if ( distanceAtoms( atom_list , i , j , box) < cut_off_matrix.matrix[n_type*i+j] ) value = 1;
-	  distance_matrix.push_back( value );
-	}
-    }
-    
-  return { types , distance_matrix };
-}
-//---------------------------------------------------------------------------------
-template <int N>
-ContactMatrix<N> makeContactMatrix ( std::vector<Atom> atoms , Cell box )
-{
-  double matrix[N];
-  std::string types[N];
-  for ( int i=0 ; i < N-1 ; i++ )
-    {
-      types[i] = atoms[i].name;
-      for ( int j=i+1 ; j < N ; j++ )
-	{
-	  matrix[ N*i + j - 1 ] = distanceAtoms( atoms , i , j , box);
-	}
-    }
-  types[N] = atoms[N].name;
-  return { matrix , types };
+  ContactMatrix cm;
+  return cm;
 }
 //=======================================================================================
 

@@ -58,8 +58,8 @@ int main(void)
   // Reading XYZ file
   //----------------------------------------------------
   while( readStepXYZ( input , atom_list , list_lut, true ) )
-    {      
-     
+    {
+      makeContactMatrix( atom_list , list_lut , box );
       step++;
      }
   //----------------------------------------------------

@@ -3,14 +3,14 @@
 //======
 // READ
 //==================================================================================
-bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector<typeLUT> & lut_list , bool verbose )
+bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector<typeLUT> & lut_list , bool same_type , bool verbose )
 // Reads a step of XYZ file and build atom list and LUT for types
 {
 
   // Clearing previous values
   //---------------------------------------------------------------
-  atoms.clear();
-  lut_list.clear();
+  if ( atoms.size() == 0 ) atoms.clear();
+  if ( same_type && lut_list.size() != 0 ) lut_list.clear();
   //---------------------------------------------------------------
 
   // Physical Parameters
@@ -59,7 +59,7 @@ bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector
 	    }
 	  atom.index = atoms.size();
 	  atoms.push_back( atom );
-	  addAtom2LUT( lut_list , atom );
+	  if ( same_type ) addAtom2LUT( lut_list , atom );
 	}
     }
   //---------------------------------------------------------------

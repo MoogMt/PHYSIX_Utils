@@ -34,8 +34,7 @@ struct ContactMatrix
 // Cut-Off Matrix
 struct CutOffMatrix
 {
-  std::string types1[n_type]; std::string types2[n_type];
-  double cut_offs_matrix[n_type];
+  std::vector<double> cut_offs_matrix;
 };
 //====================================================================
 
