@@ -38,7 +38,8 @@ int main(void)
   //----------------------
   // Physical parameters
   //---------------------------------------------------------------
-  int step = 1;  // Step counter
+  int step      = 1;  // Step counter
+  int comp_step = 5;
   //----------------------------------------------------------------
 
   //---------------
@@ -59,7 +60,11 @@ int main(void)
   //----------------------------------------------------
   while( readStepXYZ( input , atom_list , list_lut ) )
     {
-      makeContactMatrix( atom_list , list_lut , box );
+      if ( step % comp_step == 0 )
+	{
+	  ContactMatrix cm = makeContactMatrix( atom_list , list_lut , box );
+	  std::cout << "step: " << step << std::endl;
+	}
       step++;
      }
   //----------------------------------------------------

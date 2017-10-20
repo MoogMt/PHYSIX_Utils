@@ -17,10 +17,18 @@ Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
     }
   return contact_matrix;
 }
+//--------------------------------------------------------------------------------------
 ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list, std::vector<typeLUT> lut_list ,Cell box )
 {
-  ContactMatrix cm;
-  return cm;
+  std::vector<double> matrix;
+  for ( int i=0 ; i < atom_list.size() ; i++ )
+    {
+      for( int j=0 ; j < atom_list.size() ; j++ )
+	{
+	  matrix.push_back( distanceAtoms( atom_list , i , j , box ) );
+	}
+    }
+  return { lut_list , matrix };
 }
 //=======================================================================================
 
