@@ -9,7 +9,7 @@ bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector
 
   // Clearing previous values
   //---------------------------------------------------------------
-  if ( atoms.size() == 0 ) atoms.clear();
+  if ( atoms.size() != 0 ) atoms.clear();
   if ( same_type && lut_list.size() != 0 ) lut_list.clear();
   //---------------------------------------------------------------
 

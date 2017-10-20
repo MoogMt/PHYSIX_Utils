@@ -57,7 +57,7 @@ int main(void)
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
-  while( readStepXYZ( input , atom_list , list_lut, true ) )
+  while( readStepXYZ( input , atom_list , list_lut ) )
     {
       makeContactMatrix( atom_list , list_lut , box );
       step++;
