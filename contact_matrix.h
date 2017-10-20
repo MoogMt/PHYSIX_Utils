@@ -85,7 +85,7 @@ void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::v
 //====================================================================
 struct CutOffMatrix
 {
-  std::vector<double> cut_offs_matrix;
+  std::vector<double> matrix;
 };
 //====================================================================
 

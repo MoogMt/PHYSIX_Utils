@@ -72,7 +72,7 @@ std::vector<Atom> readstepXYZ(std::ifstream & file)
   // Stream Handling
   std::istream_iterator<std::string> read(file);
   std::istream_iterator<std::string> end;
-
+  
   // Atoms
   int nb_atoms=-1;
   Atom atom;

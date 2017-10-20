@@ -299,7 +299,15 @@ void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::v
 //=======================================================================================
 CutOffMatrix readCutOff( std::string file )
 {
+
   CutOffMatrix com;
+
+  std::ifstream input( file.c_str() );
+  std::istream_iterator<double> read(input);
+  std::istream_iterator<double> end;
+
+  while( read != end ) com.matrix.push_back( *read ); ++read;
+  
   return com;
 }
 //=======================================================================================
