@@ -72,6 +72,7 @@ bool typeExists( std::vector<TypeLUT> list , int index );
 //---------------------------------------------------------------
 // Modify
 //---------------------------------------------------------------
+void addAtom2LUT( std::vector<TypeLUT>  & list , std::string name , int index  );
 void addAtom2LUT( std::vector<TypeLUT> & list , Atom atom );
 //---------------------------------------------------------------
 // Create

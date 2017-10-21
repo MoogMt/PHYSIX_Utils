@@ -31,20 +31,37 @@ ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list, std::vector<TypeL
   return { lut_list , matrix };
 }
 //--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( AtomList atom_list, std::vector<TypeLUT> lut_list , Cell box )
+ContactMatrix makeContactMatrix ( AtomList atom_list, std::vector<TypeLUT> lut_list , Cell cell )
 {
   std::vector<double> matrix;
   for ( int i=0 ; i < atom_list.names.size() ; i++ )
     {
       for ( int j=0 ; j < atom_list.names.size() ; j++ )
 	{
-	  matrix.push_back( distanceAtomsSq( atom_list , i , j , box ) );
+	  matrix.push_back( distanceAtomsSq( atom_list , i , j , cell) );
+	}
+    }
+  return { lut_list, matrix };
+}
+//--------------------------------------------------------------------------------------
+ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , std::vector<TypeLUT> lut_list )
+{
+  std::vector<double> matrix;
+  for ( int i=0 ; i < atom_list.names.size() ; i++ )
+    {
+      for ( int j=0 ; j < atom_list.names.size() ; j++ )
+	{
+	  int value = 0;
+	  if ( distanceAtomsSq( atom_list , i , j , cell) < getCutOff( cut_off , i , j ) )
+	    {
+	      value = 1;
+	    }
+	  matrix.push_back( value );
 	}
     }
   return { lut_list, matrix };
 }
 //=======================================================================================
-
 
 //==========
 // DISTANCE
@@ -307,56 +324,3 @@ void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::v
 }
 //=======================================================================================
 
-//================
-// CUT-OFF MATRIX
-//=======================================================================================
-CutOffMatrix readCutOff( std::string file , std::vector<TypeLUT> & lut_list )
-{
-  //-----------
-  // Variables
-  //-----------------
-  CutOffMatrix com;
-  //-----------------
-  
-  //--------------------------
-  // Stream related variables
-  //-------------------------------------------
-  std::ifstream input( file.c_str() );
-  std::istream_iterator<std::string> read(input);
-  std::istream_iterator<std::string> end;
-  //-------------------------------------------
-
-  ///----------
-  // Variables
-  //--------------------------------------------------------------
-  int count = 0; // count
-  int nb_types = atoi( std::string( *read ).c_str() ); ++read; // Reads number of types
-  //--------------------------------------------------------------
-
-  //------------------------
-  // Reading names of types
-  //----------------------------------------------------------
-  std::vector<std::string> names;
-  while( read != end && count < nb_types )
-    {
-      names.push_back( std::string( *read ) );
-      ++read;
-    }
-  for ( int i=0 ; i < names.size() ; i++ )
-    {
-      lut_list.push_back( makeLUT( names[i] , i ) );
-    }
-  //----------------------------------------------------------
-
-  //-----------------
-  // Building matrix
-  //----------------------------------------------------------
-  for ( int i=0 ; i < names.size() ; i++ )
-    {
-      com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
-    }
-  //----------------------------------------------------------
-  
-  return com;
-}
-//=======================================================================================

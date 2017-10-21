@@ -47,6 +47,22 @@ bool typeExists( std::vector<TypeLUT> list , int index )
   return false;
 }
 //--------------------------------------------------------------
+void addAtom2LUT( std::vector<TypeLUT>  & list , std::string name , int index  )
+{
+  for ( int i=0 ; i < list.size() ; i++ )
+    {
+      if ( name == list[i].type_name )
+	{
+	  list[i].atom_index.push_back( index );
+	  return;
+	}
+    }
+  std::vector<int> atom_index;
+  atom_index.push_back( index );
+  TypeLUT lut = { name, list.size() , atom_index };
+  return;
+}
+//--------------------------------------------------------------
 void addAtom2LUT( std::vector<TypeLUT> & list , Atom atom )
 {
   for ( int i=0 ; i < list.size() ; i++ )
@@ -59,7 +75,7 @@ void addAtom2LUT( std::vector<TypeLUT> & list , Atom atom )
     }
   std::vector<int> atom_index;
   atom_index.push_back(atom.index);
-  typeLUT lut = { atom.name, list.size() , atom_index };
+  TypeLUT lut = { atom.name, list.size() , atom_index };
   return ;
 }
 //--------------------------------------------------------------

@@ -62,14 +62,18 @@ bool readStepXYZ( std::ifstream & file , AtomList & atoms , std::vector<TypeLUT>
 	  std::istringstream it_string(line);
 	  std::string name;
 	  double x,y,z;
-	  int index = atoms.size();
+	  int index = atoms.names.size();
 	  if ( ! ( it_string >> name >> x >> y >> z ) )
 	    {
-	      if ( verbose ) std::cout << "Problem with file format at line " << 2 + atoms.size() << "."<< std::endl;
+	      if ( verbose ) std::cout << "Problem with file format at line " << 2 + atoms.names.size() << "."<< std::endl;
 	      return false;
 	    }
-	  atoms.push_back( { name , x ,  y , z , index } );
-	  if ( ! same_type ) addAtom2LUT( lut_list , { name , x ,  y , z , index } );
+	  atoms.names.push_back( name );
+	  atoms.x.push_back( x );
+	  atoms.y.push_back( y );
+	  atoms.z.push_back( z );
+	  atoms.index.push_back( index );
+	  if ( ! same_type ) addAtom2LUT( lut_list , name , index  );
 	}
     }
   //-------------------------------------------------------------------------------------

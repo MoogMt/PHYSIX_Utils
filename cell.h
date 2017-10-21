@@ -39,7 +39,7 @@ std::vector<Atom> pbcImages( Atom atom, Cell box );
 //-----------------------------------------------------------------------------------------------
 double distAtoms1D( double x1, double x2, double a );
 double distanceAtoms( std::vector<Atom> atoms, int i, int j, Cell box , bool wrap = true , bool sqrt_test = true );
-double distanceAtomsSq( AtomList & atom_list ,  int i , int  j , Cell cell , bool wrap );
+double distanceAtomsSq( AtomList & atom_list ,  int i , int  j , Cell cell , bool wrap=true );
 //----------------------------------------------------------------------------------------------
 // Change Box
 //----------------------------------------------------------------------------------------------

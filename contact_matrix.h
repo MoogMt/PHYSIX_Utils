@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "atom.h"
 #include "cell.h"
+#include "cutoff.h"
 
 //================
 // CONTACT MATRIX
@@ -40,7 +41,8 @@ struct ContactMatrix
 // Computes the contact matrix from an atom list and a cell
 Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list , Cell box );
 ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list , std::vector<TypeLUT> lut_list , Cell box );
-ContactMatrix makeContactMatrix ( AtomList atom_list , std::vector<TypeLUT> lut_list , Cell box );
+ContactMatrix makeContactMatrix ( AtomList atom_list , std::vector<TypeLUT> lut_list , Cell cell );
+ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , std::vector<TypeLUT> lut_list );
 //--------------------------------------------------------------------------------
 // ANGLES ET DISTANCE
 //------------------------------------------------------------------------------------
@@ -80,20 +82,5 @@ void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , int n_
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
 void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
 //================================================================================================
-
-//================
-// Cut-Off Matrix
-//====================================================================
-struct CutOffMatrix
-{
-  std::vector<double> matrix;
-};
-//====================================================================
-
-//=============
-// FUNCTIONS
-//=======================================================================================
-CutOffMatrix readCutOff( std::string file , std::vector<TypeLUT> & lut_list );
-//=======================================================================================
 
 #endif 
