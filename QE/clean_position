@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sed "s/^1./C /g" -i position.xyz
+sed "s/^2./O /g" -i position.xyz
+sed "s/O 92/2592/g" -i position.xyz
