@@ -1,0 +1,8 @@
+E(x)=A*x+B
+fit E(x) 'res' u 2:8 via A, B
+set yrange [-1000:1000]
+set xrange [450:2100]
+set xlabel "T(K)"
+set ylabel "E(J)"
+plot 'res' u 2:($8-E($2)) title "E(T)"
+replot 0 title ""
