@@ -16,7 +16,8 @@
 //======
 // READ
 //=======================================================================
-bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector<typeLUT> & lut_list , bool same_type = true , bool verbose = true );
+bool readStepXYZ( std::ifstream & file , AtomList & atoms , std::vector<TypeLUT> & lut_list , bool same_type=true , bool verbose = true );
+bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector<TypeLUT> & lut_list , bool same_type = true , bool verbose = true );
 //----------------------------------------------------
 std::vector<Atom> readstepXYZ( std::ifstream & file );
 //=======================================================================

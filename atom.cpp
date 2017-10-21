@@ -17,19 +17,19 @@ double distanceAtoms(Atom i, Atom j)
 //===========
 // TYPES LUT
 //======================================================================
-bool testType( typeLUT lut , std::string specie )
+bool testType( TypeLUT lut , std::string specie )
 {
   if ( lut.type_name == specie ) return true;
   else return false;
 }
 //---------------------------------------------------------------
-bool testType( typeLUT lut , int index )
+bool testType( TypeLUT lut , int index )
 {
   if ( lut.type_index == index ) return true;
   else return false;
 }
 //---------------------------------------------------------------
-bool typeExists( std::vector<typeLUT> list , std::string specie )
+bool typeExists( std::vector<TypeLUT> list , std::string specie )
 {
   for ( int i = 0 ; i < list.size() ; i++ )
     {
@@ -38,7 +38,7 @@ bool typeExists( std::vector<typeLUT> list , std::string specie )
   return false;
 }
 //---------------------------------------------------------------
-bool typeExists( std::vector<typeLUT> list , int index )
+bool typeExists( std::vector<TypeLUT> list , int index )
 {
   for ( int i = 0 ; i < list.size() ; i++ )
     {
@@ -47,7 +47,7 @@ bool typeExists( std::vector<typeLUT> list , int index )
   return false;
 }
 //--------------------------------------------------------------
-void addAtom2LUT( std::vector<typeLUT> & list , Atom atom )
+void addAtom2LUT( std::vector<TypeLUT> & list , Atom atom )
 {
   for ( int i=0 ; i < list.size() ; i++ )
     {
@@ -63,9 +63,19 @@ void addAtom2LUT( std::vector<typeLUT> & list , Atom atom )
   return ;
 }
 //--------------------------------------------------------------
-std::vector<typeLUT> makeLUT( std::vector<Atom> atoms )
+TypeLUT makeLUT( std::string name , int index )
 {
-  std::vector<typeLUT> list_lut;
+  std::vector<int> atom_index;
+  return { name, index, atom_index };
+}
+TypeLUT makeLUT( std::string name , int index , std::vector<int> atom_index )
+{
+  return { name , index , atom_index };
+}
+//--------------------------------------------------------------
+std::vector<TypeLUT> makeLUT( std::vector<Atom> atoms )
+{
+  std::vector<TypeLUT> list_lut;
   for ( int i=0 ; i < atoms.size() ; i++ )
     {
       addAtom2LUT( list_lut, atoms[i] );
@@ -122,4 +132,4 @@ void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string
   file << std::endl;
   return;
 }
-//----------------------------------------------------------------------
+//======================================================================================

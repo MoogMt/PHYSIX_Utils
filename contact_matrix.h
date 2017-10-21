@@ -27,7 +27,7 @@ struct Contact_Matrix
 // Full Contact Matrix
 struct ContactMatrix
 {
-  std::vector<typeLUT> lut_list;  // LUT list
+  std::vector<TypeLUT> lut_list;  // LUT list
   std::vector<double> matrix;     // Contact_Matrix
 };
 //====================================================================
@@ -38,28 +38,29 @@ struct ContactMatrix
 // MAKE
 //--------------------------------------------------------------------------------
 // Computes the contact matrix from an atom list and a cell
-Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list, Cell box );
-ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list, std::vector<typeLUT> lut_list ,Cell box );
+Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list , Cell box );
+ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list , std::vector<TypeLUT> lut_list , Cell box );
+ContactMatrix makeContactMatrix ( AtomList atom_list , std::vector<TypeLUT> lut_list , Cell box );
 //--------------------------------------------------------------------------------
 // ANGLES ET DISTANCE
 //------------------------------------------------------------------------------------
 double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index );
 double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_index_2 );
-void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box);
+void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box );
 //-------------------------------------------------------------------------------------
 // CONTACT
 //---------------------------------------------------------------------------------------
-std::vector<double> getAtomContact(Contact_Matrix contact_matrix, int atom_index);
+std::vector<double> getAtomContact( Contact_Matrix contact_matrix , int atom_index );
 std::vector<double> getAtomContact( Contact_Matrix contact_matrix , int atom_index, std::string specie );
 void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_index );
 //----------------------------------------------------------------------------------------
 // COORDINANCE
 //-----------------------------------------------------------------------------------------------
-int getAtomNeighboursNb( Contact_Matrix contact_matrix, int atom_index, double cut_off_radius );
-int getAtomNeighboursNb( Contact_Matrix contact_matrix, int atom_index, std::string specie, double cut_off_radius );
+int getAtomNeighboursNb( Contact_Matrix contact_matrix , int atom_index , double cut_off_radius );
+int getAtomNeighboursNb( Contact_Matrix contact_matrix , int atom_index , std::string specie , double cut_off_radius );
 std::vector<int> getAtomsNeighboursNb( Contact_Matrix contact_matrix , std::vector<int> atom_index_list , double cut_off_radius );
-std::vector<int> getTypeNeighboursNb(Contact_Matrix contact_matrix, std::string type, double cut_off_radius ) ;
-double getTypeCoordinance( Contact_Matrix contact_matrix, std::string type, double cut_off_radius );
+std::vector<int> getTypeNeighboursNb( Contact_Matrix contact_matrix , std::string type , double cut_off_radius ) ;
+double getTypeCoordinance( Contact_Matrix contact_matrix , std::string type , double cut_off_radius );
 // Nearest Neighbours
 //-------------------------------------------------------------------------------------------------
 // -> Get
@@ -92,7 +93,7 @@ struct CutOffMatrix
 //=============
 // FUNCTIONS
 //=======================================================================================
-CutOffMatrix readCutOff( std::string file );
+CutOffMatrix readCutOff( std::string file , std::vector<TypeLUT> & lut_list );
 //=======================================================================================
 
 #endif 

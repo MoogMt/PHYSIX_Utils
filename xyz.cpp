@@ -3,7 +3,80 @@
 //======
 // READ
 //==================================================================================
-bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector<typeLUT> & lut_list , bool same_type , bool verbose )
+bool readStepXYZ( std::ifstream & file , AtomList & atoms , std::vector<TypeLUT> & lut_list , bool same_type , bool verbose )
+// Reads a step of XYZ file and build atom list and LUT for types
+{
+  //---------------------------
+  // Clearing previous values
+  //---------------------------------------------------------------
+  if ( atoms.names.size() != 0 ) atoms.names.clear();
+  if ( atoms.x.size() != 0 ) atoms.x.clear();
+  if ( atoms.y.size() != 0 ) atoms.y.clear();
+  if ( atoms.z.size() != 0 ) atoms.z.clear();
+  if ( atoms.index.size() != 0 ) atoms.index.clear();
+  if ( same_type && lut_list.size() != 0 ) lut_list.clear();
+  //---------------------------------------------------------------
+
+  //----------------------
+  // Physical Parameters
+  //---------------------------------------------------------------
+  int nb_atoms = 0 ; // Numbers
+  Atom atom ;        // Stock a temporary atom
+  std::string line ; // Contains one line
+  //---------------------------------------------------------------
+
+  //------------------------------------------
+  // Getting the number of atoms in the step
+  //-----------------------------------------------------------------------------------
+  if ( std::getline( file , line ) )
+    {
+      std::istringstream it_string(line);
+      if ( ! ( it_string >> nb_atoms ) )
+	{
+	  if ( verbose ) std::cout << "Problem with file format at line 1." << std::endl;
+	  return false;
+	}
+    }
+  //-----------------------------------------------------------------------------------
+
+  //-------------------------
+  // Jumps next comment line
+  //----------------------------------------------------------------------------------
+  if( ! std::getline( file , line ) )
+    {
+      if ( verbose && line != "" )
+	{
+	  std::cout << "Problem with file format at line 2" << std::endl;
+	}
+      return false;
+    }
+  //----------------------------------------------------------------------------------
+
+  //----------------------
+  // Reads atoms by atoms
+  //-------------------------------------------------------------------------------------
+  while ( atoms.names.size() < nb_atoms )
+    {
+      if ( std::getline( file , line ) )
+	{
+	  std::istringstream it_string(line);
+	  std::string name;
+	  double x,y,z;
+	  int index = atoms.size();
+	  if ( ! ( it_string >> name >> x >> y >> z ) )
+	    {
+	      if ( verbose ) std::cout << "Problem with file format at line " << 2 + atoms.size() << "."<< std::endl;
+	      return false;
+	    }
+	  atoms.push_back( { name , x ,  y , z , index } );
+	  if ( ! same_type ) addAtom2LUT( lut_list , { name , x ,  y , z , index } );
+	}
+    }
+  //-------------------------------------------------------------------------------------
+  return true; 
+}
+//-------------------------------------------------------------------------------------------------
+bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector<TypeLUT> & lut_list , bool same_type , bool verbose )
 // Reads a step of XYZ file and build atom list and LUT for types
 {
 

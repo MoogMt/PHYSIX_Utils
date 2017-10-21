@@ -45,15 +45,15 @@ int main(void)
   //---------------
   // Initializers
   //----------------------------------------------
-  std::vector<Atom>    atom_list;   // Atoms in cell
-  std::vector<typeLUT> list_lut ;
+  AtomList  atom_list;            // Atoms in cell
+  std::vector<TypeLUT> list_lut ;
   //----------------------------------------------
 
   //--------------------
   // Reading Parameters
   //------------------------------------------
-  Cell         box     = readParamCell ("cell.param");
-  CutOffMatrix cut_off = readCutOff    ("truc.dat");
+  Cell         box     = readParamCell ( "cell.param" );
+  CutOffMatrix cut_off = readCutOff    ( "cut_off.dat" , list_lut);
   //------------------------------------------
   
   //-------------------

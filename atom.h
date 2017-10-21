@@ -22,6 +22,17 @@ struct Atom
 };
 //==============================
 
+//===========
+// ATOM LIST
+//================================
+struct AtomList
+{
+  std::vector<std::string> names;
+  std::vector<double> x, y, z;
+  std::vector<int> index;
+};
+//================================
+  
 //==========
 // MOLECULE
 //=============================================
@@ -35,7 +46,7 @@ struct Molecule
 //=============================
 // TYPES LUT ( Look Up Table )
 //=============================================
-struct typeLUT
+struct TypeLUT
 {
   std::string type_name;
   int type_index;
@@ -54,18 +65,20 @@ double distanceAtoms(Atom i, Atom j);
 //=============================================================================================
 // Tests
 //---------------------------------------------------------------
-bool testType ( typeLUT lut , std::string specie );
-bool testType ( typeLUT lut , int index );
-bool typeExists ( std::vector<typeLUT> list , std::string specie );
-bool typeExists( std::vector<typeLUT> list , int index );
+bool testType ( TypeLUT lut , std::string specie );
+bool testType ( TypeLUT lut , int index );
+bool typeExists ( std::vector<TypeLUT> list , std::string specie );
+bool typeExists( std::vector<TypeLUT> list , int index );
 //---------------------------------------------------------------
 // Modify
 //---------------------------------------------------------------
-void addAtom2LUT( std::vector<typeLUT> & list , Atom atom );
+void addAtom2LUT( std::vector<TypeLUT> & list , Atom atom );
 //---------------------------------------------------------------
 // Create
 //---------------------------------------------------------------
-std::vector<typeLUT> makeLUT( std::vector<Atom> atoms );
+TypeLUT makeLUT( std::string name , int index );
+TypeLUT makeLUT( std::string name , int index , std::vector<int> atom_index );
+std::vector<TypeLUT> makeLUT( std::vector<Atom> atoms );
 //=============================================================================================
 
 //=======

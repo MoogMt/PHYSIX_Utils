@@ -41,16 +41,27 @@ std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell )
     }
   return atoms;
 }
-//=======================================================================
-
-//======================
-// PBC IMAGES (legacy)
-//===========================================================================================
-std::vector<Atom> pbcImages(Atom atom, Cell box)
+//--------------------------------------------------------------
+void wrapPBC( AtomList & atom_list , int i , Cell cell )
+// Wraps a specific atom in PBC
+{
+  atom_list.x[i] = backIn( atom_list.x[i], cell.a );
+  atom_list.y[i] = backIn( atom_list.y[i], cell.b );
+  atom_list.z[i] = backIn( atom_list.z[i], cell.c );
+  return ;
+}
+//--------------------------------------------------------------
+void wrapPBC( AtomList & atom_list , Cell cell )
+// Wraps all atoms in PBC
+{
+  for ( int i=0 ; i < atom_list.names.size() ; i++ )
+    {
+      wrapPBC( atom_list , i , cell );
+    }
+  return;
+}
 //-----------------------------------------------------------------------
-
-//----
-// PBC
+std::vector<Atom> pbcImages(Atom atom, Cell box)
 // Generates all the pbc image of an atom
 {
   Atom atom_image;
@@ -87,7 +98,7 @@ double distAtoms1D( double x1, double x2, double a )
   double a2 = a*0.5;
   if ( dx >  a2 ) dx -= a;
   if ( dx < -a2 ) dx += a;
-  return dx;
+  return dx*dx;
 }
 //------------------------------------------------------------------------------------------------
 double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box , bool wrap , bool sqrt_test )
@@ -106,7 +117,17 @@ double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box , bool wrap
   if ( sqrt_test ) return sqrt( dist );
   else return dist;
 }
-
+//------------------------------------------------------------------------------------------------
+double distanceAtomsSq( AtomList & atom_list ,  int i , int  j , Cell cell , bool wrap )
+{
+  // Wrappring in PBC
+  if ( wrap ) wrapPBC( atom_list , i , cell ); wrapPBC( atom_list , j , cell );
+  // Calculating distance
+  double dist = distAtoms1D( atom_list.x[i] , atom_list.x[j] , cell.a );
+  dist += distAtoms1D( atom_list.y[i] , atom_list.y[j] , cell.b );
+  dist += distAtoms1D( atom_list.z[i] , atom_list.z[j] , cell.c );
+  return dist;
+}
 //-----------------------------------------------------------------------------------------------
 void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box)
 {
