@@ -1,4 +1,3 @@
-
 #ifndef ATOMS_H
 #define ATOMS_H
 
@@ -33,16 +32,6 @@ struct AtomList
 };
 //================================
   
-//==========
-// MOLECULE
-//=============================================
-struct Molecule
-{
-  std::string name;        // Name of molecule
-  std::vector<Atom> atoms; // Atoms
-};
-//=============================================
-
 //=============================
 // TYPES LUT ( Look Up Table )
 //=============================================
