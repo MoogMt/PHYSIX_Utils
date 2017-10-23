@@ -32,44 +32,12 @@ struct AtomList
 };
 //================================
   
-//=============================
-// TYPES LUT ( Look Up Table )
-//=============================================
-struct TypeLUT
-{
-  std::string type_name;
-  int type_index;
-  std::vector<int> atom_index;
-};
-//=============================================
-
 //===========
 // Distances
 //=============================================================================================
 double distanceAtoms(Atom i, Atom j);
 //=============================================================================================
 
-//=====
-// LUT
-//=============================================================================================
-// Tests
-//---------------------------------------------------------------
-bool testType ( TypeLUT lut , std::string specie );
-bool testType ( TypeLUT lut , int index );
-bool typeExists ( std::vector<TypeLUT> list , std::string specie );
-bool typeExists( std::vector<TypeLUT> list , int index );
-//---------------------------------------------------------------
-// Modify
-//---------------------------------------------------------------
-void addAtom2LUT( std::vector<TypeLUT>  & list , std::string name , int index  );
-void addAtom2LUT( std::vector<TypeLUT> & list , Atom atom );
-//---------------------------------------------------------------
-// Create
-//---------------------------------------------------------------
-TypeLUT makeLUT( std::string name , int index );
-TypeLUT makeLUT( std::string name , int index , std::vector<int> atom_index );
-std::vector<TypeLUT> makeLUT( std::vector<Atom> atoms );
-//=============================================================================================
 
 //=======
 // MOVE 

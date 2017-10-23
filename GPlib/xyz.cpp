@@ -15,6 +15,9 @@ bool readStepXYZ( std::ifstream & file , AtomList & atoms , std::vector<TypeLUT>
   if ( atoms.z.size() != 0 ) atoms.z.clear();
   if ( atoms.index.size() != 0 ) atoms.index.clear();
   if ( same_type && lut_list.size() != 0 ) lut_list.clear();
+  bool fill_lut;
+  if ( lut_list.size() == 0 ) fill_lut=true;
+  else fill_lut = false;
   //---------------------------------------------------------------
 
   //----------------------
@@ -73,7 +76,11 @@ bool readStepXYZ( std::ifstream & file , AtomList & atoms , std::vector<TypeLUT>
 	  atoms.y.push_back( y );
 	  atoms.z.push_back( z );
 	  atoms.index.push_back( index );
-	  if ( ! same_type ) addAtom2LUT( lut_list , name , index  );
+	  if ( !(same_type) || fill_lut )
+	    {
+	      std::cout << "check" << std::endl;
+	      addAtom2LUT( lut_list , name , index  );
+	    }
 	}
     }
   //-------------------------------------------------------------------------------------
@@ -140,7 +147,7 @@ bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , std::vector
 	}
     }
   //---------------------------------------------------------------
-  
+
   return true; 
 }
 //-----------------------------------------------------------------------------------

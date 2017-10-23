@@ -22,6 +22,7 @@
 #include "histogram.h"
 #include "pdb.h"
 #include "sim.h"
+#include "molecules.h"
 //-------------------------
 
 //================
@@ -39,31 +40,33 @@ int main(void)
   // Physical parameters
   //---------------------------------------------------------------
   int step      = 1;  // Step counter
-  int comp_step = 5;
+  int comp_step = 2;
   //----------------------------------------------------------------
 
   //---------------
   // Initializers
   //----------------------------------------------
   AtomList  atom_list;            // Atoms in cell
-  std::vector<TypeLUT> list_lut ;
+  std::vector<TypeLUT> lut_list ;
   //----------------------------------------------
 
   //--------------------
   // Reading Parameters
   //------------------------------------------
-  Cell         box     = readParamCell ( "cell.param" );
-  CutOffMatrix cut_off = readCutOff    ( "cut_off.dat" , list_lut);
+  Cell         cell    = readParamCell ( "cell.param" );
+  CutOffMatrix cut_off = readCutOff    ( "cut_off.dat" , lut_list );
   //------------------------------------------
   
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
-  while( readStepXYZ( input , atom_list , list_lut ) )
+  while( readStepXYZ( input , atom_list , lut_list, true, true ) )
     {
       if ( step % comp_step == 0 )
 	{
-	  ContactMatrix cm = makeContactMatrix( atom_list , list_lut , box );
+	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
+	  std::vector<MoleculeBasic> mols = makeMolecules( cm );
+	  printMoleculesSize( mols );
 	  std::cout << "step: " << step << std::endl;
 	}
       step++;

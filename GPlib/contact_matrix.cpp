@@ -52,7 +52,8 @@ ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix c
       for ( int j=0 ; j < atom_list.names.size() ; j++ )
 	{
 	  int value = 0;
-	  if ( distanceAtomsSq( atom_list , i , j , cell) < getCutOff( cut_off , i , j ) )
+	  double cutoff = getCutOff( cut_off , i , j );
+	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
 	    {
 	      value = 1;
 	    }
