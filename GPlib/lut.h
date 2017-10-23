@@ -15,6 +15,12 @@
 //=====
 // LUT
 //===============================
+struct AllTypeLUT
+{
+  std::vector<int> type_index;
+  std::vector<std::string> type_name;
+  std::vector<TypeLUT> types;
+};
 struct TypeLUT
 {
   std::string type_name;
