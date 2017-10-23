@@ -324,3 +324,13 @@ void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::v
 }
 //=======================================================================================
 
+//===========
+// CONNECTED
+//==================================================
+bool connected( ContactMatrix cm , int i , int j )
+{
+  int nb_atoms = sqrt( cm.matrix.size() );
+  if ( cm.matrix[ i*nb_atoms + j ] ) return true;
+  else return false;
+}
+//=================================================

@@ -1,19 +1,20 @@
 #include "utils.h"
 
-// Min
-// Returns the minimum of value of vector containing doubles
-//-----------------------------------------------------------
+//======
 // MIN
+//===========================================================
 int min( int int1, int int2 )
 {
   if (int1 < int2) return int1;
   else return int2;
 }
+//-------------------------------------------
 double min ( double real1, double real2 )
 {
   if ( real1 < real2 ) return real1;
   else return real2;
 }
+//-------------------------------------------
 double min(std::vector<double> vector)
 {
   double min=vector[0];
@@ -26,17 +27,23 @@ double min(std::vector<double> vector)
     }
   return min;
 }
+//===========================================================
+
+//=====
 // MAX
+//===========================================================
 int max( int int1, int int2 )
 {
   if (int1 > int2) return int1;
   else return int2;
 }
+//-------------------------------------------
 double max ( double real1, double real2 )
 {
   if ( real1 > real2 ) return real1;
   else return real2;
 }
+//-------------------------------------------
 double max(std::vector<double> vector)
 {
   double max=vector[0];
@@ -49,11 +56,11 @@ double max(std::vector<double> vector)
     }
   return max;
 }
-//-------------------------------------------
+//==========================================================
 
+//===========
 // Average
-// Returns the average distance between two atoms
-//----------------------------------------------------------
+//==========================================================
 double average(std::vector<int> data)
 {
   double average=0;
@@ -63,7 +70,7 @@ double average(std::vector<int> data)
     }
   return average=average/(double)(data.size()); // Returning the average
 }
-
+//----------------------------------------------------------
 double average(std::vector<double> data)
 {
   double average=0;                   // Average
@@ -73,9 +80,11 @@ double average(std::vector<double> data)
     }
   return average=average/data.size(); // Returning the average
 }
-//--------------------------------------
+//==========================================================
 
+//======
 // SUMS
+//==========================================================
 int sumFromO(int integer)
 {
   int sum=0;
@@ -85,6 +94,7 @@ int sumFromO(int integer)
     }
   return sum;
 }
+//-------------------------------------------------------
 int sumBtw(int int1, int int2)
 {
   int sum=0;
@@ -94,15 +104,16 @@ int sumBtw(int int1, int int2)
     }
   return sum;
 }
-
-
+//-------------------------------------------------------
 int computeSep(int atom_index, int nb_atoms)
 {
   return atom_index*nb_atoms-sumFromO(atom_index);
 }
+//==========================================================
 
-
-
+//========
+// VECTORS
+//==============================================================================
 std::vector<int> makeVec(int init, int final)
 {
   std::vector<int> vector;
@@ -112,10 +123,7 @@ std::vector<int> makeVec(int init, int final)
     }
   return vector;
 }
-
-//----------
-// SORT
-//---------------------------------------------------------------------------
+//-----------------------------------------------------------------------
 std::vector<double> sortVector(std::vector<double> to_sort, bool increasing)
 {
   if ( increasing )
@@ -127,6 +135,7 @@ std::vector<double> sortVector(std::vector<double> to_sort, bool increasing)
       return sortVectorDecreasing(to_sort);
     }
 }
+//-----------------------------------------------------------------------
 std::vector<double> sortVectorIncreasing(std::vector<double> to_sort)
 {
   for ( int i=0 ; i < to_sort.size()-1 ; i++ )
@@ -143,6 +152,7 @@ std::vector<double> sortVectorIncreasing(std::vector<double> to_sort)
     }
   return to_sort;
 }
+//-----------------------------------------------------------------------
 std::vector<double> sortVectorDecreasing(std::vector<double> to_sort)
 {
   for ( int i=0 ; i < to_sort.size()-1 ; i++ )
@@ -159,12 +169,44 @@ std::vector<double> sortVectorDecreasing(std::vector<double> to_sort)
     }
   return to_sort;
 }
-//----------------------------------------------------------------
+//=================================================================
 
-//--------------
+//=============
 // CONVERSION
-//---------------------------------------------------------------
+//=================================================================
 double it2real (  std::istream_iterator<std::string> iterator )
 {
   return atof(std::string(*iterator).c_str());
 }
+//=================================================================
+
+//=======
+// ARRAY
+//======================================================
+void zeros( int* vec , int nb_atoms )
+{
+  for ( int i=0 ; i < nb_atoms ; i++ )
+    {
+      vec[i] = 0;
+    }
+  return;
+}
+//------------------------------------------------
+int sum( int* vector , int nb_atoms )
+{
+  double sum=0;
+  for ( int i=0 ; i < nb_atoms ; i++ )
+    {
+      sum += vector[i];
+    }
+  return sum;
+}
+void copy( int* try2 , int* try1 , int size )
+{
+  for ( int i=0 ; i < size ; i++ )
+    {
+      try1[i] = try2[i];
+    }
+  return;
+}
+//======================================================
