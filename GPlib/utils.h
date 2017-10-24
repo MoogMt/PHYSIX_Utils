@@ -49,7 +49,14 @@ int computeSep(int atom_index, int nb_atoms);
 //=========
 // VECTORS
 //============================================================================
+// Init
+//---------------------------------------
+std::vector<int> initVector( int value );
+std::vector<double> initVector( double value );
+std::vector<std::string> initVector( std::string value );
+//---------------------------------------
 std::vector<int> makeVec(int init, int final);
+//---------------------------------------
 std::vector<double> sortVector(std::vector<double> to_sort, bool increasing);
 std::vector<double> sortVectorIncreasing(std::vector<double> unsorted);
 std::vector<double> sortVectorDecreasing(std::vector<double> unsorted);

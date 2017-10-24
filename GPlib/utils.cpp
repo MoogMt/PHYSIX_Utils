@@ -58,8 +58,8 @@ double max(std::vector<double> vector)
 }
 //==========================================================
 
-//===========
-// Average
+//=========
+// AVERAGE
 //==========================================================
 double average(std::vector<int> data)
 {
@@ -114,7 +114,28 @@ int computeSep(int atom_index, int nb_atoms)
 //========
 // VECTORS
 //==============================================================================
-std::vector<int> makeVec(int init, int final)
+std::vector<int> initVector( int value )
+{
+  std::vector<int> vector;
+  vector.push_back( value );
+  return vector;
+}
+//-------------------------------------------------------
+std::vector<double> initVector( double value )
+{
+  std::vector<double> vector;
+  vector.push_back( value );
+  return vector;
+}
+//-------------------------------------------------------
+std::vector<std::string> initVector( std::string value )
+{
+  std::vector<std::string> vector;
+  vector.push_back( value );
+  return vector;
+}
+//-------------------------------------------------------
+std::vector<int> makeVec( int init, int final )
 {
   std::vector<int> vector;
   for ( int i = init ; i <= final ; i++ )

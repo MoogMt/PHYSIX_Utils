@@ -1,4 +1,4 @@
-#ifndef LUT_H
+1#ifndef LUT_H
 #define LUT_H
 
 #include <fstream>
@@ -21,6 +21,7 @@ struct AllTypeLUT
   std::vector<std::string> type_name;
   std::vector<TypeLUT> types;
 };
+//==============================
 struct TypeLUT
 {
   std::string type_name;
@@ -32,25 +33,30 @@ struct TypeLUT
 //=======
 // Tests
 //=============================================================================================
-bool testType ( TypeLUT lut , std::string specie );
-bool testType ( TypeLUT lut , int index );
-bool typeExists ( std::vector<TypeLUT> list , std::string specie );
-bool typeExists( std::vector<TypeLUT> list , int index );
+bool testType ( const AllTypeLut lut_all, const int atom_index ,  const std::string specie );
+bool testType ( const AllTypeLUT lut_all, const int atom_index ,  const int type_index );
+bool testType ( const TypeLUT lut , const std::string specie );
+bool testType ( const TypeLUT lut , const int index );
+//--------------------------------------------------------------------------
+bool typeExists ( const std::vector<TypeLUT> list , const std::string specie );
+bool typeExists( const std::vector<TypeLUT> list , const int index );
 //=============================================================================================
 
 //========
 // Modify
 //=============================================================================================
-void addAtom2LUT( std::vector<TypeLUT>  & list , std::string name , int index  );
-void addAtom2LUT( std::vector<TypeLUT> & list , Atom atom );
+void addAtom2LUT( std::vector<TypeLUT>  & list , const std::string name , const int index  );
+void addAtom2LUT( std::vector<TypeLUT> & list , const Atom atom );
+void addAtom2LUT( AllTypeLUT & list , const std::string name , const int index  )
+void addAtom2LUT( AllTypeLUT & list , const Atom atom );
 //=============================================================================================
 
 //========
 // Create
 //=============================================================================================
-TypeLUT makeLUT( std::string name , int index );
-TypeLUT makeLUT( std::string name , int index , std::vector<int> atom_index );
-std::vector<TypeLUT> makeLUT( std::vector<Atom> atoms );
+TypeLUT makeLUT( const std::string name , const int index );
+TypeLUT makeLUT( const std::string name , const int index , const std::vector<int> atom_index );
+std::vector<TypeLUT> makeLUT( const std::vector<Atom> atoms );
 //=============================================================================================
 
 #endif
