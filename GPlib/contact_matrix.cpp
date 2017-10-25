@@ -28,6 +28,7 @@ ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix c
 	{
 	  int value = 0;
 	  double cutoff = getCutOff( cut_off , i , j );
+	  std::cout << "cutoff " << cutoff << std::endl;
 	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
 	    {
 	      value = 1;
