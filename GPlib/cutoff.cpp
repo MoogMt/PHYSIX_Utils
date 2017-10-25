@@ -34,20 +34,30 @@ CutOffMatrix readCutOff( const std::string file , std::vector<TypeLUT> & lut_lis
     {
       names.push_back( std::string( *read ) );
       ++read;
+      count++;
     }
+  //----------------------------------------------------------
   
   //----------------
-  // Reading Matrix
+  // BUILDING LUT
   //----------------------------------------------------------
-  for ( int i=0 ; i < names.size() ; i++ )
+  for ( int i=0 ; i < nb_types ; i++ )
     {
-      // Building LUT
       lut_list.push_back( makeLUT( names[i] , i ) );
-      // Building MATRIX
-      com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
     }
   //----------------------------------------------------------
- 
+
+  //-----------------
+  // READING MATRIX
+  //----------------------------------------------------------
+  int i=0;
+  while ( read != end && i < nb_types*nb_types )
+    {
+      com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
+      i++;
+    }
+  //----------------------------------------------------------
+  
   return com;
 }
 //---------------------------------------------------------------------------------------
@@ -82,20 +92,31 @@ CutOffMatrix readCutOff( const std::string file , AllTypeLUT & lut_list )
     {
       names.push_back( std::string( *read ) );
       ++read;
+      count++;
     }
+  //----------------------------------------------------------
   
   //----------------
-  // Reading Matrix
+  // BUILDING LUT
   //----------------------------------------------------------
-  for ( int i=0 ; i < names.size() ; i++ )
+  for ( int i=0 ; i < nb_types ; i++ )
     {
-      // Building LUT
       lut_list.types.push_back( makeLUT( names[i] , i ) );
-      // Building matrix
-      com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
     }
   //----------------------------------------------------------
 
+  //------------------
+  // READING MATRIX
+  //----------------------------------------------------------
+  int i=0;
+  while ( read != end && i < nb_types*nb_types )
+    {
+      com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
+      i++;
+    }
+  //----------------------------------------------------------
+  
+  
   return com;
 }
 //====================================================================================

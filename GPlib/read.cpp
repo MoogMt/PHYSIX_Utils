@@ -65,7 +65,7 @@ int main(void)
     {
       if ( step % comp_step == 0 )
 	{
-	  //ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
+	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
 	  // std::vector<MoleculeBasic> mols = makeMolecules( cm );
 	  //std::cout << "step: " << step << std::endl;
 	}
