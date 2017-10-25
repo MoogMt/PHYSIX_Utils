@@ -41,7 +41,7 @@ int main(void)
   // Physical parameters
   //--------------------------------------
   int step      = 1;  // Step counter
-  int comp_step = 2;
+  int comp_step = 1;
   //--------------------------------------
 
   //---------------
@@ -57,7 +57,7 @@ int main(void)
   Cell         cell    = readParamCell ( "cell.param" );
   CutOffMatrix cut_off = readCutOff    ( "cut_off.dat" , lut_list );
   //-------------------------------------------------------------------
-  
+
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------

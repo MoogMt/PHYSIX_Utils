@@ -32,11 +32,9 @@ std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
     {
       // Reinitiate matrix
       zeros( try1 , nb_atoms ); try1[i] = 1;
-      if ( cm.lut_list.types.size() <= i ) exit(0);
-      std::cout << "check: " <<  i << " cm.lut: " << cm.lut_list.type_name.size() << " types: " << cm.lut_list.types.size() << std::endl;
+      if ( cm.lut_list.type_name.size() <= i ) exit(0);
       MoleculeBasic molecule = startMolecule( cm.lut_list.type_name[i] , cm.lut_list.type_index[i] );
       // Starting molecule
-      std::cout << "check2!" << std::endl;
       do
 	{
 	  // Reinitiate matrix
