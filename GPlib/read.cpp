@@ -67,7 +67,6 @@ int main(void)
 	{
 	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
 	  std::vector<MoleculeBasic> mols = makeMolecules( cm );
-	  printMoleculesSize( mols );
 	  std::cout << "step: " << step << std::endl;
 	}
       step++;

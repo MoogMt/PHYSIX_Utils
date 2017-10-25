@@ -48,9 +48,11 @@ std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
 	      int h = 0;
 	      while ( h < nb_atoms && used[h] == 0 )
 		{
+		  std::cout << "h:" << h << std::endl; 
 		  if ( connected(cm,k,h) )
 		    {
 		      try2[h] = 1;
+		      std::cout << "h:" << h << std::endl; 
 		      molecule.names.push_back( cm.lut_list.type_name[h] );
 		      molecule.atom_index.push_back( cm.lut_list.type_index[h] );
 		    }
