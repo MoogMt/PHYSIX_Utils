@@ -12,6 +12,7 @@
 #include <math.h>
 
 #include "atom.h"
+#include "lut.h"
 
 //======
 // READ

@@ -3,15 +3,15 @@
 //=======
 // TESTS
 //======================================================================
-bool testType ( const AllTypeLut lut_all, const int atom_index ,  const std::string specie )
+bool testType ( const AllTypeLUT lut_all, const int atom_index ,  const std::string specie )
 {
-  if ( lut_all.type_name[ atom_index ] == specie ) ) return true;
+  if ( lut_all.type_name[ atom_index ] == specie ) return true;
   else return false;
 }
 //---------------------------------------------------------------
-bool testType ( const AllTypeLut lut_all, const int atom_index ,  const int type_index )
+bool testType ( const AllTypeLUT lut_all, const int atom_index ,  const int type_index )
 {
-  if ( lut_all.type_index[ atom_index ] == type_index ) ) return true;
+  if ( lut_all.type_index[ atom_index ] == type_index )  return true;
   else return false;
 }
 //---------------------------------------------------------------
@@ -23,7 +23,7 @@ bool testType( const TypeLUT lut , const std::string specie )
 //---------------------------------------------------------------
 bool testType( const TypeLUT lut , const int index )
 {
-  if ( lut.type_index == index ) return true;
+  if ( lut.index == index ) return true;
   else return false;
 }
 //---------------------------------------------------------------

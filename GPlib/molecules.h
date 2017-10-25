@@ -15,6 +15,7 @@
 #include "cell.h"
 #include "cutoff.h"
 #include "contact_matrix.h"
+#include "lut.h"
 
 //==========
 // MOLECULE

@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "atom.h"
 #include "cell.h"
+#include "lut.h"
 
 //================
 // Cut-Off Matrix

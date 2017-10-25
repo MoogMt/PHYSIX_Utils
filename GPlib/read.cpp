@@ -22,6 +22,7 @@
 #include "histogram.h"
 #include "pdb.h"
 #include "sim.h"
+#include "lut.h"
 #include "molecules.h"
 //-------------------------
 
