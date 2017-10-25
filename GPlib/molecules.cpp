@@ -40,29 +40,27 @@ std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
 	  // Reinitiate matrix
 	  zeros( try2 , nb_atoms ) ;
 	  // Second loop over all atoms
-	  int k = 0;
-	  while ( k < nb_atoms && try1[k] != 0 )
+	  for ( int k=0 ; k < nb_atoms ; k++ )
 	    {
+	      if ( try1[k] == 0 )
+		{
+		  continue;
+		}
 	      used[k] = 1;
 	      // Loop over all atoms
-	      int h = 0;
-	      while ( h < nb_atoms && used[h] == 0 )
+	      for ( int h=0 ; h < nb_atoms ; h++ )
 		{
-		  std::cout << "h:" << h << std::endl; 
-		  if ( connected(cm,k,h) )
+		  if ( used[h] == 0 && connected(cm,k,h) )
 		    {
 		      try2[h] = 1;
-		      std::cout << "h:" << h << std::endl; 
 		      molecule.names.push_back( cm.lut_list.type_name[h] );
 		      molecule.atom_index.push_back( cm.lut_list.type_index[h] );
 		    }
-		  h++;
 		}
-	      k++;
 	    }
 	  // Propagates the neighbor
 	  copy( try2 , try1 , nb_atoms);
-	} while ( sum( try1, nb_atoms ) != 0 );
+	} while ( sum( try1, nb_atoms ) == 0 );
       // Add molecule to list
       mol_list.push_back( molecule );
       // Going to the next atom
