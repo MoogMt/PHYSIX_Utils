@@ -1,10 +1,9 @@
-
 #include "molecules.h"
 
 //================
 // Make molecules
 //=================================================================================
-MoleculeBasic startMolecule( std::string name_atom , int index_atom )
+MoleculeBasic startMolecule( const std::string name_atom , const int index_atom )
 {
   std::vector<std::string> names;
   std::vector<int> index;
@@ -13,7 +12,7 @@ MoleculeBasic startMolecule( std::string name_atom , int index_atom )
   return { names, index };
 }
 //----------------------------------------------------------------------------
-std::vector<MoleculeBasic> makeMolecules( ContactMatrix & cm )
+std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
 {
   //-----------------
   // Initialization
@@ -33,9 +32,11 @@ std::vector<MoleculeBasic> makeMolecules( ContactMatrix & cm )
     {
       // Reinitiate matrix
       zeros( try1 , nb_atoms ); try1[i] = 1;
-      if ( cm.lut_list.size() == 0 ) exit(0);
-      MoleculeBasic molecule = startMolecule( cm.lut_list[i].type_name , i);
+      if ( cm.lut_list.types.size() <= i ) exit(0);
+      std::cout << "check: " <<  i << " cm.lut: " << cm.lut_list.type_name.size() << " types: " << cm.lut_list.types.size() << std::endl;
+      MoleculeBasic molecule = startMolecule( cm.lut_list.type_name[i] , cm.lut_list.type_index[i] );
       // Starting molecule
+      std::cout << "check2!" << std::endl;
       do
 	{
 	  // Reinitiate matrix
@@ -52,8 +53,8 @@ std::vector<MoleculeBasic> makeMolecules( ContactMatrix & cm )
 		  if ( connected(cm,k,h) )
 		    {
 		      try2[h] = 1;
-		      molecule.names.push_back( cm.lut_list[i].type_name );
-		      molecule.atom_index.push_back( h );
+		      molecule.names.push_back( cm.lut_list.type_name[h] );
+		      molecule.atom_index.push_back( cm.lut_list.type_index[h] );
 		    }
 		  h++;
 		}
@@ -75,7 +76,7 @@ std::vector<MoleculeBasic> makeMolecules( ContactMatrix & cm )
 //================
 // PRINT MOLECULE
 //=================================================================================
-void printMolecule( MoleculeBasic molecule )
+void printMolecule( const MoleculeBasic molecule )
 {
   for ( int i=0 ; i < molecule.names.size() ; i++ )
     {
@@ -85,14 +86,14 @@ void printMolecule( MoleculeBasic molecule )
   return;
 }
 //-----------------------------------------------------------------------------
-void printMoleculeSize( MoleculeBasic molecule, bool toline )
+void printMoleculeSize( const MoleculeBasic molecule, const bool toline )
 {
   std::cout << molecule.names.size() << " ";
   if ( toline ) std::cout << std::endl;
   return;
 }
 //-----------------------------------------------------------------------------
-void printMolecules( std::vector<MoleculeBasic> molecules )
+void printMolecules( const std::vector<MoleculeBasic> molecules )
 {
   std::cout << "------------------------" << std::endl;
   for ( int i=0 ; i < molecules.size() ; i++ )
@@ -103,7 +104,7 @@ void printMolecules( std::vector<MoleculeBasic> molecules )
   return ;
 }
 //-----------------------------------------------------------------------------
-void printMoleculesSize( std::vector<MoleculeBasic> molecules )
+void printMoleculesSize( const std::vector<MoleculeBasic> molecules )
 {
   for ( int i=0 ; i < molecules.size() ; i++ )
     {

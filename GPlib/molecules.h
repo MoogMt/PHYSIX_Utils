@@ -31,17 +31,17 @@ struct MoleculeBasic
 //======
 // MAKE
 //=====================================================================
-MoleculeBasic startMolecule( std::string name_atom , int index_atom );
-std::vector<MoleculeBasic> makeMolecules( ContactMatrix & cm );
+MoleculeBasic startMolecule( const std::string name_atom , const int index_atom );
+std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm );
 //=====================================================================
 
 //=======
 // PRINT
 //===========================================================
-void printMolecule( MoleculeBasic molecule );
-void printMoleculeSize( MoleculeBasic molecule, bool toline );
-void printMolecules( std::vector<MoleculeBasic> molecules );
-void printMoleculesSize( std::vector<MoleculeBasic> molecules );
+void printMolecule( const MoleculeBasic molecule );
+void printMoleculeSize( const MoleculeBasic molecule, const bool toline );
+void printMolecules( const std::vector<MoleculeBasic> molecules );
+void printMoleculesSize( const std::vector<MoleculeBasic> molecules );
 //===========================================================
 
 #endif
