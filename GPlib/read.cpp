@@ -63,10 +63,18 @@ int main(void)
   //----------------------------------------------------
   while( readStepXYZ( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0 )
+      if ( step == 10000 ) //% comp_step == 0 )
 	{
 	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
-	  // std::vector<MoleculeBasic> mols = makeMolecules( cm );
+	  for ( int i=0 ; i < cm.matrix.size() ; i++ )
+	    {
+	      std::cout << cm.matrix[i] << " ";
+	      if ( (i+1)%(cm.lut_list.type_index.size()) == 0)
+		{
+		  std::cout << std::endl;
+		}
+	    }
+	  //std::vector<MoleculeBasic> mols = makeMolecules( cm );
 	  //std::cout << "step: " << step << std::endl;
 	}
       step++;

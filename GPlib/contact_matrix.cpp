@@ -27,13 +27,12 @@ ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix c
       for ( int j=0 ; j < atom_list.names.size() ; j++ )
 	{
 	  int value = 0;
-	  double cutoff = getCutOff( cut_off , i , j );
-	  std::cout << "cutoff " << i << " " << j <<  std::endl;
+	  double cutoff = getCutOff( cut_off , lut_type.type_index[i] , lut_type.type_index[j] );
 	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
 	    {
 	      value = 1;
 	    }
-	  matrix.push_back( value );
+	  matrix.push_back( cutoff );//distanceAtomsSq( atom_list , i , j , cell, true ) );
 	}
     }
   return { lut_type, matrix };
