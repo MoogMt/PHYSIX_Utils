@@ -33,15 +33,12 @@ std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
       // Reinitiate matrix
       zeros( try1 , nb_atoms ); try1[i] = 1;
       if ( cm.lut_list.type_name.size() <= i ) exit(0);
-      std::cout << "potato" << std::endl;
       MoleculeBasic molecule = startMolecule( cm.lut_list.type_name[i] , cm.lut_list.type_index[i] );
-      std::cout << "truc" << std::endl;
       // Starting molecule
       do
 	{
 	  // Reinitiate matrix
 	  zeros( try2 , nb_atoms ) ;
-	  std::cout << "loutre " << std::endl;
 	  // Second loop over all atoms
 	  for ( int k=0 ; k < nb_atoms ; k++ )
 	    {
@@ -61,14 +58,10 @@ std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
 		    }
 		}
 	    }
-	  std::cout << "machin" << std::endl;
 	  copy(try2,try1,nb_atoms);
-	  std::cout << "chouette" << std::endl;
 	} while ( sum( try1, nb_atoms ) != 0 );
       // Add molecule to list
-      std::cout << "bidule" << std::endl;
       mol_list.push_back( molecule );
-      std::cout << "muche " << std::endl;
       // Going to the next atom
       i++;
     }

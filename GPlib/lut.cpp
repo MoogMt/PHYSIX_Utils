@@ -102,13 +102,19 @@ void addAtom2LUT( AllTypeLUT & list , const std::string name , const int index  
 void addAtom2LUT( AllTypeLUT & list , const Atom atom )
 {
   list.type_name.push_back( atom.name );
+  bool check = false;
   for ( int i=0 ; list.types.size() ; i++ )
     {
       if ( list.types[i].type_name == atom.name )
 	{
 	  list.type_index.push_back( list.types[i].index );
+	  check=true;
 	  break;
 	}
+    }
+  if ( ! check )
+    {
+      list.type_index.push_back( list.types.size()  );
     }
   addAtom2LUT( list.types , atom.name , atom.index );
 } 
