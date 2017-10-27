@@ -21,20 +21,24 @@ Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
 ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type )
 // Constructs the contact matrix
 {
+  std::cout << "saloperie" << std::endl;
   std::vector<double> matrix;
   for ( int i=0 ; i < atom_list.names.size() ; i++ )
     {
       for ( int j=0 ; j < atom_list.names.size() ; j++ )
 	{
 	  int value = 0;
+	  std::cout << i <<  " " << j <<  " " << lut_type.type_index.size() << " " << lut_type.type_index[j] << std::endl;
 	  double cutoff = getCutOff( cut_off , lut_type.type_index[i] , lut_type.type_index[j] );
-	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
+	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff && i != j )
 	    {
 	      value = 1;
 	    }
-	  matrix.push_back( cutoff );//distanceAtomsSq( atom_list , i , j , cell, true ) );
+	  std::cout << "jevousaicompris" << std::endl;
+	  matrix.push_back( value );
 	}
     }
+  std::cout << "TRUC" << std::endl;
   return { lut_type, matrix };
 }
 //=======================================================================================

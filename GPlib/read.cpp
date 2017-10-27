@@ -41,7 +41,7 @@ int main(void)
   // Physical parameters
   //--------------------------------------
   int step      = 1;  // Step counter
-  int comp_step = 1;
+  int comp_step = 15;
   //--------------------------------------
 
   //---------------
@@ -57,25 +57,28 @@ int main(void)
   Cell         cell    = readParamCell ( "cell.param" );
   CutOffMatrix cut_off = readCutOff    ( "cut_off.dat" , lut_list );
   //-------------------------------------------------------------------
-
+  
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
   while( readStepXYZ( input , atom_list , lut_list, true, true ) )
     {
-      if ( step == 10000 ) //% comp_step == 0 )
+      if ( step % comp_step == 0  ) //% comp_step == 0 )
 	{
+	  std::cout << "putain de " << step << std::endl;
 	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
-	  for ( int i=0 ; i < cm.matrix.size() ; i++ )
+	  std::cout << "salete" << step << std::endl;
+	  std::vector<MoleculeBasic> mols = makeMolecules( cm );
+	  std::cout << "de merde." << step << std::endl;
+	  int count=0;
+	  int count2=0;
+	  /*std::cout << count << " "<<  count2 << " " << mols.size() << std::endl;
+	  for ( int i=0 ; i < mols.size() ; i++ )
 	    {
-	      std::cout << cm.matrix[i] << " ";
-	      if ( (i+1)%(cm.lut_list.type_index.size()) == 0)
-		{
-		  std::cout << std::endl;
-		}
-	    }
-	  //std::vector<MoleculeBasic> mols = makeMolecules( cm );
-	  //std::cout << "step: " << step << std::endl;
+	      count += mols[i].names.size();
+	      count2 += mols[i].atom_index.size();
+	      }*/
+	  std::cout << "step: " << step << std::endl;
 	}
       step++;
      }
