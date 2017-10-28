@@ -222,11 +222,12 @@ int sum( int* vector , int nb_atoms )
     }
   return sum;
 }
-void copy( int* try2 , int* try1 , int size )
+//------------------------------------------------
+void copy( int* vec_from , int* vec_to , int size )
 {
   for ( int i=0 ; i < size ; i++ )
     {
-      try1[i] = try2[i];
+      vec_to[i] = vec_from[i];
     }
   return;
 }

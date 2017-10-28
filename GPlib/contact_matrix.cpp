@@ -3,8 +3,8 @@
 //==================
 // CONTACT MATRIX
 //=======================================================================================
-// Constructs the contact matrix
 Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
+// Constructs the contact matrix
 {
   Contact_Matrix contact_matrix;
   for ( int i=0 ; i < atom_list.size() ; i++ )
@@ -18,33 +18,8 @@ Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
   return contact_matrix;
 }
 //--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list, std::vector<TypeLUT> lut_list , Cell box )
-{
-  std::vector<double> matrix;
-  for ( int i=0 ; i < atom_list.size() ; i++ )
-    {
-      for( int j=0 ; j < atom_list.size() ; j++ )
-	{
-	  matrix.push_back( distanceAtoms( atom_list , i , j , box ) );
-	}
-    }
-  return { lut_list , matrix };
-}
-//--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( AtomList atom_list, std::vector<TypeLUT> lut_list , Cell cell )
-{
-  std::vector<double> matrix;
-  for ( int i=0 ; i < atom_list.names.size() ; i++ )
-    {
-      for ( int j=0 ; j < atom_list.names.size() ; j++ )
-	{
-	  matrix.push_back( distanceAtomsSq( atom_list , i , j , cell) );
-	}
-    }
-  return { lut_list, matrix };
-}
-//--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , std::vector<TypeLUT> lut_list )
+ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type )
+// Constructs the contact matrix
 {
   std::vector<double> matrix;
   for ( int i=0 ; i < atom_list.names.size() ; i++ )
@@ -52,15 +27,15 @@ ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix c
       for ( int j=0 ; j < atom_list.names.size() ; j++ )
 	{
 	  int value = 0;
-	  double cutoff = getCutOff( cut_off , i , j );
-	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
+	  double cutoff = getCutOff( cut_off , lut_type.type_index[i] , lut_type.type_index[j] );
+	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff && i != j )
 	    {
 	      value = 1;
 	    }
 	  matrix.push_back( value );
 	}
     }
-  return { lut_list, matrix };
+  return { lut_type, matrix };
 }
 //=======================================================================================
 

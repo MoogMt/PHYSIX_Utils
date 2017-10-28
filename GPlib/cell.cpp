@@ -95,9 +95,8 @@ double distAtoms1D( double x1, double x2, double a )
 // returns the distance between two atoms in a given cell 
 {
   double dx = x1 - x2;
-  double a2 = a*0.5;
-  if ( dx >  a2 ) dx -= a;
-  if ( dx < -a2 ) dx += a;
+  if ( dx >  a*0.5 ) dx -= a;
+  if ( dx < -a*0.5 ) dx += a;
   return dx*dx;
 }
 //------------------------------------------------------------------------------------------------
@@ -121,7 +120,11 @@ double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box , bool wrap
 double distanceAtomsSq( AtomList & atom_list ,  int i , int  j , Cell cell , bool wrap )
 {
   // Wrappring in PBC
-  if ( wrap ) wrapPBC( atom_list , i , cell ); wrapPBC( atom_list , j , cell );
+  if ( wrap )
+    {
+      wrapPBC( atom_list , i , cell );
+      wrapPBC( atom_list , j , cell );
+    }
   // Calculating distance
   double dist = distAtoms1D( atom_list.x[i] , atom_list.x[j] , cell.a );
   dist += distAtoms1D( atom_list.y[i] , atom_list.y[j] , cell.b );

@@ -29,8 +29,8 @@ struct Contact_Matrix
 // Full Contact Matrix
 struct ContactMatrix
 {
-  std::vector<TypeLUT> lut_list;  // LUT list
-  std::vector<double> matrix;     // Contact_Matrix
+  AllTypeLUT lut_list;        // LUT list
+  std::vector<double> matrix; // Contact_Matrix
 };
 //====================================================================
 
@@ -39,9 +39,7 @@ struct ContactMatrix
 //==================================================================================================
 // Computes the contact matrix from an atom list and a cell
 Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list , Cell box );
-ContactMatrix makeContactMatrix ( std::vector<Atom> atom_list , std::vector<TypeLUT> lut_list , Cell box );
-ContactMatrix makeContactMatrix ( AtomList atom_list , std::vector<TypeLUT> lut_list , Cell cell );
-ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , std::vector<TypeLUT> lut_list );
+ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type );
 //==================================================================================================
 
 //====================

@@ -3,7 +3,7 @@
 //======
 // READ
 //====================================================================================
-CutOffMatrix readCutOff( std::string file , std::vector<TypeLUT> & lut_list )
+CutOffMatrix readCutOff( const std::string file , std::vector<TypeLUT> & lut_list )
 {
   //-----------
   // Variables
@@ -34,19 +34,85 @@ CutOffMatrix readCutOff( std::string file , std::vector<TypeLUT> & lut_list )
     {
       names.push_back( std::string( *read ) );
       ++read;
+      count++;
     }
-  for ( int i=0 ; i < names.size() ; i++ )
+  //----------------------------------------------------------
+  
+  //----------------
+  // BUILDING LUT
+  //----------------------------------------------------------
+  for ( int i=0 ; i < nb_types ; i++ )
     {
       lut_list.push_back( makeLUT( names[i] , i ) );
     }
   //----------------------------------------------------------
 
   //-----------------
-  // Building matrix
+  // READING MATRIX
   //----------------------------------------------------------
-  for ( int i=0 ; i < names.size() ; i++ )
+  int i=0;
+  while ( read != end && i < nb_types*nb_types )
     {
       com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
+      i++;
+    }
+  //----------------------------------------------------------
+  
+  return com;
+}
+//---------------------------------------------------------------------------------------
+CutOffMatrix readCutOff( const std::string file , AllTypeLUT & lut_list )
+{
+  //-----------
+  // Variables
+  //-----------------
+  CutOffMatrix com;
+  //-----------------
+  
+  //--------------------------
+  // Stream related variables
+  //-------------------------------------------
+  std::ifstream input( file.c_str() );
+  std::istream_iterator<std::string> read(input);
+  std::istream_iterator<std::string> end;
+  //-------------------------------------------
+
+  ///----------
+  // Variables
+  //--------------------------------------------------------------
+  int count = 0; // count
+  int nb_types = atoi( std::string( *read ).c_str() ); ++read; // Reads number of types
+  //--------------------------------------------------------------
+
+  //------------------------
+  // Reading names of types
+  //----------------------------------------------------------
+  std::vector<std::string> names;
+  while( read != end && count < nb_types )
+    {
+      names.push_back( std::string( *read ) );
+      ++read;
+      count++;
+    }
+  //----------------------------------------------------------
+  
+  //----------------
+  // BUILDING LUT
+  //----------------------------------------------------------
+  for ( int i=0 ; i < nb_types ; i++ )
+    {
+      lut_list.types.push_back( makeLUT( names[i] , i ) );
+    }
+  //----------------------------------------------------------
+
+  //------------------
+  // READING MATRIX
+  //----------------------------------------------------------
+  int i=0;
+  while ( read != end && i < nb_types*nb_types )
+    {
+      com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
+      i++;
     }
   //----------------------------------------------------------
   
@@ -57,8 +123,9 @@ CutOffMatrix readCutOff( std::string file , std::vector<TypeLUT> & lut_list )
 //=====
 // Get
 //====================================================================================
-double getCutOff( CutOffMatrix cut_off_matrix , int i , int j )
+double getCutOff( const CutOffMatrix cut_off_matrix , const int type_index1 , const int type_index2 )
 {
-  return cut_off_matrix.matrix[ i*( cut_off_matrix.list_lut.size() ) + j ];
+  int nb_type = sqrt( cut_off_matrix.matrix.size() );
+  return cut_off_matrix.matrix[ type_index1*nb_type + type_index2 ];
 }
 //============================================================================================
