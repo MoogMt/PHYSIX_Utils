@@ -3,7 +3,7 @@
 //================//
 // MAKE MOLECULES //
 //=================================================================================
-MoleculeBasic startMolecule( const std::string name_atom , const int index_atom )
+MoleculeBasic startMoleculeBasic( const std::string name_atom , const int index_atom )
 {
   std::vector<std::string> names;
   std::vector<int> index;
@@ -12,7 +12,17 @@ MoleculeBasic startMolecule( const std::string name_atom , const int index_atom 
   return { names, index };
 }
 //----------------------------------------------------------------------------
-std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
+Molecule startMolecule( const std::string name_atom , const int index_atom )
+{
+  std::vector<std::string> names;
+  std::vector<int> index;
+  std::vector<Bond> bonds;
+  names.push_back( name_atom );
+  index.push_back( index_atom );
+  return { names, index, bonds };
+}
+//----------------------------------------------------------------------------
+std::vector<MoleculeBasic> makeMoleculesBasic( const ContactMatrix & cm )
 {
   //-----------------
   // Initialization
@@ -20,7 +30,7 @@ std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
   std::vector<MoleculeBasic> mol_list;
   int nb_atoms = (int)( sqrt( cm.matrix.size() ) );
   // Initiate all connection vectors
-  int used[ nb_atoms ]; zeros( used , nb_atoms ); // check if atom is already connected
+  int used[ nb_atoms ]; zeros( used , nb_atoms ); // check if atom is already in a molecule
   int try1[ nb_atoms ]; zeros( try1 , nb_atoms ); // global connection vector
   int try2[ nb_atoms ]; zeros( try2 , nb_atoms ); // local atomic connection vector
   //------------------------------------------------------------------
@@ -29,35 +39,106 @@ std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm )
   // Loop over all non already used atoms
   for ( int i=0 ; i < nb_atoms ; i++ )
     {
+      // if atom is already in a molecule, skip to the next one
       if ( used[i] == 1 ) continue;
-      // Reinitiate matrix
+      // Initialize connection matrix for atom i
       zeros( try1 , nb_atoms ); try1[i] = 1;
-      if ( cm.lut_list.type_name.size() <= i ) exit(0);
-      MoleculeBasic molecule = startMolecule( cm.lut_list.type_name[i] , cm.lut_list.type_index[i] );
-      // Starting molecule
+      // Initiate molecule with atom i
+      MoleculeBasic molecule = startMoleculeBasic( cm.lut_list.type_name[i] , i );
+      // Looping to get all atoms in molecule
       do
 	{
-	  // Reinitiate matrix
+	  // Initiate connection vector for atom k
 	  zeros( try2 , nb_atoms ) ;
-	  // Second loop over all atoms
+	  // Looping over all atoms in the connection vector
 	  for ( int k=0 ; k < nb_atoms ; k++ )
 	    {
+	      // If atom k isn't connected, skip it, else...
 	      if ( try1[k] == 0 ) continue;
+	      // If it is, mark it as used...
 	      used[k] = 1;
-	      // Loop over all atoms
+	      // ... And look for its neighbours
 	      for ( int h=0 ; h < nb_atoms ; h++ )
 		{
+		  // If atom isn't used and is connected to local atom...
 		  if ( used[h] == 0 && connected(cm,k,h) )
 		    {
+		      // Add it to the connection vector
 		      try2[h] = 1;
+		      // Add atom name to the molecule
 		      molecule.names.push_back( cm.lut_list.type_name[h] );
+		      // Add Atom index to the molecule
 		      molecule.atom_index.push_back( h );
 		    }
 		}
 	    }
+	  // copy the new connection 
 	  copy(try2,try1,nb_atoms);
+	  // If the connection doesn't give anything,
+	  // then we have found all molecules.
 	} while ( sum( try1, nb_atoms ) != 0 );
       // Add molecule to list
+      mol_list.push_back( molecule );
+    }
+  //-----------------------------------------------------------------------
+  return mol_list;
+}
+//----------------------------------------------------------------------------
+std::vector<Molecule> makeMolecules( const ContactMatrix & cm )
+{
+  //-----------------
+  // Initialization
+  //------------------------------------------------------------------
+  std::vector<Molecule> mol_list;
+  int nb_atoms = (int)( sqrt( cm.matrix.size() ) );
+  // Initiate all connection vectors
+  int used[ nb_atoms ]; zeros( used , nb_atoms ); // check if atom is already in a molecule
+  int try1[ nb_atoms ]; zeros( try1 , nb_atoms ); // global connection vector
+  int try2[ nb_atoms ]; zeros( try2 , nb_atoms ); // local atomic connection vector
+  //------------------------------------------------------------------
+
+  //-----------------------------------------------------------------------
+  // Loop over all non already used atoms
+  for ( int i=0 ; i < nb_atoms ; i++ )
+    {
+      // if atom is already in a molecule, skip to the next one
+      if ( used[i] == 1 ) continue;
+      // Initialize connection matrix for atom i
+      zeros( try1 , nb_atoms ); try1[i] = 1;
+      // Initiate molecule with atom i
+      Molecule molecule = startMolecule( cm.lut_list.type_name[i] , i );
+      // Looping to get all atoms in molecule
+      do
+	{
+	  // Initiate connection vector for atom k
+	  zeros( try2 , nb_atoms ) ;
+	  // Looping over all atoms in the connection vector
+	  for ( int k=0 ; k < nb_atoms ; k++ )
+	    {
+	      // If atom k isn't connected, skip it, else...
+	      if ( try1[k] == 0 ) continue;
+	      // If it is, mark it as used...
+	      used[k] = 1;
+	      // ... And look for its neighbours
+	      for ( int h=0 ; h < nb_atoms ; h++ )
+		{
+		  // If atom isn't used and is connected to local atom...
+		  if ( used[h] == 0 && connected(cm,k,h) )
+		    {
+		      // ... Add it to the connection vector
+		      try2[h] = 1;
+		      // ... And to the molecule
+		      molecule.names.push_back( cm.lut_list.type_name[h] ); // Name
+		      molecule.atom_index.push_back( h );                   // Index
+		      molecule.bonds.push_back({k,h,1.0});                  // Bond
+		    }
+		}
+	    }
+	  // copy the new connection 
+	  copy(try2,try1,nb_atoms);
+	  // If the connection vector is null then we have found all atoms to the molecule
+	} while ( sum( try1, nb_atoms ) != 0 );
+      // Add molecule to the molecule list
       mol_list.push_back( molecule );
     }
   //-----------------------------------------------------------------------

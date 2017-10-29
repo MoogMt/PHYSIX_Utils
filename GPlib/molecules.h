@@ -16,6 +16,7 @@
 #include "cutoff.h"
 #include "contact_matrix.h"
 #include "lut.h"
+#include "bonds.h"
 
 //==========
 // MOLECULE
@@ -29,8 +30,8 @@ struct MoleculeBasic
 struct Molecule
 {
   std::vector<std::string> names;
-  std::vector<double> x, y, z;
   std::vector<int> atom_index;
+  std::vector<Bond> bonds;
 };
 //=============================================
 
@@ -38,8 +39,11 @@ struct Molecule
 //======
 // MAKE
 //=====================================================================
-MoleculeBasic startMolecule( const std::string name_atom , const int index_atom );
-std::vector<MoleculeBasic> makeMolecules( const ContactMatrix & cm );
+MoleculeBasic startMoleculeBasic( const std::string name_atom , const int index_atom );
+std::vector<MoleculeBasic> makeMoleculesBasic( const ContactMatrix & cm );
+//----------------------------------------------------------------------
+Molecule startMolecule( const std::string name_atom , const int index_atom );
+std::vector<Molecule> makeMolecules( const ContactMatrix & cm );
 //=====================================================================
 
 //=======
