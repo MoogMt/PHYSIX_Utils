@@ -38,21 +38,21 @@ struct Molecule
 
 //======
 // MAKE
-//=====================================================================
+//=============================================================================================
 MoleculeBasic startMoleculeBasic( const std::string name_atom , const int index_atom );
 std::vector<MoleculeBasic> makeMoleculesBasic( const ContactMatrix & cm );
-//----------------------------------------------------------------------
+//----------------------------------------------------------------------------------
 Molecule startMolecule( const std::string name_atom , const int index_atom );
 std::vector<Molecule> makeMolecules( const ContactMatrix & cm );
-//=====================================================================
+//============================================================================================
 
 //=======
 // PRINT
-//===========================================================
+//============================================================================
 void printMolecule( const MoleculeBasic molecule );
 void printMoleculeSize( const MoleculeBasic molecule, const bool toline );
 void printMolecules( const std::vector<MoleculeBasic> molecules );
 void printMoleculesSize( const std::vector<MoleculeBasic> molecules );
-//===========================================================
+//============================================================================
 
 #endif

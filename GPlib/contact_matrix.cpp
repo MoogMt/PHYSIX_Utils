@@ -4,7 +4,7 @@
 // CONTACT MATRIX
 //=======================================================================================
 Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
-// Constructs the contact matrix
+// Constructs the restricted contact matrix
 {
   Contact_Matrix contact_matrix;
   for ( int i=0 ; i < atom_list.size() ; i++ )
@@ -19,23 +19,32 @@ Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
 }
 //--------------------------------------------------------------------------------------
 ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type )
-// Constructs the contact matrix
+// Constructs the full contact matrix
 {
-  std::vector<double> matrix;
-  for ( int i=0 ; i < atom_list.names.size() ; i++ )
+  // Determines the number of atoms
+  int nb_atoms = atom_list.x.size();
+
+  // Initialize contact matrix with 0s
+  std::vector<double> matrix; matrix.assign(nb_atoms*nb_atoms,0.);
+
+  // Loop over all pairs of atoms
+  for ( int i=0 ; i < nb_atoms-1 ; i++ )
     {
-      for ( int j=0 ; j < atom_list.names.size() ; j++ )
+      for ( int j=i+1 ; j < nb_atoms ; j++ )
 	{
-	  int value = 0;
+	  // Getting the cut_off for the atom_i vs atom_j interaction
 	  double cutoff = getCutOff( cut_off , lut_type.type_index[i] , lut_type.type_index[j] );
-	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff && i != j )
+	  // Comparing distance to cut_off
+	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
 	    {
-	      value = 1;
+	      matrix[i*nb_atoms+j] = 1;
+	      matrix[j*nb_atoms+i] = 1; 
 	    }
-	  matrix.push_back( value );
 	}
     }
-  return { lut_type, matrix };
+
+  // Sending results
+  return { nb_atoms, lut_type, matrix };
 }
 //=======================================================================================
 
@@ -305,8 +314,23 @@ void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::v
 //==================================================
 bool connected( ContactMatrix cm , int i , int j )
 {
-  int nb_atoms = sqrt( cm.matrix.size() );
-  if ( cm.matrix[ i*nb_atoms + j ] ) return true;
+  if ( cm.matrix[ i*cm.nb_atoms + j ] ) return true;
   else return false;
+}
+//=================================================
+
+//======
+// PRINT
+//=================================================
+void printContactMatrix( ContactMatrix cm )
+{
+  for (int i=0; i < cm.nb_atoms*cm.nb_atoms; i++)
+    {
+      std::cout << cm.matrix[i] << " ";
+      if ( (i+1) % cm.nb_atoms == 0 )
+	{
+	  std::cout << std::endl;
+	}
+    }
 }
 //=================================================

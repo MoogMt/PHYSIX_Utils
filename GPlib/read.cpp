@@ -57,17 +57,18 @@ int main(void)
   Cell         cell    = readParamCell ( "cell.param" );
   CutOffMatrix cut_off = readCutOff    ( "cut_off.dat" , lut_list );
   //-------------------------------------------------------------------
-  
+
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
   while( readStepXYZ( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0  ) 
+      if ( step % comp_step == 0  && step > 2000 ) 
 	{
 	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
-	  std::vector<MoleculeBasic> mols = makeMolecules( cm );
-	  for ( int i=0 ; i < mols.size() ; i++ )
+	  //printContactMatrix(cm);
+	  //std::vector<Molecule> mols = makeMolecules( cm );
+	  /*for ( int i=0 ; i < mols.size() ; i++ )
 	    {
 	      std::cout << "-------------------------------------------" << std::endl;
 	      for ( int j=0 ; j < mols[i].names.size() ; j++ )
@@ -75,7 +76,7 @@ int main(void)
 		  std::cout << mols[i].names[j] << " " << mols[i].atom_index[j] << std::endl;
 		}
 	      std::cout << "-------------------------------------------" << std::endl;
-	    }
+	      }*/
 	  std::cout << "step: " << step << std::endl;
 	}
       step++;

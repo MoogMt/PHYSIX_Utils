@@ -133,18 +133,22 @@ double distanceAtomsSq( AtomList & atom_list ,  int i , int  j , Cell cell , boo
 }
 //-----------------------------------------------------------------------------------------------
 void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box)
+// Write atomic distances for all atom whose index are stored in atom_index using file pointer file.
 {
+  // First loop over all atoms
   for ( int i=0 ; i < atom_index.size() ; i++ )
     {
+      // Loop over all other atoms
       for ( int j=0 ; j < atom_list.size() ; j++ )
  	{
+	  // We don't calculate distance of an atom with itself
 	  if ( atom_index[i] != j )
 	    {
+	      // Writing 
 	      file << distanceAtoms(atom_list,atom_index[i],j,box) << std::endl;
 	    }
 	}
-    }
-  file << std::endl;
+    }  
   return;
 }
 //===========================================================================================
@@ -167,14 +171,25 @@ Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c )
 // READS
 //------------------------------------------------------------------------------------------
 Cell readParamCellStep( std::ifstream& file )
-// => Reading from files
+// Reading cell parameters from cell file, using cell pointer.
 {
+  //----------------
+  // Flux Variables
+  //-------------------------------------------------
   std::istream_iterator<std::string> read(file);
   std::istream_iterator<std::string> end;
-
-  Cell cell;
-
   int count = 0;
+  //-------------------------------------------------
+
+  //--------------------
+  // Physical variables
+  //-------------------------------------------------
+  Cell cell;
+  //-------------------------------------------------
+
+  //--------------
+  // Reading file
+  //-------------------------------------------------
   while( read != end && count < 6 )
     {
       switch(count)
@@ -201,19 +216,32 @@ Cell readParamCellStep( std::ifstream& file )
       ++read;
       count++;
     }
+  //-------------------------------------------------
+  
   return cell;
 }
 //--------------------------------------------------------------
 Cell readParamCell( std::string file_name )
-//
+// Reading cell parameters from cell file, using string
 {
-
+  //-------------------
+  // Working variables
+  //-------------------------------------------------
   std::ifstream file( file_name.c_str() );
   std::istream_iterator<std::string> read( file );
   std::istream_iterator<std::string> end;
-
-  Cell cell;
   int count = 0;
+  //-------------------------------------------------  
+
+  //--------------------
+  // Physical Variables
+  //----------------------
+  Cell cell;
+  //----------------------
+
+  //---------------
+  // Reading file
+  //--------------------------------------------
   while( read != end && count < 6 )
     {
       switch(count)
@@ -240,6 +268,9 @@ Cell readParamCell( std::string file_name )
       ++read;
       count++;
     }
+  //--------------------------------------------
+
+  // Return
   return cell;
 }
 //==============================================================================================

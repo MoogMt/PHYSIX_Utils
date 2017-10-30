@@ -19,7 +19,8 @@
 //================
 // CONTACT MATRIX
 //====================================================================
-// Restricted Contact Matrix
+// Restricted Matrix
+//--------------------------------------------------------
 struct Contact_Matrix
 {
   std::vector<std::string> types;  // Types of the atoms
@@ -27,8 +28,10 @@ struct Contact_Matrix
 };
 //---------------------------------------------------------
 // Full Contact Matrix
+//--------------------------------------------------------
 struct ContactMatrix
 {
+  int nb_atoms;               // Number of atoms
   AllTypeLUT lut_list;        // LUT list
   std::vector<double> matrix; // Contact_Matrix
 };
@@ -37,8 +40,12 @@ struct ContactMatrix
 //=======
 // MAKE
 //==================================================================================================
-// Computes the contact matrix from an atom list and a cell
+// Restricted Matrix
+//-------------------------------------------------------------------------------------------------
 Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list , Cell box );
+//------------------------------------------------------------------------------------------------
+// Full Matrix
+//-------------------------------------------------------------------------------------------------
 ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type );
 //==================================================================================================
 
@@ -83,18 +90,24 @@ std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, 
 std::vector<std::vector<double> > getNNearest( Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , std::string specie ); 
 //==========================================================================================
 
-//========
-// Write
-//==========================================================================================
-void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , int n_nearest , std::vector<int> atom_indexes , int step );
-void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
-void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
-//==========================================================================================
-
 //=============
 // CONNECTION
 //=====================================================
 bool connected( ContactMatrix cm , int i , int j);
 //=====================================================
+
+//=======
+// IO
+//=====================================================
+// PRINT
+//-----------------------------------------------------------------------------------------
+void printContactMatrix( ContactMatrix cm );
+//-----------------------------------------------------------------------------------------
+// WRITE
+//-----------------------------------------------------------------------------------------
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , int n_nearest , std::vector<int> atom_indexes , int step );
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, int atom_index);
+void writeNearest( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> nearest, std::vector<int> atom_indexes , int step);
+//==========================================================================================
 
 #endif 
