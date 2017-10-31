@@ -66,11 +66,11 @@ int main(void)
   //-----------------
   // Reading Cut-Off
   //-------------------------------------------------------------------
-  CutOffMatrix cut_off;
+  /*CutOffMatrix cut_off;
   if ( ! readCutOff( "cut_off.dat" , lut_list ) )
     {
       return 1;
-    }
+      }*/
   //-------------------------------------------------------------------
 
   //-------------------
@@ -80,9 +80,9 @@ int main(void)
     {
       if ( step % comp_step == 0  && step > 2000 ) 
 	{
-	  cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
+	  /*cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
 	  std::vector<Molecule> mols = makeMolecules( cm );
-	  std::cout << "step: " << step << std::endl;
+	  std::cout << "step: " << step << std::endl;*/
 	}
       step++;
      }
