@@ -133,7 +133,17 @@ TypeLUT makeLUT( const std::string name , const int index , const std::vector<in
 {
   return { name , index , atom_index };
 }
-//--------------------------------------------------------------
+//--------------------------------------------------------------------------------------
+void makeLUT( std::vector<typeLUT> lut_list , std::vector<std::string> names )
+{
+  std::vector<int> atom_index;
+  for ( int i=0 ; i < names.size() ; i++ )
+    {
+      lut_list.push_back( makeLUT( names[i] , i ) );
+    }
+  return ;
+}
+//-------------------------------------------------------------------------------------
 std::vector<TypeLUT> makeLUT( const std::vector<Atom> atoms )
 {
   std::vector<TypeLUT> list_lut;

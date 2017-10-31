@@ -182,11 +182,8 @@ bool readParamCellStep( std::ifstream& file , Cell & cell  )
       // Checking line
       std::istringstream it_string(line);
       // Parsing line
-      if ( !( it_string >> cell.a >> cell.b >> cell.c >> cell.alpha >> cell.beta >> cell.gamma) )
-	{
-	  return false;
-	}
-      return true;
+      if ( !( it_string >> cell.a >> cell.b >> cell.c >> cell.alpha >> cell.beta >> cell.gamma) ) return false;
+      else return true;
     }
 }
 //------------------------------------------------------------------------------------------

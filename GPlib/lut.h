@@ -57,6 +57,7 @@ void addAtom2LUT( AllTypeLUT & list , const Atom atom );
 //=============================================================================================
 TypeLUT makeLUT( const std::string name , const int index );
 TypeLUT makeLUT( const std::string name , const int index , const std::vector<int> atom_index );
+void makeLUT( std::vector<typeLUT> lut_list , std::vector<std::string> names );
 std::vector<TypeLUT> makeLUT( const std::vector<Atom> atoms );
 //=============================================================================================
 
