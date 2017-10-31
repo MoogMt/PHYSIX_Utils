@@ -40,8 +40,9 @@ int main(void)
   //----------------------
   // Physical parameters
   //--------------------------------------
-  int step      = 1;  // Step counter
-  int comp_step = 1;
+  int step       = 1;  // Step counter
+  int start_step = 2000;
+  int comp_step  = 1;
   //--------------------------------------
 
   //---------------
@@ -66,17 +67,7 @@ int main(void)
       if ( step % comp_step == 0  && step > 2000 ) 
 	{
 	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
-	  //printContactMatrix(cm);
-	  //std::vector<Molecule> mols = makeMolecules( cm );
-	  /*for ( int i=0 ; i < mols.size() ; i++ )
-	    {
-	      std::cout << "-------------------------------------------" << std::endl;
-	      for ( int j=0 ; j < mols[i].names.size() ; j++ )
-		{
-		  std::cout << mols[i].names[j] << " " << mols[i].atom_index[j] << std::endl;
-		}
-	      std::cout << "-------------------------------------------" << std::endl;
-	      }*/
+	  std::vector<Molecule> mols = makeMolecules( cm );
 	  std::cout << "step: " << step << std::endl;
 	}
       step++;

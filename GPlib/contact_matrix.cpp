@@ -58,6 +58,11 @@ double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_ind
   int maxi=max(atom_index_1,atom_index_2);
   return contact_matrix.matrix[computeSep(mini,nb_atoms)-mini+maxi-1];
 }
+//--------------------------------------------------------------------------------------
+double getDistance( ContactMatrix cm, int atom_index1 , int atom_index2 )
+{
+  return cm.matrix[atom_index1*cm.nb_atoms+atom_index2];
+}
 //=======================================================================================
 
 //==================
@@ -65,10 +70,20 @@ double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_ind
 //=======================================================================================
 // Calculates the angles between three atoms centered on atom_center_index using contact matrix and Al-Kashi theorem
 double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index )
+// Get Angle
 {
   double a = getDistance( contact_matrix, atom_center_index, atom_2_index);
   double b = getDistance( contact_matrix, atom_center_index, atom_3_index);
   double c = getDistance( contact_matrix, atom_center_index, atom_3_index);
+  return acos( (a*a+b*b-c*c)/(2*a*b) );
+}
+//--------------------------------------------------------------------------------------
+double getAngle( ContactMatrix cm , int atom_A , int atom_B , int atom_C )
+// Get Angle(A)=(BAC)
+{
+  double a = getDistance( cm , atom_A , atom_C );
+  double b = getDistance( cm , atom_A , atom_C );
+  double c = getDistance( cm , atom_B , atom_C );
   return acos( (a*a+b*b-c*c)/(2*a*b) );
 }
 //=======================================================================================
@@ -121,6 +136,29 @@ void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , st
     }
   file << std::endl;
   return;
+}
+//-----------------------------------------------------------------------------------------
+std::vector<double> getAtomContact( ContactMatrix cm , int atom_index )
+{
+  std::vector<double> contact;
+  int offset = cm.n_atoms*atom_index;
+  for ( int i=0 ; i < cm.nb_atoms ; i++ )
+    {
+      contact.push_back(cm.matrix[offset+i]);
+    }
+  return contact;
+}
+//-----------------------------------------------------------------------------------------
+std::vector<double> getAtomContact( ContactMatrix cm , int atom_index , std::string specie )
+{
+  std::vector<double> contact;
+  for ( int i=0 ; i < cm.nb_atoms ; i++ )
+    {
+      if ( cm.lut_list.type_name )
+	{
+	}
+    }
+  return contact;
 }
 //=======================================================================================
 

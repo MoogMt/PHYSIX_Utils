@@ -49,13 +49,23 @@ Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list , Cell box );
 ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type );
 //==================================================================================================
 
-//====================
-// ANGLES ET DISTANCE
+//============
+// DISTANCES
 //==================================================================================================
-double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index );
+// Compute
 double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_index_2 );
+double getDistance( ContactMatrix cm, int atom_index1 , int atom_index2 );
+// IO
+//-------------------------------------------------------------------------------------------------
 void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box );
-//==================================================================================================
+//=================================================================================================
+
+//========
+// Angles
+//=================================================================================================
+double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index );
+double getAngle( ContactMatrix cm , int atom_A , int atom_B , int atom_C );
+//=================================================================================================
 
 //=========
 // CONTACT
