@@ -168,109 +168,45 @@ Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c )
 //========
 // FILES
 //===========================================================================================
-// READS
+// READ
 //------------------------------------------------------------------------------------------
-Cell readParamCellStep( std::ifstream& file )
+bool readParamCellStep( std::ifstream& file , Cell & cell  )
 // Reading cell parameters from cell file, using cell pointer.
 {
-  //----------------
-  // Flux Variables
-  //-------------------------------------------------
-  std::istream_iterator<std::string> read(file);
-  std::istream_iterator<std::string> end;
-  int count = 0;
-  //-------------------------------------------------
-
-  //--------------------
-  // Physical variables
-  //-------------------------------------------------
-  Cell cell;
-  //-------------------------------------------------
-
-  //--------------
-  // Reading file
-  //-------------------------------------------------
-  while( read != end && count < 6 )
-    {
-      switch(count)
-	{
-	case 0:
-	  cell.a = it2real(read);
-	  break;
-	case 1:
-	  cell.b = it2real(read);
-	  break;
-	case 2:
-	  cell.c = it2real(read);
-	  break;
-	case 3:
-	  cell.alpha = it2real(read);
-	  break;
-	case 4:
-	  cell.beta  = it2real(read);
-	  break;
-	case 5:
-	  cell.gamma = it2real(read);
-	  break;
-	}
-      ++read;
-      count++;
-    }
-  //-------------------------------------------------
+  // Variable
+  std::string line; // line of file
   
-  return cell;
+  // Reads line...
+  if ( std::getline( file, line ) )
+    {
+      // Checking line
+      std::istringstream it_string(line);
+      // Parsing line
+      if ( !( it_string >> cell.a >> cell.b >> cell.c >> cell.alpha >> cell.beta >> cell.gamma) )
+	{
+	  return false;
+	}
+      return true;
+    }
 }
-//--------------------------------------------------------------
-Cell readParamCell( std::string file_name )
+//------------------------------------------------------------------------------------------
+bool readParamCell( std::string file_name , Cell & cell )
 // Reading cell parameters from cell file, using string
 {
   //-------------------
   // Working variables
   //-------------------------------------------------
   std::ifstream file( file_name.c_str() );
-  std::istream_iterator<std::string> read( file );
-  std::istream_iterator<std::string> end;
-  int count = 0;
   //-------------------------------------------------  
 
-  //--------------------
-  // Physical Variables
-  //----------------------
-  Cell cell;
-  //----------------------
-
-  //---------------
-  // Reading file
-  //--------------------------------------------
-  while( read != end && count < 6 )
+  if ( readParamCellStep( file , cell ) )
     {
-      switch(count)
-	{
-	case 0:
-	  cell.a = it2real(read);
-	  break;
-	case 1:
-	  cell.b = it2real(read);
-	  break;
-	case 2:
-	  cell.c = it2real(read);
-	  break;
-	case 3:
-	  cell.alpha = it2real(read);
-	  break;
-	case 4:
-	  cell.beta  = it2real(read);
-	  break;
-	case 5:
-	  cell.gamma = it2real(read);
-	  break;
-	}
-      ++read;
-      count++;
+      return true;
     }
-  //--------------------------------------------
-
-  // Return
-  return cell;
+  else
+    {
+      std::cout << "Problem reading file " << file_name << std::endl;
+      return false;
+    }
 }
 //==============================================================================================

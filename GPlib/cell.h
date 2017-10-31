@@ -9,6 +9,7 @@
 #include <stdio.h>  
 #include <stdlib.h>    
 #include <math.h>
+#include <sstream>
 
 #include "utils.h"
 #include "atom.h"
@@ -54,8 +55,8 @@ Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c );
 // Writting Atom distances
 void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , std::vector<int> atom_index, Cell box);
 // Reading Cell Param File
-Cell readParamCellStep( std::ofstream & file );
-Cell readParamCell( std::string file_name );
+bool readParamCellStep( std::ofstream & file , Cell & cell );
+bool readParamCell( std::string file_name , Cell & cell );
 //=============================================================================================
 
 #endif 

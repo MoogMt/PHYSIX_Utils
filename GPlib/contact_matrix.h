@@ -49,6 +49,12 @@ Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list , Cell box );
 ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type );
 //==================================================================================================
 
+//=============
+// CONNECTION
+//=====================================================
+bool connected( ContactMatrix cm , int i , int j);
+//=====================================================
+
 //============
 // DISTANCES
 //==================================================================================================
@@ -91,31 +97,26 @@ double getTypeCoordinance( Contact_Matrix contact_matrix , std::string type , do
 //====================
 // NEAREST NEIGHBORS
 //==========================================================================================
-double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index );
-double getNNearest( Contact_Matrix contact_matrix , int n_nearest, int atom_index, std::string specie );
-std::vector<double> getNNearest( Contact_Matrix contact_matrix , std::vector<int> n_nearest, int atom_index );
-std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes );
-std::vector<double> getNNearest( Contact_Matrix contact_matrix , int nearest, std::vector<int> atom_indexes , std::string specie );
-std::vector<double> getNNearest( Contact_Matrix contact_matrix , int n_nearest, std::vector<std::string> atom_types );
+// By index
+double getNNearest( Contact_Matrix cm , int n_nearest, int atom_index );
+std::vector<double> getNNearest( Contact_Matrix cm , std::vector<int> n_nearest, int atom_index );
+std::vector<double> getNNearest( Contact_Matrix cm , int nearest, std::vector<int> atom_indexes );
+// By Specie
+double getNNearest( Contact_Matrix cm , int n_nearest, int atom_index, std::string specie );
+std::vector<double> getNNearest( Contact_Matrix cm , int n_nearest , std::string specie );
+std::vector<double> getNNearest( Contact_Matrix cm , int nearest, std::vector<int> atom_indexes , std::string specie );
+std::vector<double> getNNearest( Contact_Matrix cm , int n_nearest, std::vector<std::string> atom_types );
 //------------------------------------------------------------------------------------------
-// -> Get the n_nearest_th nearest neighbours of the atom with atom_index index
+// By Index
 double getNNearest( ContactMatrix cm , int n_nearest , int atom_index );
-// -> Get the n_th (n = numbers contained in n_nearest) nearest neighbours
-// of the atom with atom_index index
-std::vector<double> getNNearest( ContactMatrix cm , std::vector<int> n_nearest , int atom_index);
-// -> 
+std::vector<double> getNNearest( ContactMatrix cm , std::vector<int> n_nearest , int atom_index );
 std::vector<double> getNNearest( Contact_Matrix cm , int nearest , std::vector<int> atom_indexes );
-// ->
+// By specie
 double getNNearest( ContactMatrix cm , int n_nearest, int atom_index, std::string specie );
-// ->
-std::vector<double> getNNearest( ContactMatrix cm , int n_nearest, std::vector<std::string> atom_types )
+std::vector<double> getNNearestVector( ContactMatrix cm , int atom_index , int n_nearest , std::string specie );
+std::vector<double> getNNearest( Contact_Matrix cm , int nearest, std::vector<int> atom_indexes , std::string specie );
+std::vector<double> getNNearest( ContactMatrix cm , int n_nearest, std::vector<std::string> atom_types );
 //==========================================================================================
-
-//=============
-// CONNECTION
-//=====================================================
-bool connected( ContactMatrix cm , int i , int j);
-//=====================================================
 
 //=======
 // IO

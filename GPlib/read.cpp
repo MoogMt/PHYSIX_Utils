@@ -48,15 +48,29 @@ int main(void)
   //---------------
   // Initializers
   //--------------------------------------------------
-  AtomList  atom_list;               // Atoms in cell
-  AllTypeLUT lut_list ; // LUT for types
+  AtomList  atom_list;  // Atoms in cell
+  AllTypeLUT lut_list; // LUT for types
+  ContactMatrix cm;
   //---------------------------------------------------
 
   //--------------------
-  // Reading Parameters
+  // Reading Cell File
   //-------------------------------------------------------------------
-  Cell         cell    = readParamCell ( "cell.param" );
-  CutOffMatrix cut_off = readCutOff    ( "cut_off.dat" , lut_list );
+  Cell cell;
+  if ( ! readParamCell( "cell.param" , cell ) )
+    {
+      return 1;
+    }
+  //-------------------------------------------------------------------
+
+  //-----------------
+  // Reading Cut-Off
+  //-------------------------------------------------------------------
+  CutOffMatrix cut_off;
+  if ( ! readCutOff( "cut_off.dat" , lut_list ) )
+    {
+      return 1;
+    }
   //-------------------------------------------------------------------
 
   //-------------------
@@ -66,7 +80,7 @@ int main(void)
     {
       if ( step % comp_step == 0  && step > 2000 ) 
 	{
-	  ContactMatrix cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
+	  cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
 	  std::vector<Molecule> mols = makeMolecules( cm );
 	  std::cout << "step: " << step << std::endl;
 	}
