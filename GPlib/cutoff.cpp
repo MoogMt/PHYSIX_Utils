@@ -26,13 +26,13 @@ bool readCutOff( std::ifstream & input , CutOffMatrix & com , std::vector<TypeLU
   // Reading types names
   //-----------------------------------------------
   int i=0;
-  std::vector<std::string> names;
+  std::vector<std::string> names; names.assign( nb_type, "" );
   while( i < nb_type && getline( input, file ) )
     {
       std::istringstream it_string(line);
       std::string name;
       if ( ! it_string << name ) return false;
-      names.push_back( name );
+      names[i] = name ;
       i++;
     }
   //-----------------------------------------------
@@ -48,27 +48,31 @@ bool readCutOff( std::ifstream & input , CutOffMatrix & com , std::vector<TypeLU
       count++;
       }*/
   //----------------------------------------------------------
-  
-  makeLUT()
-  //----------------
-  // BUILDING LUT
-  //----------------------------------------------------------
-  for ( int i=0 ; i < nb_types ; i++ )
-    {
-      lut_list.push_back( makeLUT( names[i] , i ) );
-    }
-  //----------------------------------------------------------
 
-  //-----------------
-  // READING MATRIX
-  //----------------------------------------------------------
-  int i=0;
-  while ( read != end && i < nb_types*nb_types )
+  // Checking names
+  if ( !checkNames(names) ) return false;
+
+  // BUILDING LUT
+  makeLUT( lut_list , names);
+
+  // Reading matrix
+  i=0;
+  matrix
+  while( getline( file, line) && i < nb_types )
+    {
+      int j=0;
+      std::istringstream it_string(line);
+      while( j < nb_types )
+	{
+	  
+	}
+    }
+
+  /*while ( read != end && i < nb_types*nb_types )
     {
       com.matrix.push_back( atof( std::string(*read).c_str() ) ); ++read;
       i++;
-    }
-  //----------------------------------------------------------
+      }*/
   
   return com;
 }

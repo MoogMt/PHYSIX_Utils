@@ -59,6 +59,17 @@ bool typeExists( const AllTypeLUT lut , const int type_index )
 //======================================================================
 
 //======================================================================
+bool checkNames( std::vector<std::string> names )
+{
+  for ( int i=0 ; i < names.size()-1 ; i++ )
+    {
+      for ( int j=i+1 ;j < names.size() ; j++ )
+	{
+	  if ( names[i] == names[j] ) return false;
+	}
+    }
+  return true;
+}
 //======================================================================
 
 //==================
