@@ -164,4 +164,10 @@ std::vector<TypeLUT> makeLUT( const std::vector<Atom> atoms )
     }
   return list_lut;
 }
-//======================================================================
+//--------------------------------------------------------------------------------------
+void makeLUT( AllTypeLUT & lut_list , std::vector<std::string> names )
+{
+  makeLUT( lut_list.types , names);
+  return;
+}
+//=======================================================================================
