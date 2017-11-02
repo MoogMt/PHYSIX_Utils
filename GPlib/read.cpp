@@ -71,12 +71,6 @@ int main(void)
     {
       return 1;
     }
-  std::cout << "lut1:" << lut_list.types[0].type_name << " " << std::endl;
-  std::cout << "lut2:" << lut_list.types[1].type_name << " " << std::endl;
-  std::cout << "co1:" << cut_off.matrix[0] << " " << std::endl;
-  std::cout << "co2:" << cut_off.matrix[1] << " " << std::endl;
-  std::cout << "co3:" << cut_off.matrix[2] << " " << std::endl;
-  std::cout << "co4:" << cut_off.matrix[3] << " " << std::endl;
   //-------------------------------------------------------------------
 
   //-------------------
@@ -86,9 +80,9 @@ int main(void)
     {
       if ( step % comp_step == 0  && step > 2000 ) 
 	{
-	  /*cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
-	  std::vector<Molecule> mols = makeMolecules( cm );
-	  std::cout << "step: " << step << std::endl;*/
+	  //cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
+	  //std::vector<Molecule> mols = makeMolecules( cm );
+	  std::cout << "step: " << step << std::endl;
 	}
       step++;
      }
