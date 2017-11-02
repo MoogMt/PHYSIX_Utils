@@ -76,12 +76,12 @@ int main(void)
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
-  while( readStepXYZ( input , atom_list , lut_list, true, true ) )
+  while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
       if ( step % comp_step == 0  && step > 2000 ) 
 	{
 	  makeContactMatrix ( cm , atom_list, cell , cut_off , lut_list );
-	  //std::vector<Molecule> mols = makeMolecules( cm );
+	  std::vector<Molecule> mols = makeMolecules( cm );
 	  std::cout << "step: " << step << std::endl;
 	}
       step++;

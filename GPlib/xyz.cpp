@@ -44,7 +44,7 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
       atoms.x.assign( nb_atoms, 0 );
       atoms.y.assign( nb_atoms, 0 );
       atoms.z.assign( nb_atoms, 0 );
-      atoms.index.assign( nb_atons , 0 );
+      atoms.index.assign( nb_atoms , 0 );
     }
   //-----------------------------------------------------------------------------------
   
