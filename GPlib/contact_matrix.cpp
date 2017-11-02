@@ -3,7 +3,7 @@
 //==================
 // CONTACT MATRIX
 //=======================================================================================
-Contact_Matrix makeContactMatrix( const std::vector<Atom> atom_list , const Cell box)
+Contact_Matrix makeContactMatrix( std::vector<Atom> & atom_list , const Cell box)
 // Constructs the restricted contact matrix
 {
   Contact_Matrix contact_matrix;
@@ -18,7 +18,7 @@ Contact_Matrix makeContactMatrix( const std::vector<Atom> atom_list , const Cell
   return contact_matrix;
 }
 //--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( const AtomList atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
+ContactMatrix makeContactMatrix ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
 // Constructs the full contact matrix
 {
   // Determines the number of atoms
@@ -47,7 +47,7 @@ ContactMatrix makeContactMatrix ( const AtomList atom_list , const Cell cell , c
   return { nb_atoms, lut_type, matrix };
 }
 //--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrixDistance ( const AtomList atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
+ContactMatrix makeContactMatrixDistance ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
 // Constructs the full contact matrix
 {
   // Determines the number of atoms
@@ -61,7 +61,7 @@ ContactMatrix makeContactMatrixDistance ( const AtomList atom_list , const Cell 
     {
       for ( int j=i+1 ; j < nb_atoms ; j++ )
 	{
-	  dist=distanceAtomsSq( atom_list , i , j , cell);
+	  double dist=distanceAtomsSq( atom_list , i , j , cell);
 	  matrix[i*nb_atoms+j] = dist;
 	  matrix[j*nb_atoms+i] = dist; 
 	}
@@ -71,27 +71,30 @@ ContactMatrix makeContactMatrixDistance ( const AtomList atom_list , const Cell 
   return { nb_atoms, lut_type, matrix };
 }
 //--------------------------------------------------------------------------------------
-void makeContactMatrix ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
+void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on )
 // Constructs the full contact matrix
 {
   // Determines the number of atoms
-  int nb_atoms = atom_list.x.size();
+  cm.nb_atoms = atom_list.x.size();
 
   // Initialize contact matrix with 0s
-  std::vector<double> matrix; matrix.assign(nb_atoms*nb_atoms,0.);
+  if ( !(go_on) || cm.matrix.size() == 0 )
+    {
+      cm.matrix.assign(cm.nb_atoms*cm.nb_atoms,0.);
+    }
 
   // Loop over all pairs of atoms
-  for ( int i=0 ; i < nb_atoms-1 ; i++ )
+  for ( int i=0 ; i < cm.nb_atoms-1 ; i++ )
     {
-      for ( int j=i+1 ; j < nb_atoms ; j++ )
+      for ( int j=i+1 ; j < cm.nb_atoms ; j++ )
 	{
 	  // Getting the cut_off for the atom_i vs atom_j interaction
 	  double cutoff = getCutOff( cut_off , lut_type.type_index[i] , lut_type.type_index[j] );
 	  // Comparing distance to cut_off
 	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
 	    {
-	      matrix[i*nb_atoms+j] = 1;
-	      matrix[j*nb_atoms+i] = 1; 
+	      cm.matrix[i*cm.nb_atoms+j] = 1;
+	      cm.matrix[j*cm.nb_atoms+i] = 1; 
 	    }
 	}
     }
@@ -100,7 +103,7 @@ void makeContactMatrix ( ContactMatrix & cm , const AtomList atom_list, const Ce
   return;
 }
 //--------------------------------------------------------------------------------------
-void makeContactMatrixDistance ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on )
+void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on )
 // Constructs the full contact matrix
 {
   // Determines the number of atoms
@@ -117,9 +120,9 @@ void makeContactMatrixDistance ( ContactMatrix & cm , const AtomList atom_list, 
     {
       for ( int j=i+1 ; j < cm.nb_atoms ; j++ )
 	{
-	  dist=distanceAtomsSq( atom_list , i , j , cell);
-	  cm.matrix[i*nb_atoms+j] = dist;
-	  cm.matrix[j*nb_atoms+i] = dist; 
+	  double dist=distanceAtomsSq( atom_list , i , j , cell);
+	  cm.matrix[i*cm.nb_atoms+j] = dist;
+	  cm.matrix[j*cm.nb_atoms+i] = dist; 
 	}
     }
 

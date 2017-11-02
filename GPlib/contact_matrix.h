@@ -42,14 +42,14 @@ struct ContactMatrix
 //==================================================================================================
 // Restricted Matrix
 //-------------------------------------------------------------------------------------------------
-Contact_Matrix makeContactMatrix ( const std::vector<Atom> atom_list , const Cell box );
+Contact_Matrix makeContactMatrix ( std::vector<Atom> & atom_list , const Cell box );
 //------------------------------------------------------------------------------------------------
 // Full Matrix
 //-------------------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
-ContactMatrix makeContactMatrixDistance ( const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
-void makeContactMatrix ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
-void makeContactMatrixDistance ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on );
+ContactMatrix makeContactMatrix ( AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
+ContactMatrix makeContactMatrixDistance ( AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
+void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on = true );
+void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on = true );
 //==================================================================================================
 
 //=============

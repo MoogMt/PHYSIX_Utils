@@ -80,7 +80,7 @@ int main(void)
     {
       if ( step % comp_step == 0  && step > 2000 ) 
 	{
-	  //cm =  makeContactMatrix ( atom_list, cell , cut_off , lut_list );
+	  makeContactMatrix ( cm , atom_list, cell , cut_off , lut_list );
 	  //std::vector<Molecule> mols = makeMolecules( cm );
 	  std::cout << "step: " << step << std::endl;
 	}
