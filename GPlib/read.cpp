@@ -66,11 +66,17 @@ int main(void)
   //-----------------
   // Reading Cut-Off
   //-------------------------------------------------------------------
-  /*CutOffMatrix cut_off;
-  if ( ! readCutOff( "cut_off.dat" , lut_list ) )
+  CutOffMatrix cut_off;
+  if ( ! readCutOff( "cut_off.dat" , cut_off , lut_list ) )
     {
       return 1;
-      }*/
+    }
+  std::cout << "lut1:" << lut_list.types[0].type_name << " " << std::endl;
+  std::cout << "lut2:" << lut_list.types[1].type_name << " " << std::endl;
+  std::cout << "co1:" << cut_off.matrix[0] << " " << std::endl;
+  std::cout << "co2:" << cut_off.matrix[1] << " " << std::endl;
+  std::cout << "co3:" << cut_off.matrix[2] << " " << std::endl;
+  std::cout << "co4:" << cut_off.matrix[3] << " " << std::endl;
   //-------------------------------------------------------------------
 
   //-------------------

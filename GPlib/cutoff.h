@@ -27,8 +27,10 @@ struct CutOffMatrix
 //======================
 // Read Cut Off Matrix
 //=======================================================================================
-CutOffMatrix readCutOff( const std::string file , std::vector<TypeLUT> & lut_list );
-CutOffMatrix readCutOff( const std::string file , AllTypeLUT & lut_list );
+bool readCutOff( std::ifstream & input , CutOffMatrix & com , std::vector<TypeLUT> & lut_list );
+bool readCutOff( const std::string file , CutOffMatrix & com , std::vector<TypeLUT> & lut_list );
+bool readCutOff(  std::ifstream & input , CutOffMatrix & com, AllTypeLUT & lut_list );
+bool readCutOff( const std::string file , CutOffMatrix & com, AllTypeLUT & lut_list );
 //=======================================================================================
 
 //=============

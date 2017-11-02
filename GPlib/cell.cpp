@@ -185,6 +185,7 @@ bool readParamCellStep( std::ifstream& file , Cell & cell  )
       if ( !( it_string >> cell.a >> cell.b >> cell.c >> cell.alpha >> cell.beta >> cell.gamma) ) return false;
       else return true;
     }
+  else return false;
 }
 //------------------------------------------------------------------------------------------
 bool readParamCell( std::string file_name , Cell & cell )

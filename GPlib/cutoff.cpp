@@ -115,14 +115,19 @@ bool readCutOff(  std::ifstream & input , CutOffMatrix & com, AllTypeLUT & lut_l
   //-----------------------------------------------
   int i=0;
   std::vector<std::string> names; names.assign( nb_type, "" );
-  while( i < nb_type && getline( input, line ) )
+  if( getline( input, line ) )
     {
       std::istringstream it_string(line);
       std::string name;
-      if ( ! ( it_string >> name) ) return false;
-      names[i] = name ;
-      i++;
+      while( i < nb_type )
+	{
+	  if ( ! ( it_string >> name) ) return false;
+	  std::cout << "name: " << name << std::endl;
+	  names[i] = name ;
+	  i++;
+	}
     }
+  else return false;
   //-----------------------------------------------
 
   //----------
@@ -131,7 +136,10 @@ bool readCutOff(  std::ifstream & input , CutOffMatrix & com, AllTypeLUT & lut_l
   // Checking Names
   if ( !checkNames(names) ) return false;
   // Building LUT
+  std::cout << "check" << std::endl;
   makeLUT( lut_list , names);
+  std::cout << "check: " << lut_list.types[0].type_name << std::endl;
+  std::cout << "check" << std::endl;
   //----------------------------------------------
 
   //----------------
@@ -141,16 +149,20 @@ bool readCutOff(  std::ifstream & input , CutOffMatrix & com, AllTypeLUT & lut_l
   // Assign Matrix
   com.matrix.assign( nb_type*nb_type, 0.0);
   // Reading matrix
-  while( getline( input, line) && i < nb_type )
+  if(  i < nb_type )
     {
-      int j=i;
-      std::istringstream it_string(line);
-      while( j < nb_type )
+      if ( getline( input, line) )
 	{
-	  if ( !( it_string >> com.matrix[i*nb_type+j] ) ) return false;
-	  com.matrix[ j*nb_type + i ];
-	  j++;
+	  int j=i;
+	  std::istringstream it_string(line);
+	  while( j < nb_type )
+	    {
+	      if ( !( it_string >> com.matrix[i*nb_type+j] ) ) return false;
+	      com.matrix[ j*nb_type + i ];
+	      j++;
+	    }
 	}
+      else return false;
     }
   //----------------------------------------------
 
