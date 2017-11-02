@@ -42,35 +42,38 @@ struct ContactMatrix
 //==================================================================================================
 // Restricted Matrix
 //-------------------------------------------------------------------------------------------------
-Contact_Matrix makeContactMatrix ( std::vector<Atom> atom_list , Cell box );
+Contact_Matrix makeContactMatrix ( const std::vector<Atom> atom_list , const Cell box );
 //------------------------------------------------------------------------------------------------
 // Full Matrix
 //-------------------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type );
+ContactMatrix makeContactMatrix ( const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
+ContactMatrix makeContactMatrixDistance ( const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
+void makeContactMatrix ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
+void makeContactMatrixDistance ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on );
 //==================================================================================================
 
 //=============
 // CONNECTION
 //=====================================================
-bool connected( ContactMatrix cm , int i , int j);
+bool connected( const ContactMatrix cm , const int i , const int j);
 //=====================================================
 
 //============
 // DISTANCES
 //==================================================================================================
 // Compute
-double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_index_2 );
+double getDistance( const Contact_Matrix contact_matrix, const int atom_index_1, const int atom_index_2 );
 //------------------------------------------------------------------------------------------------
 // Compute
-double getDistance( ContactMatrix cm, int atom_index1 , int atom_index2 );
+double getDistance( const ContactMatrix cm, const int atom_index1 , const int atom_index2 );
 //=================================================================================================
 
 //========
 // Angles
 //=================================================================================================
-double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index );
+double getAngle( const Contact_Matrix contact_matrix, const int atom_center_index , const int atom_2_index, const int atom_3_index );
 //---------------------------------------------------------------------------------------------
-double getAngle( ContactMatrix cm , int atom_A , int atom_B , int atom_C );
+double getAngle( const ContactMatrix cm , const int atom_A , const int atom_B , const int atom_C );
 //=================================================================================================
 
 //=========

@@ -3,7 +3,7 @@
 //==================
 // CONTACT MATRIX
 //=======================================================================================
-Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
+Contact_Matrix makeContactMatrix( const std::vector<Atom> atom_list , const Cell box)
 // Constructs the restricted contact matrix
 {
   Contact_Matrix contact_matrix;
@@ -18,7 +18,7 @@ Contact_Matrix makeContactMatrix(std::vector<Atom> atom_list, Cell box)
   return contact_matrix;
 }
 //--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix cut_off , AllTypeLUT lut_type )
+ContactMatrix makeContactMatrix ( const AtomList atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
 // Constructs the full contact matrix
 {
   // Determines the number of atoms
@@ -46,12 +46,91 @@ ContactMatrix makeContactMatrix ( AtomList atom_list, Cell cell , CutOffMatrix c
   // Sending results
   return { nb_atoms, lut_type, matrix };
 }
+//--------------------------------------------------------------------------------------
+ContactMatrix makeContactMatrixDistance ( const AtomList atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
+// Constructs the full contact matrix
+{
+  // Determines the number of atoms
+  int nb_atoms = atom_list.x.size();
+
+  // Initialize contact matrix with 0s
+  std::vector<double> matrix; matrix.assign(nb_atoms*nb_atoms,0.);
+
+  // Loop over all pairs of atoms
+  for ( int i=0 ; i < nb_atoms-1 ; i++ )
+    {
+      for ( int j=i+1 ; j < nb_atoms ; j++ )
+	{
+	  dist=distanceAtomsSq( atom_list , i , j , cell);
+	  matrix[i*nb_atoms+j] = dist;
+	  matrix[j*nb_atoms+i] = dist; 
+	}
+    }
+
+  // Sending results
+  return { nb_atoms, lut_type, matrix };
+}
+//--------------------------------------------------------------------------------------
+void makeContactMatrix ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type )
+// Constructs the full contact matrix
+{
+  // Determines the number of atoms
+  int nb_atoms = atom_list.x.size();
+
+  // Initialize contact matrix with 0s
+  std::vector<double> matrix; matrix.assign(nb_atoms*nb_atoms,0.);
+
+  // Loop over all pairs of atoms
+  for ( int i=0 ; i < nb_atoms-1 ; i++ )
+    {
+      for ( int j=i+1 ; j < nb_atoms ; j++ )
+	{
+	  // Getting the cut_off for the atom_i vs atom_j interaction
+	  double cutoff = getCutOff( cut_off , lut_type.type_index[i] , lut_type.type_index[j] );
+	  // Comparing distance to cut_off
+	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
+	    {
+	      matrix[i*nb_atoms+j] = 1;
+	      matrix[j*nb_atoms+i] = 1; 
+	    }
+	}
+    }
+
+  // Sending results
+  return;
+}
+//--------------------------------------------------------------------------------------
+void makeContactMatrixDistance ( ContactMatrix & cm , const AtomList atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on )
+// Constructs the full contact matrix
+{
+  // Determines the number of atoms
+  cm.nb_atoms = atom_list.x.size();
+
+  // Initialize contact matrix with 0s
+  if ( ! go_on && cm.matrix.size() == 0 )
+    {
+      cm.matrix.assign( cm.nb_atoms*cm.nb_atoms , 0. );
+    }
+
+  // Loop over all pairs of atoms
+  for ( int i=0 ; i < cm.nb_atoms-1 ; i++ )
+    {
+      for ( int j=i+1 ; j < cm.nb_atoms ; j++ )
+	{
+	  dist=distanceAtomsSq( atom_list , i , j , cell);
+	  cm.matrix[i*nb_atoms+j] = dist;
+	  cm.matrix[j*nb_atoms+i] = dist; 
+	}
+    }
+
+  return;
+}
 //=======================================================================================
 
 //===========
 // CONNECTED
 //==================================================
-bool connected( ContactMatrix cm , int i , int j )
+bool connected( const ContactMatrix cm , const int i , const int j )
 {
   if ( cm.matrix[ i*cm.nb_atoms + j ] ) return true;
   else return false;
@@ -61,7 +140,7 @@ bool connected( ContactMatrix cm , int i , int j )
 //==========
 // DISTANCE
 //=======================================================================================
-double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_index_2 )
+double getDistance( const Contact_Matrix contact_matrix , const int atom_index_1 , const int atom_index_2 )
 {
   int nb_atoms = contact_matrix.types.size();
   int mini=min(atom_index_1,atom_index_2);
@@ -69,7 +148,7 @@ double getDistance(Contact_Matrix contact_matrix, int atom_index_1, int atom_ind
   return contact_matrix.matrix[computeSep(mini,nb_atoms)-mini+maxi-1];
 }
 //--------------------------------------------------------------------------------------
-double getDistance( ContactMatrix cm, int atom_index1 , int atom_index2 )
+double getDistance( const ContactMatrix cm , const int atom_index1 , const int atom_index2 )
 {
   return cm.matrix[atom_index1*cm.nb_atoms+atom_index2];
 }
@@ -79,7 +158,7 @@ double getDistance( ContactMatrix cm, int atom_index1 , int atom_index2 )
 // ANGLES FUNCTIONS
 //=======================================================================================
 // Calculates the angles between three atoms centered on atom_center_index using contact matrix and Al-Kashi theorem
-double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom_2_index, int atom_3_index )
+double getAngle( const Contact_Matrix contact_matrix, const int atom_center_index , const int atom_2_index, const int atom_3_index )
 // Get Angle
 {
   double a = getDistance( contact_matrix, atom_center_index, atom_2_index);
@@ -88,7 +167,7 @@ double getAngle( Contact_Matrix contact_matrix, int atom_center_index , int atom
   return acos( (a*a+b*b-c*c)/(2*a*b) );
 }
 //--------------------------------------------------------------------------------------
-double getAngle( ContactMatrix cm , int atom_A , int atom_B , int atom_C )
+double getAngle( const ContactMatrix cm , const int atom_A , const int atom_B , const int atom_C )
 // Get Angle(A)=(BAC)
 {
   double a = getDistance( cm , atom_A , atom_C );
