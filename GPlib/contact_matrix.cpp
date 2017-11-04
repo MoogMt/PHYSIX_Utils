@@ -88,13 +88,18 @@ void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell c
     {
       for ( int j=i+1 ; j < cm.nb_atoms ; j++ )
 	{
-	  // Getting the cut_off for the atom_i vs atom_j interaction
+	  // Computing cut off for i and j
 	  double cutoff = getCutOff( cut_off , lut_list.type_index[i] , lut_list.type_index[j] );
 	  // Comparing distance to cut_off
 	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
 	    {
 	      cm.matrix[i*cm.nb_atoms+j] = 1;
 	      cm.matrix[j*cm.nb_atoms+i] = 1; 
+	    }
+	  else
+	    {
+	      cm.matrix[i*cm.nb_atoms+j] = 0;
+	      cm.matrix[j*cm.nb_atoms+i] = 0; 
 	    }
 	}
     }
@@ -112,20 +117,21 @@ void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, cons
   // Determines the number of atoms
   cm.nb_atoms = atom_list.x.size();
 
-  // Initialize contact matrix with 0s
-  if ( ! go_on && cm.matrix.size() == 0 )
+  // Initialize contact matrix with 0so
+  if ( !(go_on) || cm.matrix.size() == 0 )
     {
       cm.matrix.assign( cm.nb_atoms*cm.nb_atoms , 0. );
     }
+
 
   // Loop over all pairs of atoms
   for ( int i=0 ; i < cm.nb_atoms-1 ; i++ )
     {
       for ( int j=i+1 ; j < cm.nb_atoms ; j++ )
 	{
-	  double dist=distanceAtomsSq( atom_list , i , j , cell);
+	  double dist= sqrt( distanceAtomsSq( atom_list , i , j , cell) );
 	  cm.matrix[i*cm.nb_atoms+j] = dist;
-	  cm.matrix[j*cm.nb_atoms+i] = dist; 
+	  cm.matrix[j*cm.nb_atoms+i] = dist;
 	}
     }
 

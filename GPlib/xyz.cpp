@@ -65,40 +65,20 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
   // Reads atoms by atoms
   //-------------------------------------------------------------------------------------
   int i = 0;
-  if (  !(same_type) || fill_lut )
+  while ( i < nb_atoms )
     {
-      while ( i < nb_atoms )
+      if ( std::getline( file , line ) )
 	{
-	  if ( std::getline( file , line ) )
+	  std::istringstream it_string(line);
+	  if ( ! ( it_string >> atoms.names[i] >> atoms.x[i] >> atoms.y[i] >> atoms.z[i] ) )
 	    {
-	      std::istringstream it_string(line);
-	      if ( ! ( it_string >> atoms.names[i] >> atoms.x[i] >> atoms.y[i] >> atoms.z[i] ) )
-		{
-		  if ( verbose ) std::cout << "Problem with file format at line " << 2 + atoms.names.size() << "."<< std::endl;
+	      if ( verbose ) std::cout << "Problem with file format at line " << 2 + atoms.names.size() << "."<< std::endl;
 		  return false;
-		}
-	      atoms.index[i] = i;
-	      addAtom2LUT( lut_list , { atoms.names[ i ] , atoms.x[ i ] , atoms.y[ i ] , atoms.z[ i ] , atoms.index[ i ] } );
 	    }
-	  i++;
+	  atoms.index[i] = i;
+	  if (  !(same_type) || fill_lut )  addAtom2LUT( lut_list , { atoms.names[ i ] , atoms.x[ i ] , atoms.y[ i ] , atoms.z[ i ] , atoms.index[ i ] } );
 	}
-    }
-  else
-    {
-      while ( i < nb_atoms )
-	{
-	  if ( std::getline( file , line ) )
-	    {
-	      std::istringstream it_string(line);
-	      if ( ! ( it_string >> atoms.names[i] >> atoms.x[i] >> atoms.y[i] >> atoms.z[i] ) )
-		{
-		  if ( verbose ) std::cout << "Problem with file format at line " << 2 + atoms.names.size() << "."<< std::endl;
-		  return false;
-		}
-	      atoms.index[i] = i;
-	    }
-	  i++;
-	}
+      i++;
     }
   //-------------------------------------------------------------------------------------
   return true; 

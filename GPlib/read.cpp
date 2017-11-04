@@ -78,11 +78,21 @@ int main(void)
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0  && step > 2000 ) 
+      if ( step  % comp_step == 0 ) 
 	{
-	  makeContactMatrix ( cm , atom_list, cell , cut_off , lut_list );
+	  makeContactMatrix( cm , atom_list, cell , cut_off , lut_list );
 	  std::vector<Molecule> mols = makeMolecules( cm );
 	  std::cout << "step: " << step << std::endl;
+	  
+	  for ( int i=0 ; i < mols.size() ; i++ )
+	    {
+	      std::cout << "------------------------------" << std::endl;
+	      for ( int j=0 ; j < mols[i].bonds.size() ; j++ )
+		{
+		  std::cout << mols[i].bonds[j].atom1_index << " " <<  mols[i].bonds[j].atom2_index   <<  std::endl;
+		}
+	      std::cout << "------------------------------" << std::endl;
+	    }
 	}
       step++;
      }
