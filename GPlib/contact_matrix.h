@@ -48,8 +48,8 @@ Contact_Matrix makeContactMatrix ( std::vector<Atom> & atom_list , const Cell bo
 //-------------------------------------------------------------------------------------------------
 ContactMatrix makeContactMatrix ( AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
 ContactMatrix makeContactMatrixDistance ( AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
-void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on = true );
-void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on = true );
+void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
+void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
 //==================================================================================================
 
 //=============

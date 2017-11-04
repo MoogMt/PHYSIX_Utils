@@ -33,7 +33,7 @@ std::vector<MoleculeBasic> makeMoleculesBasic( const ContactMatrix & cm )
   int try1[ cm.nb_atoms ]; zeros( try1 , cm.nb_atoms ); // global connection vector
   int try2[ cm.nb_atoms ]; zeros( try2 , cm.nb_atoms ); // local atomic connection vector
   //------------------------------------------------------------------
-
+  
   //-----------------------------------------------------------------------
   // Loop over all non already used atoms
   for ( int i=0 ; i < cm.nb_atoms ; i++ )
@@ -94,14 +94,14 @@ std::vector<Molecule> makeMolecules( const ContactMatrix & cm )
   int try1[ cm.nb_atoms ]; zeros( try1 , cm.nb_atoms ); // global connection vector
   int try2[ cm.nb_atoms ]; zeros( try2 , cm.nb_atoms ); // local atomic connection vector
   //------------------------------------------------------------------
-
+  
   //-----------------------------------------------------------------------
   // Loop over all non already used atoms
   for ( int i=0 ; i < cm.nb_atoms ; i++ )
     {
       // if atom is already in a molecule, skip to the next one
       if ( used[i] == 1 ) continue;
-      // Initialize connection matrix for atom i
+      // Initialize connection matrix for atom 
       zeros( try1 , cm.nb_atoms ); try1[i] = 1;
       // Initiate molecule with atom i
       Molecule molecule = startMolecule( cm.lut_list.type_name[i] , i );

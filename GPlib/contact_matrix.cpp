@@ -71,7 +71,7 @@ ContactMatrix makeContactMatrixDistance ( AtomList & atom_list , const Cell cell
   return { nb_atoms, lut_type, matrix };
 }
 //--------------------------------------------------------------------------------------
-void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on )
+void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on )
 // Constructs the full contact matrix
 {
   // Determines the number of atoms
@@ -89,7 +89,7 @@ void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell c
       for ( int j=i+1 ; j < cm.nb_atoms ; j++ )
 	{
 	  // Getting the cut_off for the atom_i vs atom_j interaction
-	  double cutoff = getCutOff( cut_off , lut_type.type_index[i] , lut_type.type_index[j] );
+	  double cutoff = getCutOff( cut_off , lut_list.type_index[i] , lut_list.type_index[j] );
 	  // Comparing distance to cut_off
 	  if ( distanceAtomsSq( atom_list , i , j , cell) < cutoff*cutoff )
 	    {
@@ -99,11 +99,14 @@ void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell c
 	}
     }
 
+  // Updating LUT
+  cm.lut_list = lut_list;
+  
   // Sending results
   return;
 }
 //--------------------------------------------------------------------------------------
-void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , const bool go_on )
+void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on )
 // Constructs the full contact matrix
 {
   // Determines the number of atoms
@@ -125,6 +128,9 @@ void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, cons
 	  cm.matrix[j*cm.nb_atoms+i] = dist; 
 	}
     }
+
+  // Updating LUT for types
+  cm.lut_list = lut_list;
 
   return;
 }
