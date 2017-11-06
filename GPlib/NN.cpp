@@ -165,7 +165,7 @@ int main(void)
   writeHistogram( outputOC_2nn , normalizeHistogram( hist_2OC ) );
   
   writeHistogram( outputOO_1nn , normalizeHistogram( hist_1OO ) );
-    
+
   //Closing fluxes
   //----------------------
   input.close();
