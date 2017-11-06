@@ -55,70 +55,70 @@ void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, cons
 //=============
 // CONNECTION
 //=====================================================
-bool connected( const ContactMatrix cm , const int i , const int j);
+bool connected( const ContactMatrix & cm , const int i , const int j);
 //=====================================================
 
 //============
 // DISTANCES
 //==================================================================================================
 // Compute
-double getDistance( const Contact_Matrix contact_matrix, const int atom_index_1, const int atom_index_2 );
+double getDistance( const Contact_Matrix & cm , const int atom_index1, const int atom_index2 );
 //------------------------------------------------------------------------------------------------
 // Compute
-double getDistance( const ContactMatrix cm, const int atom_index1 , const int atom_index2 );
+double getDistance( const ContactMatrix & cm , const int atom_index1 , const int atom_index2 );
 //=================================================================================================
 
 //========
 // Angles
 //=================================================================================================
-double getAngle( const Contact_Matrix contact_matrix, const int atom_center_index , const int atom_2_index, const int atom_3_index );
+double getAngle( const Contact_Matrix & cm , const int atom_center_index , const int atom_2_index, const int atom_3_index );
 //---------------------------------------------------------------------------------------------
-double getAngle( const ContactMatrix cm , const int atom_A , const int atom_B , const int atom_C );
+double getAngle( const ContactMatrix & cm , const int atom_A , const int atom_B , const int atom_C );
 //=================================================================================================
 
 //=========
 // CONTACT
 //==================================================================================================
-std::vector<double> getAtomContact( Contact_Matrix contact_matrix , int atom_index );
-std::vector<double> getAtomContact( Contact_Matrix contact_matrix , int atom_index, std::string specie );
-void writeAtomContact( std::ofstream & file , Contact_Matrix contact_matrix , std::vector<int> atom_index );
+std::vector<double> getAtomContact( Contact_Matrix & cm , int atom_index );
+std::vector<double> getAtomContact( Contact_Matrix & cm , int atom_index, std::string specie );
+void writeAtomContact( std::ofstream & file , Contact_Matrix & cm , std::vector<int> atom_index );
 //-------------------------------------------------------------------------------------------------
-std::vector<double> getAtomContact( ContactMatrix cm , int atom_index );
-std::vector<double> getAtomContact( ContactMatrix cm , int atom_index , std::string specie );
+std::vector<double> getAtomContact( ContactMatrix & cm , int atom_index );
+std::vector<double> getAtomContact( ContactMatrix & cm , int atom_index , std::string specie );
 //==================================================================================================
 
 //=============
 // COORDINANCE
 //==========================================================================================
-int getAtomNeighboursNb( Contact_Matrix contact_matrix , int atom_index , double cut_off_radius );
-int getAtomNeighboursNb( Contact_Matrix contact_matrix , int atom_index , std::string specie , double cut_off_radius );
-std::vector<int> getAtomsNeighboursNb( Contact_Matrix contact_matrix , std::vector<int> atom_index_list , double cut_off_radius );
-std::vector<int> getTypeNeighboursNb( Contact_Matrix contact_matrix , std::string type , double cut_off_radius ) ;
-double getTypeCoordinance( Contact_Matrix contact_matrix , std::string type , double cut_off_radius );
+int getAtomNeighboursNb( Contact_Matrix & cm , int atom_index , double cut_off_radius );
+int getAtomNeighboursNb( Contact_Matrix & cm , int atom_index , std::string specie , double cut_off_radius );
+std::vector<int> getAtomsNeighboursNb( Contact_Matrix & cm , std::vector<int> atom_index_list , double cut_off_radius );
+std::vector<int> getTypeNeighboursNb( Contact_Matrix & cm , std::string type , double cut_off_radius ) ;
+double getTypeCoordinance( Contact_Matrix & cm , std::string type , double cut_off_radius );
 //==========================================================================================
 
 //====================
 // NEAREST NEIGHBORS
 //==========================================================================================
 // By index
-double getNNearest( Contact_Matrix cm , int n_nearest, int atom_index );
-std::vector<double> getNNearest( Contact_Matrix cm , std::vector<int> n_nearest, int atom_index );
-std::vector<double> getNNearest( Contact_Matrix cm , int nearest, std::vector<int> atom_indexes );
+double getNNearest( Contact_Matrix & cm , int n_nearest, int atom_index );
+std::vector<double> getNNearest( Contact_Matrix & cm , std::vector<int> n_nearest, int atom_index );
+std::vector<double> getNNearest( Contact_Matrix & cm , int nearest, std::vector<int> atom_indexes );
 // By Specie
-double getNNearest( Contact_Matrix cm , int n_nearest, int atom_index, std::string specie );
-std::vector<double> getNNearest( Contact_Matrix cm , int n_nearest , std::string specie );
-std::vector<double> getNNearest( Contact_Matrix cm , int nearest, std::vector<int> atom_indexes , std::string specie );
-std::vector<double> getNNearest( Contact_Matrix cm , int n_nearest, std::vector<std::string> atom_types );
+double getNNearest( Contact_Matrix & cm , int n_nearest, int atom_index, std::string specie );
+std::vector<double> getNNearest( Contact_Matrix & cm , int n_nearest , std::string specie );
+std::vector<double> getNNearest( Contact_Matrix & cm , int nearest, std::vector<int> atom_indexes , std::string specie );
+std::vector<double> getNNearest( Contact_Matrix & cm , int n_nearest, std::vector<std::string> atom_types );
 //------------------------------------------------------------------------------------------
 // By Index
-double getNNearest( ContactMatrix cm , int n_nearest , int atom_index );
-std::vector<double> getNNearest( ContactMatrix cm , std::vector<int> n_nearest , int atom_index );
-std::vector<double> getNNearest( Contact_Matrix cm , int nearest , std::vector<int> atom_indexes );
+double getNNearest( ContactMatrix & cm , int n_nearest , int atom_index );
+std::vector<double> getNNearest( ContactMatrix & cm , std::vector<int> n_nearest , int atom_index );
+std::vector<double> getNNearest( Contact_Matrix & cm , int nearest , std::vector<int> atom_indexes );
 // By specie
-double getNNearest( ContactMatrix cm , int n_nearest, int atom_index, std::string specie );
-std::vector<double> getNNearestVector( ContactMatrix cm , int atom_index , int n_nearest , std::string specie );
-std::vector<double> getNNearest( Contact_Matrix cm , int nearest, std::vector<int> atom_indexes , std::string specie );
-std::vector<double> getNNearest( ContactMatrix cm , int n_nearest, std::vector<std::string> atom_types );
+double getNNearest( ContactMatrix & cm , int n_nearest, int atom_index, std::string specie );
+std::vector<double> getNNearestVector( ContactMatrix & cm , int atom_index , int n_nearest , std::string specie );
+std::vector<double> getNNearest( ContactMatrix & cm , int nearest, std::vector<int> atom_indexes , std::string specie );
+std::vector<double> getNNearest( ContactMatrix & cm , int n_nearest, std::vector<std::string> atom_types );
 //==========================================================================================
 
 //=======
@@ -126,7 +126,7 @@ std::vector<double> getNNearest( ContactMatrix cm , int n_nearest, std::vector<s
 //=====================================================
 // PRINT
 //-----------------------------------------------------------------------------------------
-void printContactMatrix( ContactMatrix cm );
+void printContactMatrix( ContactMatrix & cm );
 //-----------------------------------------------------------------------------------------
 // WRITE
 //-----------------------------------------------------------------------------------------

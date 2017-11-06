@@ -29,7 +29,7 @@
 //================
 // MAIN PROGRAM
 //=====================================================================
-int main(void)
+int main( void )
 {
   //--------
   // Input
@@ -59,14 +59,14 @@ int main(void)
   // Technical values
   double hist_start = 0.95;
   double hist_end   = 3.00;
-  int nb_box = 300;
+  int nb_box = 400;
   //------------------------------------
+  std::vector<Bin> hist_1CC; 
+  std::vector<Bin> hist_2CC;
   std::vector<Bin> hist_1CO;
   std::vector<Bin> hist_2CO;
   std::vector<Bin> hist_3CO;
   std::vector<Bin> hist_4CO;
-  std::vector<Bin> hist_1CC; 
-  std::vector<Bin> hist_2CC;
   std::vector<Bin> hist_1OC;
   std::vector<Bin> hist_2OC; 
   std::vector<Bin> hist_1OO;
@@ -100,7 +100,7 @@ int main(void)
   std::ofstream outputCO_1nn ("1nearestCO.dat",  std::ios::out );
   std::ofstream outputCO_2nn ("2nearestCO.dat",  std::ios::out );
   std::ofstream outputCO_3nn ("3nearestCO.dat",  std::ios::out );
-  std::ofstream outputCO_4nn ("4nearestCO.dat",  std::ios::out );
+  std::ofstream outputCO_4nn ("4nearestCO.dat",  std::ios::out );  
   std::ofstream outputOC_1nn ("1nearestOC.dat",  std::ios::out );
   std::ofstream outputOC_2nn ("2nearestOC.dat",  std::ios::out );
   std::ofstream outputOO_1nn ("1nearestOO.dat",  std::ios::out );
@@ -118,7 +118,7 @@ int main(void)
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      makeContactMatrix( cm , atom_list, cell , cut_off , lut_list );
+      makeContactMatrixDistance( cm , atom_list, cell , cut_off , lut_list );
       if ( step == 1 )
 	{
 	  //-----------------------------------
@@ -127,20 +127,19 @@ int main(void)
 	  atom_indexesC = cm.lut_list.types[0].atom_index;
 	  atom_indexesO = cm.lut_list.types[1].atom_index;
 	  //---------------------------------------------------------------------------------
-	  //----------
-	  // CC bonds
+	  // CC Bonds
 	  //---------------------------------------------------------------------------------
 	  hist_1CC = makeRegularHistogram( getNNearest( cm , 1 , atom_indexesC , "C" ) , hist_start , hist_end , nb_box );
 	  hist_2CC = makeRegularHistogram( getNNearest( cm , 2 , atom_indexesC , "C" ) , hist_start , hist_end , nb_box );
 	  //---------------------------------------------------------------------------------
-	  // CO bonds
+	  // CO Bonds
 	  //---------------------------------------------------------------------------------
 	  hist_1CO = makeRegularHistogram( getNNearest( cm , 1 , atom_indexesC , "O" ) , hist_start , hist_end , nb_box );
 	  hist_2CO = makeRegularHistogram( getNNearest( cm , 2 , atom_indexesC , "O" ) , hist_start , hist_end , nb_box );
 	  hist_3CO = makeRegularHistogram( getNNearest( cm , 3 , atom_indexesC , "O" ) , hist_start , hist_end , nb_box );
 	  hist_4CO = makeRegularHistogram( getNNearest( cm , 4 , atom_indexesC , "O" ) , hist_start , hist_end , nb_box );
 	  //---------------------------------------------------------------------------------
-	  // OC bonds
+	  // OC Bonds
 	  //---------------------------------------------------------------------------------
 	  hist_1OC = makeRegularHistogram( getNNearest( cm , 1 , atom_indexesO , "C" ) , hist_start , hist_end , nb_box );
 	  hist_2OC = makeRegularHistogram( getNNearest( cm , 2 , atom_indexesO , "C" ) , hist_start , hist_end , nb_box );
@@ -152,20 +151,20 @@ int main(void)
 	}
       else if ( step  % comp_step == 0 ) 
 	{
-	  //----------
-	  // CC bonds
 	  //---------------------------------------------------------------------------------
+	  // CC Bonds
+	  //---------------------------------------------------------------------------------	  
 	  hist_1CC = addHistograms( hist_1CC , makeRegularHistogram( getNNearest( cm , 1 , atom_indexesC , "C" ) , hist_start , hist_end ,  nb_box ) );
 	  hist_2CC = addHistograms( hist_2CC , makeRegularHistogram( getNNearest( cm , 2, atom_indexesC  , "C" ) , hist_start , hist_end , nb_box ) );
 	  //---------------------------------------------------------------------------------
-	  // CO bonds
+	  // CO Bonds
 	  //---------------------------------------------------------------------------------	  
 	  hist_1CO = addHistograms( hist_1CO , makeRegularHistogram( getNNearest( cm , 1 , atom_indexesC , "O" ) , hist_start , hist_end ,  nb_box ) );
 	  hist_2CO = addHistograms( hist_2CO , makeRegularHistogram( getNNearest( cm , 2 , atom_indexesC , "O" ) , hist_start , hist_end , nb_box ) );
 	  hist_3CO = addHistograms( hist_3CO , makeRegularHistogram( getNNearest( cm , 3 , atom_indexesC , "O" ) , hist_start , hist_end , nb_box ) );
 	  hist_4CO = addHistograms( hist_4CO , makeRegularHistogram( getNNearest( cm , 4 , atom_indexesC , "O" ) , hist_start , hist_end , nb_box ) );
 	  //---------------------------------------------------------------------------------
-	  // OC bonds
+	  // CO Bonds
 	  //---------------------------------------------------------------------------------
 	  hist_1OC = addHistograms( hist_1OC , makeRegularHistogram( getNNearest( cm , 1 , atom_indexesO , "C" ) , hist_start , hist_end , nb_box ) );
 	  hist_2OC = addHistograms( hist_2OC , makeRegularHistogram( getNNearest( cm , 2 , atom_indexesO , "C" ) , hist_start , hist_end , nb_box ) );
@@ -173,7 +172,9 @@ int main(void)
 	  // OO Bonds
 	  //---------------------------------------------------------------------------------
 	  hist_1OO = addHistograms( hist_1OO , makeRegularHistogram( getNNearest( cm , 1 , atom_indexesO , "O" ) , hist_start , hist_end , nb_box ) );
+	  //---------------------------------------------------------------------------------
 	}
+      std::cout << "step: " << step << std::endl;
       step++;
      }
   //----------------------------------------------------
