@@ -73,20 +73,25 @@ int main( void )
       return 1;
     }
   //-------------------------------------------------------------------
-  
+
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step )
+      if ( step % comp_step == 0 )
 	{
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
-	}
-      std::cout << "step: " << step << std::endl;
+	  int co2 = 0;
+	  for ( int i=0 ; i < molecules.size() ; i++ )
+	    {
+	      if ( molecules[i].names.size() == 3 ) co2++;
+	    }
+	  std::cout << step << " " << co2 << std::endl;
+	}      
       step++;
      }
   //----------------------------------------------------
