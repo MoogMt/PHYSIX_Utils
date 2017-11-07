@@ -140,6 +140,54 @@ void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, cons
 
   return;
 }
+//--------------------------------------------------------------------------------------
+void makeContactMatrix( ContactMatrix & cm_connect , ContactMatrix & cm_distance , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on )
+{
+  // Determines the number of atoms
+  cm_connect.nb_atoms = atom_list.x.size();
+  cm_distance.nb_atoms = atom_list.x.size();
+
+  // Initialize contact matrix with 0so
+  if ( !(go_on) || cm_connect.matrix.size() == 0 )
+    {
+      cm_connect.matrix.assign( cm_connect.nb_atoms*cm_connect.nb_atoms , 0. );
+    }
+  if ( !(go_on) || cm_distance.matrix.size() == 0 )
+    {
+      cm_distance.matrix.assign( cm_distance.nb_atoms*cm_distance.nb_atoms , 0. );
+    }
+
+  // Loop over all pairs of atoms
+  for ( int i=0 ; i < cm_connect.nb_atoms-1 ; i++ )
+    {
+      double offset1 = i*cm_distance.nb_atoms;
+      double offset2 = i*cm_connect.nb_atoms;
+      for ( int j=i+1 ; j < cm_connect.nb_atoms ; j++ )
+	{
+	  double distsq = distanceAtomsSq( atom_list , i , j , cell);
+	  double dist= sqrt( distsq );
+	  cm_distance.matrix[ offset1 + j ] = dist;
+	  cm_distance.matrix[ j*cm_distance.nb_atoms + i ] = dist;
+	  double cutoff = getCutOff( cut_off , lut_list.type_index[i] , lut_list.type_index[j] );
+	  if ( distsq < cutoff*cutoff )
+	    {
+	      cm_connect.matrix[ offset2 + j ] = 1;
+	      cm_connect.matrix[ j*cm_connect.nb_atoms + i ] = 1; 
+	    }
+	  else
+	    {
+	      cm_connect.matrix[ offset2 + j ] = 0;
+	      cm_connect.matrix[ j*cm_connect.nb_atoms + i ] = 0; 
+	    }
+	}
+    }
+
+  // Updating LUT for types
+  cm_connect.lut_list = lut_list;
+  cm_distance.lut_list = lut_list;
+
+  return;
+}  
 //=======================================================================================
 
 //===================
@@ -148,6 +196,7 @@ void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, cons
 ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::string specie1 , const std::string specie2 )
 {
   ContactMatrix new_cm;
+  new_cm.nb_atoms = 0;
   for ( int i=0 ; i < old_cm.nb_atoms ; i++ )
     {
       if ( old_cm.lut_list.type_name[i] != specie1 ) continue;
@@ -158,6 +207,7 @@ ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::stri
 	  else
 	    {
 	      new_cm.matrix.push_back( old_cm.matrix[ offset + j ] );
+	      if ( j == 0 ) new_cm.nb_atoms++;
 	    }
 	}
     }
@@ -167,12 +217,14 @@ ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::stri
 ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::vector<int> atom_list1 , const std::vector<int> atom_list2 )
 {
   ContactMatrix new_cm;
+  new_cm.nb_atoms = 0;
   for ( int i=0 ; i < atom_list1.size() ; i++ )
     {
       int offset = atom_list1[i]*old_cm.nb_atoms;
       for ( int j=0 ; j < atom_list2.size() ; j++ )
 	{
 	  new_cm.matrix.push_back( old_cm.matrix[ offset +j ] );
+	  if ( j == 0 ) new_cm.nb_atoms++;
 	}
     }
   return new_cm;
