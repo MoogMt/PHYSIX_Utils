@@ -142,6 +142,43 @@ void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, cons
 }
 //=======================================================================================
 
+//===================
+// EXTRACTING MATRIX
+//=================================================================================================
+ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::string specie1 , const std::string specie2 )
+{
+  ContactMatrix new_cm;
+  for ( int i=0 ; i < old_cm.nb_atoms ; i++ )
+    {
+      if ( old_cm.lut_list.type_name[i] != specie1 ) continue;
+      int offset = old_cm.nb_atoms*i;
+      for ( int j = 0 ; j < old_cm.nb_atoms ; j++ )
+	{
+	  if ( old_cm.lut_list.type_name[j] != specie2 ) continue;
+	  else
+	    {
+	      new_cm.matrix.push_back( old_cm.matrix[ offset + j ] );
+	    }
+	}
+    }
+  return new_cm;
+}
+//-------------------------------------------------------------------------------------------------
+ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::vector<int> atom_list1 , const std::vector<int> atom_list2 )
+{
+  ContactMatrix new_cm;
+  for ( int i=0 ; i < atom_list1.size() ; i++ )
+    {
+      int offset = atom_list1[i]*old_cm.nb_atoms;
+      for ( int j=0 ; j < atom_list2.size() ; j++ )
+	{
+	  new_cm.matrix.push_back( old_cm.matrix[ offset +j ] );
+	}
+    }
+  return new_cm;
+}
+//=================================================================================================
+
 //===========
 // CONNECTED
 //==================================================
@@ -149,6 +186,30 @@ bool connected( const ContactMatrix & cm , const int i , const int j )
 {
   if ( cm.matrix[ i*cm.nb_atoms + j ] ) return true;
   else return false;
+}
+//=================================================
+
+//=================
+// SORTING MATRIX
+//=================================================
+void sortContactMatrix( ContactMatrix & cm )
+{
+  for ( int i=0 ; i < cm.nb_atoms ; i ++ )
+    {
+      double offset = cm.nb_atoms*i;
+      for ( int j=0 ; j < cm.nb_atoms-1 ; j++ )
+	{
+	  for ( int k=0 ; k < cm.nb_atoms ; k++ )
+	    {
+	      int index1 = offset + j, index2 = offset + k;
+	      if ( cm.matrix[ index1 ] > cm.matrix[ index2 ] )
+		{
+		  switchV( cm.matrix , index1 , index2 );
+		}
+	    }
+	}
+    }
+  return ;
 }
 //=================================================
 
@@ -195,7 +256,7 @@ double getAngle( const ContactMatrix & cm , const int atom_A , const int atom_B 
 //================
 // ATOMIC CONTACT
 //=======================================================================================
-std::vector<double> getAtomContact( Contact_Matrix & cm , int atom_index )
+std::vector<double> getAtomContact( const Contact_Matrix & cm , const int atom_index )
 {
   std::vector<double> contact_atom;
   int nb_atoms = cm.types.size();
@@ -211,7 +272,7 @@ std::vector<double> getAtomContact( Contact_Matrix & cm , int atom_index )
   return contact_atom;
 }
 //----------------------------------------------------------------------------------------
-std::vector<double> getAtomContact( Contact_Matrix & cm , int atom_index, std::string specie ) 
+std::vector<double> getAtomContact( const Contact_Matrix & cm , const int atom_index, const std::string specie ) 
 {
   std::vector<double> contact_atom;
   int nb_atoms = cm.types.size();
@@ -225,26 +286,28 @@ std::vector<double> getAtomContact( Contact_Matrix & cm , int atom_index, std::s
   return contact_atom ;
 }
 //-----------------------------------------------------------------------------------------
-std::vector<double> getAtomContact( ContactMatrix & cm , int atom_index )
+std::vector<double> getAtomContact( const ContactMatrix & cm , const int atom_index )
 {
   std::vector<double> contact;
   int offset = cm.nb_atoms*atom_index;
   for ( int i=0 ; i < cm.nb_atoms ; i++ )
     {
-      contact.push_back(cm.matrix[offset+i]);
+      double element = cm.matrix[ offset + i ];
+      if ( element > 0 ) contact.push_back( element );
     }
   return contact;
 }
 //-----------------------------------------------------------------------------------------
-std::vector<double> getAtomContact( ContactMatrix & cm , int atom_index , std::string specie )
+std::vector<double> getAtomContact( const ContactMatrix & cm , const int atom_index , const std::string specie )
 {
   std::vector<double> contact;
-  double offset = atom_index*cm.nb_atoms-1;
+  double offset = atom_index*cm.nb_atoms;
   for ( int i=0 ; i < cm.nb_atoms ; i++ )
     {
-      if ( cm.lut_list.type_name[i] == specie && i != atom_index )
+      double element = cm.matrix[ offset+i ];
+      if ( cm.lut_list.type_name[i] == specie && element > 0 )
 	{
-	  contact.push_back(cm.matrix[offset+i]);
+	  contact.push_back( element );
 	}
     }
   return contact;
@@ -254,7 +317,7 @@ std::vector<double> getAtomContact( ContactMatrix & cm , int atom_index , std::s
 //=============
 // COORDINANCE
 //=======================================================================================
-int getAtomNeighboursNb( Contact_Matrix & cm , int atom_index, double cut_off_radius )
+int getAtomNeighboursNb( const Contact_Matrix & cm , const int atom_index, const double cut_off_radius )
 {
   int neighbours = 0;
   std::vector<double> contact = getAtomContact( cm , atom_index );
@@ -268,7 +331,7 @@ int getAtomNeighboursNb( Contact_Matrix & cm , int atom_index, double cut_off_ra
   return neighbours;
 }
 //------------------------------------------------------------------------------------------------
-int getAtomNeighboursNb( Contact_Matrix & cm , int atom_index, std::string specie, double cut_off_radius )
+int getAtomNeighboursNb( const Contact_Matrix & cm , const int atom_index, const std::string specie, const double cut_off_radius )
 {
   int neighbours = 0;
   std::vector<double> contact = getAtomContact( cm, atom_index );
@@ -282,7 +345,7 @@ int getAtomNeighboursNb( Contact_Matrix & cm , int atom_index, std::string speci
   return neighbours;
 }
 //------------------------------------------------------------------------------------------------
-std::vector<int> getAtomsNeighboursNb( Contact_Matrix & cm , std::vector<int> atom_index_list , double cut_off_radius )
+std::vector<int> getAtomsNeighboursNb( const Contact_Matrix & cm , const std::vector<int> atom_index_list , const double cut_off_radius )
 {
   std::vector<int> neighbours_nb_list;
   for ( int i=0 ; i < atom_index_list.size() ; i++ )
@@ -292,7 +355,7 @@ std::vector<int> getAtomsNeighboursNb( Contact_Matrix & cm , std::vector<int> at
   return neighbours_nb_list;
 }
 //------------------------------------------------------------------------------------------------
-std::vector<int> getTypeNeighboursNb(Contact_Matrix & cm , std::string type, double cut_off_radius ) 
+std::vector<int> getTypeNeighboursNb( const Contact_Matrix & cm , const std::string type, const double cut_off_radius ) 
 {
   int nb_atoms = cm.types.size();
   std::vector<int> neighbours_nb_list;
@@ -306,7 +369,7 @@ std::vector<int> getTypeNeighboursNb(Contact_Matrix & cm , std::string type, dou
   return neighbours_nb_list;
 }
 //------------------------------------------------------------------------------------------------
-double getTypeCoordinance( Contact_Matrix & cm , std::string type, double cut_off_radius )
+double getTypeCoordinance( const Contact_Matrix & cm , const std::string type, const double cut_off_radius )
 {
   return average( getTypeNeighboursNb( cm , type , cut_off_radius ) );
 }

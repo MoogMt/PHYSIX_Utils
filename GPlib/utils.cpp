@@ -114,6 +114,22 @@ int computeSep(int atom_index, int nb_atoms)
 //========
 // VECTORS
 //==============================================================================
+void switchV( std::vector<int> & vector , int index1 , int index2 )
+{
+  double stock = vector[index1];
+  vector[ index1 ] = vector[ index2 ];
+  vector[ index2 ] = stock; 
+  return;
+}
+//-------------------------------------------------------
+void switchV( std::vector<double> & vector , int index1 , int index2 )
+{
+  double stock = vector[index1];
+  vector[ index1 ] = vector[ index2 ];
+  vector[ index2 ] = stock; 
+  return;
+}
+//-------------------------------------------------------
 std::vector<int> initVector( int value )
 {
   std::vector<int> vector;

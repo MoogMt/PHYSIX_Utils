@@ -49,17 +49,28 @@ int computeSep(int atom_index, int nb_atoms);
 //=========
 // VECTORS
 //============================================================================
+//--------
+// Switch
+//---------------------------------------------------------------------
+void switchV( std::vector<int> & vector , int index1 , int index2 );
+void switchV( std::vector<double> & vector , int index1 , int index2 );
+//----------------------------------------------------------------------
 // Init
-//---------------------------------------
+//--------------------------------------------------------
 std::vector<int> initVector( int value );
 std::vector<double> initVector( double value );
 std::vector<std::string> initVector( std::string value );
-//---------------------------------------
+//---------------------------------------------------------
+// Make
+//---------------------------------------------
 std::vector<int> makeVec(int init, int final);
-//---------------------------------------
-std::vector<double> sortVector(std::vector<double> to_sort, bool increasing);
-std::vector<double> sortVectorIncreasing(std::vector<double> unsorted);
-std::vector<double> sortVectorDecreasing(std::vector<double> unsorted);
+//---------------------------------------------
+// Sort
+//-----------------------------------------------------------------------------
+std::vector<double> sortVector( std::vector<double> to_sort, bool increasing );
+std::vector<double> sortVectorIncreasing( std::vector<double> unsorted );
+std::vector<double> sortVectorDecreasing( std::vector<double> unsorted );
+//-----------------------------------------------------------------------------
 //============================================================================
 
 

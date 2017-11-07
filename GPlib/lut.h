@@ -39,7 +39,7 @@ bool testType ( const AllTypeLUT lut_all, const int atom_index ,  const int type
 bool testType ( const TypeLUT lut , const std::string specie );
 bool testType ( const TypeLUT lut , const int index );
 //--------------------------------------------------------------------------
-bool typeExists ( const std::vector<TypeLUT> list , const std::string specie );
+bool typeExists( const std::vector<TypeLUT> list , const std::string specie );
 bool typeExists( const std::vector<TypeLUT> list , const int index );
 //=============================================================================================
 
