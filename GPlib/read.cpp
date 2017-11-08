@@ -37,6 +37,12 @@ int main( void )
   std::ifstream input("TRAJEC.xyz");
   //---------------------------------
 
+  //--------
+  // Output
+  //--------------------------------------------------------------------------------
+  std::ofstream molecules ("molecules.dat",  std::ios::out );
+  //--------------------------------------------------------------------------------
+  
   //----------------------
   // Physical parameters
   //--------------------------------------
@@ -53,6 +59,14 @@ int main( void )
   ContactMatrix cm_connection;    // Contact Matrix
   ContactMatrix cm_distance;    // Contact Matrix
   //--------------------------------------------------
+
+  //-----------
+  // Histogram
+  //-----------------------------------------
+  double hist_start = 0.5, hist_end = 96.5;
+  int nb_box = 96;
+  std::vector<Bin> hist;
+  //-----------------------------------------
   
   //--------------------
   // Reading Cell File
@@ -79,27 +93,36 @@ int main( void )
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0 )
+     if ( step % comp_step == 0 )
 	{
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
-	  int co2 = 0;
+	  std::vector<double> sizes;
 	  for ( int i=0 ; i < molecules.size() ; i++ )
 	    {
-	      if ( molecules[i].names.size() == 3 ) co2++;
+	      sizes.push_back( molecules[i].names.size() );
 	    }
-	  std::cout << step << " " << co2 << std::endl;
+	  if ( step == 1 )
+	    {
+	      hist = makeRegularHistogram( sizes , hist_start , hist_end , nb_box );
+	    }
+	  else
+	    {
+	      hist = addHistograms ( hist , makeRegularHistogram( sizes , hist_start , hist_end , nb_box ) );
+	    }
+	  std::cout << step << std::endl;
 	}      
-      step++;
+      step++;*
      }
   //----------------------------------------------------
-  
+  writeHistogram( molecules , normalizeHistogram( hist ) );
   //--------------
   //Closing fluxes
   //----------------------
   input.close();
+  molecules.close();
    //----------------------
   
   return 0;
