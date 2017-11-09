@@ -99,6 +99,15 @@ int main( void )
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
+	  for( int i=0 ; i < molecules.size() ; i++ )
+	    {
+	      for ( int j=0 ; j < molecules[i].bonds.size(); j++ )
+		{
+		  std::cout << molecules[i].bonds[j].atom1_index << " " << molecules[i].bonds[j].atom2_index << std::endl;
+		}
+	      std::cout << "------------" << std::endl;
+	    }
+	  std::cout << "================" << std::endl;
 	  std::vector<double> sizes;
 	  for ( int i=0 ; i < molecules.size() ; i++ )
 	    {
@@ -112,9 +121,8 @@ int main( void )
 	    {
 	      hist = addHistograms ( hist , makeRegularHistogram( sizes , hist_start , hist_end , nb_box ) );
 	    }
-	  std::cout << step << std::endl;
 	}      
-      step++;*
+      step++;
      }
   //----------------------------------------------------
   writeHistogram( molecules , normalizeHistogram( hist ) );
