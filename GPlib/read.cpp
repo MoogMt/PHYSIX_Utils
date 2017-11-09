@@ -99,6 +99,7 @@ int main( void )
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
+	  // Prints the bonds between atoms
 	  for( int i=0 ; i < molecules.size() ; i++ )
 	    {
 	      for ( int j=0 ; j < molecules[i].bonds.size(); j++ )
@@ -108,11 +109,13 @@ int main( void )
 	      std::cout << "------------" << std::endl;
 	    }
 	  std::cout << "================" << std::endl;
+	  // Stock the size of the molecules in the box
 	  std::vector<double> sizes;
 	  for ( int i=0 ; i < molecules.size() ; i++ )
 	    {
 	      sizes.push_back( molecules[i].names.size() );
 	    }
+	  // Make an histogram of the sizes of the molecules in the box
 	  if ( step == 1 )
 	    {
 	      hist = makeRegularHistogram( sizes , hist_start , hist_end , nb_box );
@@ -125,6 +128,7 @@ int main( void )
       step++;
      }
   //----------------------------------------------------
+  // Writes histogram
   writeHistogram( molecules , normalizeHistogram( hist ) );
   //--------------
   //Closing fluxes
