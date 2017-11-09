@@ -22,101 +22,120 @@
 #include "histogram.h"
 #include "pdb.h"
 #include "sim.h"
+#include "lut.h"
+#include "molecules.h"
 //-------------------------
 
 //================
 // MAIN PROGRAM
 //=====================================================================
-int main(void)
+int main( void )
 {
-  //-------
-  // DEBUG
-  //-----------------
-  bool debug=false;
-  //-----------------
-  
-  //---------
+  //--------
   // Input
-  //------------------------------------
+  //---------------------------------
   std::ifstream input("TRAJEC.xyz");
-  //------------------------------------
+  //---------------------------------
 
   //--------
   // Output
   //--------------------------------------------------------------------------------
-  std::ofstream trackCC("trackCC.dat",  std::ios::out );
-  std::ofstream CCxyz("CC-molecules.xyz",  std::ios::out  | std::ios::app );
+  std::ofstream molecules ("molecules.dat",  std::ios::out );
   //--------------------------------------------------------------------------------
   
   //----------------------
   // Physical parameters
-  //----------------------------------------------------------------------------------
-  double cut_off_radius = 1.6;             // Cut-Off for molecules
-  int step = 1;                            // Step counter
-  int comp_step=2;                         // The number of step you wait to compute CM
-  int start_step = 5000, end_step = 31000; // Start and end step for datanalysis
-  double hist_start  = 0.95;  double hist_end = 3.00; int nb_box = 300;
-  //----------------------------------------------------------------------------------
-
-  //---------
-  // Initializers
-  //----------------------------------------------------------------------------------
-  std::vector<Atom> atom_list;                                    // Atoms in cell
-  std::vector<int> atom_indexesC; std::vector<int> atom_indexesO; // Indexes of atoms
-  Contact_Matrix contact_matrix_init;                             // Initial Contact Matrix
-  //----------------------------------------------------------------------------------
+  //--------------------------------------
+  int step       = 1;  // Step counter
+  int start_step = 2000; // Start step
+  int comp_step  = 1; // Frequency of computation
+  //--------------------------------------
 
   //---------------
-  // Reading cell
-  //---------------------------------
-  Cell box=readParamCell("cell.param");
-  //---------------------------------
+  // Initializers
+  //--------------------------------------------------
+  AtomList  atom_list;  // Atoms in cell
+  AllTypeLUT lut_list; // LUT for types
+  ContactMatrix cm_connection;    // Contact Matrix
+  ContactMatrix cm_distance;    // Contact Matrix
+  //--------------------------------------------------
+
+  //-----------
+  // Histogram
+  //-----------------------------------------
+  double hist_start = 0.5, hist_end = 96.5;
+  int nb_box = 96;
+  std::vector<Bin> hist;
+  //-----------------------------------------
   
+  //--------------------
+  // Reading Cell File
+  //-------------------------------------------------------------------
+  Cell cell;
+  if ( ! readParamCell( "cell.param" , cell ) )
+    {
+      return 1;
+    }
+  //-------------------------------------------------------------------
+
+  //-----------------
+  // Reading Cut-Off
+  //-------------------------------------------------------------------
+  CutOffMatrix cut_off;
+  if ( ! readCutOff( "cut_off.dat" , cut_off , lut_list ) )
+    {
+      return 1;
+    }
+  //-------------------------------------------------------------------
+
   //-------------------
   // Reading XYZ file
-  //---------------------------------------------------------------------------------
-  do
+  //----------------------------------------------------
+  while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      atom_list=readstepXYZ( input ); // Read one line
-      if ( step == 1 )
+     if ( step % comp_step == 0 )
 	{
-	  atom_indexesC = makeVec(0,31);
-	  atom_indexesO = makeVec(32,atom_list.size());
-	}
-      if( step % comp_step == 0 && !(debug) && step >= start_step && step <=  end_step )
-	{
-	  //----------------
-	  // Contact Matrix
-	  //-------------------------------------------------------------------
-	  Contact_Matrix contact_matrix = makeContactMatrix( atom_list , box );
-	  //-------------------------------------------------------------------
-	  for ( int i=0 ; i < atom_indexesC.size()-1 ; i++ )
+	  // Makes the contact matrix
+	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
+	  // Making molecules
+	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
+	  // Prints the bonds between atoms
+	  for( int i=0 ; i < molecules.size() ; i++ )
 	    {
-	      for (int j=i+1 ; j < atom_indexesC.size() ; j++ )
+	      for ( int j=0 ; j < molecules[i].bonds.size(); j++ )
 		{
-		  if ( getDistance(contact_matrix, atom_indexesC[i],  atom_indexesC[j] ) < 1.6 )
-		    {
-		      
-		      trackCC << step << " " << i << " " << j << " " << getAtomNeighboursNb(contact_matrix, i , "O", cut_off_radius ) << " " << getAtomNeighboursNb(contact_matrix, j , "O", cut_off_radius ) << " " <<  getAtomNeighboursNb(contact_matrix, i , "C", cut_off_radius ) << " " << getAtomNeighboursNb(contact_matrix, j , "C", cut_off_radius ) << std::endl;
-		      writeXYZ(CCxyz,atom_list);
-		    }
+		  std::cout << molecules[i].bonds[j].atom1_index << " " << molecules[i].bonds[j].atom2_index << std::endl;
 		}
+	      std::cout << "------------" << std::endl;
 	    }
-	  //--------------------------------------------------------------------
-	  //-----------------------------------------
-	  std::cout << "step " << step << std::endl;
-	  //-----------------------------------------
-	  }
+	  std::cout << "================" << std::endl;
+	  // Stock the size of the molecules in the box
+	  std::vector<double> sizes;
+	  for ( int i=0 ; i < molecules.size() ; i++ )
+	    {
+	      sizes.push_back( molecules[i].names.size() );
+	    }
+	  // Make an histogram of the sizes of the molecules in the box
+	  if ( step == 1 )
+	    {
+	      hist = makeRegularHistogram( sizes , hist_start , hist_end , nb_box );
+	    }
+	  else
+	    {
+	      hist = addHistograms ( hist , makeRegularHistogram( sizes , hist_start , hist_end , nb_box ) );
+	    }
+	}      
       step++;
-    } while( atom_list.size() != 0 );
-  //-----------------------------------------------------------------------------
-
+     }
+  //----------------------------------------------------
+  // Writes histogram
+  writeHistogram( molecules , normalizeHistogram( hist ) );
+  //--------------
   //Closing fluxes
   //----------------------
   input.close();
-  trackCC.close();
-  CCxyz.close();
-  //----------------------
+  molecules.close();
+   //----------------------
   
   return 0;
 }
