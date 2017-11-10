@@ -12,7 +12,7 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
   int nb_atoms = 0 ; // Numbers
   std::string line ; // Contains one line
   //---------------------------------------------------------------
-
+  
   //------------------------------------------
   // Getting the number of atoms in the step
   //-----------------------------------------------------------------------------------
@@ -26,7 +26,7 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
 	}
     }
   //-----------------------------------------------------------------------------------
-
+  
   //-------------
   // Filling LUT
   //---------------------------------------------------------------
@@ -34,7 +34,7 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
   if ( lut_list.type_name.size() == 0 ) fill_lut=true;
   else fill_lut = false;
   //---------------------------------------------------------------
-  
+
   //-----------------------------
   // Initialization of variables
   //-----------------------------------------------------------------------------------
@@ -45,6 +45,16 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
       atoms.y.assign( nb_atoms, 0 );
       atoms.z.assign( nb_atoms, 0 );
       atoms.index.assign( nb_atoms , 0 );
+    }
+  //-----------------------------------------------------------------------------------
+
+  //---------------
+  // Detecting EOF
+  //-----------------------------------------------------------------------------------
+  std::cout << "check" << std::endl;
+  if ( nb_atoms == 0 )
+    {
+      return false;
     }
   //-----------------------------------------------------------------------------------
   
@@ -81,6 +91,7 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
       i++;
     }
   //-------------------------------------------------------------------------------------
+
   return true; 
 }
 //---------------------------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-//---------------
+2//---------------
 // External Libs
 //-------------------
 #include <fstream>
@@ -40,7 +40,9 @@ int main( void )
   //--------
   // Output
   //--------------------------------------------------------------------------------
-  std::ofstream molecules ("molecules.dat",  std::ios::out );
+  std::ofstream graph_molecules ( "graph_molecules.dat" ,  std::ios::out );
+  std::ofstream hist_molecules ( "hist_molecules.dat" ,  std::ios::out );
+  std::ofstream co2 ( "co2.dat" ,  std::ios::out );
   //--------------------------------------------------------------------------------
   
   //----------------------
@@ -104,11 +106,13 @@ int main( void )
 	    {
 	      for ( int j=0 ; j < molecules[i].bonds.size(); j++ )
 		{
-		  std::cout << molecules[i].bonds[j].atom1_index << " " << molecules[i].bonds[j].atom2_index << std::endl;
+		  int index_atom1 = molecules[i].bonds[j].atom1_index;
+		  int index_atom2 = molecules[i].bonds[j].atom2_index;
+		  graph_molecules << cm_connection.lut_list.type_index[ index_atom1 ] << " " << index_atom1 << " " << cm_connection.lut_list.type_index[ index_atom1 ] << " " << index_atom2 << std::endl;
 		}
-	      std::cout << "------------" << std::endl;
+	      graph_molecules << "------------" << std::endl;
 	    }
-	  std::cout << "================" << std::endl;
+	   graph_molecules << "================" << std::endl;
 	  // Stock the size of the molecules in the box
 	  std::vector<double> sizes;
 	  for ( int i=0 ; i < molecules.size() ; i++ )
@@ -124,18 +128,43 @@ int main( void )
 	    {
 	      hist = addHistograms ( hist , makeRegularHistogram( sizes , hist_start , hist_end , nb_box ) );
 	    }
+	  // Bookkeeping fraction of co2 molecules
+	  int co2_count=0;
+	  for ( int i=0 ; i < molecules.size() ; i++ )
+	    {
+	      if ( molecules[i].names.size() == 3 ) co2_count++;
+	    }
+	  co2 << step << " " << 3*(double)(co2_count)/96 << std::endl;
+	  // Step making
+	  std::cout << step << std::endl;
 	}      
       step++;
      }
   //----------------------------------------------------
-  // Writes histogram
-  writeHistogram( molecules , normalizeHistogram( hist ) );
+
+  //-------------------------------------------------------
+  // Multiplying values by number of atoms in the molecule
+  //---------------------------------------------------------
+  for ( int i=0 ; i < hist.size() ; i++ )
+    {
+      hist[i].value = hist[i].value*center(hist[i]);
+    }
+  //---------------------------------------------------------
+
+  //---------------------------------
+  // Normalizes and Writes histogram
+  //----------------------------------------------------
+  writeHistogram( hist_molecules , normalizeHistogram( hist ) );
+  //----------------------------------------------------
+
   //--------------
   //Closing fluxes
   //----------------------
   input.close();
-  molecules.close();
-   //----------------------
+  graph_molecules.close();
+  hist_molecules.close();
+  co2.close();
+  //----------------------
   
   return 0;
 }
