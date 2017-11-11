@@ -35,8 +35,15 @@ int main( void )
   // Input
   //---------------------------------
   std::ifstream input("TRAJEC.xyz");
-  //---------------------------------
+  //--------------------------------
 
+  //--------
+  // Output
+  //-------------------------------------
+  std::ofstream cangles("cangles.dat");
+  std::ofstream oangles("oangles.dat");
+  //-------------------------------------
+  
   //----------------------
   // Physical parameters
   //--------------------------------------
@@ -84,7 +91,17 @@ int main( void )
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
-	  getAngleAtom( makeMolecules( cm_connection ) );
+	  for ( int i=0 ; i < atom_list.size() ; i++ )
+	    {
+	      if ( i < 32 )
+		{
+		  cangles << step << " " <<  getAngleAtom( cm_distance, makeMolecules( cm_connection ) , i ) << std::endl; 
+		}
+	      else
+		{
+		  oangles << step << " " << getAngleAtom( cm_distance, makeMolecules( cm_connection ) , i ) << std:: endl;
+		}
+	    }
 	  // Step making
 	  std::cout << step << std::endl;
 	}      
@@ -96,6 +113,8 @@ int main( void )
   //Closing fluxes
   //----------------------
   input.close();
+  cangles.close();
+  oangles.close();
   //----------------------
   
   return 0;
