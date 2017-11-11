@@ -91,7 +91,8 @@ int main( void )
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
-	  for ( int i=0 ; i < atom_list.size() ; i++ )
+	  
+	  for ( int i=0 ; i < atom_list.names.size() ; i++ )
 	    {
 	      if ( i < 32 )
 		{
