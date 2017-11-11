@@ -128,7 +128,8 @@ std::vector<Molecule> makeMolecules( const ContactMatrix & cm )
 		      // ... And to the molecule
 		      molecule.names.push_back( cm.lut_list.type_name[h] ); // Name
 		      molecule.atom_index.push_back( h );                   // Index
-		      molecule.bonds.push_back({k,h,1.0});                  // Bond
+		      Bond bond =  { k , h , 1.0 };
+		      molecule.bonds.push_back( bond );                  // Bond
 		    }
 		}
 	    }
@@ -185,3 +186,37 @@ void printMoleculesSize( const std::vector<MoleculeBasic> molecules )
   return;
 }
 //=================================================================================
+
+//========
+// Bonded
+//=================================================================================
+std::vector<int> getBonded( Molecule molecule , int atom_index )
+{
+  std::vector<int> bonded;
+  for ( int i=0 ; i < molecule.bonds.size() ; i++ )
+    {
+      if ( molecule.bonds[i].atom1_index == atom_index ) bonded.push_back( molecule.bonds[i].atom2_index );
+      else if ( molecule.bonds[i].atom2_index == atom_index ) bonded.push_back( molecule.bonds[i].atom1_index );  
+    }
+  return bonded;
+}
+//=================================================================================
+
+//=========================
+// GET ANGLES AROUND ATOMS
+//=================================================================================
+std::vector<double> getAngleAtom( ContactMatrix cm , Molecule molecule , int atom_index )
+{
+  std::vector<double> angles;
+  std::vector<int> bonded_atom = getBonded( molecule , atom_index );
+  for ( int i=0 ; i < bonded_atom.size()-1 ; i++ )
+    {
+      for ( int j=i+1 ; j < bonded_atom.size() ; j++ )
+	{
+	  angles.push_back( getAngle( cm , atom_index , i , j ) );
+	}
+    }
+  return angles;
+}
+//=================================================================================
+

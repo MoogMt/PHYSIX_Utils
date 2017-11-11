@@ -35,7 +35,6 @@ struct Molecule
 };
 //=============================================
 
-
 //======
 // MAKE
 //=============================================================================================
@@ -53,6 +52,18 @@ void printMolecule( const MoleculeBasic molecule );
 void printMoleculeSize( const MoleculeBasic molecule, const bool toline );
 void printMolecules( const std::vector<MoleculeBasic> molecules );
 void printMoleculesSize( const std::vector<MoleculeBasic> molecules );
+//============================================================================
+
+//========
+// Bonded
+//=================================================================================
+std::vector<int> getBonded( Molecule molecule , int atom_index );
+//=================================================================================
+
+//========
+// Angles 
+//============================================================================
+std::vector<double> getAngleAtom( ContactMatrix cm , Molecule molecule , int atom_index );
 //============================================================================
 
 #endif

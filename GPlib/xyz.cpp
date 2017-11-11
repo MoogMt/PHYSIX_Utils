@@ -51,7 +51,6 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
   //---------------
   // Detecting EOF
   //-----------------------------------------------------------------------------------
-  std::cout << "check" << std::endl;
   if ( nb_atoms == 0 )
     {
       return false;
