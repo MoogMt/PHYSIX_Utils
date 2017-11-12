@@ -108,16 +108,16 @@ int main( void )
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
 	  for ( int j=0 ; j < molecules.size() ; j++ )
 	    {
-	      for ( int i=0 ; i < atom_list.names.size() ; i++ )
+	      for ( int i=0 ; i < molecules[j].atom_index.size() ; i++ )
 		{
 		  std::vector<double> angles;
 		  if ( i < 32 )
 		    {
-		      appendVector( c_angles, getAngleAtom( cm_distance, molecules[j] , i ) ) ;
+		      appendVector( c_angles, getAngleAtom( cm_distance, molecules[j] , molecules[j].atom_index[i] ) ) ;
 		    }
 		  else
 		    {
-		      appendVector( o_angles , getAngleAtom( cm_distance, molecules[j] , i ) ) ;
+		      appendVector( o_angles , getAngleAtom( cm_distance, molecules[j] , molecules[j].atom_index[i] ) ) ;
 		    }
 		}
 	    }
