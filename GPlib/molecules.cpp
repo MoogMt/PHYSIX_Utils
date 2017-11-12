@@ -213,7 +213,7 @@ std::vector<double> getAngleAtom( ContactMatrix cm , Molecule molecule , int ato
     {
       for ( int j=i+1 ; j < bonded_atom.size() ; j++ )
 	{
-	  angles.push_back( getAngle( cm , atom_index , i , j ) );
+	  angles.push_back( getAngle( cm , atom_index , bonded_atom[i] , bonded_atom[j] ) );
 	}
     }
   return angles;

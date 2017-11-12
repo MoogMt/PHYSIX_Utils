@@ -291,17 +291,17 @@ double getAngle( const Contact_Matrix & cm , const int atom_center_index , const
 {
   double a = getDistance( cm , atom_center_index, atom_2_index);
   double b = getDistance( cm , atom_center_index, atom_3_index);
-  double c = getDistance( cm , atom_center_index, atom_3_index);
-  return acos( (a*a+b*b-c*c)/(2*a*b) );
+  double c = getDistance( cm , atom_2_index, atom_3_index);
+  return acos( (a*a+b*b-c*c)/(2*a*b) )*180.0/M_PI;
 }
 //--------------------------------------------------------------------------------------
 double getAngle( const ContactMatrix & cm , const int atom_A , const int atom_B , const int atom_C )
 // Get Angle(A)=(BAC)
 {
-  double a = getDistance( cm , atom_A , atom_C );
+  double a = getDistance( cm , atom_A , atom_B );
   double b = getDistance( cm , atom_A , atom_C );
   double c = getDistance( cm , atom_B , atom_C );
-  return acos( (a*a+b*b-c*c)/(2*a*b) );
+  return acos( (a*a+b*b-c*c)/(2*a*b) )*180.0/M_PI;
 }
 //=======================================================================================
 

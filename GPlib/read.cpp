@@ -85,9 +85,9 @@ int main( void )
   // Histograms
   //------------------------------------
   // Technical values
-  double hist_start = 0.000;
-  double hist_end   = 180.0;
-  int nb_box = 400;
+  double hist_start =  0.0;
+  double hist_end   =  180.0;
+  int nb_box = 1000;
   //-----------------------------------
   std::vector<double> c_angles;
   std::vector<double> o_angles;
@@ -110,7 +110,6 @@ int main( void )
 	    {
 	      for ( int i=0 ; i < molecules[j].atom_index.size() ; i++ )
 		{
-		  std::vector<double> angles;
 		  if ( i < 32 )
 		    {
 		      appendVector( c_angles, getAngleAtom( cm_distance, molecules[j] , molecules[j].atom_index[i] ) ) ;
