@@ -81,6 +81,20 @@ int main( void )
     }
   //-------------------------------------------------------------------
 
+  //------------------------------------
+  // Histograms
+  //------------------------------------
+  // Technical values
+  double hist_start = 0.000;
+  double hist_end   = 180.0;
+  int nb_box = 400;
+  //-----------------------------------
+  std::vector<double> c_angles;
+  std::vector<double> o_angles;
+  std::vector<Bin> c_angles_hist;
+  std::vector<Bin> o_angles_hist;
+  //------------------------------------
+  
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
@@ -91,16 +105,20 @@ int main( void )
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
-	  
-	  for ( int i=0 ; i < atom_list.names.size() ; i++ )
+	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
+	  for ( int j=0 ; j < molecules.size() ; j++ )
 	    {
-	      if ( i < 32 )
+	      for ( int i=0 ; i < atom_list.names.size() ; i++ )
 		{
-		  cangles << step << " " <<  getAngleAtom( cm_distance, makeMolecules( cm_connection ) , i ) << std::endl; 
-		}
-	      else
-		{
-		  oangles << step << " " << getAngleAtom( cm_distance, makeMolecules( cm_connection ) , i ) << std:: endl;
+		  std::vector<double> angles;
+		  if ( i < 32 )
+		    {
+		      appendVector( c_angles, getAngleAtom( cm_distance, molecules[j] , i ) ) ;
+		    }
+		  else
+		    {
+		      appendVector( o_angles , getAngleAtom( cm_distance, molecules[j] , i ) ) ;
+		    }
 		}
 	    }
 	  // Step making

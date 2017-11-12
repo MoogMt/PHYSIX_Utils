@@ -71,6 +71,9 @@ std::vector<double> sortVector( std::vector<double> to_sort, bool increasing );
 std::vector<double> sortVectorIncreasing( std::vector<double> unsorted );
 std::vector<double> sortVectorDecreasing( std::vector<double> unsorted );
 //-----------------------------------------------------------------------------
+// Appending
+//-----------------------------------------------------------------------------
+void appendVector( std::vector<double> & vec_to, std::vector<double> vec_from );
 //============================================================================
 
 

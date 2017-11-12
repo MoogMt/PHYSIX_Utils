@@ -206,6 +206,15 @@ std::vector<double> sortVectorDecreasing(std::vector<double> to_sort)
     }
   return to_sort;
 }
+//-----------------------------------------------------------------------
+void appendVector( std::vector<double> & vec_to, std::vector<double> vec_from )
+{
+  for ( int i=0 ; i < vec_from.size() ; i++ )
+    {
+      vec_to.push_back( vec_from[i] );
+    }
+  return;
+}
 //=================================================================
 
 //=============
