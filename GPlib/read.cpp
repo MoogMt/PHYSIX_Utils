@@ -128,6 +128,20 @@ int main( void )
      }
   //----------------------------------------------------
 
+  //-------------------
+  // Making Histograms
+  //----------------------------------------------------
+  c_angles_hist = makeRegularHistogram( c_angles, hist_start , hist_end , nb_box);
+  o_angles_hist = makeRegularHistogram( o_angles, hist_start , hist_end , nb_box);
+  //----------------------------------------------------
+
+  //--------------------
+  // Writting histograms
+  //----------------------------------------------------
+  writeHistogram( cangles , normalizeHistogram( c_angles_hist ) );
+  writeHistogram( oangles , normalizeHistogram( o_angles_hist ) );
+  //----------------------------------------------------
+  
   //--------------
   //Closing fluxes
   //----------------------
