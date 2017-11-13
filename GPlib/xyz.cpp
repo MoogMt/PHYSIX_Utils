@@ -25,6 +25,7 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
 	  return false;
 	}
     }
+  else return false;
   //-----------------------------------------------------------------------------------
   
   //-------------

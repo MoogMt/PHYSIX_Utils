@@ -41,15 +41,14 @@ int main( void )
   // Output
   //-------------------------------------
   std::ofstream cangles("cangles.dat");
-  std::ofstream oangles("oangles.dat");
   //-------------------------------------
   
   //----------------------
   // Physical parameters
   //--------------------------------------
   int step       = 1;  // Step counter
-  int start_step = 3000; // Start step
-  //int stop_step  = 20000;
+  int start_step = 2000; // Start step
+  int end_step = 22000;
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
 
@@ -90,10 +89,7 @@ int main( void )
   double hist_end   =  180.0;
   int nb_box = 1800;
   //-----------------------------------
-  std::vector<double> c_angles;
-  std::vector<double> o_angles;
   std::vector<Bin> c_angles_hist;
-  std::vector<Bin> o_angles_hist;
   //------------------------------------
   
   //-------------------
@@ -101,25 +97,33 @@ int main( void )
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0 && step > start_step )
+      if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
-	  for ( int j=0 ; j < molecules.size() ; j++ )
+	  // Calculating angles
+	  std::vector<double> c_angles;
+	  for ( int i=0 ; i < molecules.size() ; i++ )
 	    {
-	      for ( int i=0 ; i < molecules[j].atom_index.size() ; i++ )
+	      for ( int j=0 ; j < molecules[i].atom_index.size() ; j++ )
 		{
-		  if ( i < 32 )
+		  if ( molecules[i].names[j] == "C" )
 		    {
-		      appendVector( c_angles, getAngleAtom( cm_distance, molecules[j] , molecules[j].atom_index[i] ) ) ;
-		    }
-		  else
-		    {
-		      appendVector( o_angles , getAngleAtom( cm_distance, molecules[j] , molecules[j].atom_index[i] ) ) ;
+		      appendVector( c_angles , getAngleAtom( cm_distance, molecules[i] , molecules[i].atom_index[j] ) );
 		    }
 		}
+	    }
+	  std::vector<Bin> cangles_hist_temp = makeRegularHistogram( c_angles, hist_start , hist_end , nb_box);
+	  // Building up the histogram
+	  if ( step > start_step + 1 )
+	    {
+	      c_angles_hist = addHistograms( c_angles_hist , cangles_hist_temp );
+	    }
+	  else
+	    {
+	      c_angles_hist = cangles_hist_temp;
 	    }
 	  // Step making
 	  std::cout << step << std::endl;
@@ -128,18 +132,10 @@ int main( void )
      }
   //----------------------------------------------------
 
-  //-------------------
-  // Making Histograms
-  //----------------------------------------------------
-  c_angles_hist = makeRegularHistogram( c_angles, hist_start , hist_end , nb_box);
-  o_angles_hist = makeRegularHistogram( o_angles, hist_start , hist_end , nb_box);
-  //----------------------------------------------------
-
   //--------------------
   // Writting histograms
   //----------------------------------------------------
   writeHistogram( cangles , normalizeHistogram( c_angles_hist ) );
-  writeHistogram( oangles , normalizeHistogram( o_angles_hist ) );
   //----------------------------------------------------
   
   //--------------
@@ -147,7 +143,6 @@ int main( void )
   //----------------------
   input.close();
   cangles.close();
-  oangles.close();
   //----------------------
   
   return 0;

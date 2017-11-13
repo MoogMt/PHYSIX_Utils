@@ -208,3 +208,54 @@ bool readParamCell( std::string file_name , Cell & cell )
     }
 }
 //==============================================================================================
+
+
+//===================
+// Reading Pressure
+//==============================================================================================
+bool readPressure( std::ifstream & input , double & pressure )
+{
+  //----------
+  // Variable
+  //--------------------
+  pressure=0;
+  std::string line;
+  //---------------------
+
+  //---------------------
+  // Reading First line
+  //--------------------------------------
+  if ( ! std::getline( input , line ) )
+    {
+      return false;
+    }
+  //--------------------------------------
+  
+  //------------------
+  // Reading pressure
+  //--------------------------------------
+  for ( int i=1 ; i <= 3 ; i++ )
+    {
+      if ( std::getline( input , line ) )
+	{
+	  std::istringstream it_string(line);
+	  int j=0;
+	  double stock;
+	  while ( j < i )
+	    {
+	      stock=0;
+	      if ( !( it_string >> stock ) ) return false;
+	      j++;
+	    }
+	  pressure += stock;
+	}
+      else return false;
+    }
+  //--------------------------------------
+
+  // Dividing by 3
+  pressure /= 3 ;
+  // No end of file met
+  return true;
+}
+//==============================================================================================
