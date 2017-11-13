@@ -47,7 +47,8 @@ int main( void )
   // Physical parameters
   //--------------------------------------
   int step       = 1;  // Step counter
-  int start_step = 3000; // Start step
+  int start_step = 2000; // Start step
+  int end_step = 22000;
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
 
@@ -96,7 +97,7 @@ int main( void )
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0 && step > start_step )
+      if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
