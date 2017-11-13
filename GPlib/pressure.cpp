@@ -80,13 +80,12 @@ int main( void )
 	    {
 	      loc_avg_press /= (double)(stride_press);
 	      loc_var_press = loc_var_press/(double)(stride_press) - loc_avg_press*loc_avg_press;
-	      press_out << step << " " << gen_avg_press << " " << loc_var_press << " " << sqrt( loc_var_press ) << std::endl;
-	      std::cout << step << " " << gen_avg_press << " " << loc_var_press << " " << sqrt( loc_var_press ) << std::endl;
+	      press_out << step << " " << loc_avg_press << " " << loc_var_press << " " << sqrt( loc_var_press ) << std::endl;
 	      loc_avg_press = 0;
 	      loc_var_press = 0;
 	    }
 	  step_press++;
-	  std::cout << step << std::endl;
+	  std::cout << step << " " << pressure << std::endl;
 	}      
       step++;
      }
