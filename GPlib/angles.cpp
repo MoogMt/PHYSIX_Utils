@@ -48,7 +48,8 @@ int main( void )
   // Physical parameters
   //--------------------------------------
   int step       = 1;  // Step counter
-  int start_step = 2000; // Start step
+  int start_step = 3000; // Start step
+  //int stop_step  = 20000;
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
 
@@ -87,7 +88,7 @@ int main( void )
   // Technical values
   double hist_start =  0.0;
   double hist_end   =  180.0;
-  int nb_box = 1000;
+  int nb_box = 1800;
   //-----------------------------------
   std::vector<double> c_angles;
   std::vector<double> o_angles;
@@ -100,7 +101,7 @@ int main( void )
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0 )
+      if ( step % comp_step == 0 && step > start_step )
 	{
 	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );

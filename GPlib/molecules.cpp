@@ -220,11 +220,11 @@ std::vector<double> getAngleAtom( ContactMatrix cm , Molecule molecule , int ato
 }
 //=================================================================================
 
-void sortMolecules( std::vector<Molecule> & molecules_stock , std::vector<Molecule> & molecule )
+/*void sortMolecules( std::vector<Molecule> & molecules_stock , std::vector<Molecule> & molecule )
 {
   for ( int i=0 ; i < molecule.size() ; i++ )
     {
       sortMolecule( molecules_stock , molecule[i] );
     }
   return;
-}
+  }*/
