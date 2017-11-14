@@ -40,7 +40,10 @@ int main( void )
   //--------
   // Output
   //-------------------------------------
-  std::ofstream cangles("cangles.dat");
+  std::ofstream c2_angles("c2angles.dat");
+  std::ofstream c3_angles("c3angles.dat");
+  std::ofstream c4_angles("c4angles.dat");
+  std::ofstream o2_angles("o2angles.dat");
   //-------------------------------------
   
   //----------------------
@@ -48,7 +51,7 @@ int main( void )
   //--------------------------------------
   int step       = 1;  // Step counter
   int start_step = 2000; // Start step
-  int end_step = 22000;
+  int end_step   = 120000;
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
 
@@ -81,16 +84,19 @@ int main( void )
     }
   //-------------------------------------------------------------------
 
-  //------------------------------------
+  //------------
   // Histograms
-  //------------------------------------
+  //---------------------------------------------------------------
   // Technical values
-  double hist_start =  0.0;
-  double hist_end   =  180.0;
-  int nb_box = 1800;
-  //-----------------------------------
-  std::vector<Bin> c_angles_hist;
-  //------------------------------------
+  double hist_start = 0;
+  double hist_end   = 180;
+  int nb_box        = 1800;
+  //---------------------------------------------------------------
+  std::vector<Bin> c2_angles_hist; std::vector<double> c2_angles;
+  std::vector<Bin> c3_angles_hist; std::vector<double> c3_angles;
+  std::vector<Bin> c3_angles_hist; std::vector<double> c4_angles;
+  std::vector<Bin> o2_angles_hist; std::vector<double> o2_angles;
+  //---------------------------------------------------------------
   
   //-------------------
   // Reading XYZ file
@@ -104,26 +110,24 @@ int main( void )
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
 	  // Calculating angles
-	  std::vector<double> c_angles;
-	  for ( int i=0 ; i < molecules.size() ; i++ )
+	  for ( int i=0 ; i < molecules.size() ; i++  )
 	    {
-	      for ( int j=0 ; j < molecules[i].atom_index.size() ; j++ )
+	      for ( int j=0 ; j < molecules[j].atom_index.size() ; j++ )
 		{
-		  if ( molecules[i].names[j] == "C" )
+		  std::vector<double> angles = getAngleAtom( cm_distance , molecules[j] , molecules[j].atom_index[i] );
+		  if ( molecules[j].names[i] == "C" )
 		    {
-		      appendVector( c_angles , getAngleAtom( cm_distance, molecules[i] , molecules[i].atom_index[j] ) );
+		      if ( angles.size() == 1 )       appendVector( c2_angles , angles );
+		      else if ( angles.size() == 3 )  appendVector( c3_angles , angles );
+		      else if ( angles.size() == 6 )  appendVector( c4_angles , angles );
+		      else c_others_nb.push_back( angles.size() );
+		    }
+		  else
+		    {
+		      if ( angles.size() == 1 ) appendVector( o2_angles , angles );
+		      else o_others_nb.push_back( angles.size() );
 		    }
 		}
-	    }
-	  std::vector<Bin> cangles_hist_temp = makeRegularHistogram( c_angles, hist_start , hist_end , nb_box);
-	  // Building up the histogram
-	  if ( step > start_step + 1 )
-	    {
-	      c_angles_hist = addHistograms( c_angles_hist , cangles_hist_temp );
-	    }
-	  else
-	    {
-	      c_angles_hist = cangles_hist_temp;
 	    }
 	  // Step making
 	  std::cout << step << std::endl;
@@ -132,18 +136,45 @@ int main( void )
      }
   //----------------------------------------------------
 
+
+  
   //--------------------
-  // Writting histograms
+  // Making histograms
   //----------------------------------------------------
-  writeHistogram( cangles , normalizeHistogram( c_angles_hist ) );
+  c2_angles_hist = makeRegularHistogram( c2_angles , hist_start , hist_end , nb_box );
+  writeHistogram( c2_angles_out , normalizeHistogram( c2_angles_hist ) );
+  c3_angles_hist = makeRegularHistogram( c3_angles , hist_start , hist_end , nb_box );
+  writeHistogram( c3_angles_out , normalizeHistogram( c3_angles_hist ) );
+  c4_angles_hist = makeRegularHistogram( c4_angles , hist_start , hist_end , nb_box );
+  writeHistogram( c4_angles_out , normalizeHistogram( c4_angles_hist ) );
+  o2_angles_hist = makeRegularHistogram( o2_angles , hist_start , hist_end , nb_box );
+  writeHistogram( o2_angles_out , normalizeHistogram( o2_angles_hist ) );
+  //----------------------------------------------------
+
+  // Print other values
+  //----------------------------------------------------
+  std::cout << "Other C Angles: " << std::endl;
+  for ( int i=0 ; i < c_others_nb.size() ; i++ )
+    {
+      std::cout << "value: " << c_others_nb[i] << std::endl;
+    }
+  //----------------------------------------------------
+  std::cout << "Other O Angles: " << std::endl;
+  for ( int i=0 ; i < o_others_nb.size() ; i++ )
+    {
+      std::cout << "value: " << o_others_nb[i] << std::endl;
+    }
   //----------------------------------------------------
   
   //--------------
   //Closing fluxes
   //----------------------
   input.close();
-  cangles.close();
+  c2_angles.close();
+  c3_angles.close();
+  c4_angles.close();
+  o2_angles.close();
   //----------------------
-  
+      
   return 0;
 }
