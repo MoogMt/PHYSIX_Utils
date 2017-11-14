@@ -122,6 +122,9 @@ std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<Bin> bins
     }
   return bins;
 }
+//---------------------------------------------------------------------------------------
+// Modification
+//---------------------------------------------------------------------------------------
 std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 )
 {
   std::vector<Bin> sum_hist;
@@ -137,6 +140,9 @@ std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 
     }
   return sum_hist;
 }
+//---------------------------------------------------------------------------------------
+// Total Value
+//---------------------------------------------------------------------------------------
 double getTotalValue( std::vector<Bin> hist )
 {
   double total_value = 0;
@@ -146,7 +152,9 @@ double getTotalValue( std::vector<Bin> hist )
     }
   return total_value;
 }
-//
+//-----
+// IO
+//---------------------------------------------------------------------------------------
 void writeHistogram( std::ofstream & file , std::vector<Bin> hist )
 {
   for ( int i = 0 ; i < hist.size() ; i++ )
@@ -165,7 +173,8 @@ void writeHistogram( std::string file_name , std::vector<Bin> hist )
   file.close();
   return;
 }
-//--------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+//==========================================================================================
 
 
 // Bin Real

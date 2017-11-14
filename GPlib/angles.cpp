@@ -43,8 +43,11 @@ int main( void )
   std::ofstream c2_angles_out("c2angles.dat");
   std::ofstream c3_angles_out("c3angles.dat");
   std::ofstream c4_angles_out("c4angles.dat");
+  std::ofstream c_prop("c_prop.dat");
+  //-------------------------------------
   std::ofstream o2_angles_out("o2angles.dat");
   std::ofstream o3_angles_out("o3angles.dat");
+  std::ofstream o_prop("o_prop.dat");
   //-------------------------------------
   
   //----------------------
@@ -145,17 +148,46 @@ int main( void )
   // Making histograms
   //----------------------------------------------------
   c2_angles_hist = makeRegularHistogram( c2_angles , hist_start , hist_end , nb_box );
-  writeHistogram( c2_angles_out , normalizeHistogram( c2_angles_hist ) );
   c3_angles_hist = makeRegularHistogram( c3_angles , hist_start , hist_end , nb_box );
-  writeHistogram( c3_angles_out , normalizeHistogram( c3_angles_hist ) );
-  c4_angles_hist = makeRegularHistogram( c4_angles , hist_start , hist_end , nb_box );
-  writeHistogram( c4_angles_out , normalizeHistogram( c4_angles_hist ) );
+  c4_angles_hist = makeRegularHistogram( c4_angles , hist_start , hist_end , nb_box );  
   o2_angles_hist = makeRegularHistogram( o2_angles , hist_start , hist_end , nb_box );
-  writeHistogram( o2_angles_out , normalizeHistogram( o2_angles_hist ) );
   o3_angles_hist = makeRegularHistogram( o3_angles , hist_start , hist_end , nb_box );
+  for ( int i=0 ; i < c2_angles_hist.size() ; i++ )
+    {
+      c2_angles_hist[i].value = (int)(c2_angles_hist[i].value/sin(center(c2_angles_hist[i])));
+    }
+  for ( int i=0 ; i < c3_angles_hist.size() ; i++ )
+    {
+      c3_angles_hist[i].value = (int)(c3_angles_hist[i].value/sin(center(c3_angles_hist[i])));
+    }
+  for ( int i=0 ; i < c4_angles_hist.size() ; i++ )
+    {
+      c4_angles_hist[i].value = (int)(c4_angles_hist[i].value/sin(center(c4_angles_hist[i])));
+    }
+  for ( int i=0 ; i < o2_angles_hist.size() ; i++ )
+    {
+      o2_angles_hist[i].value = (int)(o2_angles_hist[i].value/sin(center(o2_angles_hist[i])));
+    }
+  for ( int i=0 ; i < o3_angles_hist.size() ; i++ )
+    {
+      o3_angles_hist[i].value = (int)(o3_angles_hist[i].value/sin(center(o3_angles_hist[i])));
+    }
+  writeHistogram( c2_angles_out , normalizeHistogram( c2_angles_hist ) );
+  writeHistogram( c3_angles_out , normalizeHistogram( c3_angles_hist ) );
+  writeHistogram( c4_angles_out , normalizeHistogram( c4_angles_hist ) );
+  writeHistogram( o2_angles_out , normalizeHistogram( o2_angles_hist ) );
   writeHistogram( o3_angles_out , normalizeHistogram( o3_angles_hist ) );
   //----------------------------------------------------
 
+  //----------------------
+  // Printing repartition
+  //--------------------------------------------------------------------------------------------
+  c_prop << c2_angles.size() << " " << c3_angles.size() << " " << c4_angles.size() << std::endl;
+  //--------------------------------------------------------------------------------------------
+  o_prop << o2_angles.size() << " " << o3_angles.size() << " " << std::endl;
+  //--------------------------------------------------------------------------------------------
+
+  //--------------------
   // Print other values
   //----------------------------------------------------
   std::cout << "Other C Angles: " << std::endl;

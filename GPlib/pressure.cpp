@@ -46,56 +46,47 @@ int main( void )
   
   //----------------------
   // Physical parameters
-  //--------------------------------------
+  //----------------------------------------------------
   int step       = 1;    // Step counter
   int start_step = 2000; // Start step
   int end_step = 40000;
   int comp_step  = 1;    // Frequency of computation
-  //--------------------------------------
+  //----------------------------------------------------
 
-  //---------
-  // Pressure
-  //-------------------------------------------------------------------
-  int step_press = 200;
-  int stride_press = 0;
-  double gen_avg_press = 0;
-  double gen_var_press = 0;
-  double loc_avg_press = 0;
-  double loc_var_press = 0;
-  //-------------------------------------------------------------------
-
+  //-------
+  // Press 
+  //----------------------------------------------------
+  double pressure; std::vector<double> press_vec ;
+  std::vector<Bin> press_hist;
+  int step_press = 0;
+  //----------------------------------------------------
+  
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
-  double pressure = 0;
   while(  readPressure( press_in, pressure ) )
     {
       if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
-	  gen_avg_press += pressure;
-	  gen_var_press += pressure*pressure;
-	  loc_avg_press += pressure;
-	  loc_var_press += pressure*pressure;
-	  if ( step_press % stride_press == 0 )
-	    {
-	      loc_avg_press /= (double)(stride_press);
-	      loc_var_press = loc_var_press/(double)(stride_press) - loc_avg_press*loc_avg_press;
-	      press_out << step << " " << loc_avg_press << " " << loc_var_press << " " << sqrt( loc_var_press ) << std::endl;
-	      loc_avg_press = 0;
-	      loc_var_press = 0;
-	    }
+	  press_vec.push_back( pressure );
 	  step_press++;
-	  std::cout << step << " " << pressure << std::endl;
+	  std::cout << step << std::endl;
 	}      
       step++;
      }
   //----------------------------------------------------
 
-  // Writting results
-  gen_avg_press = gen_avg_press/(end_step-start_step);
-  gen_var_press = gen_var_press/(end_step-start_step) - gen_avg_press*gen_avg_press;
-  std::cout << gen_avg_press << " " << gen_var_press << " " << sqrt(gen_var_press) << std::endl;
-
+  //------------
+  // Histograms
+  //---------------------------------------------------------------
+  // Technical values
+  double hist_start = min( press_vec ) ;
+  double hist_end   = max( press_vec );
+  int nb_box        = 1000;
+  //---------------------------------------------------------------
+  writeHistogram( press_out , normalizeHistogram( makeRegularHistogram( press_vec , hist_start , hist_end , nb_box ) ) );
+  //---------------------------------------------------------------
+  
   //--------------
   //Closing fluxes
   //----------------------
