@@ -183,9 +183,9 @@ int main( void )
   // Printing repartition
   //--------------------------------------------------------------------------------------------
   double total = c2_angles.size() + c3_angles.size() + c4_angles.size();
-  c_prop << 2 << " " << c2_angles.size() << std::endl;
-  c_prop << 3 << " " << c3_angles.size() << std::endl;
-  c_prop << 4 << " " << c4_angles.size() << std::endl;
+  c_prop << 2 << " " << c2_angles.size()/total << std::endl;
+  c_prop << 3 << " " << c3_angles.size()/total << std::endl;
+  c_prop << 4 << " " << c4_angles.size()/total << std::endl;
   //--------------------------------------------------------------------------------------------
   total = o2_angles.size() + o3_angles.size();
   o_prop << 2 << " " << o2_angles.size()/total << std::endl;
