@@ -44,6 +44,7 @@ int main( void )
   std::ofstream c3_angles_out("c3angles.dat");
   std::ofstream c4_angles_out("c4angles.dat");
   std::ofstream o2_angles_out("o2angles.dat");
+  std::ofstream o3_angles_out("o3angles.dat");
   //-------------------------------------
   
   //----------------------
@@ -96,6 +97,7 @@ int main( void )
   std::vector<Bin> c3_angles_hist; std::vector<double> c3_angles;
   std::vector<Bin> c4_angles_hist; std::vector<double> c4_angles;
   std::vector<Bin> o2_angles_hist; std::vector<double> o2_angles;
+  std::vector<Bin> o3_angles_hist; std::vector<double> o3_angles;
   std::vector<int> c_others_nb;    std::vector<int>  o_others_nb;
   //---------------------------------------------------------------
   
@@ -113,19 +115,21 @@ int main( void )
 	  // Calculating angles
 	  for ( int i=0 ; i < molecules.size() ; i++  )
 	    {
-	      for ( int j=0 ; j < molecules[j].atom_index.size() ; j++ )
+	      for ( int j=0 ; j < molecules[i].atom_index.size() ; j++ )
 		{
-		  std::vector<double> angles = getAngleAtom( cm_distance , molecules[j] , molecules[j].atom_index[i] );
-		  if ( molecules[j].names[i] == "C" )
+		  std::vector<double> angles = getAngleAtom( cm_distance , molecules[i] , molecules[i].atom_index[j] );
+		  if ( angles.size() == 0 ) continue;
+		  if ( molecules[i].names[j] == "C" )
 		    {
-		      if ( angles.size() == 1 )       appendVector( c2_angles , angles );
-		      else if ( angles.size() == 3 )  appendVector( c3_angles , angles );
+		      if ( angles.size() == 1 )   appendVector( c2_angles , angles );
+		      else if ( angles.size() == 3 )  appendVector( c3_angles , angles ); 
 		      else if ( angles.size() == 6 )  appendVector( c4_angles , angles );
 		      else c_others_nb.push_back( angles.size() );
 		    }
 		  else
 		    {
 		      if ( angles.size() == 1 ) appendVector( o2_angles , angles );
+		      else if ( angles.size() == 3 )  appendVector( o3_angles , angles ); 
 		      else o_others_nb.push_back( angles.size() );
 		    }
 		}
@@ -136,8 +140,6 @@ int main( void )
       step++;
      }
   //----------------------------------------------------
-
-
   
   //--------------------
   // Making histograms
@@ -150,6 +152,8 @@ int main( void )
   writeHistogram( c4_angles_out , normalizeHistogram( c4_angles_hist ) );
   o2_angles_hist = makeRegularHistogram( o2_angles , hist_start , hist_end , nb_box );
   writeHistogram( o2_angles_out , normalizeHistogram( o2_angles_hist ) );
+  o3_angles_hist = makeRegularHistogram( o3_angles , hist_start , hist_end , nb_box );
+  writeHistogram( o3_angles_out , normalizeHistogram( o3_angles_hist ) );
   //----------------------------------------------------
 
   // Print other values
@@ -175,6 +179,7 @@ int main( void )
   c3_angles_out.close();
   c4_angles_out.close();
   o2_angles_out.close();
+  o3_angles_out.close();
   //----------------------
       
   return 0;
