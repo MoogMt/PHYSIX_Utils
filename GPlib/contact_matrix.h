@@ -133,6 +133,7 @@ std::vector<double> getNNearest( Contact_Matrix & cm , int n_nearest, std::vecto
 double getNNearest( ContactMatrix & cm , int n_nearest , int atom_index );
 std::vector<double> getNNearest( ContactMatrix & cm , std::vector<int> n_nearest , int atom_index );
 std::vector<double> getNNearest( Contact_Matrix & cm , int nearest , std::vector<int> atom_indexes );
+std::vector<double> getNNearest( ContactMatrix & cm , int nearest, std::vector<int> atoms_center_index , std::vector<int> atoms_ext_index );
 // By specie
 double getNNearest( ContactMatrix & cm , int n_nearest, int atom_index, std::string specie );
 std::vector<double> getNNearestVector( ContactMatrix & cm , int atom_index , int n_nearest , std::string specie );

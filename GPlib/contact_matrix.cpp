@@ -520,6 +520,31 @@ std::vector<double> getNNearest( ContactMatrix & cm , int nearest, std::vector<i
     }
   return n_nearest;
 }
+//-----------------------------------------------------------------------------------------------
+std::vector<double> getNNearest( ContactMatrix & cm , int nearest, std::vector<int> atoms_center_index , std::vector<int> atoms_ext_index )
+{
+  std::vector<double> n_nearest;
+  // Loop over atoms at the center
+  for ( int i=0 ; i <  atoms_center_index.size() ; i++ )
+    {
+      // Contact Restricted to atom of interest
+      std::vector<double> restricted_contact;
+      // Offset to speed up calculation
+      double offset = atoms_center_index[i]*cm.nb_atoms;
+      // Loop over peripheral atoms of interest
+      for ( int j=0 ; j < atoms_ext_index.size() ; j++ )
+	{
+	  // Distance between atoms
+	  double element = cm.matrix[ offset + atoms_ext_index[j] ];
+	  // Updating restricted contact
+	  if ( element > 0) restricted_contact.push_back( element );
+	}
+      // Add nearest_th distance to the distance vector
+      n_nearest.push_back( sortVector( restricted_contact , true )[ nearest-1 ] );
+    }
+  // Return the vector
+  return n_nearest;
+}
 //------------------------------------------------------------------------------------------------
 // By Specie
 //------------------------------------------------------------------------------------------------
