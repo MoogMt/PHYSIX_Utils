@@ -50,6 +50,7 @@ int main( void )
   //--------------------------------------
   int step       = 1;  // Step counter
   int start_step = 2000; // Start step
+  int end_step   = 1000000; // End step
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
 
@@ -62,13 +63,27 @@ int main( void )
   ContactMatrix cm_distance;    // Contact Matrix
   //--------------------------------------------------
 
+  //------
+  // Data
+  //-----------------------------------------
+  std::vector<double> co2_data;
+  std::vector<double> sizes;
+  //-----------------------------------------
+
   //-----------
   // Histogram
   //-----------------------------------------
+  // Sizes
   double hist_start = 0.5, hist_end = 96.5;
   int nb_box = 96;
   std::vector<Bin> hist;
   //-----------------------------------------
+  // Co2 %
+  double hist_co2_start = 0, hist_co2_end = 1;
+  int nb_co2_box = 100;
+  std::vector<Bin> hist_co2;
+  //-----------------------------------------
+  
   
   //--------------------
   // Reading Cell File
@@ -95,13 +110,16 @@ int main( void )
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0 )
+      if ( step % comp_step == 0 && step > start_step && step < end_step)
 	{
-	  // Makes the contact matrix
+       	  // Makes the contact matrix
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
-	  // Prints the bonds between atoms
+
+	  //----------------------------------------------------
+	  // Printing bonds to file
+	  //----------------------------------------------------
 	  for( int i=0 ; i < molecules.size() ; i++ )
 	    {
 	      for ( int j=0 ; j < molecules[i].bonds.size(); j++ )
@@ -112,49 +130,50 @@ int main( void )
 		}
 	      graph_molecules << "------------" << std::endl;
 	    }
-	   graph_molecules << "================" << std::endl;
-	  // Stock the size of the molecules in the box
-	  std::vector<double> sizes;
+	  graph_molecules << "================" << std::endl;
+	  //----------------------------------------------------
+
+	  //-----------------------------
+	  // Stocking sizes of molecules
+	  //----------------------------------------------------
 	  for ( int i=0 ; i < molecules.size() ; i++ )
 	    {
 	      sizes.push_back( molecules[i].names.size() );
 	    }
-	  // Make an histogram of the sizes of the molecules in the box
-	  if ( step == 1 )
-	    {
-	      hist = makeRegularHistogram( sizes , hist_start , hist_end , nb_box );
-	    }
-	  else
-	    {
-	      hist = addHistograms ( hist , makeRegularHistogram( sizes , hist_start , hist_end , nb_box ) );
-	    }
-	  // Bookkeeping fraction of co2 molecules
+	  //----------------------------------------------------
+
+	  //------------------------------------
+	  // Stocking fraction of co2 molecules
+	  //----------------------------------------------------
 	  int co2_count=0;
 	  for ( int i=0 ; i < molecules.size() ; i++ )
 	    {
 	      if ( molecules[i].names.size() == 3 ) co2_count++;
 	    }
-	  co2 << step << " " << 3*(double)(co2_count)/96 << std::endl;
+	  co2_data.push_back( (double)(co2_count)/(double)(32) );
+	  //----------------------------------------------------
+	  
 	  // Step making
-	  std::cout << step << std::endl;
+	  std::cout << step << " " << sizes.size() <<std::endl;
 	}      
       step++;
      }
   //----------------------------------------------------
 
+  //------------------
+  // % co2 Histogram 
   //-------------------------------------------------------
-  // Multiplying values by number of atoms in the molecule
+  writeHistogram( co2 , normalizeHistogram( makeRegularHistogram( co2_data, hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  //-------------------------------------------------------
+  
+  //-----------------
+  // Size histograms
   //---------------------------------------------------------
   for ( int i=0 ; i < hist.size() ; i++ )
     {
       hist[i].value = hist[i].value*center(hist[i]);
     }
-  //---------------------------------------------------------
-
-  //---------------------------------
-  // Normalizes and Writes histogram
-  //----------------------------------------------------
-  writeHistogram( hist_molecules , normalizeHistogram( hist ) );
+  writeHistogram( hist_molecules , normalizeHistogram( makeRegularHistogram( sizes , hist_start , hist_end , nb_box ) ) );
   //----------------------------------------------------
 
   //--------------
