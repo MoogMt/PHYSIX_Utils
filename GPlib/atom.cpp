@@ -1,5 +1,18 @@
 #include "atom.h"
 
+//==========
+// Position
+//======================================================================
+std::vector<double> getPosition( AtomList atoms , int index )
+{
+  std::vector<double> position;
+  position.push_back( atoms.x[ index ] );
+  position.push_back( atoms.y[ index ] );
+  position.push_back( atoms.z[ index ] );
+  return position;
+}
+//======================================================================
+
 //===========
 // DISTANCES
 //======================================================================
@@ -64,3 +77,4 @@ void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string
   return;
 }
 //======================================================================================
+
