@@ -42,7 +42,15 @@ int main( void )
   //--------------------------------------------------------------------------------
   std::ofstream graph_molecules ( "graph_molecules.dat" ,  std::ios::out );
   std::ofstream hist_molecules ( "hist_molecules.dat" ,  std::ios::out );
-  std::ofstream co2 ( "co2.dat" ,  std::ios::out );
+  std::ofstream co2_stock_in_out ( "co2_stock_in_out.dat" ,  std::ios::out );
+  std::ofstream co3_stock_in_out ( "co3_stock_in_out.dat" ,  std::ios::out );
+  std::ofstream co4_stock_in_out ( "co4_stock_in_out.dat" ,  std::ios::out );
+  std::ofstream co2_stock_alone_out ( "co2_stock_alone_out.dat" ,  std::ios::out );
+  std::ofstream co3_stock_alone_out ( "co3_stock_alone_out.dat" ,  std::ios::out );
+  std::ofstream co4_stock_alone_out ( "co4_stock_alone_out.dat" ,  std::ios::out );
+  std::ofstream c2_ratio_out ( "c2_ratio_out.dat" ,  std::ios::out );
+  std::ofstream c3_ratio_out ( "c3_ratio_out.dat" ,  std::ios::out );
+  std::ofstream c4_ratio_out ( "c4_ratio_out.dat" ,  std::ios::out );
   //--------------------------------------------------------------------------------
   
   //----------------------
@@ -79,11 +87,28 @@ int main( void )
   std::vector<Bin> hist;
   //-----------------------------------------
   // Co2 %
-  double hist_co2_start = 0, hist_co2_end = 1;
-  int nb_co2_box = 100;
+  double hist_co2_start = 0.5, hist_co2_end = 32.5;
+  int nb_co2_box = 32;
   std::vector<Bin> hist_co2;
   //-----------------------------------------
-  
+
+
+  // CO2_fractions
+  //-----------------------------------------
+  int co2_in = 0, co2_alone = 0; std::vector<double> co2_stock_in; std::vector<double> co2_stock_alone;
+  int co3_in = 0, co3_alone = 0; std::vector<double> co3_stock_in; std::vector<double> co3_stock_alone;
+  int co4_in = 0, co4_alone = 0; std::vector<double> co4_stock_in; std::vector<double> co4_stock_alone;
+  int o2_in = 0, o2_alone = 0; std::vector<double> o2_stock_in; std::vector<double> o2_stock_alone;
+  int o3_in = 0, o3_alone = 0; std::vector<double> o3_stock_in; std::vector<double> o3_stock_alone;
+  int c2_in = 0, c2_alone = 0;
+  int c3_in = 0, c3_alone = 0;
+  int c4_in = 0, c4_alone = 0;
+  std::vector<double> c2_ratio ;
+  std::vector<double> c3_ratio ;
+  std::vector<double> c4_ratio ;
+  std::vector<double> o2_ratio ;
+  std::vector<double> o3_ratio ;
+  //-----------------------------------------
   
   //--------------------
   // Reading Cell File
@@ -133,28 +158,105 @@ int main( void )
 	  graph_molecules << "================" << std::endl;
 	  //----------------------------------------------------
 
+	  // Reinitialialize
+	  co2_in = 0, co2_alone = 0;
+	  co3_in = 0, co3_alone = 0;
+	  co4_in = 0, co4_alone = 0;
+	  
+	  //--------------------
+	  // Calculating angles
+	  //-----------------------------------------------------------------------------
+	  for ( int i=0 ; i < molecules.size() ; i++  )
+	    {
+	      for ( int j=0 ; j < molecules[i].atom_index.size() ; j++ )
+		{
+		  std::vector<double> angles = getAngleAtom( cm_distance , molecules[i] , molecules[i].atom_index[j] );
+		  if ( angles.size() == 0 ) continue;
+		  if ( molecules[i].names[j] == "C" )
+		    {
+		      if ( angles.size() == 1 )
+			{
+			  if ( molecules[j].names.size() == 3 )
+			    {
+			      co2_alone++;
+			    }
+			  else co2_in++;
+			}
+		      else if ( angles.size() == 3 )
+			{
+			  if ( molecules[j].names.size() == 4 )
+			    {
+			      co3_alone++;
+			    }
+			  else co3_in++;
+			}
+		      else if ( angles.size() == 6 )
+			{
+			  if ( molecules[j].names.size() == 5 )
+			    {
+			      co4_alone++;
+			    }
+			  else co4_in++;
+			}
+		    }
+		  else
+		    {
+		      if ( angles.size() == 1 )
+			{
+			  if( molecules[j].names.size() == 3 ) o2_in++;
+			  else o2_alone++;
+			}
+		      else if ( angles.size() == 3 )
+			{
+			  if ( molecules[j].names.size() == 4 ) o3_in++;
+			  else o3_alone++;
+			}
+		    }
+		}
+	    }
+	  //-----------------------------------------------------------------------------
+	  
 	  //-----------------------------
 	  // Stocking sizes of molecules
-	  //----------------------------------------------------
-	  for ( int i=0 ; i < molecules.size() ; i++ )
-	    {
-	      sizes.push_back( molecules[i].names.size() );
-	    }
-	  //----------------------------------------------------
+	  //----------------------------------------------------------
+	  co2_stock_in.push_back( co2_in );
+	  co3_stock_in.push_back( co3_in );
+	  co4_stock_in.push_back( co4_in );
+	  //------------------------------
+	  co2_stock_alone.push_back( co2_alone );
+	  co3_stock_alone.push_back( co3_alone );
+	  co4_stock_alone.push_back( co4_alone );
+	  //------------------------------
+	  int c2_total = c2_alone + c2_in;
+	  int c3_total = c3_alone + c3_in;
+	  int c4_total = c4_alone + c4_in;
+	  //------------------------------
+	  double ratio=0;
+	  if ( c2_total != 0 ) c2_ratio.push_back( (double)(c2_alone)/(double)(c2_total) );
+	  else c2_ratio.push_back( ratio );
+	  if ( c3_total != 0 ) c3_ratio.push_back( (double)(c3_alone)/(double)(c3_total) );
+	  else c3_ratio.push_back( ratio );
+	  if ( c4_total != 0 ) c4_ratio.push_back( (double)(c4_alone)/(double)(c4_total) );
+	  else c4_ratio.push_back( ratio );
+	  //-----------------------------------------------------------
+	  o2_stock_in.push_back( o2_in );
+	  o3_stock_in.push_back( o2_in );
+	  o2_stock_alone.push_back( o2_alone );
+	  o3_stock_alone.push_back( o3_alone );
+	  //------------------------------
+	  int o2_total = o2_alone + o2_in;
+	  int o3_total = o3_alone + o3_in;
+	  //------------------------------
+	  if ( o2_total != 0 ) o2_ratio.push_back( (double)(o2_alone)/(double)(o2_total) );
+	  else o2_ratio.push_back( ratio );
+	  if ( o3_total != 0 ) o3_ratio.push_back( (double)(o3_alone)/(double)(o3_total) );
+	  else o3_ratio.push_back( ratio );
+	  //-----------------------------------------------------------
 
-	  //------------------------------------
-	  // Stocking fraction of co2 molecules
-	  //----------------------------------------------------
-	  int co2_count=0;
-	  for ( int i=0 ; i < molecules.size() ; i++ )
-	    {
-	      if ( molecules[i].names.size() == 3 ) co2_count++;
-	    }
-	  co2_data.push_back( (double)(co2_count)/(double)(32) );
-	  //----------------------------------------------------
-	  
 	  // Step making
-	  std::cout << step << " " << sizes.size() <<std::endl;
+	  //----------------------------------------------------
+	  std::cout << step << std::endl;
+	  //----------------------------------------------------
 	}      
       step++;
      }
@@ -163,7 +265,15 @@ int main( void )
   //------------------
   // % co2 Histogram 
   //-------------------------------------------------------
-  writeHistogram( co2 , normalizeHistogram( makeRegularHistogram( co2_data, hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( co2_stock_in_out , normalizeHistogram( makeRegularHistogram( co2_stock_in , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( co3_stock_in_out , normalizeHistogram( makeRegularHistogram( co3_stock_in , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( co4_stock_in_out , normalizeHistogram( makeRegularHistogram( co4_stock_in , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( co2_stock_alone_out , normalizeHistogram( makeRegularHistogram( co2_stock_alone , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( co3_stock_alone_out , normalizeHistogram( makeRegularHistogram( co3_stock_alone , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( co4_stock_alone_out , normalizeHistogram( makeRegularHistogram( co4_stock_alone , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( c2_ratio_out , normalizeHistogram( makeRegularHistogram( c2_ratio , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( c3_ratio_out , normalizeHistogram( makeRegularHistogram( c3_ratio , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
+  writeHistogram( c4_ratio_out , normalizeHistogram( makeRegularHistogram( c4_ratio , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
   //-------------------------------------------------------
   
   //-----------------
@@ -182,7 +292,15 @@ int main( void )
   input.close();
   graph_molecules.close();
   hist_molecules.close();
-  co2.close();
+  co2_stock_in_out.close();
+  co3_stock_in_out.close();
+  co4_stock_in_out.close();
+  co2_stock_alone_out.close();
+  co3_stock_alone_out.close();
+  co4_stock_alone_out.close();
+  c2_ratio_out.close();
+  c3_ratio_out.close();
+  c4_ratio_out.close();
   //----------------------
   
   return 0;
