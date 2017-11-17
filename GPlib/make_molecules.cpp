@@ -57,7 +57,7 @@ int main( void )
   std::ofstream c2_ratio_out ( "c2_ratio_out.dat" ,  std::ios::out );
   std::ofstream c3_ratio_out ( "c3_ratio_out.dat" ,  std::ios::out );
   std::ofstream c4_ratio_out ( "c4_ratio_out.dat" ,  std::ios::out );
-  std::ofstream distance_from_plan( "distance_from_plan.dat" , std::ios::out )
+  std::ofstream distance_from_plan( "distance_from_plan.dat" , std::ios::out );
   //--------------------------------------------------------------------------------
   
   //----------------------
@@ -114,6 +114,7 @@ int main( void )
   int c4_in = 0, c4_alone = 0; std::vector<double> c4_ratio ;
   std::vector<double> o2_ratio ;
   std::vector<double> o3_ratio ;
+  std::vector<double> DistPlanC3;
   //-----------------------------------------
   
   //--------------------
@@ -193,12 +194,15 @@ int main( void )
 			  if ( molecules[j].names.size() == 4 )
 			    {
 			      co3_alone++;
-			      std::vector<double> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
+			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
 			      int index_center = molecules[i].atom_index[j];
-			      std::vector<double> position_center = getPosition();
-			      std::vector<double> position_atom2  = getPosition();
-			      std::vector<double> position_atom3  = getPosition();
-			      double dist = getDistanceFromPlan(  );
+			      std::vector<double> position_center = getPosition( atom_list , index_center );
+			      std::vector<double> position_atom1  = getPosition( atom_list , per_atoms_index[0] );
+			      std::vector<double> position_atom2  = getPosition( atom_list , per_atoms_index[1] );
+			      std::vector<double> position_atom3  = getPosition( atom_list , per_atoms_index[2] );
+			      std::vector<double> vector1 = Difference( position_atom1 , position_atom2 );
+			      std::vector<double> vector2 = Difference( position_atom1 , position_atom3 );
+			      double dist = getDistanceFromPlan( vector1 , vector2 , position_center, position_atom1 );
 			      distance_from_plan << step << " " << dist << std::endl;
 			      DistPlanC3.push_back( dist );
 			    }

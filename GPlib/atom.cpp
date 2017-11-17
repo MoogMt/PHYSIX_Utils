@@ -3,7 +3,7 @@
 //==========
 // Position
 //======================================================================
-std::vector<double> getPosition( AtomList atoms , int index )
+std::vector<double> getPosition( AtomList & atoms , int index )
 {
   std::vector<double> position;
   position.push_back( atoms.x[ index ] );
