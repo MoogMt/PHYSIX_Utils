@@ -57,7 +57,10 @@ int main( void )
   std::ofstream c2_ratio_out ( "c2_ratio_out.dat" ,  std::ios::out );
   std::ofstream c3_ratio_out ( "c3_ratio_out.dat" ,  std::ios::out );
   std::ofstream c4_ratio_out ( "c4_ratio_out.dat" ,  std::ios::out );
-  std::ofstream distance_from_plan( "distance_from_plan.dat" , std::ios::out )
+  std::ofstream distance_from_plan_in( "distance_from_plan_in.dat" , std::ios::out );
+  std::ofstream distance_from_plan_alone( "distance_from_plan_alone.dat" , std::ios::out );
+  std::ofstream distance_from_plan_hist_alone( "distance_from_plan_hist_alone.dat" , std::ios::out );
+  std::ofstream distance_from_plan_hist_in( "distance_from_plan_hist_in.dat" , std::ios::out );
   //--------------------------------------------------------------------------------
   
   //----------------------
@@ -100,6 +103,8 @@ int main( void )
   int nb_co2_box = 32;
   std::vector<Bin> hist_co2;
   //-----------------------------------------
+  int nb_box2 = 1000;
+  //-----------------------------------------
 
 
   // CO2_fractions
@@ -114,6 +119,8 @@ int main( void )
   int c4_in = 0, c4_alone = 0; std::vector<double> c4_ratio ;
   std::vector<double> o2_ratio ;
   std::vector<double> o3_ratio ;
+  std::vector<double> distPlanC3_in ;
+  std::vector<double> distPlanC3_alone ;
   //-----------------------------------------
   
   //--------------------
@@ -193,16 +200,33 @@ int main( void )
 			  if ( molecules[j].names.size() == 4 )
 			    {
 			      co3_alone++;
-			      std::vector<double> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
+			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
 			      int index_center = molecules[i].atom_index[j];
-			      std::vector<double> position_center = getPosition();
-			      std::vector<double> position_atom2  = getPosition();
-			      std::vector<double> position_atom3  = getPosition();
-			      double dist = getDistanceFromPlan(  );
-			      distance_from_plan << step << " " << dist << std::endl;
-			      DistPlanC3.push_back( dist );
+			      std::vector<double> position_center = getPosition( atom_list , index_center );
+			      std::vector<double> position_atom1  = getPosition( atom_list , per_atoms_index[0] );
+			      std::vector<double> position_atom2  = getPosition( atom_list , per_atoms_index[1] );
+			      std::vector<double> position_atom3  = getPosition( atom_list , per_atoms_index[2] );
+			      std::vector<double> vector_plan1 = Difference( position_atom1 , position_atom2 );
+			      std::vector<double> vector_plan2 = Difference( position_atom1 , position_atom3 );
+			      double dist = getDistanceFromPlan( vector_plan1 , vector_plan2 , position_center , position_atom1 );
+			      distance_from_plan_alone << step << " " << dist << std::endl;
+			      distPlanC3_alone.push_back( dist );
 			    }
-			  else co3_in++;
+			  else
+			    {
+			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
+			      int index_center = molecules[i].atom_index[j];
+			      std::vector<double> position_center = getPosition( atom_list , index_center );
+			      std::vector<double> position_atom1  = getPosition( atom_list , per_atoms_index[0] );
+			      std::vector<double> position_atom2  = getPosition( atom_list , per_atoms_index[1] );
+			      std::vector<double> position_atom3  = getPosition( atom_list , per_atoms_index[2] );
+			      std::vector<double> vector_plan1 = Difference( position_atom1 , position_atom2 );
+			      std::vector<double> vector_plan2 = Difference( position_atom1 , position_atom3 );
+			      double dist = getDistanceFromPlan( vector_plan1 , vector_plan2 , position_center , position_atom1 );
+			      distance_from_plan_in << step << " " << dist << std::endl;
+			      distPlanC3_in.push_back( dist );
+			      co3_in++;
+			    }
 			}
 		      else if ( angles.size() == 6 )
 			{
@@ -294,6 +318,8 @@ int main( void )
   writeHistogram( c2_ratio_out , normalizeHistogram( makeRegularHistogram( c2_ratio , hist_start_ratio, hist_end_ratio, nb_box_ratio ) ) );
   writeHistogram( c3_ratio_out , normalizeHistogram( makeRegularHistogram( c3_ratio , hist_start_ratio , hist_end_ratio, nb_box_ratio ) ) );
   writeHistogram( c4_ratio_out , normalizeHistogram( makeRegularHistogram( c4_ratio , hist_start_ratio , hist_end_ratio, nb_co2_box ) ) );
+  writeHistogram( distance_from_plan_hist_alone , normalizeHistogram( makeRegularHistogram( distPlanC3_alone , 0 , 1.75, 200 ) ) );
+  writeHistogram( distance_from_plan_hist_in , normalizeHistogram( makeRegularHistogram( distPlanC3_in , -0.01 , 1.75, 200 ) ) );
   //-------------------------------------------------------
   
   //-----------------
@@ -321,7 +347,10 @@ int main( void )
   c2_ratio_out.close();
   c3_ratio_out.close();
   c4_ratio_out.close();
-  distance_from_plan.close();
+  distance_from_plan_in.close();
+  distance_from_plan_alone.close();
+  distance_from_plan_hist_in.close();
+  distance_from_plan_hist_alone.close();
   //----------------------
   
   return 0;

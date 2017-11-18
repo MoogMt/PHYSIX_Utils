@@ -233,15 +233,15 @@ double scalarProduct( std::vector<double> vector1 , std::vector<double> vector2 
 std::vector<double> crossProduct( std::vector<double> vector1 , std::vector<double> vector2 )
 {
   std::vector<double> vector;
-  vector.push_back( vector1[1]*vector2[2] - vector2[2]*vector1[1] );
-  vector.push_back( vector1[2]*vector2[0] - vector2[0]*vector1[2] );
-  vector.push_back( vector1[0]*vector2[1] - vector2[1]*vector1[0] );
+  vector.push_back( vector1[1]*vector2[2] - vector2[1]*vector1[2] );
+  vector.push_back( vector1[2]*vector2[0] - vector2[2]*vector1[0] );
+  vector.push_back( vector1[0]*vector2[1] - vector2[0]*vector1[1] );
   return vector;
 }
 //-----------------------------------------------------------------------
 double norm( std::vector<double> vector )
 {
-  return abs( scalarProduct( vector , vector ) );
+  return sqrt(abs( scalarProduct( vector , vector ) ));
 }
 //-----------------------------------------------------------------------
 double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vector2 , std::vector<double> point_outside , std::vector<double> point_plan )
