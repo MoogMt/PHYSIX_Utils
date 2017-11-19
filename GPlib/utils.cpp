@@ -216,7 +216,7 @@ void appendVector( std::vector<double> & vec_to, std::vector<double> vec_from )
   return;
 }
 //-----------------------------------------------------------------------
-std::vector<double> Difference( std::vector<double> vector1 , std::vector<double> vector2 )
+std::vector<double> difference( std::vector<double> vector1 , std::vector<double> vector2 )
 {
   std::vector<double> vector;
   vector.push_back( vector1[0] - vector2[0] );
@@ -247,7 +247,7 @@ double norm( std::vector<double> vector )
 double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vector2 , std::vector<double> point_outside , std::vector<double> point_plan )
 {
   std::vector<double> normal = crossProduct( vector1, vector2 );
-  std::vector<double> vector = Difference( point_plan , point_outside  );
+  std::vector<double> vector = difference( point_plan , point_outside  );
   return abs(scalarProduct( normal , vector ) ) / norm( normal );
 }
 //=================================================================
