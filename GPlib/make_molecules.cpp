@@ -203,9 +203,9 @@ int main( void )
 			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
 			      int index_center = molecules[i].atom_index[j];
 			      std::vector<double> position_center = getMinImage( atom_list , cell , index_center , index_center );
-			      std::vector<double> position_atom1  = getMinImage( atom_list , cell , image_center , per_atoms_index[0] );
-			      std::vector<double> position_atom2  = getPosition( atom_list , cell , image_center , per_atoms_index[1] );
-			      std::vector<double> position_atom3  = getPosition( atom_list , cell , image_center , per_atoms_index[2] );
+			      std::vector<double> position_atom1  = getMinImage( atom_list , cell , index_center , per_atoms_index[0] );
+			      std::vector<double> position_atom2  = getMinImage( atom_list , cell , index_center , per_atoms_index[1] );
+			      std::vector<double> position_atom3  = getMinImage( atom_list , cell , index_center , per_atoms_index[2] );
 			      std::vector<double> vector_plan1 = difference( position_atom1 , position_atom2 );
 			      std::vector<double> vector_plan2 = difference( position_atom1 , position_atom3 );
 			      double dist = getDistanceFromPlan( vector_plan1 , vector_plan2 , position_center , position_atom1 )  ;
@@ -216,10 +216,10 @@ int main( void )
 			    {
 			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
 			      int index_center = molecules[i].atom_index[j];
-			      std::vector<double> position_center = getPosition( atom_list , index_center );
-			      std::vector<double> position_atom1  = getPosition( atom_list , per_atoms_index[0] );
-			      std::vector<double> position_atom2  = getPosition( atom_list , per_atoms_index[1] );
-			      std::vector<double> position_atom3  = getPosition( atom_list , per_atoms_index[2] );
+			      std::vector<double> position_center = getMinImage( atom_list , cell , index_center , index_center );
+			      std::vector<double> position_atom1  = getMinImage( atom_list , cell , index_center , per_atoms_index[0] );
+			      std::vector<double> position_atom2  = getMinImage( atom_list , cell , index_center , per_atoms_index[1] );
+			      std::vector<double> position_atom3  = getMinImage( atom_list , cell , index_center , per_atoms_index[2] );
 			      std::vector<double> vector_plan1 = difference( position_atom1 , position_atom2 ) ;
 			      std::vector<double> vector_plan2 = difference( position_atom1 , position_atom3 ) ;
 			      double dist = getDistanceFromPlan( vector_plan1 , vector_plan2 , position_center , position_atom1 );

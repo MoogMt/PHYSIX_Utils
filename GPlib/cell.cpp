@@ -98,13 +98,13 @@ std::vector<Atom> pbcImages(Atom atom, Cell box)
 std::vector<double> getMinImage( AtomList atom_list , Cell cell , int atom_center , int atom_target )
 {
   std::vector<double> position;
-  double cell_length = [ cell.a , cell.b , cell.c ];
+  double cell_length[3] = { cell.a , cell.b , cell.c };
   // Normalizing with regard to atom_center
   position = difference( getPosition( atom_list, atom_target ) , getPosition( atom_list, atom_center));
   for( int i=0; i < 3 ; i++ )
     {
-      if( position[i] > cell[i]*0.5 ) position[i] -= cell[i];
-      else if ( position[i] < cell[i]*0.5 ) position[i] += cell[i];
+      if( position[i] > cell_length[i]*0.5 ) position[i] -= cell_length[i];
+      else if ( position[i] < cell_length[i]*0.5 ) position[i] += cell_length[i];
     }
   return position;
 }
