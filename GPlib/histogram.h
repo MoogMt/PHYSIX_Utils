@@ -9,6 +9,7 @@
 #include <stdio.h>  
 #include <stdlib.h>    
 #include <math.h>
+#include <sstream>
 
 #include "utils.h"
 
@@ -90,9 +91,19 @@ void writeHistBin( std::ofstream & file , std::vector<BinReal> hist, int index ,
 void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> > hist_list );
 //------------------------------------------------------------------------------
 
-// IO
-void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram )
+//-----------------------
+// Integrate Histograms
+//-------------------------------------------------------------------------------------
+double integrateHistogram( std::vector<Bin> & histogram );
+double integrateHistogram( std::vector<Bin> & histogram , double start , double end );
+//-------------------------------------------------------------------------------------
 
-//==============================================================================
+//----
+// IO
+//-------------------------------------------------------------------------------------
+void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram );
+//-------------------------------------------------------------------------------------
+
+//======================================================================================
 
 #endif 

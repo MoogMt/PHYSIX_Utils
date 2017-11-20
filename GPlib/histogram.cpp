@@ -359,6 +359,33 @@ void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> >
 }
 //=========================================================================================
 
+//=======================
+// Integrating Histogram
+//=========================================================================================
+double integrateHistogram( std::vector<Bin> & histogram )
+{
+  double value = 0;
+  for ( int i=0 ; i < histogram.size() ; i++ )
+    {
+      value += histogram[i].value*(histogram[i].end - histogram[i].begin);
+    }
+  return value;
+}
+//------------------------------------------------------------
+double integrateHistogram( std::vector<Bin> & histogram , double start , double end )
+{
+  double value = 0;
+  for ( int i=0 ; i < histogram.size() ; i++ )
+    {
+      if ( histogram[i].begin > start && histogram[i].end < end )
+	{
+	  value += histogram[i].value*(histogram[i].end - histogram[i].begin);
+	}
+    }
+  return value;
+}
+//=========================================================================================
+
 //=====
 // IO
 //=========================================================================================
@@ -366,14 +393,15 @@ void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram 
 {
 
   // Reading variables
-  std::string line, line2;
+  std::ifstream file( file_name.c_str() );
+  std::string line, line1, line2;
   double step = 0;
 
   // First two step, to compute the step
-  if( std::getline( file , line ) )
+  if( std::getline( file , line1 ) )
     {
       double step1 = 0, value1 = 0;
-      std::istringstream it_string1( line );
+      std::istringstream it_string1(line1);
       if ( it_string1 >> step1 >> value1 ) 
 	{
 	  if( std::getline( file , line2 ) )
