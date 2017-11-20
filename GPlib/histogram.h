@@ -90,6 +90,9 @@ void writeHistBin( std::ofstream & file , std::vector<BinReal> hist, int index ,
 void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> > hist_list );
 //------------------------------------------------------------------------------
 
+// IO
+void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram )
+
 //==============================================================================
 
 #endif 

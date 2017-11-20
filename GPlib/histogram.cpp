@@ -357,7 +357,58 @@ void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> >
     }  
   return ;
 }
-//-------------------------------------------------------------------------------------------------
+//=========================================================================================
 
+//=====
+// IO
+//=========================================================================================
+void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram )
+{
+
+  // Reading variables
+  std::string line, line2;
+  double step = 0;
+
+  // First two step, to compute the step
+  if( std::getline( file , line ) )
+    {
+      double step1 = 0, value1 = 0;
+      std::istringstream it_string1( line );
+      if ( it_string1 >> step1 >> value1 ) 
+	{
+	  if( std::getline( file , line2 ) )
+	    {
+	      std::istringstream it_string2( line2 );
+	      double step2 = 0 , value2 = 0;
+	      if ( it_string2 >> step2 >> value2 )
+		{
+		  step = (step2 - step1)*0.5;
+		  Bin bin1 = { step1 - step , step1 + step , value1 };
+		  Bin bin2 = { step2 - step , step2 + step , value2 };
+		  histogram.push_back( bin1 );
+		  histogram.push_back( bin2 );
+		}
+	      else return;
+	    }
+	  else return;
+	}
+      else return;
+    }
+  else return;
+
+  while( std::getline( file , line ) )
+    {
+      double step_loc, value;
+      std::istringstream it_string( line );
+      if ( it_string >> step_loc >> value )
+	{
+	  Bin bin = { step_loc - step , step_loc + step , value };
+	  histogram.push_back( bin );
+	}
+      return;
+    }
+  return;
+}
+//=========================================================================================
 
 
