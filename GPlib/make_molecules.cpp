@@ -57,14 +57,11 @@ int main( void )
   std::ofstream c2_ratio_out ( "c2_ratio_out.dat" ,  std::ios::out );
   std::ofstream c3_ratio_out ( "c3_ratio_out.dat" ,  std::ios::out );
   std::ofstream c4_ratio_out ( "c4_ratio_out.dat" ,  std::ios::out );
-<<<<<<< HEAD
   std::ofstream distance_from_plan( "distance_from_plan.dat" , std::ios::out );
-=======
   std::ofstream distance_from_plan_in( "distance_from_plan_in.dat" , std::ios::out );
   std::ofstream distance_from_plan_alone( "distance_from_plan_alone.dat" , std::ios::out );
   std::ofstream distance_from_plan_hist_alone( "distance_from_plan_hist_alone.dat" , std::ios::out );
   std::ofstream distance_from_plan_hist_in( "distance_from_plan_hist_in.dat" , std::ios::out );
->>>>>>> 8949137768667afa043e11530c0dfe8720550956
   //--------------------------------------------------------------------------------
   
   //----------------------
@@ -123,12 +120,9 @@ int main( void )
   int c4_in = 0, c4_alone = 0; std::vector<double> c4_ratio ;
   std::vector<double> o2_ratio ;
   std::vector<double> o3_ratio ;
-<<<<<<< HEAD
   std::vector<double> DistPlanC3;
-=======
   std::vector<double> distPlanC3_in ;
   std::vector<double> distPlanC3_alone ;
->>>>>>> 8949137768667afa043e11530c0dfe8720550956
   //-----------------------------------------
   
   //--------------------
@@ -209,7 +203,6 @@ int main( void )
 			    {
 			      co3_alone++;
 			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
-<<<<<<< HEAD
 			      int index_center = molecules[i].atom_index[j];
 			      std::vector<double> position_center = getPosition( atom_list , index_center );
 			      std::vector<double> position_atom1  = getPosition( atom_list , per_atoms_index[0] );
@@ -220,7 +213,6 @@ int main( void )
 			      double dist = getDistanceFromPlan( vector1 , vector2 , position_center, position_atom1 );
 			      distance_from_plan << step << " " << dist << std::endl;
 			      DistPlanC3.push_back( dist );
-=======
 			      int index_center = molecules[i].atom_index[j];
 			      std::vector<double> position_center = getMinImage( atom_list , cell , index_center , index_center );
 			      std::vector<double> position_atom1  = getMinImage( atom_list , cell , index_center , per_atoms_index[0] );
@@ -249,7 +241,6 @@ int main( void )
 				  distPlanC3_in.push_back( dist );
 				}
 			      co3_in++;
->>>>>>> 8949137768667afa043e11530c0dfe8720550956
 			    }
 			}
 		      else if ( angles.size() == 6 )
