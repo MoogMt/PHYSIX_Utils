@@ -28,11 +28,13 @@ struct Cell
 // PBC
 //==========================================================
 double backIn( double x, double a );
+std::vector<double> wrapPBC( std::vector<double> vector_input, Cell cell );
 Atom wrapPBC(Atom atom_in, Cell box );
 std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell );
 void wrapPBC( AtomList & atom_list , int i , Cell cell );
 void wrapPBC( AtomList & atom_list , Cell cell );
 std::vector<Atom> pbcImages( Atom atom, Cell box );
+std::vector<double> getMinImage( AtomList atom_list , Cell cell , int atom_center , int atom_target );
 //==========================================================
 
 //=======================

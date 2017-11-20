@@ -77,7 +77,7 @@ void appendVector( std::vector<double> & vec_to, std::vector<double> vec_from );
 //-----------------------------------------------------------------------------
 // Difference
 //-----------------------------------------------------------------------------
-std::vector<double> Difference( std::vector<double> vector1 , std::vector<double> vector2 );
+std::vector<double> difference( std::vector<double> vector1 , std::vector<double> vector2 );
 //-----------------------------------------------------------------------------
 // Products
 //-----------------------------------------------------------------------------
