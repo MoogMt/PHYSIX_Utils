@@ -126,7 +126,7 @@ int main( void )
 	  atom_indexesC = cm.lut_list.types[0].atom_index;
 	  atom_indexesO = cm.lut_list.types[1].atom_index;
 	}
-      if ( step % comp_step == 0 && step >= start_step && step =< end_step )
+      if ( step % comp_step == 0 && step >= start_step && step <= end_step )
 	{
 	  makeContactMatrixDistance( cm , atom_list, cell , cut_off , lut_list );
 	  appendVector( CC1 , getNNearest( cm , 1 , atom_indexesC , atom_indexesC ) );

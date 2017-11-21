@@ -94,8 +94,8 @@ void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> >
 //-----------------------
 // Integrate Histograms
 //-------------------------------------------------------------------------------------
-double integrateHistogram( std::vector<Bin> & histogram );
-double integrateHistogram( std::vector<Bin> & histogram , double start , double end );
+double integrateHistogram( std::vector<BinReal> & histogram );
+double integrateHistogram( std::vector<BinReal> & histogram , double start , double end );
 //-------------------------------------------------------------------------------------
 
 //----
@@ -103,6 +103,7 @@ double integrateHistogram( std::vector<Bin> & histogram , double start , double 
 //-------------------------------------------------------------------------------------
 void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram );
 std::vector<Bin> readRegularHistogram( std::string file_name );
+std::vector<BinReal> readRegularHistogramReal( std::string file_name );
 //-------------------------------------------------------------------------------------
 
 //======================================================================================

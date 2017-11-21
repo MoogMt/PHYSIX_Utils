@@ -40,37 +40,60 @@ int main( void )
   //--------
   // Output
   //--------------------------------------------------------------------------------
-  std::ofstream output( "ratio.dat" ,  std::ios::out );
+  std::ofstream output3CO_1st( "3C_1st.dat" ,  std::ios::out );
+  std::ofstream output3CO_2nd( "3C_2nd.dat" ,  std::ios::out );
   //--------------------------------------------------------------------------------
   
   //------
   // Data
   //-----------------------------------------
-  std::vector<Bin> hist1CC;
-  std::vector<Bin> hist2CC;
-  std::vector<Bin> hist1CO;
-  std::vector<Bin> hist2CO;
-  std::vector<Bin> hist3CO;
-  std::vector<Bin> hist4CO;
-  std::vector<Bin> hist1OO;
+  std::vector<std::vector<BinReal> > hist_list;
   //-----------------------------------------
 
+  //--------------
   // Reading Data
   //-------------------------------------------------------------------
-  readRegularHistogram( "1CCnearest.dat" , hist1CC );
-  readRegularHistogram( "1CCnearest.dat" , hist2CO );
-  readRegularHistogram( "1CCnearest.dat" , hist3CO );
-  readRegularHistogram( "1CCnearest.dat" , hist4CO );
-  readRegularHistogram( "1CCnearest.dat" , hist1CC );
-  readRegularHistogram( "1CCnearest.dat" , hist2CC );
-  readRegularHistogram( "1CCnearest.dat" , hist1OO );
+  // 3CO
+  //------------------------------------------------
+  // 2500K
+  hist_list.push_back( readRegularHistogramReal( "3500K/40GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "2500K/45GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "2500K/50GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "2500K/60GPa/3nearestCO.dat" ) );
+  // 3000K
+  hist_list.push_back( readRegularHistogramReal( "3000K/40GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "3000K/45GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "3000K/50GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "3000K/60GPa/3nearestCO.dat" ) );
+  // 3500K
+  hist_list.push_back( readRegularHistogramReal( "3500K/40GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "3500K/45GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "3500K/50GPa/3nearestCO.dat" ) );
+  hist_list.push_back( readRegularHistogramReal( "3500K/60GPa/3nearestCO.dat" ) );
+  //-------------------------------------------------------------------i
+
+  //----------
+  // Pressure
+  //-------------------------------------------------------------------
+  double press[4] = { 40, 45 , 50, 60 };
   //-------------------------------------------------------------------
 
+  //-----------------
+  // Writting data
+  //-------------------------------------------------------------------
+  for ( int i=0 ; i < 4 ; i++ )
+    {
+      output3CO_1st << press[i] << " " << integrateHistogram( hist_list[i] , 0 , 1.75 ) << " " << integrateHistogram( hist_list[i+4] , 0 , 1.75 ) << " " << integrateHistogram( hist_list[i+8] , 0 , 1.75 )  <<  std::endl;
+      output3CO_2nd << press[i] << " " << integrateHistogram( hist_list[i] , 1.75 , 3.00 ) << " " << integrateHistogram( hist_list[i+4] , 1.75 , 3.00 ) << " " << integrateHistogram( hist_list[i+8] , 1.75 , 3.00 )  <<  std::endl;
+    }
+  //-------------------------------------------------------------------
+  
   //--------------
   //Closing fluxes
   //----------------------
   input.close();
-  output.close();
+  output3CO_1st.close();
+  output3CO_2nd.close();
   //----------------------
   
   return 0;
