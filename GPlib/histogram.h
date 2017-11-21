@@ -102,6 +102,7 @@ double integrateHistogram( std::vector<Bin> & histogram , double start , double 
 // IO
 //-------------------------------------------------------------------------------------
 void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram );
+std::vector<Bin> readRegularHistogram( std::string file_name );
 //-------------------------------------------------------------------------------------
 
 //======================================================================================

@@ -1,25 +1,30 @@
 #include "histogram.h"
 
+//========
 // BINS
-//-------------------------------------------------
+//======================================================================
 Bin emptyBin()
 {
   Bin bin = { 0, 0, 0};
 
   return bin;
 }
-//
+//-----------------------------------------------------------
 Bin makeBinReal( double begin , double end , int value )
 {
   Bin bin = { begin , end , value };
   return bin;
 }
-//
+//======================================================================
+
+//========
+// 
+//======================================================================
 double center( Bin bin )
 {
   return (bin.end+bin.begin)/2.0;
 }
-//
+//-----------------------------------------------------------
 bool overlap( Bin bin1, Bin bin2 )
 {
   if ( max(bin1.begin,bin2.begin) <  min(bin1.end,bin2.end) )
@@ -31,7 +36,7 @@ bool overlap( Bin bin1, Bin bin2 )
       return false;
     }
 }
-//
+//-----------------------------------------------------------
 void fillBin( Bin &bin , std::vector<double> data )
 {
   for ( int i=0 ; i < data.size() ; i++ )
@@ -43,14 +48,14 @@ void fillBin( Bin &bin , std::vector<double> data )
     }
   return ;
 }
-//
+//-----------------------------------------------------------
 Bin makeBin( double bin_min, double bin_max, std::vector<double> data)
 {
   Bin bin = { bin_min , bin_max , 0 };
   fillBin( bin , data );
   return bin;
 }
-//
+//-----------------------------------------------------------
 Bin addBinsMin( Bin bin1, Bin bin2)
 {
   Bin bin_final;
@@ -66,16 +71,17 @@ Bin addBinsMin( Bin bin1, Bin bin2)
       return emptyBin();
     }
 }
-//
+//-------------------------------------------------------------
 Bin addBinsMax( Bin bin1, Bin bin2 )
 {
   Bin bin_final = { min(bin1.begin,bin2.begin) , max(bin1.end,bin2.end) , bin1.value + bin2.value };
   return bin_final;
 }
-//-------------------------------------------------
+//===============================================================================================
 
+//================
 // MAKE HISTOGRAM
-//--------------------------------------------------------------------------------------------------
+//===============================================================================================
 std::vector<Bin> makeRegularHistogram( std::vector<double> data , double x_min , double x_max , int number_bins )
 {
   std::vector<Bin> bins_hist;
@@ -91,7 +97,7 @@ std::vector<Bin> makeRegularHistogram( std::vector<double> data , double x_min ,
     }
   return bins_hist;
 }
-//
+//--------------------------------------------------------------------------------------------
 std::vector<Bin> makeRegularHistogram( std::vector<double> data_x , std::vector<double> data_y , int number_bins )
 {
   std::vector<Bin> bins_hist;
@@ -104,7 +110,7 @@ std::vector<Bin> makeRegularHistogram( std::vector<double> data_x , std::vector<
     }
   return bins_hist;
 }
-//
+//--------------------------------------------------------------------------------------------
 std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<double> bins_limits)
 {
   std::vector<Bin> bins_hist;
@@ -114,6 +120,7 @@ std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<double> b
     }
   return bins_hist;
 }
+//--------------------------------------------------------------------------------------------
 std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<Bin> bins)
 {
   for( int i=0 ; i < bins.size() ; i++ )
@@ -122,9 +129,12 @@ std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<Bin> bins
     }
   return bins;
 }
-//---------------------------------------------------------------------------------------
+//===============================================================================================
+
+
+//===============
 // Modification
-//---------------------------------------------------------------------------------------
+//===============================================================================================
 std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 )
 {
   std::vector<Bin> sum_hist;
@@ -140,9 +150,11 @@ std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 
     }
   return sum_hist;
 }
-//---------------------------------------------------------------------------------------
+//===============================================================================================
+
+//==============
 // Total Value
-//---------------------------------------------------------------------------------------
+//===============================================================================================
 double getTotalValue( std::vector<Bin> hist )
 {
   double total_value = 0;
@@ -173,29 +185,28 @@ void writeHistogram( std::string file_name , std::vector<Bin> hist )
   file.close();
   return;
 }
-//---------------------------------------------------------------------------------------
 //==========================================================================================
 
-
+//==========
 // Bin Real
-//-------------------------------------------------------------------------------------------------
+//==========================================================================================
 BinReal emptyBinReal()
 {
   BinReal bin = { 0, 0, 0};
   return bin;
 }
-//
+//-------------------------------------------------------------------------------------------------
 BinReal makeBinReal( double begin , double end , double value )
 {
   BinReal bin = { begin , end , value };
   return bin;
 }
-//
+//-------------------------------------------------------------------------------------------------
 double center( BinReal bin )
 {
   return ( bin.begin + bin.end )/2;
 }
-//
+//-------------------------------------------------------------------------------------------------
 bool overlap( BinReal bin1 , BinReal bin2 )
 { 
   if ( max(bin1.begin,bin2.begin) <  min(bin1.end,bin2.end) )
@@ -207,7 +218,7 @@ bool overlap( BinReal bin1 , BinReal bin2 )
       return false;
     }
 }
-//
+//-------------------------------------------------------------------------------------------------
 void fillBin( BinReal &bin , std::vector<double> data )
 {
   for ( int i=0 ; i < data.size() ; i++ )
@@ -219,14 +230,14 @@ void fillBin( BinReal &bin , std::vector<double> data )
     }
   return ;
 }
-//
+//-------------------------------------------------------------------------------------------------
 BinReal makeBinReal( double bin_min, double bin_max, std::vector<double> data)
 {
   BinReal bin = { bin_min , bin_max , 0 };
   fillBin( bin , data );
   return bin;
 }
-//
+//-------------------------------------------------------------------------------------------------
 BinReal addBinsMin( BinReal bin1, BinReal bin2)
 {
   BinReal bin_final;
@@ -242,16 +253,18 @@ BinReal addBinsMin( BinReal bin1, BinReal bin2)
       return emptyBinReal();
     }
 }
-//
+//-------------------------------------------------------------------------------------------------
 BinReal addBinsMax( BinReal bin1, BinReal bin2 )
 {
   BinReal bin_final = { min(bin1.begin,bin2.begin) , max(bin1.end,bin2.end) , bin1.value + bin2.value };
   return bin_final;
 }
-//-------------------------------------------------------------------------------------------------
+//================================================================================================
 
+
+//======================
 // Bin Real Histogram
-//-------------------------------------------------------------------------------------------------
+//================================================================================================
 std::vector<BinReal> normalizeHistogram( std::vector<Bin> hist )
 {
   std::vector<BinReal> hist_real;
@@ -262,7 +275,7 @@ std::vector<BinReal> normalizeHistogram( std::vector<Bin> hist )
     }
   return hist_real;
 }
-//
+//-------------------------------------------------------------------------------------------------
 void writeHistogram( std::ofstream & file , std::vector<BinReal> hist )
 {
   for ( int i=0 ; i < hist.size() ; i++ )
@@ -271,7 +284,7 @@ void writeHistogram( std::ofstream & file , std::vector<BinReal> hist )
     }
   return;
 }
-//
+//-------------------------------------------------------------------------------------------------
 void writeHistogram( std::string file_name , std::vector<BinReal> hist )
 {
   std::ofstream file ( file_name.c_str() ,  std::ios::out | std::ios::app );
@@ -282,7 +295,7 @@ void writeHistogram( std::string file_name , std::vector<BinReal> hist )
   file.close();
   return;
 }
-//
+//-------------------------------------------------------------------------------------------------
 bool checkSizeHists( std::vector<BinReal> hist , std::vector<BinReal> hist2 )
 {
   if ( hist.size() == hist2.size() )
@@ -294,7 +307,7 @@ bool checkSizeHists( std::vector<BinReal> hist , std::vector<BinReal> hist2 )
       return false;
     }
 }
-//
+//-------------------------------------------------------------------------------------------------
 bool checkSizeHists( std::vector< std::vector<BinReal> > hist_list )
 {
   for ( int i=0 ; i < hist_list.size()-1 ; i++ )
@@ -309,7 +322,7 @@ bool checkSizeHists( std::vector< std::vector<BinReal> > hist_list )
     }
   return true;
 }
-//
+//-------------------------------------------------------------------------------------------------
 void writeBinReal( std::ofstream & file , BinReal bin, bool wcenter)
 {
   if ( wcenter )
@@ -322,23 +335,23 @@ void writeBinReal( std::ofstream & file , BinReal bin, bool wcenter)
     }
   return ;
 }
-//
+//-------------------------------------------------------------------------------------------------
 void writeBinRealCenter( std::ofstream & file, BinReal bin )
 {
   file << center(bin) << " ";
   return;
 }
-//
+//-------------------------------------------------------------------------------------------------
 void writeHistBinCenter( std::ofstream & file , std::vector<BinReal> hist , int index )
 {
   writeBinRealCenter( file, hist[index] );
 }  
-//
+//-------------------------------------------------------------------------------------------------
 void writeHistBin( std::ofstream & file , std::vector<BinReal> hist, int index , bool wcenter )
 {
   writeBinReal( file , hist[index] , wcenter );
 }
-//
+//-------------------------------------------------------------------------------------------------
 void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> > hist_list )
 {
   if ( checkSizeHists( hist_list ) )
@@ -436,6 +449,72 @@ void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram 
       return;
     }
   return;
+}
+//-----------------------------------------------------------------------------------
+ std::vector<Bin> readRegularHistogram( std::string file_name )
+{
+  //-----------
+  // Histogram
+  //--------------------------------------------------------------
+  std::vector<Bin> histogram;
+  //--------------------------------------------------------------
+
+  //-------------------
+  // Reading variables
+  //--------------------------------------------------------------
+  std::ifstream file( file_name.c_str() );
+  std::string line, line1, line2;
+  double step = 0;
+  //--------------------------------------------------------------
+
+  //--------------------------------------------------------------
+  // First two step, to compute the step
+  //--------------------------------------------------------------
+  if( std::getline( file , line1 ) )
+    {
+      double step1 = 0, value1 = 0;
+      std::istringstream it_string1(line1);
+      if ( it_string1 >> step1 >> value1 ) 
+	{
+	  if( std::getline( file , line2 ) )
+	    {
+	      std::istringstream it_string2( line2 );
+	      double step2 = 0 , value2 = 0;
+	      if ( it_string2 >> step2 >> value2 )
+		{
+		  step = (step2 - step1)*0.5;
+		  Bin bin1 = { step1 - step , step1 + step , value1 };
+		  Bin bin2 = { step2 - step , step2 + step , value2 };
+		  histogram.push_back( bin1 );
+		  histogram.push_back( bin2 );
+		}
+	      else return histogram;
+	    }
+	  else return histogram;
+	}
+      else return histogram;
+    }
+  else return histogram;
+  //--------------------------------------------------------------
+
+  //-------------------------------
+  // Reading rest of the histogram
+  //--------------------------------------------------------------
+  while( std::getline( file , line ) )
+    {
+      double step_loc, value;
+      std::istringstream it_string( line );
+      if ( it_string >> step_loc >> value )
+	{
+	  Bin bin = { step_loc - step , step_loc + step , value };
+	  histogram.push_back( bin );
+	}
+      return histogram;
+    }
+  //--------------------------------------------------------------
+
+  // Return histogram
+  return histogram;
 }
 //=========================================================================================
 
