@@ -57,7 +57,7 @@ int main( void )
   //--------------------------------------------------
   AtomList  atom_list;     // Atoms in cell
   std::vector<double> r, r_0; // Atoms_old in cell
-  double origin[3] = { 0 , 0 , 0};
+  std::vector<double> origin; origin.assign( 3 , 0 ); // Origin of the box
   AllTypeLUT lut_list; // LUT for types
   //--------------------------------------------------
 
@@ -76,10 +76,10 @@ int main( void )
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step == start_step ) r_0 = calculate_distance( atom_list , origin );
+      if ( step == start_step ) r_0 = distanceFromPoint( atom_list , origin );
       else if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
-	  std::vector<double> r = calculate_distance( atom_list , origin) ;
+	  std::vector<double> r = distanceFromPoint( atom_list , origin) ;
 	  double r2_avg = abs( average( difference( r , r_0 ) ) ); r2_avg *= r2_avg;
 	  diffusion << step << " " << r2_avg << std::endl;
 	  std::cout << step << std::endl;

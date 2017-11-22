@@ -7,7 +7,8 @@ OBJP = pressure.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogra
 OBJNN = NN.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJmols = make_molecules.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJangles = angles.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
-OBJhistratio = ratio_counting.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 						
+OBJhistratio = ratio_counting.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+OBJdiff = diffusion.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 						
 
 %.o: %.c $(DEPS)
 	$(CPP) -c -o $@ $< $(CFLAGS)
@@ -21,7 +22,9 @@ molecule: $(OBJmols)
 angles: $(OBJangles)
 	$(CPP) -o $@ $^ $(CFLAGS)
 ratio: $(OBJhistratio)
-	$(CPP) -o $@ $^ $(CFLAGS)	
+	$(CPP) -o $@ $^ $(CFLAGS)
+diffusion: $(OBJdiff)
+	$(CPP) -o $@ $^ $(CFLAGS)		
 
 clean:
 	rm -rf *.o 

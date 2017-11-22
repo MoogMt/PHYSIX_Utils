@@ -222,11 +222,11 @@ std::vector<double> difference( std::vector<double> vector1 , std::vector<double
     {
       for ( int i=0 ; i < vector1.size() ; i++ )
 	{
-	  vector1[i] += vector2[i];
+	  vector1[i] -= vector2[i];
 	}
+      return vector1;
     }
   else vector1.clear();
-  return vector1;
 }
 //-----------------------------------------------------------------------
 double average( std::vector<double> & vector )
@@ -237,6 +237,46 @@ double average( std::vector<double> & vector )
       avg += vector[i];
     }
   return avg/(double)(vector.size());
+}
+//-----------------------------------------------------------------------
+std::vector<double> distance( std::vector<double> & vector1 , double scalar )
+{
+  for ( int i=0 ; i < vector1.size() ; i++ )
+    {
+      vector1[i] -= scalar; 
+    }
+  return vector1;
+}
+//-----------------------------------------------------------------------
+std::vector<double> square( std::vector<double> & vector1 )
+{
+  for ( int i=0 ; i < vector.size() ; i++ )
+    {
+      vector1[i] *= vector1[i];
+    }
+  return vector1
+}
+//-----------------------------------------------------------------------
+std::vector<double> squaroot( std::vector<double> & vector1 )
+{
+  for ( int i=0; i < vector1.size() ; i++ )
+    {
+      vector1[i] = sqrt( vector1[i] );
+    }
+  return vector1;
+}
+//-----------------------------------------------------------------------
+std::vector<double> addVector( std::vector<double> & vector1 , std::vector<double> vector2 )
+{
+  if( vector1.size() == vector2.size() )
+    {
+      for( int i=0 ; i < vector1.size() ; i++ )
+	{
+	  vector1[i] += vector2[i];
+	}
+      return vector1;
+    }
+  else vector1.clear();
 }
 //-----------------------------------------------------------------------
 double scalarProduct( std::vector<double> & vector1 , std::vector<double> & vector2 )

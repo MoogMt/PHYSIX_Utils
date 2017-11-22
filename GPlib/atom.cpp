@@ -25,7 +25,16 @@ double distanceAtoms(Atom i, Atom j)
   double dist=sqrt( pow(x2,2.0) + pow(y2,2.0) + pow(z2,2.0) );
   return dist;
 }
-//======================================================================
+//-------------------------------------------------------------------------
+std::vector<double> distanceFromPoint( AtomList atom_list , std::vector<double> point )
+{
+  std::vector<double> r;
+  std::vector<double> x2 = square( distance( atom_list.x , point[0] ) );
+  std::vector<double> y2 = square( distance( atom_list.y , point[1] ) );
+  std::vector<double> z2 = square( distance( atom_list.z , point[2] ) );
+  return squaroot( addVector( addVector( addVectors( r , x2 ) , y2 ), z2 ) ); 
+}
+//=====================================================================
 
 
 //=======

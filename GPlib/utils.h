@@ -75,13 +75,17 @@ std::vector<double> sortVectorDecreasing( std::vector<double> unsorted );
 //-----------------------------------------------------------------------------
 void appendVector( std::vector<double> & vec_to, std::vector<double> vec_from );
 //-----------------------------------------------------------------------------
-// Difference
-//-----------------------------------------------------------------------------
-std::vector<double> difference( std::vector<double> vector1 , std::vector<double> vector2 );
-//-----------------------------------------------------------------------------
 // Average
 //-----------------------------------------------------------------------------
 double average( std::vector<double> & vector );
+//-----------------------------------------------------------------------------
+// Basic Operations
+//-----------------------------------------------------------------------------
+std::vector<double> square( std::vector<double> & vector1 );
+std::vector<double> squaroot( std::vector<double> & vector1 );
+std::vector<double> distance( std::vector<double> & vector1 , double scalar );
+std::vector<double> addVector( std::vector<double> & vector1 , std::vector<double> vector2 );
+std::vector<double> difference( std::vector<double> vector1 , std::vector<double> vector2 );
 //-----------------------------------------------------------------------------
 // Products
 //-----------------------------------------------------------------------------

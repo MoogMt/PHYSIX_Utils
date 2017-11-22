@@ -10,6 +10,8 @@
 #include <stdlib.h>    
 #include <math.h>
 
+#include "utils.h"
+
 //======
 // ATOM
 //==============================
@@ -42,6 +44,7 @@ std::vector<double> getPosition( AtomList & atoms , int index );
 // Distances
 //=============================================================================================
 double distanceAtoms(Atom i, Atom j);
+std::vector<double> distanceFromPoint( AtomList atom_list , std::vector<double> point );
 //=============================================================================================
 
 
