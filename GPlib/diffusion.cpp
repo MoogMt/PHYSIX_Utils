@@ -55,10 +55,10 @@ int main( void )
   //---------------
   // Initializers
   //--------------------------------------------------
-  AtomList  atom_list;  // Atoms in cell
+  AtomList  atom_list;     // Atoms in cell
+  std::vector<double> r, r_0; // Atoms_old in cell
+  double origin[3] = { 0 , 0 , 0};
   AllTypeLUT lut_list; // LUT for types
-  ContactMatrix cm_connection;    // Contact Matrix
-  ContactMatrix cm_distance;    // Contact Matrix
   //--------------------------------------------------
 
   //--------------------
@@ -71,34 +71,24 @@ int main( void )
     }
   //-------------------------------------------------------------------
 
-  //-----------------
-  // Reading Cut-Off
-  //-------------------------------------------------------------------
-  CutOffMatrix cut_off;
-  if ( ! readCutOff( "cut_off.dat" , cut_off , lut_list ) )
-    {
-      return 1;
-    }
-  //-------------------------------------------------------------------
-  
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step % comp_step == 0 && step > start_step && step < end_step )
+      if ( step == start_step ) r_0 = calculate_distance( atom_list , origin );
+      else if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
-	  // Makes the contact matrix
-	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
-	  // Making molecules
-	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
-
+	  std::vector<double> r = calculate_distance( atom_list , origin) ;
+	  double r2_avg = abs( average( difference( r , r_0 ) ) ); r2_avg *= r2_avg;
+	  diffusion << step << " " << r2_avg << std::endl;
 	  std::cout << step << std::endl;
 	}      
       step++;
      }
   //----------------------------------------------------
 
+  
   //---------------
   //Closing fluxes
   //----------------------
