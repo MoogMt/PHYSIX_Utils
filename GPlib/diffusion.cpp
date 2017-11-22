@@ -71,31 +71,6 @@ int main( void )
   int count = 0;
   //--------------------------------------------------
 
-  //--------------------
-  // Reading Cell File
-  //-------------------------------------------------------------------
-  Cell cell40;
-  if ( ! readParamCell( "40GPa/cell.param" , cell40 ) )
-    {
-      return 1;
-    }
-  Cell cell45;
-  if ( ! readParamCell( "45GPa/cell.param" , cell45 ) )
-    {
-      return 1;
-    }
-  Cell cell50;
-  if ( ! readParamCell( "50GPa/cell.param" , cell50 ) )
-    {
-      return 1;
-    }
-  Cell cell60;
-  if ( ! readParamCell( "60GPa/cell.param" , cell60 ) )
-    {
-      return 1;
-    }
-  //-------------------------------------------------------------------
-
   //-----------------
   // Reading Cut-Off
   //-------------------------------------------------------------------
