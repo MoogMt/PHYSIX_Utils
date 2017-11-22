@@ -34,13 +34,20 @@ int main( void )
   //--------
   // Input
   //---------------------------------
-  std::ifstream input("TRAJEC.xyz");
+  std::ifstream input40("40GPa/TRAJEC.xyz");
+  std::ifstream input45("45GPa/TRAJEC.xyz");
+  std::ifstream input50("50GPa/TRAJEC.xyz");
+  std::ifstream input60("60GPa/TRAJEC.xyz");
   //--------------------------------
 
   //--------
   // Output
   //-------------------------------------
-  std::ofstream diffusion("diffusion.dat");
+  std::ofstream diffcoef("diffcoef.dat");
+  std::ofstream diffusion40("diffusion_40.dat");
+  std::ofstream diffusion45("diffusion_45.dat");
+  std::ofstream diffusion50("diffusion_50.dat");
+  std::ofstream diffusion60("diffusion_60.dat");
   //-------------------------------------
   
   //----------------------
@@ -60,13 +67,30 @@ int main( void )
   AllTypeLUT lut_list; // LUT for types
   std::vector<double> x0, y0, z0;
   std::vector<double> x, y, z;
+  double d_40=0, d_45=0, d_50=0 , d_60=0;
+  int count = 0;
   //--------------------------------------------------
 
   //--------------------
   // Reading Cell File
   //-------------------------------------------------------------------
-  Cell cell;
-  if ( ! readParamCell( "cell.param" , cell ) )
+  Cell cell40;
+  if ( ! readParamCell( "40GPa/cell.param" , cell40 ) )
+    {
+      return 1;
+    }
+  Cell cell45;
+  if ( ! readParamCell( "45GPa/cell.param" , cell45 ) )
+    {
+      return 1;
+    }
+  Cell cell50;
+  if ( ! readParamCell( "50GPa/cell.param" , cell50 ) )
+    {
+      return 1;
+    }
+  Cell cell60;
+  if ( ! readParamCell( "60GPa/cell.param" , cell60 ) )
     {
       return 1;
     }
@@ -76,7 +100,7 @@ int main( void )
   // Reading Cut-Off
   //-------------------------------------------------------------------
   CutOffMatrix cut_off;
-  if ( ! readCutOff( "cut_off.dat" , cut_off , lut_list ) )
+  if ( ! readCutOff( "40GPa/cut_off.dat" , cut_off , lut_list ) )
     {
       return 1;
     }
@@ -85,7 +109,7 @@ int main( void )
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
-  while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
+  while( readStepXYZfast( input40 , atom_list , lut_list, true, true ) )
     {
       if ( step == start_step )
 	{
@@ -99,19 +123,118 @@ int main( void )
 	  std::vector<double> y = difference( atom_list.y , y0 );
 	  std::vector<double> z = difference( atom_list.z , z0 );
 	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
-	  diffusion << step << " " << average( r ) << std::endl;
+	  diffusion40 << step-start_step << " " << average( r )/(6*(step-start_step)) << std::endl;
+	  count++;
+	  if ( step > start_step + 2000 )
+	    {
+	      d_40 += average( r )/(6*(step-start_step));
+	    }
 	}      
       std::cout << step << std::endl;
       step++;
      }
+  d_40 /= (double)(count);
+  //----------------------------------------------------
+  step=0;
+  //----------------------------------------------------
+  while( readStepXYZfast( input45 , atom_list , lut_list, true, true ) )
+    {
+      if ( step == start_step )
+	{
+	  x0 = atom_list.x;
+	  y0 = atom_list.y;
+	  z0 = atom_list.z;
+	}
+      else if ( step % comp_step == 0 && step > start_step && step < end_step )
+	{
+	  std::vector<double> x = difference( atom_list.x , x0 );
+	  std::vector<double> y = difference( atom_list.y , y0 );
+	  std::vector<double> z = difference( atom_list.z , z0 );
+	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
+	  diffusion45 << step-start_step << " " << average( r )/(6*(step-start_step)) << std::endl;
+	  count++;
+	  if ( step > start_step + 2000 )
+	    {
+	      d_45 += average( r )/(6*(step-start_step));
+	    }
+	}      
+      std::cout << step << std::endl;
+      step++;
+     }
+  d_45 /= (double)(count);
+  //----------------------------------------------------
+  step=0;
+  //----------------------------------------------------
+  while( readStepXYZfast( input50 , atom_list , lut_list, true, true ) )
+    {
+      if ( step == start_step )
+	{
+	  x0 = atom_list.x;
+	  y0 = atom_list.y;
+	  z0 = atom_list.z;
+	}
+      else if ( step % comp_step == 0 && step > start_step && step < end_step )
+	{
+	  std::vector<double> x = difference( atom_list.x , x0 );
+	  std::vector<double> y = difference( atom_list.y , y0 );
+	  std::vector<double> z = difference( atom_list.z , z0 );
+	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
+	  diffusion50 << step-start_step << " " << average( r )/(6*(step-start_step)) << std::endl;
+	  count++;
+	  if ( step > start_step + 2000 )
+	    {
+	      d_50 += average( r )/(6*(step-start_step));
+	    }
+	}      
+      std::cout << step << std::endl;
+      step++;
+     }
+  d_50 /= (double)(count);
+  //----------------------------------------------------
+  step=0;
+  //----------------------------------------------------
+  while( readStepXYZfast( input60 , atom_list , lut_list, true, true ) )
+    {
+      if ( step == start_step )
+	{
+	  x0 = atom_list.x;
+	  y0 = atom_list.y;
+	  z0 = atom_list.z;
+	}
+      else if ( step % comp_step == 0 && step > start_step && step < end_step )
+	{
+	  std::vector<double> x = difference( atom_list.x , x0 );
+	  std::vector<double> y = difference( atom_list.y , y0 );
+	  std::vector<double> z = difference( atom_list.z , z0 );
+	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
+	  diffusion60 << step-start_step << " " << average( r )/(6*(step-start_step)) << std::endl;
+	  count++;
+	  if ( step > start_step + 2000 )
+	    {
+	      d_60 += average( r )/(6*(step-start_step));
+	    }
+	}      
+      std::cout << step << std::endl;
+      step++;
+     }
+  d_60 /= (double)(count);
   //----------------------------------------------------
 
+  //----------------------------------------------------
+  diffcoef << 40 << " " << d_40 << std::endl;
+  diffcoef << 45 << " " << d_45 << std::endl;
+  diffcoef << 50 << " " << d_50 << std::endl;
+  diffcoef << 60 << " " << d_60 << std::endl;
+  //----------------------------------------------------
   
   //---------------
   //Closing fluxes
   //----------------------
-  input.close();
-  diffusion.close();
+  diffusion40.close();
+  diffusion45.close();
+  diffusion50.close();
+  diffusion60.close();
+  diffcoef.close();
   //----------------------
       
   return 0;
