@@ -239,7 +239,7 @@ double average( std::vector<double> & vector )
   return avg/(double)(vector.size());
 }
 //-----------------------------------------------------------------------
-std::vector<double> distance( std::vector<double> & vector1 , double scalar )
+std::vector<double> distance( std::vector<double> vector1 , double scalar )
 {
   for ( int i=0 ; i < vector1.size() ; i++ )
     {
@@ -248,16 +248,16 @@ std::vector<double> distance( std::vector<double> & vector1 , double scalar )
   return vector1;
 }
 //-----------------------------------------------------------------------
-std::vector<double> square( std::vector<double> & vector1 )
+std::vector<double> square( std::vector<double> vector1 )
 {
-  for ( int i=0 ; i < vector.size() ; i++ )
+  for ( int i=0 ; i < vector1.size() ; i++ )
     {
       vector1[i] *= vector1[i];
     }
-  return vector1
+  return vector1;
 }
 //-----------------------------------------------------------------------
-std::vector<double> squaroot( std::vector<double> & vector1 )
+std::vector<double> squaroot( std::vector<double> vector1 )
 {
   for ( int i=0; i < vector1.size() ; i++ )
     {
@@ -266,7 +266,7 @@ std::vector<double> squaroot( std::vector<double> & vector1 )
   return vector1;
 }
 //-----------------------------------------------------------------------
-std::vector<double> addVector( std::vector<double> & vector1 , std::vector<double> vector2 )
+std::vector<double> addVector( std::vector<double> vector1 , std::vector<double> vector2 )
 {
   if( vector1.size() == vector2.size() )
     {
@@ -279,7 +279,7 @@ std::vector<double> addVector( std::vector<double> & vector1 , std::vector<doubl
   else vector1.clear();
 }
 //-----------------------------------------------------------------------
-double scalarProduct( std::vector<double> & vector1 , std::vector<double> & vector2 )
+double scalarProduct( std::vector<double> vector1 , std::vector<double> vector2 )
 {
   double scalar = 0;
   if ( vector1.size() == vector2.size() )
@@ -293,7 +293,7 @@ double scalarProduct( std::vector<double> & vector1 , std::vector<double> & vect
   else return 0;
 }
 //-----------------------------------------------------------------------
-std::vector<double> crossProduct( std::vector<double> & vector1 , std::vector<double> & vector2 )
+std::vector<double> crossProduct( std::vector<double> vector1 , std::vector<double> vector2 )
 {
   std::vector<double> vector;
   vector.push_back( vector1[1]*vector2[2] - vector2[1]*vector1[2] );
@@ -302,12 +302,12 @@ std::vector<double> crossProduct( std::vector<double> & vector1 , std::vector<do
   return vector;
 }
 //-----------------------------------------------------------------------
-double norm( std::vector<double> & vector )
+double norm( std::vector<double> vector )
 {
   return sqrt(abs( scalarProduct( vector , vector ) ));
 }
 //-----------------------------------------------------------------------
-double getDistanceFromPlan( std::vector<double> & vector1, std::vector<double> & vector2 , std::vector<double> point_outside , std::vector<double> point_plan )
+double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vector2 , std::vector<double> point_outside , std::vector<double> point_plan )
 {
   std::vector<double> normal = crossProduct( vector1, vector2 );
   std::vector<double> vector = difference( point_plan , point_outside  );
