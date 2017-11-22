@@ -72,6 +72,8 @@ int main( void )
   // Reading Cell File
   //-------------------------------------------------------------------
   Cell cell;
+
+
   if ( ! readParamCell( "cell.param" , cell ) )
     {
       return 1;

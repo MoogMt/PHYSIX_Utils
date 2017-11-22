@@ -208,21 +208,11 @@ int main( void )
 			      std::vector<double> position_atom1  = getPosition( atom_list , per_atoms_index[0] );
 			      std::vector<double> position_atom2  = getPosition( atom_list , per_atoms_index[1] );
 			      std::vector<double> position_atom3  = getPosition( atom_list , per_atoms_index[2] );
-			      std::vector<double> vector1 = Difference( position_atom1 , position_atom2 );
-			      std::vector<double> vector2 = Difference( position_atom1 , position_atom3 );
+			      std::vector<double> vector1 = difference( position_atom1 , position_atom2 );
+			      std::vector<double> vector2 = difference( position_atom1 , position_atom3 );
 			      double dist = getDistanceFromPlan( vector1 , vector2 , position_center, position_atom1 );
 			      distance_from_plan << step << " " << dist << std::endl;
 			      DistPlanC3.push_back( dist );
-			      int index_center = molecules[i].atom_index[j];
-			      std::vector<double> position_center = getMinImage( atom_list , cell , index_center , index_center );
-			      std::vector<double> position_atom1  = getMinImage( atom_list , cell , index_center , per_atoms_index[0] );
-			      std::vector<double> position_atom2  = getMinImage( atom_list , cell , index_center , per_atoms_index[1] );
-			      std::vector<double> position_atom3  = getMinImage( atom_list , cell , index_center , per_atoms_index[2] );
-			      std::vector<double> vector_plan1 = difference( position_atom1 , position_atom2 );
-			      std::vector<double> vector_plan2 = difference( position_atom1 , position_atom3 );
-			      double dist = getDistanceFromPlan( vector_plan1 , vector_plan2 , position_center , position_atom1 )  ;
-			      distance_from_plan_alone << step << " " << dist << std::endl;
-			      distPlanC3_alone.push_back( dist );
 			    }
 			  else
 			    {
