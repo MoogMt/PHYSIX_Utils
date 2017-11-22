@@ -56,9 +56,10 @@ int main( void )
   // Initializers
   //--------------------------------------------------
   AtomList  atom_list;     // Atoms in cell
-  std::vector<double> r, r_0; // Atoms_old in cell
-  std::vector<double> origin; origin.assign( 3 , 0 ); // Origin of the box
+  std::vector<double> r; // Atoms_old in cell
   AllTypeLUT lut_list; // LUT for types
+  std::vector<double> x0, y0, z0;
+  std::vector<double> x, y, z;
   //--------------------------------------------------
 
   //--------------------
@@ -88,16 +89,17 @@ int main( void )
     {
       if ( step == start_step )
 	{
-	  x_0 = distanceFromPoint( atom_list , origin );
-	  x_0 = distanceFromPoint( atom_list , origin );
-	  x_0 = distanceFromPoint( atom_list , origin );
+	  x0 = atom_list.x;
+	  y0 = atom_list.y;
+	  z0 = atom_list.z;
 	}
       else if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
-	  std::vector<double> r = distanceFromPoint( atom_list , origin) ;
-	  std::vector<double> diff= difference( r , r_0 );
-	  double r2_avg = average( square( squaroot( square( diff ) ) ) );
-	  diffusion << step << " " << r2_avg << std::endl;
+	  std::vector<double> x = difference( atom_list.x , x0 );
+	  std::vector<double> y = difference( atom_list.y , y0 );
+	  std::vector<double> z = difference( atom_list.z , z0 );
+	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
+	  diffusion << step << " " << average( r ) << std::endl;
 	}      
       std::cout << step << std::endl;
       step++;

@@ -75,10 +75,6 @@ std::vector<double> sortVectorDecreasing( std::vector<double> unsorted );
 //-----------------------------------------------------------------------------
 void appendVector( std::vector<double> & vec_to, std::vector<double> vec_from );
 //-----------------------------------------------------------------------------
-// Average
-//-----------------------------------------------------------------------------
-double average( std::vector<double> & vector );
-//-----------------------------------------------------------------------------
 // Basic Operations
 //-----------------------------------------------------------------------------
 std::vector<double> square( std::vector<double> vector1 );

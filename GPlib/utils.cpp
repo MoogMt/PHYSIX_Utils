@@ -229,16 +229,6 @@ std::vector<double> difference( std::vector<double> vector1 , std::vector<double
   else vector1.clear();
 }
 //-----------------------------------------------------------------------
-double average( std::vector<double> & vector )
-{
-  double avg = 0;
-  for ( int i=0 ; vector.size() ; i++ )
-    {
-      avg += vector[i];
-    }
-  return avg/(double)(vector.size());
-}
-//-----------------------------------------------------------------------
 std::vector<double> distance( std::vector<double> vector1 , double scalar )
 {
   for ( int i=0 ; i < vector1.size() ; i++ )
