@@ -79,18 +79,22 @@ void appendVector( std::vector<double> & vec_to, std::vector<double> vec_from );
 //-----------------------------------------------------------------------------
 std::vector<double> difference( std::vector<double> vector1 , std::vector<double> vector2 );
 //-----------------------------------------------------------------------------
+// Average
+//-----------------------------------------------------------------------------
+double average( std::vector<double> & vector );
+//-----------------------------------------------------------------------------
 // Products
 //-----------------------------------------------------------------------------
-double scalarProduct( std::vector<double> vector1 , std::vector<double> vector2 );
-std::vector<double> crossProduct( std::vector<double> vector1 , std::vector<double> vector2 );
+double scalarProduct( std::vector<double> & vector1 , std::vector<double> & vector2 );
+std::vector<double> crossProduct( std::vector<double> & vector1 , std::vector<double> & vector2 );
 //-----------------------------------------------------------------------------
 // Norm
 //-----------------------------------------------------------------------------
-double norm( std::vector<double> vector );
+double norm( std::vector<double> & vector );
 //-----------------------------------------------------------------------------
 // Distance From Plan
 //-----------------------------------------------------------------------------
-double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vector2 , std::vector<double> point_outside , std::vector<double> point_plan );
+double getDistanceFromPlan( std::vector<double> & vector1, std::vector<double> & vector2 , std::vector<double> point_outside , std::vector<double> point_plan );
 //============================================================================
 
 
