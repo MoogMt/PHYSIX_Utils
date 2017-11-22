@@ -68,7 +68,7 @@ double average(std::vector<int> data)
     {
       average=average+(double)(data[i]);
     }
-  return average=average/(double)(data.size()); // Returning the average
+  return average/((double)(data.size())); // Returning the average
 }
 //----------------------------------------------------------
 double average(std::vector<double> data)

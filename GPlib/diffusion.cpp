@@ -71,19 +71,35 @@ int main( void )
     }
   //-------------------------------------------------------------------
 
+  //-----------------
+  // Reading Cut-Off
+  //-------------------------------------------------------------------
+  CutOffMatrix cut_off;
+  if ( ! readCutOff( "cut_off.dat" , cut_off , lut_list ) )
+    {
+      return 1;
+    }
+  //------------------------------------------------------------------
+  
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step == start_step ) r_0 = distanceFromPoint( atom_list , origin );
+      if ( step == start_step )
+	{
+	  x_0 = distanceFromPoint( atom_list , origin );
+	  x_0 = distanceFromPoint( atom_list , origin );
+	  x_0 = distanceFromPoint( atom_list , origin );
+	}
       else if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
 	  std::vector<double> r = distanceFromPoint( atom_list , origin) ;
-	  double r2_avg = abs( average( difference( r , r_0 ) ) ); r2_avg *= r2_avg;
+	  std::vector<double> diff= difference( r , r_0 );
+	  double r2_avg = average( square( squaroot( square( diff ) ) ) );
 	  diffusion << step << " " << r2_avg << std::endl;
-	  std::cout << step << std::endl;
 	}      
+      std::cout << step << std::endl;
       step++;
      }
   //----------------------------------------------------

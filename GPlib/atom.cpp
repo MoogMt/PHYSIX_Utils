@@ -28,11 +28,11 @@ double distanceAtoms(Atom i, Atom j)
 //-------------------------------------------------------------------------
 std::vector<double> distanceFromPoint( AtomList atom_list , std::vector<double> point )
 {
-  std::vector<double> r;
+  std::vector<double> r; r.assign( atom_list.x.size(), 0);
   std::vector<double> x2; x2 = square( distance( atom_list.x , point[0] ) );
   std::vector<double> y2; y2 = square( distance( atom_list.y , point[1] ) );
   std::vector<double> z2; z2 = square( distance( atom_list.z , point[2] ) );
-  return squaroot( addVector( addVector( addVector( r , x2 ) , y2 ), z2 ) ); 
+  return squaroot( addVector( addVector( addVector( r , x2 ) , y2 ) , z2 ) );
 }
 //=====================================================================
 
