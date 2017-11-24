@@ -109,7 +109,7 @@ std::vector<double> getMinImage( std::vector<double> x , std::vector<double> x_r
       for ( int i=0 ; i < x.size() ; i++ )
 	{
 	  if ( x[i]-x_ref[i] > cell_length*0.5 ) new_vector.push_back( x[i] = x[i] - cell_length ) ;
-	  else if ( x[i]-x_ref[i] < cell_length*0.5 ) new_vector.push_back( x[i] = x[i] + cell_length ) ;
+	  else if ( x[i]-x_ref[i] < -cell_length*0.5 ) new_vector.push_back( x[i] = x[i] + cell_length ) ;
 	  else new_vector.push_back( x[i] );
 	}
       return x;
@@ -126,7 +126,7 @@ std::vector<double> getMinImage( AtomList atom_list , Cell cell , int atom_cente
   for( int i=0; i < 3 ; i++ )
     {
       if( position[i] > cell_length[i]*0.5 ) position[i] -= cell_length[i];
-      else if ( position[i] < cell_length[i]*0.5 ) position[i] += cell_length[i];
+      else if ( position[i] < -cell_length[i]*0.5 ) position[i] += cell_length[i];
     }
   return position;
 }

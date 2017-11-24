@@ -72,7 +72,6 @@ double computeDiffCoefOut( std::ofstream & output ,  std::ifstream & input , int
 	  std::vector<double> y = difference( getMinImage( backIn( atom_list.y, cell.b ) , y0 , cell.b ) , y0 );
 	  std::vector<double> z = difference( getMinImage( backIn( atom_list.z, cell.c ) , z0 , cell.c ) , z0 );
 	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
-	  //std::cout << step << " " << start_step << " " << step - start_step  <<std::endl;
 	  output << (step-start_step) << " " << average( r ) << std::endl;
 	  count++;
 	  if ( step > start_step )
