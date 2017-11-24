@@ -28,6 +28,7 @@ struct Cell
 // PBC
 //==========================================================
 double backIn( double x, double a );
+std::vector<double> backIn ( std::vector<double> x , double a );
 std::vector<double> wrapPBC( std::vector<double> vector_input, Cell cell );
 Atom wrapPBC(Atom atom_in, Cell box );
 std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell );

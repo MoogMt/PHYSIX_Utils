@@ -19,6 +19,12 @@ double backIn ( double x , double a )
   return x;
 }
 //-----------------------------------------------
+std::vector<double> backIn ( std::vector<double> x , double a )
+{
+  for ( int i=0 ; i < x.size() ; i++ ) backIn( x[i] , a );
+  return x;
+}
+//-----------------------------------------------
 std::vector<double> wrapPBC( std::vector<double> vector_input, Cell cell )
 {
   std::vector<double> vector_output;

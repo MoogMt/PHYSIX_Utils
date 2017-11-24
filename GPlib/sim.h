@@ -13,6 +13,8 @@
 #include "atom.h"
 #include "cell.h"
 #include "utils.h"
+#include "lut.h"
+#include "xyz.h"
 
 //=====
 // SIM
@@ -29,6 +31,7 @@ struct Sim
 //===========================
 Sim emptySim();
 Sim compressBox( Sim sim_set , double frac_a , double frac_b , double frac_c );
+void computeDiffCoef( std::ofstream & output , std::ifstream & input , int comp_step , int start_step , int end_step , AtomList atom_list , AllTypeLUT lut_list , Cell cell );
 //===========================
 
 #endif 
