@@ -21,7 +21,10 @@ double backIn ( double x , double a )
 //-----------------------------------------------
 std::vector<double> backIn ( std::vector<double> x , double a )
 {
-  for ( int i=0 ; i < x.size() ; i++ ) backIn( x[i] , a );
+  for ( int i=0 ; i < x.size() ; i++ )
+    {
+      x[i] = backIn( x[i] , a );
+    }
   return x;
 }
 //-----------------------------------------------
