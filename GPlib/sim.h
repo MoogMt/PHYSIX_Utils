@@ -31,7 +31,14 @@ struct Sim
 //===========================
 Sim emptySim();
 Sim compressBox( Sim sim_set , double frac_a , double frac_b , double frac_c );
+//================================================================================================
+
+//=======================
+// Diffusion Coefficient
+//================================================================================================
 void computeDiffCoef( std::ofstream & output , std::ifstream & input , int comp_step , int start_step , int end_step , AtomList atom_list , AllTypeLUT lut_list , Cell cell );
-//===========================
+double computeDiffCoefOut( std::ofstream & output , std::ifstream & input , int comp_step , int start_step , int end_step , AtomList atom_list , AllTypeLUT lut_list , Cell cell );
+//================================================================================================
+
 
 #endif 

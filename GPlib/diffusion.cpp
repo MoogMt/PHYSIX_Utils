@@ -84,132 +84,33 @@ int main( void )
   //------
   // Cell
   //------------------------------------------------------------------
-  Cell cell;
-  if ( ! readParamCell( "cell.param" , cell ) )
+  Cell cell40;
+  if ( ! readParamCell( "40GPa/cell.param" , cell40 ) )
+    {
+      return 1;
+    }
+  Cell cell45;
+  if ( ! readParamCell( "45GPa/cell.param" , cell45 ) )
+    {
+      return 1;
+    }
+  Cell cell50;
+  if ( ! readParamCell( "50GPa/cell.param" , cell50 ) )
+    {
+      return 1;
+    }
+  Cell cell60;
+  if ( ! readParamCell( "60GPa/cell.param" , cell60 ) )
     {
       return 1;
     }
   //------------------------------------------------------------------
-  
-  //-------------------
-  // Reading XYZ file
-  //----------------------------------------------------
-  while( readStepXYZfast( input40 , atom_list , lut_list, true, true ) )
-    {
-      if ( step == start_step )
-	{
-	  x0 = backIn( atom_list.x , cell.a );
-	  y0 = backIn( atom_list.y , cell.b );
-	  z0 = backIn( atom_list.z , cell.c );
-	}
-      else if ( step % comp_step == 0 && step > start_step && step < end_step )
-	{
-	  std::vector<double> x = difference( backIn( atom_list.x, cell.a ) , x0 );
-	  std::vector<double> y = difference( backIn( atom_list.y, cell.b ) , y0 );
-	  std::vector<double> z = difference( backIn( atom_list.z, cell.c ) , z0 );
-	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
-	  diffusion40 << step-start_step << " " << average( r ) << std::endl;
-	  count++;
-	  if ( step > start_step + 2000 )
-	    {
-	      d_40 += average( r );
-	    }
-	}      
-      std::cout << step << std::endl;
-      step++;
-     }
-  d_40 /= (double)(count);
-  //----------------------------------------------------
-  step=0;
-  //----------------------------------------------------
-  while( readStepXYZfast( input45 , atom_list , lut_list, true, true ) )
-    {
-      if ( step == start_step )
-	{
-	  x0 = backIn( atom_list.x, cell.a );
-	  y0 = backIn( atom_list.y, cell.b );
-	  z0 = backIn( atom_list.z, cell.c );
-	}
-      else if ( step % comp_step == 0 && step > start_step && step < end_step )
-	{
-	  std::vector<double> x = difference( backIn( atom_list.x, cell.a ) , x0 );
-	  std::vector<double> y = difference( backIn( atom_list.y, cell.b ) , y0 );
-	  std::vector<double> z = difference( backIn( atom_list.z, cell.c ) , z0 );
-	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
-	  diffusion45 << step-start_step << " " << average( r ) << std::endl;
-	  count++;
-	  if ( step > start_step + 2000 )
-	    {
-	      d_45 += average( r );
-	    }
-	}      
-      std::cout << step << std::endl;
-      step++;
-     }
-  d_45 /= (double)(count);
-  //----------------------------------------------------
-  step=0;
-  //----------------------------------------------------
-  while( readStepXYZfast( input50 , atom_list , lut_list, true, true ) )
-    {
-      if ( step == start_step )
-	{
-	  x0 = backIn( atom_list.x, cell.a );
-	  y0 = backIn( atom_list.y, cell.b );
-	  z0 = backIn( atom_list.z, cell.c );
-	}
-      else if ( step % comp_step == 0 && step > start_step && step < end_step )
-	{
-	  std::vector<double> x = difference( backIn( atom_list.x , cell.a ) , x0 );
-	  std::vector<double> y = difference( backIn( atom_list.y , cell.b ) , y0 );
-	  std::vector<double> z = difference( backIn( atom_list.z , cell.c ) , z0 );
-	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
-	  diffusion50 << step-start_step << " " << average( r ) << std::endl;
-	  count++;
-	  if ( step > start_step + 2000 )
-	    {
-	      d_50 += average( r );
-	    }
-	}      
-      std::cout << step << std::endl;
-      step++;
-     }
-  d_50 /= (double)(count);
-  //----------------------------------------------------
-  step=0;
-  //----------------------------------------------------
-  while( readStepXYZfast( input60 , atom_list , lut_list, true, true ) )
-    {
-      if ( step == start_step )
-	{
-	  x0 = backIn( atom_list.x , cell.a );
-	  y0 = backIn( atom_list.y , cell.b );
-	  z0 = backIn( atom_list.z , cell.c );
-	}
-      else if ( step % comp_step == 0 && step > start_step && step < end_step )
-	{
-	  std::vector<double> x = difference( backIn( atom_list.x , cell.a ) , x0 );
-	  std::vector<double> y = difference( backIn( atom_list.y , cell.b ) , y0 );
-	  std::vector<double> z = difference( backIn( atom_list.z , cell.c ) , z0 );
-	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
-	  diffusion60 << step-start_step << " " << average( r ) << std::endl;
-	  count++;
-	  if ( step > start_step + 2000 )
-	    {
-	      d_60 += average( r );
-	    }
-	}      
-      std::cout << step << std::endl;
-      step++;
-     }
-  d_60 /= (double)(count);
-  //----------------------------------------------------
 
   //----------------------------------------------------
-  diffcoef << 40 << " " << d_40 << std::endl;
-  diffcoef << 45 << " " << d_45 << std::endl;
-  diffcoef << 50 << " " << d_50 << std::endl;
-  diffcoef << 60 << " " << d_60 << std::endl;
+  diffcoef << 40 << " " << computeDiffCoefOut( diffusion40 , input40 , comp_step , start_step , end_step , atom_list , lut_list , cell40 ) << std::endl;
+  diffcoef << 45 << " " << computeDiffCoefOut( diffusion45 , input45 , comp_step , start_step , end_step , atom_list , lut_list , cell45 ) << std::endl;
+  diffcoef << 50 << " " << computeDiffCoefOut( diffusion50 , input50 , comp_step , start_step , end_step , atom_list , lut_list , cell50 ) << std::endl;
+  diffcoef << 60 << " " << computeDiffCoefOut( diffusion60 , input60 , comp_step , start_step , end_step , atom_list , lut_list , cell60 ) << std::endl;
   //----------------------------------------------------
   
   //---------------
