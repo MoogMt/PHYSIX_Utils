@@ -101,6 +101,20 @@ std::vector<Atom> pbcImages(Atom atom, Cell box)
   return pbc;
 }
 //-----------------------------------------------------------------------
+std::vector<double> getMinImage( std::vector<double> x , std::vector<double> x_ref , double cell_length )
+{
+  if ( x.size() == x_ref.size() )
+    {
+      for ( int i=0 ; i < x.size() ; i++ )
+	{
+	  if ( x[i]-x_ref[i] > cell_length*0.5 ) x[i] -= cell_length;
+	  else if ( x[i]-x_ref[i] < cell_length*0.5 ) x[i] += cell_length;
+	}
+      return x;
+    }
+  else return x;
+}
+//-----------------------------------------------------------------------
 std::vector<double> getMinImage( AtomList atom_list , Cell cell , int atom_center , int atom_target )
 {
   std::vector<double> position;

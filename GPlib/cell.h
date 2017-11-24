@@ -35,6 +35,7 @@ std::vector<Atom> wrapPBC( std::vector<Atom> atoms , Cell cell );
 void wrapPBC( AtomList & atom_list , int i , Cell cell );
 void wrapPBC( AtomList & atom_list , Cell cell );
 std::vector<Atom> pbcImages( Atom atom, Cell box );
+std::vector<double> getMinImage( std::vector<double> x , std::vector<double> x_ref , double cell_length );
 std::vector<double> getMinImage( AtomList atom_list , Cell cell , int atom_center , int atom_target );
 //==========================================================
 
