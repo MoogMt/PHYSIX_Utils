@@ -280,6 +280,9 @@ int main( void )
 	  int c3_total = c3_alone + c3_in;
 	  int c4_total = c4_alone + c4_in;
 	  //------------------------------
+	  std::cout << "c2_total: " << c2_total << std::endl;
+	  std::cout << "c3_total: " << c3_total << std::endl;
+	  std::cout << "c4_total: " << c4_total << std::endl;
 	  double ratio=0;
 	  if ( c2_total != 0 ) c2_ratio.push_back( (double)(c2_alone)/(double)(c2_total) );
 	  else c2_ratio.push_back( ratio );

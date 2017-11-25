@@ -43,7 +43,11 @@ void computeDiffCoef( std::ofstream & output ,  std::ifstream & input , int comp
 	  std::vector<double> x = difference( atom_list.x, x0 );
 	  std::vector<double> y = difference( atom_list.y, y0 );
 	  std::vector<double> z = difference( atom_list.z, z0 );
-	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
+	  std::vector<double> r;
+	  for ( int i=0; i < x.size() ; i++ )
+	    {
+	      r[i] = x[i]*x[i] + y[i]*y[i] + z[i]*z[i];
+	    }
 	  output << (step-start_step) << " " << average( r ) << std::endl;
 	}      
       std::cout << step << std::endl;
@@ -71,8 +75,12 @@ double computeDiffCoefOut( std::ofstream & output ,  std::ifstream & input , int
 	  std::vector<double> x = difference( atom_list.x , x0 ) ;
 	  std::vector<double> y = difference( atom_list.y , y0 );
 	  std::vector<double> z = difference( atom_list.z , z0 );
-	  std::vector<double> r = square( squaroot( addVector( addVector( square( x ), square( y ) ), square( z ) ) ) );
-	  output << (step-start_step) << " " << average( r ) << std::endl;
+	  std::vector<double> r;
+	  for ( int i=0; i < x.size() ; i++ )
+	    {
+	      r[i] = x[i]*x[i] + y[i]*y[i] + z[i]*z[i];
+	    }
+	  output << (step-start_step) << " " << average(r) << std::endl;
 	  count++;
 	  if ( step > start_step )
 	    {

@@ -66,7 +66,7 @@ double average(std::vector<int> data)
   double average=0;
   for( int i=0; i<data.size(); i++)   
     {
-      average=average+(double)(data[i]);
+      average += (double)(data[i]);
     }
   return average/((double)(data.size())); // Returning the average
 }
@@ -76,9 +76,9 @@ double average(std::vector<double> data)
   double average=0;                   // Average
   for( int i=0; i<data.size(); i++)   
     {
-      average=average+data[i];
+      average += data[i];
     }
-  return average=average/data.size(); // Returning the average
+  return average/data.size(); // Returning the average
 }
 //==========================================================
 
