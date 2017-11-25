@@ -25,71 +25,55 @@ Sim compressBox( Sim sim_set , double frac_a , double frac_b , double frac_c )
 //================
 // Diffusion Coef
 //================================================================================================
-void computeDiffCoef( std::ofstream & output ,  std::ifstream & input , int comp_step , int start_step , int end_step , AtomList atom_list , AllTypeLUT lut_list , Cell cell )
-{
-  std::vector<double> x0,y0,z0;
-  int step = 0;
-  double d_coef = 0;
-  while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
-    {
-      if ( step == start_step )
-	{
-	  x0 = atom_list.x ;
-	  y0 = atom_list.y ;
-	  z0 = atom_list.z ;
-	}
-      else if ( step % comp_step == 0 && step > start_step && step < end_step )
-	{
-	  std::vector<double> x = difference( atom_list.x, x0 );
-	  std::vector<double> y = difference( atom_list.y, y0 );
-	  std::vector<double> z = difference( atom_list.z, z0 );
-	  std::vector<double> r;
-	  for ( int i=0; i < x.size() ; i++ )
-	    {
-	      r[i] = x[i]*x[i] + y[i]*y[i] + z[i]*z[i];
-	    }
-	  output << (step-start_step) << " " << average( r ) << std::endl;
-	}      
-      std::cout << step << std::endl;
-      step++;
-    }
-  return;
-}
-//--------------------------------------------------------------------------------------------------
-double computeDiffCoefOut( std::ofstream & output ,  std::ifstream & input , int comp_step , int start_step , int end_step , AtomList atom_list , AllTypeLUT lut_list , Cell cell )
+void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_step , int start_step , int end_step , AtomList atom_list , AllTypeLUT lut_list , Cell cell )
 {
   std::vector<double> x0,y0,z0;
   int step = 0;
   int count = 0;
   double d_coef = 0;
+  AtomList atom_list0;
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
       if ( step == start_step )
 	{
+	  wrapPBC( atom_list , cell );
 	  x0 = atom_list.x;
 	  y0 = atom_list.y;
 	  z0 = atom_list.z;
+	  atom_list0 = atom_list;
 	}
       else if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
+	  wrapPBC( atom_list, cell);
+	  for ( int i=0 ; i < atom_list.x.size() ; i++ )
+	    {
+	      double dx = atom_list.x[i] - atom_list0.x[i];
+	      double dy = atom_list.y[i] - atom_list0.y[i];
+	      double dz = atom_list.z[i] - atom_list0.z[i];
+	      dx = dx - (int)(dx);
+	      dy = dy - (int)(dy);
+	      dz = dz - (int)(dz);
+	      atom_list.x[i] = atom_list0.x[i] + dx;
+	      atom_list.y[i] = atom_list0.y[i] + dy;
+	      atom_list.z[i] = atom_list0.z[i] + dz;
+	      atom_list0.x[i] = atom_list.x[i];
+	      atom_list0.y[i] = atom_list.y[i];
+	      atom_list0.z[i] = atom_list.z[i];
+	    }
+	  std::cout << atom_list0.x[2] << " " << atom_list0.y[2] << " " << atom_list0.z[2] << std::endl;
 	  std::vector<double> x = difference( atom_list.x , x0 ) ;
 	  std::vector<double> y = difference( atom_list.y , y0 );
 	  std::vector<double> z = difference( atom_list.z , z0 );
-	  std::vector<double> r;
+	  std::vector<double> r; r.assign( x.size() , 0 );
 	  for ( int i=0; i < x.size() ; i++ )
 	    {
-	      r[i] = x[i]*x[i] + y[i]*y[i] + z[i]*z[i];
+	      r[i] = abs(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
 	    }
 	  output << (step-start_step) << " " << average(r) << std::endl;
-	  count++;
-	  if ( step > start_step )
-	    {
-	      d_coef += average( r )/(6*(step-start_step));
-	    }
 	}      
-      std::cout << step << std::endl;
+      //std::cout << step << std::endl;
       step++;
     }
-  return d_coef;
+  return;
 }
 //================================================================================================

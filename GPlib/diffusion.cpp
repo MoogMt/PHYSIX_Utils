@@ -43,7 +43,6 @@ int main( void )
   //--------
   // Output
   //-------------------------------------
-  std::ofstream diffcoef("diffcoef.dat");
   std::ofstream diffusion40("diffusion_40.dat");
   std::ofstream diffusion45("diffusion_45.dat");
   std::ofstream diffusion50("diffusion_50.dat");
@@ -107,10 +106,10 @@ int main( void )
   //------------------------------------------------------------------
 
   //----------------------------------------------------
-  diffcoef << 40 << " " << computeDiffCoefOut( diffusion40 , input40 , comp_step , start_step , end_step , atom_list , lut_list , cell40 ) << std::endl;
-  diffcoef << 45 << " " << computeDiffCoefOut( diffusion45 , input45 , comp_step , start_step , end_step , atom_list , lut_list , cell45 ) << std::endl;
-  diffcoef << 50 << " " << computeDiffCoefOut( diffusion50 , input50 , comp_step , start_step , end_step , atom_list , lut_list , cell50 ) << std::endl;
-  diffcoef << 60 << " " << computeDiffCoefOut( diffusion60 , input60 , comp_step , start_step , end_step , atom_list , lut_list , cell60 ) << std::endl;
+  computeDiff( diffusion40 , input40 , comp_step , start_step , end_step , atom_list , lut_list , cell40 );
+  //computeDiff( diffusion45 , input45 , comp_step , start_step , end_step , atom_list , lut_list , cell45 );
+  //computeDiff( diffusion50 , input50 , comp_step , start_step , end_step , atom_list , lut_list , cell50 );
+  //computeDiff( diffusion60 , input60 , comp_step , start_step , end_step , atom_list , lut_list , cell60 );
   //----------------------------------------------------
   
   //---------------
@@ -120,7 +119,6 @@ int main( void )
   diffusion45.close();
   diffusion50.close();
   diffusion60.close();
-  diffcoef.close();
   //----------------------
       
   return 0;

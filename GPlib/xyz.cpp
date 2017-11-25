@@ -407,4 +407,14 @@ void writeXYZ( std::ofstream & file , const std::vector<Atom> atom_list , const 
       file << atom_list[i].name << " " << atom_list[i].x <<  " " << atom_list[i].y <<  " " << atom_list[i].z << std::endl;
     }
 }
+//-----------------------------------------------------------------------------------
+void writeXYZ( std::ofstream & file , const AtomList atom_list , const int step )
+{
+  file << atom_list.x.size() << std::endl;
+  file << "STEP " << step << std::endl;
+  for ( int i=0 ; i < atom_list.x.size() ; i++ )
+    {
+      file << atom_list.names[i] << " " << atom_list.x[i] <<  " " << atom_list.y[i] <<  " " << atom_list.z[i] << std::endl;
+    }
+}
 //==================================================================================

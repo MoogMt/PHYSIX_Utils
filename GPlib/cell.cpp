@@ -30,11 +30,10 @@ std::vector<double> backIn ( std::vector<double> x , double a )
 //-----------------------------------------------
 std::vector<double> wrapPBC( std::vector<double> vector_input, Cell cell )
 {
-  std::vector<double> vector_output;
-  vector_output.push_back( backIn( vector_input[0] , cell.a ) );
-  vector_output.push_back( backIn( vector_input[1] , cell.b ) );
-  vector_output.push_back( backIn( vector_input[2] , cell.c ) );
-  return vector_output;
+  vector_input[0] = backIn( vector_input[0] , cell.a );
+  vector_input[1] = backIn( vector_input[1] , cell.b );
+  vector_input[2] = backIn( vector_input[2] , cell.c );
+  return vector_input;
 }
 //-----------------------------------------------
 Atom wrapPBC(Atom atom_in, Cell box)
@@ -71,9 +70,28 @@ void wrapPBC( AtomList & atom_list , int i , Cell cell )
 void wrapPBC( AtomList & atom_list , Cell cell )
 // Wraps all atoms in PBC
 {
-  for ( int i=0 ; i < atom_list.names.size() ; i++ )
+  for ( int i=0 ; i < atom_list.x.size() ; i++ )
     {
-      wrapPBC( atom_list , i , cell );
+      atom_list.x[i] = backIn( atom_list.x[i] , cell.a );
+      atom_list.y[i] = backIn( atom_list.y[i] , cell.b );
+      atom_list.z[i] = backIn( atom_list.z[i] , cell.c );
+    }
+  return;
+}
+//-----------------------------------------------------------------------
+void unwrap( AtomList & atom_list , AtomList & atom_list0 )
+{
+  for ( int i=0 ; i < atom_list.x.size() ; i++ )
+    {
+      double dx = atom_list.x[i] - atom_list0.x[i];
+      double dy = atom_list.y[i] - atom_list0.y[i];
+      double dz = atom_list.z[i] - atom_list0.z[i];
+      dx -= roundLow(dx);
+      dy -= roundLow(dy);
+      dz -= roundLow(dz);
+      atom_list.x[i] = atom_list0.x[i] + dx;
+      atom_list.y[i] = atom_list0.y[i] + dy;
+      atom_list.z[i] = atom_list0.z[i] + dz;
     }
   return;
 }

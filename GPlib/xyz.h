@@ -29,6 +29,7 @@ std::vector<Atom> readstepXYZ( std::ifstream & file );
 //===========================================================================================
 void writeXYZ( std::ofstream & file , const std::vector<Atom> atom_list );
 void writeXYZ( std::ofstream & file , const std::vector<Atom> atom_list , const int step );
+void writeXYZ( std::ofstream & file , const AtomList atom_list , const int step );
 //===========================================================================================
   
 #endif 

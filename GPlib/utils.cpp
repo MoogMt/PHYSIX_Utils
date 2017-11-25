@@ -1,7 +1,7 @@
 #include "utils.h"
 
 //======
-// MIN
+// Numbers
 //===========================================================
 int min( int int1, int int2 )
 {
@@ -27,11 +27,7 @@ double min(std::vector<double> vector)
     }
   return min;
 }
-//===========================================================
-
-//=====
-// MAX
-//===========================================================
+//-------------------------------------------
 int max( int int1, int int2 )
 {
   if (int1 > int2) return int1;
@@ -55,6 +51,30 @@ double max(std::vector<double> vector)
 	}
     }
   return max;
+}
+//---------------------------------------------------------
+// Rounding
+//---------------------------------------------------------
+double roundLow( double number )
+{
+  double number2 = (int)(number);
+  if ( number2 > 0 )
+    {
+      if ( number2 - number < 0 ) return number2+1;
+      else return number2;
+    }
+  else
+    {
+      if ( number2 - number < 0 ) return number2+1;
+      else return number2;
+    }
+}
+//--------------------------------------------------
+double roundUp( double number )
+{
+  double number2 = (int)(number);
+  if ( number2 - number > 0 ) return number2;
+  else return number2-1;
 }
 //==========================================================
 
