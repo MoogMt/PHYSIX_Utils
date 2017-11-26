@@ -36,7 +36,6 @@ void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_ste
     {
       if ( step == start_step )
 	{
-	  wrapPBC( atom_list , cell );
 	  x0 = atom_list.x;
 	  y0 = atom_list.y;
 	  z0 = atom_list.z;
@@ -44,7 +43,6 @@ void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_ste
 	}
       else if ( step % comp_step == 0 && step > start_step && step < end_step )
 	{
-	  wrapPBC( atom_list, cell);
 	  for ( int i=0 ; i < atom_list.x.size() ; i++ )
 	    {
 	      double dx = atom_list.x[i] - atom_list0.x[i];
@@ -60,7 +58,6 @@ void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_ste
 	      atom_list0.y[i] = atom_list.y[i];
 	      atom_list0.z[i] = atom_list.z[i];
 	    }
-	  std::cout << atom_list0.x[2] << " " << atom_list0.y[2] << " " << atom_list0.z[2] << std::endl;
 	  std::vector<double> x = difference( atom_list.x , x0 ) ;
 	  std::vector<double> y = difference( atom_list.y , y0 );
 	  std::vector<double> z = difference( atom_list.z , z0 );
@@ -71,7 +68,7 @@ void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_ste
 	    }
 	  output << (step-start_step) << " " << average(r) << std::endl;
 	}      
-      //std::cout << step << std::endl;
+      std::cout << step << std::endl;
       step++;
     }
   return;

@@ -107,9 +107,9 @@ int main( void )
 
   //----------------------------------------------------
   computeDiff( diffusion40 , input40 , comp_step , start_step , end_step , atom_list , lut_list , cell40 );
-  //computeDiff( diffusion45 , input45 , comp_step , start_step , end_step , atom_list , lut_list , cell45 );
-  //computeDiff( diffusion50 , input50 , comp_step , start_step , end_step , atom_list , lut_list , cell50 );
-  //computeDiff( diffusion60 , input60 , comp_step , start_step , end_step , atom_list , lut_list , cell60 );
+  computeDiff( diffusion45 , input45 , comp_step , start_step , end_step , atom_list , lut_list , cell45 );
+  computeDiff( diffusion50 , input50 , comp_step , start_step , end_step , atom_list , lut_list , cell50 );
+  computeDiff( diffusion60 , input60 , comp_step , start_step , end_step , atom_list , lut_list , cell60 );
   //----------------------------------------------------
   
   //---------------
