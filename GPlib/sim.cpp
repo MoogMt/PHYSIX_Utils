@@ -48,9 +48,12 @@ void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_ste
 	      double dx = atom_list.x[i] - atom_list0.x[i];
 	      double dy = atom_list.y[i] - atom_list0.y[i];
 	      double dz = atom_list.z[i] - atom_list0.z[i];
-	      dx = dx - (int)(dx);
-	      dy = dy - (int)(dy);
-	      dz = dz - (int)(dz);
+	      if (dx > 0 ) dx = dx - (int)(dx);
+	      else dx = dx - (int)(dx) - 1;
+	      if (dy > 0 ) dy = dy - (int)(dy);
+	      else dy = dy - (int)(dy) - 1;
+	      if (dz > 0 ) dz = dz - (int)(dz);
+	      else dz = dz - (int)(dz) - 1;
 	      atom_list.x[i] = atom_list0.x[i] + dx;
 	      atom_list.y[i] = atom_list0.y[i] + dy;
 	      atom_list.z[i] = atom_list0.z[i] + dz;

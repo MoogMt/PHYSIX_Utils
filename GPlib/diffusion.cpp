@@ -34,10 +34,10 @@ int main( void )
   //--------
   // Input
   //---------------------------------
-  std::ifstream input40("40GPa/TRAJEC.xyz");
-  std::ifstream input45("45GPa/TRAJEC.xyz");
-  std::ifstream input50("50GPa/TRAJEC.xyz");
-  std::ifstream input60("60GPa/TRAJEC.xyz");
+  std::ifstream input40("40GPa/TRAJEC_wrapped.xyz");
+  std::ifstream input45("45GPa/TRAJEC_wrapped.xyz");
+  std::ifstream input50("50GPa/TRAJEC_wrapped.xyz");
+  std::ifstream input60("60GPa/TRAJEC_wrapped.xyz");
   //--------------------------------
 
   //--------
