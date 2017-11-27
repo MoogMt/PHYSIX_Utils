@@ -10,7 +10,6 @@
 #include <stdlib.h>    
 #include <math.h>
 #include <sstream>
-
 #include "utils.h"
 #include "atom.h"
 
@@ -51,7 +50,9 @@ double distanceAtomsSq( AtomList & atom_list ,  int i , int  j , Cell cell , boo
 //===========
 // Change Box
 //============================================================================================
-Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c );
+void compressCell( Cell & cell , double frac_a , double frac_b , double frac_c );
+void compressAtoms( AtomList & atom_list, double frac_a , double frac_b , double frac_c );
+void compressCell( AtomList & atom_list , Cell & cell , double frac_a , double frac_b , double c );
 //=============================================================================================
 
 //====

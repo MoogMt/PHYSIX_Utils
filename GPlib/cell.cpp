@@ -221,12 +221,28 @@ void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , st
 //============
 // MODIFY BOX
 //===========================================================================================
-Cell compressBox( Cell cell , double frac_a , double frac_b , double frac_c )
+void compressCell( Cell & cell , double frac_a , double frac_b , double frac_c )
 {
   cell.a *= frac_a;
   cell.b *= frac_b;
   cell.b *= frac_c;
-  return cell;
+  return;
+}
+void compressAtoms( AtomList & atom_list, double frac_a , double frac_b , double frac_c )
+{
+  for ( int i=0 ; i < atom_list.x.size() ; i++ )
+    {
+      atom_list.x[i] *= frac_a;
+      atom_list.y[i] *= frac_b;
+      atom_list.z[i] *= frac_c;
+    }
+  return;
+}
+void compressCell( AtomList & atom_list , Cell & cell , double frac_a , double frac_b , double frac_c )
+{
+  compressCell( cell , frac_a , frac_b , frac_c );
+  compressAtoms( atom_list , frac_a , frac_b , frac_c );
+  return;
 }
 //===========================================================================================
 

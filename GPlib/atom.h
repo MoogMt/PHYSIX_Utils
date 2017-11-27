@@ -60,7 +60,7 @@ std::vector<Atom> compressAtoms( std::vector<Atom> atoms, double frac_a , double
 // WRITE
 //-----------------------------------------------------------------------------------------
 void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
-void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string specie );
+void writePositions( std::ofstream & file , AtomList atom_list , std::string specie );
 //=============================================================================================
 
 #endif 

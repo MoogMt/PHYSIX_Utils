@@ -32,54 +32,63 @@ int main(void)
   //--------
   // Input
   //---------------------------------
-  std::ifstream input("TRAJEC.xyz");
+  std::ifstream input("input.xyz");
   //---------------------------------
 
   //--------
   // Output
   //-------------------------------------------------------------
-  std::ofstream compStruc("compressedBox.xyz",  std::ios::out );
+  std::ofstream C_position( "C_position.cpmd" , std::ios::out );
+  std::ofstream O_position( "O_position.cpmd" , std::ios::out );
+  std::ofstream xyz( "position.xyz" , std::ios::out );
   //-------------------------------------------------------------
   
   //----------------------
   // Physical parameters
   //----------------------------------------------------------------
-  int step = 1;                            // Step counter
-  double frac_a = 0.98; double frac_b = 0.98;   double frac_c = 0.98;
+  double frac_a = 0.899920886; double frac_b = 0.899920886; double frac_c =  0.899920886;
   //----------------------------------------------------------------
 
   //---------------
   // Initializers
   //----------------------------------------------
-  std::vector<Atom> atom_list;   // Atoms in cell
+  AtomList atom_list;
+  AllTypeLUT lut_list;
   //----------------------------------------------
 
   //---------------
   // Reading cell
   //---------------------------------
-  Cell box=readParamCell("cell.param");
+  Cell cell;
+  if ( ! readParamCell( "cell.param" , cell ) ) return 1;
   //---------------------------------
+
+  //-----------------
+  // Reading Cut-Off
+  //-------------------------------------------------------------------
+  CutOffMatrix cut_off;
+  if ( ! readCutOff( "cut_off.dat" , cut_off , lut_list ) ) return 1;
+  //-------------------------------------------------------------------
   
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
-  do
+  if ( readStepXYZfast( input , atom_list , lut_list , false , false) )
     {
-      atom_list=readstepXYZ( input ); // Read one line
-      if ( step == 8000 )
-	{
-	  compressBox( { wrapPBC(atom_list,box) , box } , frac_a , frac_b , frac_c);
-	  writePositions( compStruc , atom_list , "C" );
-	  writePositions( compStruc , atom_list , "O" );
-	}
-      step++;
-    } while( atom_list.size() != 0 );
+      wrapPBC( atom_list , cell) ;
+      compressCell( atom_list , cell , frac_a , frac_b , frac_c );
+      writeXYZ( xyz , atom_list );
+      writePositions( C_position , atom_list , "C" );
+      writePositions( O_position , atom_list , "O" );
+    }
   //----------------------------------------------------
 
   //Closing fluxes
   //----------------------
   input.close();
-  compStruc.close();
+  C_position.close();
+  O_position.close();
+  xyz.close();
   //----------------------
   
   return 0;

@@ -84,5 +84,21 @@ void writePositions( std::ofstream & file , std::vector<Atom> atoms, std::string
   file << std::endl;
   return;
 }
+//--------------------------------------------------------------------------------------
+void writePositions( std::ofstream & file , AtomList atom_list , std::string specie )
+{
+  for ( int i=0 ; i < atom_list.x.size() ; i++ )
+    {
+      if ( atom_list.names[i] == specie )
+	{
+	  file << atom_list.x[i] << " ";
+	  file << atom_list.y[i] << " ";
+	  file << atom_list.z[i] << " ";
+	  file << std::endl;
+	}
+    }
+  file << std::endl;
+  return;
+}
 //======================================================================================
 
