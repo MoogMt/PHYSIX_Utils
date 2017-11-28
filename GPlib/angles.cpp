@@ -43,12 +43,13 @@ int main( void )
   std::ofstream c2_angles_out("c2angles.dat");
   std::ofstream c3_angles_out("c3angles.dat");
   std::ofstream c4_angles_out("c4angles.dat");
-  std::ofstream c_prop("c_prop.dat");
-  //-------------------------------------
-  std::ofstream o2_angles_out("o2angles.dat");
-  std::ofstream o3_angles_out("o3angles.dat");
-  std::ofstream o_prop("o_prop.dat");
-  //-------------------------------------
+  std::ofstream c2_ratio_out("c2ratio.dat");
+  std::ofstream c3_ratio_out("c3ratio.dat");
+  std::ofstream c4_ratio_out("c4ratio.dat");
+  std::ofstream c2_out("c2.dat");
+  std::ofstream c3_out("c3.dat");
+  std::ofstream c4_out("c4.dat");
+   //-------------------------------------
   
   //----------------------
   // Physical parameters
@@ -72,8 +73,6 @@ int main( void )
   // Reading Cell File
   //-------------------------------------------------------------------
   Cell cell;
-
-
   if ( ! readParamCell( "cell.param" , cell ) )
     {
       return 1;
@@ -101,9 +100,10 @@ int main( void )
   std::vector<Bin> c2_angles_hist; std::vector<double> c2_angles;
   std::vector<Bin> c3_angles_hist; std::vector<double> c3_angles;
   std::vector<Bin> c4_angles_hist; std::vector<double> c4_angles;
-  std::vector<Bin> o2_angles_hist; std::vector<double> o2_angles;
-  std::vector<Bin> o3_angles_hist; std::vector<double> o3_angles;
-  std::vector<int> c_others_nb;    std::vector<int>  o_others_nb;
+  std::vector<int> c_others_nb;
+  std::vector<Bin> c2_ratio_hist ; std::vector<double> c2_ratio;
+  std::vector<Bin> c3_ratio_hist ; std::vector<double> c3_ratio;
+  std::vector<Bin> c4_ratio_hist ; std::vector<double> c4_ratio;
   //---------------------------------------------------------------
   
   //-------------------
@@ -117,28 +117,36 @@ int main( void )
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
 	  // Making molecules
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
-	  // Calculating angles
+	  // Loop over all molecules
 	  for ( int i=0 ; i < molecules.size() ; i++  )
 	    {
+	      // Loop over all atoms in a molecule
 	      for ( int j=0 ; j < molecules[i].atom_index.size() ; j++ )
 		{
+		  // Computing all angles around an atom
 		  std::vector<double> angles = getAngleAtom( cm_distance , molecules[i] , molecules[i].atom_index[j] );
+		  // If there is no angles, we move on...
 		  if ( angles.size() == 0 ) continue;
+		  // We care only about C...
 		  if ( molecules[i].names[j] == "C" )
 		    {
-		      if ( angles.size() == 1 )   appendVector( c2_angles , angles );
-		      else if ( angles.size() == 3 )  appendVector( c3_angles , angles ); 
-		      else if ( angles.size() == 6 )  appendVector( c4_angles , angles );
+		      if ( angles.size() == 1 )   appendVector( c2_angles , angles ); 
+		      else if ( angles.size() == 3 )  appendVector( c3_angles , angles );  
+		      else if ( angles.size() == 6 )  appendVector( c4_angles , angles );  
 		      else c_others_nb.push_back( angles.size() );
-		    }
-		  else
-		    {
-		      if ( angles.size() == 1 ) appendVector( o2_angles , angles );
-		      else if ( angles.size() == 3 )  appendVector( o3_angles , angles ); 
-		      else o_others_nb.push_back( angles.size() );
 		    }
 		}
 	    }
+	  // Computing ratios
+	  double angles_total = c2_angles.size() + c3_angles.size() + c4_angles.size();
+	  //---------------
+	  c2_out << step << " " << (double)(c2_angles.size())/angles_total << std::endl;
+	  c3_out << step << " " << (double)(c3_angles.size())/angles_total << std::endl;
+	  c4_out << step << " " << (double)(c4_angles.size())/angles_total << std::endl;
+	  //---------------
+	  c2_ratio.push_back( (double)(c2_angles.size())/angles_total );
+	  c3_ratio.push_back( (double)(c3_angles.size())/angles_total );
+	  c4_ratio.push_back( (double)(c4_angles.size())/angles_total );
 	  // Step making
 	  std::cout << step << std::endl;
 	}      
@@ -151,9 +159,13 @@ int main( void )
   //----------------------------------------------------
   c2_angles_hist = makeRegularHistogram( c2_angles , hist_start , hist_end , nb_box );
   c3_angles_hist = makeRegularHistogram( c3_angles , hist_start , hist_end , nb_box );
-  c4_angles_hist = makeRegularHistogram( c4_angles , hist_start , hist_end , nb_box );  
-  o2_angles_hist = makeRegularHistogram( o2_angles , hist_start , hist_end , nb_box );
-  o3_angles_hist = makeRegularHistogram( o3_angles , hist_start , hist_end , nb_box );
+  c4_angles_hist = makeRegularHistogram( c4_angles , hist_start , hist_end , nb_box );
+  c2_ratio_hist = makeRegularHistogram( c2_ratio , min( c2_ratio ) , max( c2_ratio ) , 100 );
+  c3_ratio_hist = makeRegularHistogram( c3_ratio , min( c3_ratio ) , max( c3_ratio ) , 100 );
+  c4_ratio_hist = makeRegularHistogram( c4_ratio , min( c4_ratio ) , max( c4_ratio ) , 100 );
+  //----------------------------------------------------
+  // Normalizing for angles
+  //----------------------------------------------------
   for ( int i=0 ; i < c2_angles_hist.size() ; i++ )
     {
       c2_angles_hist[i].value = (int)( c2_angles_hist[i].value/sin( center( c2_angles_hist[i] ) * M_PI/180  ) );
@@ -166,33 +178,14 @@ int main( void )
     {
       c4_angles_hist[i].value = (int)( c4_angles_hist[i].value/sin( center( c4_angles_hist[i] ) * M_PI/180 ) );
     }
-  for ( int i=0 ; i < o2_angles_hist.size() ; i++ )
-    {
-      o2_angles_hist[i].value = (int)( o2_angles_hist[i].value/sin( center( o2_angles_hist[i] ) * M_PI/180 ) );
-    }
-  for ( int i=0 ; i < o3_angles_hist.size() ; i++ )
-    {
-      o3_angles_hist[i].value = (int)( o3_angles_hist[i].value/sin( center( o3_angles_hist[i] ) * M_PI/180 ) );
-    }
+  //----------------------------------------------------
   writeHistogram( c2_angles_out , normalizeHistogram( c2_angles_hist ) );
   writeHistogram( c3_angles_out , normalizeHistogram( c3_angles_hist ) );
   writeHistogram( c4_angles_out , normalizeHistogram( c4_angles_hist ) );
-  writeHistogram( o2_angles_out , normalizeHistogram( o2_angles_hist ) );
-  writeHistogram( o3_angles_out , normalizeHistogram( o3_angles_hist ) );
+  writeHistogram( c2_ratio_out , normalizeHistogram( c2_ratio_hist ) );
+  writeHistogram( c3_ratio_out , normalizeHistogram( c3_ratio_hist ) );
+  writeHistogram( c4_ratio_out , normalizeHistogram( c4_ratio_hist ) );
   //----------------------------------------------------
-
-  //----------------------
-  // Printing repartition
-  //--------------------------------------------------------------------------------------------
-  double total = c2_angles.size() + c3_angles.size() + c4_angles.size();
-  c_prop << 2 << " " << c2_angles.size()/total << std::endl;
-  c_prop << 3 << " " << c3_angles.size()/total << std::endl;
-  c_prop << 4 << " " << c4_angles.size()/total << std::endl;
-  //--------------------------------------------------------------------------------------------
-  total = o2_angles.size() + o3_angles.size();
-  o_prop << 2 << " " << o2_angles.size()/total << std::endl;
-  o_prop << 3 << " " << o3_angles.size()/total << std::endl;
-  //--------------------------------------------------------------------------------------------
 
   //--------------------
   // Print other values
@@ -203,12 +196,6 @@ int main( void )
       std::cout << "value: " << c_others_nb[i] << std::endl;
     }
   //----------------------------------------------------
-  std::cout << "Other O Angles: " << std::endl;
-  for ( int i=0 ; i < o_others_nb.size() ; i++ )
-    {
-      std::cout << "value: " << o_others_nb[i] << std::endl;
-    }
-  //----------------------------------------------------
   
   //--------------
   //Closing fluxes
@@ -217,8 +204,9 @@ int main( void )
   c2_angles_out.close();
   c3_angles_out.close();
   c4_angles_out.close();
-  o2_angles_out.close();
-  o3_angles_out.close();
+  c2_ratio_out.close();
+  c3_ratio_out.close();
+  c4_ratio_out.close();
   //----------------------
       
   return 0;
