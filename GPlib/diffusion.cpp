@@ -54,7 +54,7 @@ int main( void )
   //--------------------------------------
   int step       = 1;  // Step counter
   int start_step = 5000; // Start step
-  int end_step   = 120000;
+  int end_step   = 1200000;
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
 
