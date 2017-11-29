@@ -27,50 +27,38 @@ Sim compressBox( Sim sim_set , double frac_a , double frac_b , double frac_c )
 //================================================================================================
 void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_step , int start_step , int end_step , AtomList atom_list , AllTypeLUT lut_list , Cell cell )
 {
-  std::vector<double> x0,y0,z0;
-  int step = 0;
-  int count = 0;
-  double d_coef = 0;
-  AtomList atom_list0;
+
+  std::vector<double> x0,y0,z0; // Initial positions
+
+  int step = 0;                 // Step counter
+
+  // Reading file
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      if ( step == start_step )
+      // All steps calculations
+      if ( step % comp_step == 0 && step > start_step && step < end_step )
+	{
+	  // Calculating  (x[i]-x0[i])
+	  std::vector<double> x = difference( atom_list.x , x0 ) ;
+	  std::vector<double> y = difference( atom_list.y , y0 );
+	  std::vector<double> z = difference( atom_list.z , z0 );
+	  // Initiating r = sqrt( x**2 + y**2 + z**2 )
+	  std::vector<double> r; r.assign( x.size() , 0 );
+	  // Loop over all atoms
+	  for ( int i=0; i < x.size() ; i++ )
+	    {
+	      r[i] = sqrt( x[i]*x[i] + y[i]*y[i] + z[i]*z[i] ) ;
+	      r[i] *= r[i]
+	    }
+	  output << (step-start_step) << " " << average(r) << std::endl;
+	}
+      // Initial position 
+      else if ( step == start_step )
 	{
 	  x0 = atom_list.x;
 	  y0 = atom_list.y;
 	  z0 = atom_list.z;
-	  atom_list0 = atom_list;
 	}
-      else if ( step % comp_step == 0 && step > start_step && step < end_step )
-	{
-	  for ( int i=0 ; i < atom_list.x.size() ; i++ )
-	    {
-	      double dx = atom_list.x[i] - atom_list0.x[i];
-	      double dy = atom_list.y[i] - atom_list0.y[i];
-	      double dz = atom_list.z[i] - atom_list0.z[i];
-	      if (dx > 0 ) dx = dx - (int)(dx);
-	      else dx = dx - (int)(dx) - 1;
-	      if (dy > 0 ) dy = dy - (int)(dy);
-	      else dy = dy - (int)(dy) - 1;
-	      if (dz > 0 ) dz = dz - (int)(dz);
-	      else dz = dz - (int)(dz) - 1;
-	      atom_list.x[i] = atom_list0.x[i] + dx;
-	      atom_list.y[i] = atom_list0.y[i] + dy;
-	      atom_list.z[i] = atom_list0.z[i] + dz;
-	      atom_list0.x[i] = atom_list.x[i];
-	      atom_list0.y[i] = atom_list.y[i];
-	      atom_list0.z[i] = atom_list.z[i];
-	    }
-	  std::vector<double> x = difference( atom_list.x , x0 ) ;
-	  std::vector<double> y = difference( atom_list.y , y0 );
-	  std::vector<double> z = difference( atom_list.z , z0 );
-	  std::vector<double> r; r.assign( x.size() , 0 );
-	  for ( int i=0; i < x.size() ; i++ )
-	    {
-	      r[i] = abs(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
-	    }
-	  output << (step-start_step) << " " << average(r) << std::endl;
-	}      
       std::cout << step << std::endl;
       step++;
     }
