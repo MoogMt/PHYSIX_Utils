@@ -48,7 +48,7 @@ void computeDiff( std::ofstream & output ,  std::ifstream & input , int comp_ste
 	  for ( int i=0; i < x.size() ; i++ )
 	    {
 	      r[i] = sqrt( x[i]*x[i] + y[i]*y[i] + z[i]*z[i] ) ;
-	      r[i] *= r[i]
+	      r[i] *= r[i];
 	    }
 	  output << (step-start_step) << " " << average(r) << std::endl;
 	}
