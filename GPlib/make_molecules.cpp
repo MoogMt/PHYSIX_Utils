@@ -42,21 +42,34 @@ int main( void )
   //--------------------------------------------------------------------------------
   std::ofstream graph_molecules ( "graph_molecules.dat" ,  std::ios::out );
   std::ofstream hist_molecules ( "hist_molecules.dat" ,  std::ios::out );
+  //-------------------------------------------------------------------------------
   std::ofstream co2_stock_in_out ( "co2_stock_in_out.dat" ,  std::ios::out );
   std::ofstream co3_stock_in_out ( "co3_stock_in_out.dat" ,  std::ios::out );
   std::ofstream co4_stock_in_out ( "co4_stock_in_out.dat" ,  std::ios::out );
+  //-------------------------------
   std::ofstream co2_stock_in_time ( "co2_stock_in_time.dat" ,  std::ios::out );
   std::ofstream co3_stock_in_time ( "co3_stock_in_time.dat" ,  std::ios::out );
   std::ofstream co4_stock_in_time ( "co4_stock_in_time.dat" ,  std::ios::out );
+  //-------------------------------
   std::ofstream co2_stock_alone_out ( "co2_stock_alone_out.dat" ,  std::ios::out );
   std::ofstream co3_stock_alone_out ( "co3_stock_alone_out.dat" ,  std::ios::out );
   std::ofstream co4_stock_alone_out ( "co4_stock_alone_out.dat" ,  std::ios::out );
+  //-------------------------------
   std::ofstream co2_stock_alone_time ( "co2_stock_alone_time.dat" ,  std::ios::out );
   std::ofstream co3_stock_alone_time ( "co3_stock_alone_time.dat" ,  std::ios::out );
   std::ofstream co4_stock_alone_time ( "co4_stock_alone_time.dat" ,  std::ios::out );
-  std::ofstream c2_ratio_out ( "c2_ratio_out.dat" ,  std::ios::out );
-  std::ofstream c3_ratio_out ( "c3_ratio_out.dat" ,  std::ios::out );
-  std::ofstream c4_ratio_out ( "c4_ratio_out.dat" ,  std::ios::out );
+  //-------------------------------------------------------------------------------
+  //  RATIOS
+  //-------------------------------------------------------------------------------
+  std::ofstream co2_ratio_out ( "c2_ratio_out.dat" ,  std::ios::out );
+  std::ofstream co2_ratio_time ( "co2_ratio_time.dat" , std::ios::out );
+  std::ofstream co3_ratio_out ( "c3_ratio_out.dat" ,  std::ios::out );
+  std::ofstream co3_ratio_time ( "co3_ratio_time.dat" , std::ios::out );
+  std::ofstream co4_ratio_out ( "c4_ratio_out.dat" ,  std::ios::out );
+  std::ofstream co4_ratio_time ( "co4_ratio_time.dat" , std::ios::out );
+  //-------------------------------------------------------------------------------
+  // DISTANCE FROM PLAN
+  //-------------------------------------------------------------------------------
   std::ofstream distance_from_plan( "distance_from_plan.dat" , std::ios::out );
   std::ofstream distance_from_plan_in( "distance_from_plan_in.dat" , std::ios::out );
   std::ofstream distance_from_plan_alone( "distance_from_plan_alone.dat" , std::ios::out );
@@ -87,44 +100,28 @@ int main( void )
   //-----------------------------------------
   std::vector<double> co2_data;
   std::vector<double> sizes;
-  //-----------------------------------------
+  //-------------------------------------
+  int co2_in = 0, co2_alone = 0; std::vector<double> co2_stock_in; std::vector<double> co2_stock_alone; std::vector<double> co2_ratio; 
+  //-------------------------------------
+  int co3_in = 0, co3_alone = 0; std::vector<double> co3_stock_in; std::vector<double> co3_stock_alone; std::vector<double> co3_ratio; 
+  //-------------------------------------
+  int co4_in = 0, co4_alone = 0; std::vector<double> co4_stock_in; std::vector<double> co4_stock_alone; std::vector<double> co4_ratio;
+  //-------------------------------------
+  // Distance From Plan
+  std::vector<double> distPlanC3 , distPlanC3_in, distPlanC3_alone ;
+  //----------------------------------------------------------------------
 
   //-----------
   // Histogram
   //-----------------------------------------
   // Sizes
-  double hist_start = 0.5, hist_end = 96.5;
-  double hist_start_ratio = 0. , hist_end_ratio = 1;
-  int nb_box_ratio = 100;
-  int nb_box = 96;
-  std::vector<Bin> hist;
-  //-----------------------------------------
-  // Co2 %
-  double hist_co2_start = 0.5, hist_co2_end = 32.5;
-  int nb_co2_box = 32;
-  std::vector<Bin> hist_co2;
-  //-----------------------------------------
-  int nb_box2 = 1000;
+  double hist_start       = 0.5,     hist_end = 96.5;
+  double hist_start_ratio = -0.001 , hist_end_ratio = 1.05;
+  double hist_co2_start   = -0.001 , hist_co2_end = 1.05;
+  int nb_box_ratio = 200 , nb_box = 96, nb_box2 = 1000, nb_co2_box = 200;
+  std::vector<Bin> hist, hist_co2;
   //-----------------------------------------
 
-
-  // CO2_fractions
-  //-----------------------------------------
-  int co2_in = 0, co2_alone = 0; std::vector<double> co2_stock_in; std::vector<double> co2_stock_alone;
-  int co3_in = 0, co3_alone = 0; std::vector<double> co3_stock_in; std::vector<double> co3_stock_alone;
-  int co4_in = 0, co4_alone = 0; std::vector<double> co4_stock_in; std::vector<double> co4_stock_alone;
-  int o2_in = 0, o2_alone = 0; std::vector<double> o2_stock_in; std::vector<double> o2_stock_alone;
-  int o3_in = 0, o3_alone = 0; std::vector<double> o3_stock_in; std::vector<double> o3_stock_alone;
-  int c2_in = 0, c2_alone = 0; std::vector<double> c2_ratio ;
-  int c3_in = 0, c3_alone = 0; std::vector<double> c3_ratio ;
-  int c4_in = 0, c4_alone = 0; std::vector<double> c4_ratio ;
-  std::vector<double> o2_ratio ;
-  std::vector<double> o3_ratio ;
-  std::vector<double> DistPlanC3;
-  std::vector<double> distPlanC3_in ;
-  std::vector<double> distPlanC3_alone ;
-  //-----------------------------------------
-  
   //--------------------
   // Reading Cell File
   //-------------------------------------------------------------------
@@ -152,34 +149,29 @@ int main( void )
     {
       if ( step % comp_step == 0 && step > start_step && step < end_step)
 	{
+
+	  //---------------------------
        	  // Makes the contact matrix
+	  //----------------------------------------------------
 	  makeContactMatrix( cm_connection , cm_distance , atom_list, cell , cut_off , lut_list );
+	  //----------------------------------------------------
+	  
+	  //------------------
 	  // Making molecules
+	  //----------------------------------------------------
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
-
 	  //----------------------------------------------------
-	  // Printing bonds to file
-	  //----------------------------------------------------
-	  for( int i=0 ; i < molecules.size() ; i++ )
-	    {
-	      for ( int j=0 ; j < molecules[i].bonds.size(); j++ )
-		{
-		  int index_atom1 = molecules[i].bonds[j].atom1_index;
-		  int index_atom2 = molecules[i].bonds[j].atom2_index;
-		  graph_molecules << index_atom1 << " " << index_atom2 << " " << cm_connection.lut_list.type_index[ index_atom1 ] << " " << cm_connection.lut_list.type_index[ index_atom2 ] << std::endl;
-		}
-	      graph_molecules << "------------" << std::endl;
-	    }
-	  graph_molecules << "================" << std::endl;
-	  //----------------------------------------------------
-
+	  
+	  //-----------------
 	  // Reinitialialize
+	  //----------------------------------------------------
 	  co2_in = 0, co2_alone = 0;
 	  co3_in = 0, co3_alone = 0;
 	  co4_in = 0, co4_alone = 0;
+	  //----------------------------------------------------
 	  
-	  //--------------------
-	  // Calculating angles
+	  //-------------------------------------------------------
+	  // Calculating ratios co2/co3/co4 + Distance From Plan
 	  //-----------------------------------------------------------------------------
 	  for ( int i=0 ; i < molecules.size() ; i++  )
 	    {
@@ -199,37 +191,47 @@ int main( void )
 			}
 		      else if ( angles.size() == 3 )
 			{
+			  std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
+			  int index_center = molecules[i].atom_index[j];
+			  std::vector<double> position_center = getMinImage( atom_list , cell , index_center , index_center );
+			  std::vector<double> position_atom1  = getMinImage( atom_list , cell , index_center , per_atoms_index[0] );
+			  std::vector<double> position_atom2  = getMinImage( atom_list , cell , index_center , per_atoms_index[1] );
+			  std::vector<double> position_atom3  = getMinImage( atom_list , cell , index_center , per_atoms_index[2] );
+			  std::vector<double> vector_plan1 = difference( position_atom1 , position_atom2 ) ;
+			  std::vector<double> vector_plan2 = difference( position_atom1 , position_atom3 ) ;
+			  double dist = getDistanceFromPlan( vector_plan1 , vector_plan2 , position_center , position_atom1 );
 			  if ( molecules[j].names.size() == 4 )
 			    {
+			      distance_from_plan_alone << step << " " << dist << std::endl;
+			      if ( dist > 0)
+				{
+				  if ( dist < 0.35 )
+				    {
+				      
+				    }
+				  else
+				    {
+				      
+				    }
+				}
+			      distPlanC3_alone.push_back( dist );
 			      co3_alone++;
-			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
-			      int index_center = molecules[i].atom_index[j];
-			      std::vector<double> position_center = getPosition( atom_list , index_center );
-			      std::vector<double> position_atom1  = getPosition( atom_list , per_atoms_index[0] );
-			      std::vector<double> position_atom2  = getPosition( atom_list , per_atoms_index[1] );
-			      std::vector<double> position_atom3  = getPosition( atom_list , per_atoms_index[2] );
-			      std::vector<double> vector1 = difference( position_atom1 , position_atom2 );
-			      std::vector<double> vector2 = difference( position_atom1 , position_atom3 );
-			      double dist = getDistanceFromPlan( vector1 , vector2 , position_center, position_atom1 );
-			      distance_from_plan << step << " " << dist << std::endl;
-			      DistPlanC3.push_back( dist );
 			    }
 			  else
 			    {
-			      std::vector<int> per_atoms_index = getBonded( molecules[i] , molecules[i].atom_index[j] );
-			      int index_center = molecules[i].atom_index[j];
-			      std::vector<double> position_center = getMinImage( atom_list , cell , index_center , index_center );
-			      std::vector<double> position_atom1  = getMinImage( atom_list , cell , index_center , per_atoms_index[0] );
-			      std::vector<double> position_atom2  = getMinImage( atom_list , cell , index_center , per_atoms_index[1] );
-			      std::vector<double> position_atom3  = getMinImage( atom_list , cell , index_center , per_atoms_index[2] );
-			      std::vector<double> vector_plan1 = difference( position_atom1 , position_atom2 ) ;
-			      std::vector<double> vector_plan2 = difference( position_atom1 , position_atom3 ) ;
-			      double dist = getDistanceFromPlan( vector_plan1 , vector_plan2 , position_center , position_atom1 );
-			      if ( dist < 1.75 )
+			      distance_from_plan_in << step << " " << dist << std::endl;
+			      if ( dist > 0)
 				{
-				  distance_from_plan_in << step << " " << dist << std::endl;
-				  distPlanC3_in.push_back( dist );
+				  if ( dist < 0.35 )
+				    {
+				      
+				    }
+				  else
+				    {
+				      
+				    }
 				}
+			      distPlanC3_in.push_back( dist );
 			      co3_in++;
 			    }
 			}
@@ -242,73 +244,61 @@ int main( void )
 			  else co4_in++;
 			}
 		    }
-		  else
-		    {
-		      if ( angles.size() == 1 )
-			{
-			  if( molecules[j].names.size() == 3 ) o2_in++;
-			  else o2_alone++;
-			}
-		      else if ( angles.size() == 3 )
-			{
-			  if ( molecules[j].names.size() == 4 ) o3_in++;
-			  else o3_alone++;
-			}
-		    }
 		}
 	    }
 	  //-----------------------------------------------------------------------------
+
+	  int c_total = co2_in + co3_in + co4_in + co2_alone + co3_alone + co4_alone;
 	  
 	  //-----------------------------
 	  // Stocking sizes of molecules
 	  //----------------------------------------------------------
-	  co2_stock_in.push_back( co2_in );
-	  co3_stock_in.push_back( co3_in );
-	  co4_stock_in.push_back( co4_in );
-	  co2_stock_in_time << step << " " << co2_in << std::endl;
-	  co3_stock_in_time << step << " " << co3_in << std::endl;
-	  co4_stock_in_time << step << " " << co4_in << std::endl;
+	  // Molecule alone
 	  //------------------------------
-	  co2_stock_alone.push_back( co2_alone );
-	  co3_stock_alone.push_back( co3_alone );
-	  co4_stock_alone.push_back( co4_alone );
-	  co2_stock_alone_time << step << " " << co2_alone << std::endl;
-	  co3_stock_alone_time << step << " " << co3_alone << std::endl;
-	  co4_stock_alone_time << step << " " << co4_alone << std::endl;
+	  // Storing co2/co3/co4
+	  co2_stock_in.push_back( (double)(co2_in)/(double)(c_total) );
+	  co3_stock_in.push_back( (double)(co3_in)/(double)(c_total) );
+	  co4_stock_in.push_back( (double)(co4_in)/(double)(c_total) );
+	  // Putting co2/co3/co4 to file
+	  co2_stock_in_time << step << " " << (double)(co2_in)/(double)(c_total) << std::endl;
+	  co3_stock_in_time << step << " " << (double)(co3_in)/(double)(c_total) << std::endl;
+	  co4_stock_in_time << step << " " << (double)(co4_in)/(double)(c_total) << std::endl;
 	  //------------------------------
-	  int c2_total = c2_alone + c2_in;
-	  int c3_total = c3_alone + c3_in;
-	  int c4_total = c4_alone + c4_in;
+	  // Molecule bigger
 	  //------------------------------
-	  std::cout << "c2_total: " << c2_total << std::endl;
-	  std::cout << "c3_total: " << c3_total << std::endl;
-	  std::cout << "c4_total: " << c4_total << std::endl;
-	  double ratio=0;
-	  if ( c2_total != 0 ) c2_ratio.push_back( (double)(c2_alone)/(double)(c2_total) );
-	  else c2_ratio.push_back( ratio );
-	  if ( c3_total != 0 ) c3_ratio.push_back( (double)(c3_alone)/(double)(c3_total) );
-	  else c3_ratio.push_back( ratio );
-	  if ( c4_total != 0 ) c4_ratio.push_back( (double)(c4_alone)/(double)(c4_total) );
-	  else c4_ratio.push_back( ratio );
-	  //-----------------------------------------------------------
-	  o2_stock_in.push_back( o2_in );
-	  o3_stock_in.push_back( o2_in );
-	  o2_stock_alone.push_back( o2_alone );
-	  o3_stock_alone.push_back( o3_alone );
-	  //------------------------------
-	  int o2_total = o2_alone + o2_in;
-	  int o3_total = o3_alone + o3_in;
-	  //------------------------------
-	  if ( o2_total != 0 ) o2_ratio.push_back( (double)(o2_alone)/(double)(o2_total) );
-	  else o2_ratio.push_back( ratio );
-	  if ( o3_total != 0 ) o3_ratio.push_back( (double)(o3_alone)/(double)(o3_total) );
-	  else o3_ratio.push_back( ratio );
-	  //-----------------------------------------------------------
+	  // Storing co2/co3/co4
+	  co2_stock_alone.push_back( (double)(co2_alone)/(double)(c_total) );
+	  co3_stock_alone.push_back( (double)(co3_alone)/(double)(c_total) );
+	  co4_stock_alone.push_back( (double)(co4_alone)/(double)(c_total) );
+	  // Putting co2/co3/co4 to file
+	  co2_stock_alone_time << step << " " << (double)(co2_alone)/(double)(c_total) << std::endl;
+	  co3_stock_alone_time << step << " " << (double)(co3_alone)/(double)(c_total) << std::endl;
+	  co4_stock_alone_time << step << " " << (double)(co4_alone)/(double)(c_total) << std::endl;
+	  //-------------------------------------------------------------------
 
+	  //--------
+	  // RATIOS
+	  //--------------------------------------------------------------------
+	  // CO2
+	  int co2_total = co2_alone + co2_in;
+	  if ( co2_total != 0 ) co2_ratio.push_back( (double)(co2_alone)/(double)(co2_total) );
+	  else co2_ratio.push_back( 0 );
+	  // CO3
+	  int co3_total = co3_alone + co3_in;
+	  if ( co3_total != 0 ) co3_ratio.push_back( (double)(co3_alone)/(double)(co3_total) );
+	  else co3_ratio.push_back( 0 );
+	  // CO4
+	  int co4_total = co4_alone + co4_in;
+	  if ( co4_total !=  0 ) co4_ratio.push_back( (double)(co4_alone)/(double)(co4_total) );
+	  else co4_ratio.push_back( 0 );
+	  //--------------------------------------------------------------------
+
+	  //-------------
 	  // Step making
 	  //----------------------------------------------------
 	  std::cout << step << std::endl;
 	  //----------------------------------------------------
+	  
 	}      
       step++;
      }
@@ -323,11 +313,11 @@ int main( void )
   writeHistogram( co2_stock_alone_out , normalizeHistogram( makeRegularHistogram( co2_stock_alone , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
   writeHistogram( co3_stock_alone_out , normalizeHistogram( makeRegularHistogram( co3_stock_alone , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
   writeHistogram( co4_stock_alone_out , normalizeHistogram( makeRegularHistogram( co4_stock_alone , hist_co2_start, hist_co2_end, nb_co2_box ) ) );
-  writeHistogram( c2_ratio_out , normalizeHistogram( makeRegularHistogram( c2_ratio , hist_start_ratio, hist_end_ratio, nb_box_ratio ) ) );
-  writeHistogram( c3_ratio_out , normalizeHistogram( makeRegularHistogram( c3_ratio , hist_start_ratio , hist_end_ratio, nb_box_ratio ) ) );
-  writeHistogram( c4_ratio_out , normalizeHistogram( makeRegularHistogram( c4_ratio , hist_start_ratio , hist_end_ratio, nb_co2_box ) ) );
-  writeHistogram( distance_from_plan_hist_alone , normalizeHistogram( makeRegularHistogram( distPlanC3_alone , 0 , 1.75, 200 ) ) );
-  writeHistogram( distance_from_plan_hist_in , normalizeHistogram( makeRegularHistogram( distPlanC3_in , -0.01 , 1.75, 200 ) ) );
+  writeHistogram( co2_ratio_out , normalizeHistogram( makeRegularHistogram( co2_ratio , min( co2_ratio) , max( co2_ratio) , nb_box ) ) );
+  writeHistogram( co3_ratio_out , normalizeHistogram( makeRegularHistogram( co3_ratio , min( co3_ratio) , max( co3_ratio) , nb_box ) ) );
+  writeHistogram( co4_ratio_out , normalizeHistogram( makeRegularHistogram( co4_ratio , min( co4_ratio) , max( co4_ratio) , nb_box ) ) );
+  writeHistogram( distance_from_plan_hist_alone , normalizeHistogram( makeRegularHistogram( distPlanC3_alone , -0.0001 , max( distPlanC3_alone ), nb_box ) ) );
+  writeHistogram( distance_from_plan_hist_in , normalizeHistogram( makeRegularHistogram( distPlanC3_in , -0.0001 , max( distPlanC3_alone ), nb_box ) ) );
   //-------------------------------------------------------
   
   //-----------------
@@ -346,15 +336,31 @@ int main( void )
   input.close();
   graph_molecules.close();
   hist_molecules.close();
+  //-----------------------
+  // CO2/3/4
+  //-----------------------
   co2_stock_in_out.close();
+  co2_stock_in_time.close();
   co3_stock_in_out.close();
+  co3_stock_in_time.close();
   co4_stock_in_out.close();
+  co4_stock_in_time.close();
+  //-----------------------
   co2_stock_alone_out.close();
+  co2_stock_alone_time.close();
   co3_stock_alone_out.close();
+  co3_stock_alone_time.close();
   co4_stock_alone_out.close();
-  c2_ratio_out.close();
-  c3_ratio_out.close();
-  c4_ratio_out.close();
+  co4_stock_alone_time.close();
+  //-----------------------
+  // RATIO
+  //-----------------------
+  co2_ratio_out.close();
+  co3_ratio_out.close();
+  co4_ratio_out.close();
+  //-----------------------
+  // Distance from plan
+  //-----------------------
   distance_from_plan_in.close();
   distance_from_plan_alone.close();
   distance_from_plan_hist_in.close();

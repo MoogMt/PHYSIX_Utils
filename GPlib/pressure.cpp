@@ -48,8 +48,8 @@ int main( void )
   // Physical parameters
   //----------------------------------------------------
   int step       = 1;    // Step counter
-  int start_step = 2000; // Start step
-  int end_step = 40000;
+  int start_step = 5000; // Start step
+  int end_step = 2000000;
   int comp_step  = 1;    // Frequency of computation
   //----------------------------------------------------
 
@@ -82,7 +82,7 @@ int main( void )
   // Technical values
   double hist_start = min( press_vec ) ;
   double hist_end   = max( press_vec );
-  int nb_box        = 1000;
+  int nb_box        = 750;
   //---------------------------------------------------------------
   writeHistogram( press_out , normalizeHistogram( makeRegularHistogram( press_vec , hist_start , hist_end , nb_box ) ) );
   //---------------------------------------------------------------

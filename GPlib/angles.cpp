@@ -55,7 +55,7 @@ int main( void )
   // Physical parameters
   //--------------------------------------
   int step       = 1;  // Step counter
-  int start_step = 2000; // Start step
+  int start_step = 1; // Start step
   int end_step   = 120000;
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
@@ -131,9 +131,17 @@ int main( void )
 		  if ( molecules[i].names[j] == "C" )
 		    {
 		      if ( angles.size() == 1 )   appendVector( c2_angles , angles ); 
-		      else if ( angles.size() == 3 )  appendVector( c3_angles , angles );  
+		      else if ( angles.size() == 3 )
+			{
+			  appendVector( c3_angles , angles );
+			}
 		      else if ( angles.size() == 6 )  appendVector( c4_angles , angles );  
-		      else c_others_nb.push_back( angles.size() );
+		      else
+			{
+			  std::cout << "nb_angle: " << angles.size() << " ";
+			  std::cout << "C_index: " <<  molecules[i].atom_index[j] << std::endl;
+			  c_others_nb.push_back( angles.size() );
+			}
 		    }
 		}
 	    }

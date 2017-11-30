@@ -47,7 +47,7 @@ int main( void )
   // Physical parameters
   //--------------------------------------
   int step       = 1;  // Step counter
-  int start_step = 2000; // Start step
+  int start_step = 1; // Start step
   int end_step   = 200000;
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
