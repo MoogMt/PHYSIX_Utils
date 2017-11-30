@@ -366,8 +366,8 @@ int main( void )
   //
   writeHistogram( dfp_in_r1_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_4th , min( dfp_in_r1_4th ) , max( dfp_in_r1_4th ), nb_box ) ) );
   writeHistogram( dfp_in_r2_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_4th , min( dfp_in_r2_4th ) , max( dfp_in_r2_4th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r1_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1_4th , min( dfp_alone_r2 ) , max( dfp_alone_r1_4th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_4th , min( dfp_alone_r2 ) , max( dfp_alone_r2_4th ), nb_box ) ) );
+  writeHistogram( dfp_alone_r1_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1_4th , min( dfp_alone_r1_4th ) , max( dfp_alone_r1_4th ), nb_box ) ) );
+  writeHistogram( dfp_alone_r2_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_4th , min( dfp_alone_r2_4th ) , max( dfp_alone_r2_4th ), nb_box ) ) );
   //-------------------------------------------------------
   
   //-----------------
