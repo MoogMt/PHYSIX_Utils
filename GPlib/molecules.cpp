@@ -221,11 +221,50 @@ std::vector<double> getAngleAtom( ContactMatrix cm , Molecule molecule , int ato
 }
 //=================================================================================
 
-/*void sortMolecules( std::vector<Molecule> & molecules_stock , std::vector<Molecule> & molecule )
+//========= 
+// SIGNALS
+//=================================================================================\
+MolSig computeSig()
 {
-  for ( int i=0 ; i < molecule.size() ; i++ )
+
+}
+//--------------------------------------------------------------------------------
+bool compare( MolSig signal1 , MolSig signal2 )
+{
+  //
+  if ( 1) return true;
+  else return false;
+}
+//--------------------------------------------------------------------------------
+int sigExists( MolSig signal , std::vector<MolSig> signal_list )
+{
+  int index=-1;
+  for ( int i=0 ; i < signal_list.size() ; i++ )
+    { 
+      if ( compare( signal , mol_signals[i] ) )
+	{
+	  return i;
+	}
+    }
+  return index;
+}
+//--------------------------------------------------------------------------------
+void UpdateSigs( std::vector<Molecule> molecules , std::vector<MolSig> & mol_signals , std::vector<int> & occurences )
+{
+  for ( int i=0 ; i < molecules.size() ; i++ )
     {
-      sortMolecule( molecules_stock , molecule[i] );
+      MolSig sig = computeSig( molecules[i] );
+      int index = -1;
+      if ( ( index = sigExists( sig , mols_signals ) ) != -1 )
+	{
+	  occurences[index]++;
+	}
+      else
+	{
+	  mol_signals.push_back( sig );
+	  occurences.push_back( 0 );
+	}
     }
   return;
-  }*/
+}
+//=================================================================================

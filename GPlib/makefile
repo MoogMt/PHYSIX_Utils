@@ -10,7 +10,8 @@ OBJangles = angles.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histo
 OBJhistratio = ratio_counting.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJdiff = diffusion.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJwrap = wrap.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
-OBJcomp = compress.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 							
+OBJcomp = compress.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+OBJmolid = mol_id.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 								
 
 %.o: %.c $(DEPS)
 	$(CPP) -c -o $@ $< $(CFLAGS)
@@ -30,6 +31,8 @@ diffusion: $(OBJdiff)
 wrap: $(OBJwrap)
 	$(CPP) -o $@ $^ $(CFLAGS)
 compress: $(OBJcomp)
+	$(CPP) -o $@ $^ $(CFLAGS)
+molid: $(OBJmolid)
 	$(CPP) -o $@ $^ $(CFLAGS)			
 
 clean:

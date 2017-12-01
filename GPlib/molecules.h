@@ -66,4 +66,10 @@ std::vector<int> getBonded( Molecule molecule , int atom_index );
 std::vector<double> getAngleAtom( ContactMatrix cm , Molecule molecule , int atom_index );
 //============================================================================
 
+//=========
+// SIGNALS
+//===============================================================================================
+int sigExists( MolSig signal , std::vector<MolSig> mol_signals )
+void UpdateSigs( std::vector<Molecule> molecules , std::vector<MolSig> & mol_signals , std::vector<int> & occurences )
+//===============================================================================================
 #endif
