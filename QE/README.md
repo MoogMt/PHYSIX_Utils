@@ -1,8 +1,7 @@
 STUFF ABOUT INSTALLING QE:
 
-==========================
--> Weird Compilation Stuff
-===========================
+===Weird Compilation Stuff===
+
 
 - ALWAYS use the method "more is better" when loading modules. The more modules you load, the best chance you have to
 see the compilation suceed.
