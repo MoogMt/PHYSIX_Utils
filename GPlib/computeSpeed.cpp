@@ -89,45 +89,11 @@ int main( void )
      }
   //----------------------------------------------------
   
-  //--------------------
-  // Making histograms
-  //----------------------------------------------------
-  c2_angles_hist = makeRegularHistogram( c2_angles , hist_start , hist_end , nb_box );
-  writeHistogram( c2_angles_out , normalizeHistogram( c2_angles_hist ) );
-  c3_angles_hist = makeRegularHistogram( c3_angles , hist_start , hist_end , nb_box );
-  writeHistogram( c3_angles_out , normalizeHistogram( c3_angles_hist ) );
-  c4_angles_hist = makeRegularHistogram( c4_angles , hist_start , hist_end , nb_box );
-  writeHistogram( c4_angles_out , normalizeHistogram( c4_angles_hist ) );
-  o2_angles_hist = makeRegularHistogram( o2_angles , hist_start , hist_end , nb_box );
-  writeHistogram( o2_angles_out , normalizeHistogram( o2_angles_hist ) );
-  o3_angles_hist = makeRegularHistogram( o3_angles , hist_start , hist_end , nb_box );
-  writeHistogram( o3_angles_out , normalizeHistogram( o3_angles_hist ) );
-  //----------------------------------------------------
-
-  // Print other values
-  //----------------------------------------------------
-  std::cout << "Other C Angles: " << std::endl;
-  for ( int i=0 ; i < c_others_nb.size() ; i++ )
-    {
-      std::cout << "value: " << c_others_nb[i] << std::endl;
-    }
-  //----------------------------------------------------
-  std::cout << "Other O Angles: " << std::endl;
-  for ( int i=0 ; i < o_others_nb.size() ; i++ )
-    {
-      std::cout << "value: " << o_others_nb[i] << std::endl;
-    }
-  //----------------------------------------------------
-  
   //--------------
   //Closing fluxes
   //----------------------
   input.close();
-  c2_angles_out.close();
-  c3_angles_out.close();
-  c4_angles_out.close();
-  o2_angles_out.close();
-  o3_angles_out.close();
+  output.close();
   //----------------------
       
   return 0;

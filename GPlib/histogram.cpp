@@ -375,6 +375,16 @@ void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> >
 //=======================
 // Integrating Histogram
 //=========================================================================================
+double average( std::vector<BinReal> & histogram )
+{
+  double value =0;
+  for ( int i=0; i < histogram.size() ; i++ )
+    {
+      value += center(histogram[i])*histogram[i].value;
+    }
+  return value;
+}
+//------------------------------------------------------------
 double integrateHistogram( std::vector<BinReal> & histogram )
 {
   double value = 0;

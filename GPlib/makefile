@@ -11,7 +11,8 @@ OBJhistratio = ratio_counting.o cutoff.o contact_matrix.o cell.o atom.o xyz.o ut
 OBJdiff = diffusion.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJwrap = wrap.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJcomp = compress.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
-OBJmolid = mol_id.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 								
+OBJmolid = mol_id.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+OBJcHist = computeHist.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 									
 
 %.o: %.c $(DEPS)
 	$(CPP) -c -o $@ $< $(CFLAGS)
@@ -33,8 +34,9 @@ wrap: $(OBJwrap)
 compress: $(OBJcomp)
 	$(CPP) -o $@ $^ $(CFLAGS)
 molid: $(OBJmolid)
+	$(CPP) -o $@ $^ $(CFLAGS)
+hist_p: $(OBJcHist)
 	$(CPP) -o $@ $^ $(CFLAGS)			
-
 clean:
 	rm -rf *.o 
 
