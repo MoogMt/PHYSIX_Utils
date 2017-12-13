@@ -95,6 +95,7 @@ void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> >
 // Integrate Histograms
 //-------------------------------------------------------------------------------------
 double average( std::vector<BinReal> & histogram );
+double variance( std::vector<BinReal> & histogram );
 double integrateHistogram( std::vector<BinReal> & histogram );
 double integrateHistogram( std::vector<BinReal> & histogram , double start , double end );
 //-------------------------------------------------------------------------------------

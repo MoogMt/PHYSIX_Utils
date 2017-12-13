@@ -41,6 +41,7 @@ int main( void )
   // Output
   //-------------------------------------
   std::ofstream output("pv.dat");
+  std::ofstream output2("var.dat");
   //-------------------------------------
   
   //-----------------
@@ -48,6 +49,7 @@ int main( void )
   //---------------------------------------------------------------------------------------------
   std::vector<BinReal> press_882_2000_hist = readRegularHistogramReal("8.82/2000K/pressure.dat");
   std::vector<BinReal> press_900_2000_hist = readRegularHistogramReal("9.0/2000K/pressure.dat");
+  std::vector<BinReal> press_910_2000_hist = readRegularHistogramReal("9.1/2000K/pressure.dat");
   std::vector<BinReal> press_980_2000_hist = readRegularHistogramReal("9.8/2000K/pressure.dat");
   std::vector<BinReal> press_882_2500_hist = readRegularHistogramReal("8.82/2500K/pressure.dat");
   std::vector<BinReal> press_900_2500_hist = readRegularHistogramReal("9.0/2500K/pressure.dat");
@@ -60,16 +62,17 @@ int main( void )
   //------------------
   // Compute averages
   //---------------------
-  std::cout << "8.82 " << average(press_882_2000_hist) << " " << average(press_882_2500_hist) << " " << average(press_882_3000_hist) << " " << std::endl;
-  std::cout << "9.00 " << average(press_900_2000_hist) << " " << average(press_900_2500_hist) << " " << average(press_900_3000_hist) << " " << std::endl;
-  std::cout << "9.80 " << average(press_980_2000_hist) << " " << average(press_980_2500_hist) << " " << average(press_980_3000_hist) << " " << std::endl;
+  output << 8.82*8.82*8.82/96 << " " << average(press_882_2000_hist) << " " << average(press_882_2500_hist) << " " << average(press_882_3000_hist) << " " << variance(press_882_2000_hist) << " " << variance(press_882_2500_hist) << " " << variance(press_882_3000_hist) << std::endl;
+  output << 9.0*9*9/96 << " " << average(press_900_2000_hist) << " " << average(press_900_2500_hist) << " " << average(press_900_3000_hist) << " " << variance(press_900_2000_hist) << " " << variance(press_900_2500_hist) << " " << variance(press_900_3000_hist) <<std::endl;
+  output << 9.8*9.8*9.8/96 << " " << average(press_980_2000_hist) << " " << average(press_980_2500_hist) << " " << average(press_980_3000_hist) << " " <<  variance(press_980_2000_hist) << " " << variance(press_980_2500_hist) << " " << variance(press_980_3000_hist) << std::endl;
   //---------------------
-    
+  
   //--------------
   //Closing fluxes
   //----------------------
   input.close();
   output.close();
+  output2.close();
   //----------------------
   
   return 0;

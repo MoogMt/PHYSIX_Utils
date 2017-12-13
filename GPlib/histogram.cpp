@@ -385,6 +385,18 @@ double average( std::vector<BinReal> & histogram )
   return value;
 }
 //------------------------------------------------------------
+double variance( std::vector<BinReal> & histogram )
+{
+  double value  = 0;
+  double value2 = 0;
+  for ( int i=0; i < histogram.size() ; i++ )
+    {
+      value += center(histogram[i])*histogram[i].value;
+      value2 += center(histogram[i])*center(histogram[i])*histogram[i].value;
+    }
+  return sqrt(value2-value*value);
+}
+//------------------------------------------------------------
 double integrateHistogram( std::vector<BinReal> & histogram )
 {
   double value = 0;
