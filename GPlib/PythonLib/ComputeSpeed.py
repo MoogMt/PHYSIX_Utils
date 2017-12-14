@@ -37,49 +37,60 @@ nb_atoms = 96;
 #==================
 # Reading XYZ step
 #========================================================
-def readXYZstep( file_pointer , nb_atoms , x_ , y_ , z_):
+def readXYZstep( file_pointer , nb_atoms , r_ ):
     for i in range(nb_atoms+2):
         line = file_pointer.readline()
         line_part = (line.rstrip("\n")).split()
         if line == "":
             return False
         if i >= 2:
-            x_[i-2] = line_part[1];
-            y_[i-2] = line_part[2];
-            z_[i-2] = line_part[3];
-    return x_, y_ ,z_ 
+            for j in range(3):
+                r_[i-2,j] = line_part[j+1];
+    return True
 #========================================================
 
+#========================================================
+def minDir( x , x0, a ):
+    dx=x-x0;
+    if dx > a*0.5: 
+        return dx-a
+    elif dx<-a*0.5: 
+        return dx+a;
+    else: 
+        return dx;
+#--------------------------------------------------------
+def minDist( r, r0, a, b, c ):
+    dr = np.zeros((r.size,3));
+    cell=[a,b,c];
+    for i in range(r[:,0].size):
+        for j in range(len(cell)):
+            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] )
+    return dr;
+#========================================================
+    
 #============
 # Atom Names
 #========================================================
 name=[];
 # Position x,y,z
-x=np.zeros(nb_atoms); x0=np.zeros(nb_atoms); 
-y=np.zeros(nb_atoms); y0=np.zeros(nb_atoms);
-z=np.zeros(nb_atoms); z0=np.zeros(nb_atoms);
+r=np.zeros((nb_atoms,3)); r0=np.zeros((nb_atoms,3)); 
 # velocities x,y,z
-vx=np.array([]);
-vy=np.array([]);
-vz=np.array([]);
+v=np.zeros((nb_atoms,3));
 #========================================================
 
 #====================
 # Reading TRAJEC.xyz
 #========================================================
-count=0;
 with open(filepath,"r") as fp:
     # Reading first step
-    if readXYZstep(fp,nb_atoms,x0,y0,z0) == False :
+    if readXYZstep(fp,nb_atoms,r0) == False :
         print("Error Reading File!")
     # Reading all other steps  
-    while( readXYZstep(fp,nb_atoms,x,y,z) != False ):
-        dx=x0[0]-x[0];
-        dy=y0[0]-y[0];
-        dz=z0[0]-z[0];
-        x0=np.copy(x); 
-        y0=np.copy(y);
-        z0=np.copy(z);
+    while( readXYZstep(fp,nb_atoms,r) != False ):
+        # Compute speeds using finite elements
+        v=(minDist(r,r0,a,b,c))/timelaps;
+        # Remembers last positions
+        r0=np.copy(r); 
         print(step)
         step+=1;
 #========================================================

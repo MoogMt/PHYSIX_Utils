@@ -393,19 +393,30 @@ int main( void )
   writeHistogram( co3_ratio_out , normalizeHistogram( makeRegularHistogram( co3_ratio , min( co3_ratio) , max( co3_ratio) , nb_box ) ) );
   writeHistogram( co4_ratio_out , normalizeHistogram( makeRegularHistogram( co4_ratio , min( co4_ratio) , max( co4_ratio) , nb_box ) ) );
   // Distances from plan
-  writeHistogram( distance_from_plan_hist_alone , normalizeHistogram( makeRegularHistogram( distPlanC3_alone , -0.0001 , max( distPlanC3_alone ), nb_box ) ) );
+  /*writeHistogram( distance_from_plan_hist_alone , normalizeHistogram( makeRegularHistogram( distPlanC3_alone , -0.0001 , max( distPlanC3_alone ), nb_box ) ) );
   writeHistogram( distance_from_plan_hist_in , normalizeHistogram( makeRegularHistogram( distPlanC3_in , -0.0001 , max( distPlanC3_alone ), nb_box ) ) );
   writeHistogram( dfp_in_r1_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1 , min(  dfp_in_r1 ) , max( dfp_in_r1 ) , nb_box ) ) );
   writeHistogram( dfp_in_r2_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2 , min(  dfp_in_r2 ) , max( dfp_in_r2 ) , nb_box ) ) );
   writeHistogram( dfp_alone_r1_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1 , min( dfp_alone_r1 ) , max( dfp_alone_r1 ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2 , min( dfp_alone_r2 ) , max( dfp_alone_r2 ), nb_box ) ) );
+  writeHistogram( dfp_alone_r2_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2 , min( dfp_alone_r2 ) , max( dfp_alone_r2 ), nb_box ) ) );*/
   //----------------------------------------------
+  std::cout << "check1th " << dfp_in_r1_1th.size()<< std::endl;
+  std::cout << "check2th " << dfp_in_r1_2th.size()<< std::endl;
+  std::cout << "check3th " << dfp_in_r1_3th.size()<< std::endl;
+  std::cout << "check4th " << dfp_in_r1_4th.size()<< std::endl;
+  std::cout << "check5th " << dfp_in_r1_5th.size()<< std::endl;
+  std::cout << "check" << std::endl;
   writeHistogram( dfp_in_r1_1th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_1th , min( dfp_in_r1_1th ) , max( dfp_in_r1_1th ), nb_box ) ) );
+  std::cout << "check" << std::endl;
   writeHistogram( dfp_in_r1_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_2th , min( dfp_in_r1_2th ) , max( dfp_in_r1_2th ), nb_box ) ) );
+    std::cout << "check" << std::endl;
   writeHistogram( dfp_in_r1_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_3th , min( dfp_in_r1_3th ) , max( dfp_in_r1_3th ), nb_box ) ) );
+  std::cout << "check" << std::endl;
   writeHistogram( dfp_in_r1_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_4th , min( dfp_in_r1_4th ) , max( dfp_in_r1_4th ), nb_box ) ) );
+  std::cout << "check" << std::endl;
   writeHistogram( dfp_in_r1_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_5th , min( dfp_in_r1_5th ) , max( dfp_in_r1_5th ), nb_box ) ) );
   //----------------------------------------------
+  /*
   writeHistogram( dfp_in_r2_1th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_1th , min( dfp_in_r2_1th ) , max( dfp_in_r2_1th ), nb_box ) ) );
   writeHistogram( dfp_in_r2_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_2th , min( dfp_in_r2_2th ) , max( dfp_in_r2_2th ), nb_box ) ) );
   writeHistogram( dfp_in_r2_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_3th , min( dfp_in_r2_3th ) , max( dfp_in_r2_3th ), nb_box ) ) );
@@ -422,7 +433,7 @@ int main( void )
   writeHistogram( dfp_alone_r2_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_2th , min( dfp_alone_r2_2th ) , max( dfp_alone_r2_2th ), nb_box ) ) );
   writeHistogram( dfp_alone_r2_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_3th , min( dfp_alone_r2_3th ) , max( dfp_alone_r2_3th ), nb_box ) ) );
   writeHistogram( dfp_alone_r2_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_4th , min( dfp_alone_r2_4th ) , max( dfp_alone_r2_4th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_5th , min( dfp_alone_r2_5th ) , max( dfp_alone_r2_5th ), nb_box ) ) );
+  writeHistogram( dfp_alone_r2_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_5th , min( dfp_alone_r2_5th ) , max( dfp_alone_r2_5th ), nb_box ) ) );*/
   //-------------------------------------------------------
   
   //-----------------
