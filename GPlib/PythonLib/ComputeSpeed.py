@@ -60,14 +60,22 @@ def minDir( x , x0, a ):
         return dx;
 #--------------------------------------------------------
 def minDist( r, r0, a, b, c ):
-    dr = np.zeros((r.size,3));
+    dr = np.zeros((r[:,0].size,3));
     cell=[a,b,c];
     for i in range(r[:,0].size):
         for j in range(len(cell)):
             dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] )
     return dr;
 #========================================================
-    
+
+#======================================================== 
+def printXYZ( matrix ):
+    for i in range(matrix[:,0].size):
+        for j in range(matrix[0,:].size):
+            print(matrix[i,j]);
+    return
+#=======================================================
+
 #============
 # Atom Names
 #========================================================
@@ -88,9 +96,12 @@ with open(filepath,"r") as fp:
     # Reading all other steps  
     while( readXYZstep(fp,nb_atoms,r) != False ):
         # Compute speeds using finite elements
-        v=(minDist(r,r0,a,b,c))/timelaps;
+        v=(minDist(r,r0,a,b,c));
+        if step == 2000:
+            print(r.size);
+            print(v.size);
         # Remembers last positions
         r0=np.copy(r); 
-        print(step)
+        #print(step)
         step+=1;
 #========================================================
