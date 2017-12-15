@@ -27,7 +27,7 @@ step = 0;
 # Timestep
 timestep = 0.5;
 # Timelaps
-timelaps = timestep*5;
+dt = timestep*5;
 # Cell
 a=9.0; b=9.0; c=9.0;
 # Number of atoms
@@ -60,19 +60,19 @@ def minDir( x , x0, a ):
         return dx;
 #--------------------------------------------------------
 def minDist( r, r0, a, b, c ):
-    dr = np.zeros((r[:,0].size,3));
-    cell=[a,b,c];
+    dr = np.zeros(( r[:,0].size, 3 ));
+    cell=[ a, b, c ];
     for i in range(r[:,0].size):
-        for j in range(len(cell)):
+        for j in range( len( cell ) ):
             dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] )
     return dr;
 #========================================================
 
 #======================================================== 
 def printXYZ( matrix ):
-    for i in range(matrix[:,0].size):
-        for j in range(matrix[0,:].size):
-            print(matrix[i,j]);
+    for i in range( matrix[:,0].size ):
+        for j in range( matrix[0,:].size ):
+            print( matrix[i,j] );
     return
 #=======================================================
 
@@ -80,28 +80,33 @@ def printXYZ( matrix ):
 # Atom Names
 #========================================================
 name=[];
-# Position x,y,z
-r=np.zeros((nb_atoms,3)); r0=np.zeros((nb_atoms,3)); 
+# Position at t
+r  = np.zeros(( nb_atoms, 3 )); 
+# Positions at t-dt
+r0 = np.zeros(( nb_atoms, 3 )); 
 # velocities x,y,z
-v=np.zeros((nb_atoms,3));
+v  = np.zeros(( nb_atoms, 3 ));
+# storing velocities 
+v_store = np.empty(( nb_atoms, 3 ));
 #========================================================
 
 #====================
 # Reading TRAJEC.xyz
 #========================================================
-with open(filepath,"r") as fp:
+with open( filepath, "r" ) as fp:
     # Reading first step
-    if readXYZstep(fp,nb_atoms,r0) == False :
+    if readXYZstep( fp, nb_atoms, r0 ) == False :
         print("Error Reading File!")
     # Reading all other steps  
-    while( readXYZstep(fp,nb_atoms,r) != False ):
+    while( readXYZstep( fp, nb_atoms, r ) != False ):
         # Compute speeds using finite elements
-        v=(minDist(r,r0,a,b,c));
-        if step == 2000:
-            print(r.size);
-            print(v.size);
+        v = (minDist( r, r0, a, b, c ))/dt;
+        v_store = np.append( v_store, v)
         # Remembers last positions
-        r0=np.copy(r); 
-        #print(step)
-        step+=1;
+        r0=np.copy( r ); 
+        # Incrementing steps
+        print(step)
+        step += 1;
+print(v_store.size);
 #========================================================
+        
