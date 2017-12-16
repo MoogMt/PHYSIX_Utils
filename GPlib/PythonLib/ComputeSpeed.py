@@ -9,15 +9,31 @@ COMPUTING SPEED
 
 # Importing useful libraries
 import os
+import platform
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Determining P,T to target and if sprint
+#====================================================================
+T = "2000";
+Length_cell = "9.0";
+SPRINT = False;
+#====================================================================1
+
 # Folder parameters
 #====================================================================
-# Folder containing all files
-folder="/media/moog/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/"
-# Local File
-filepath=folder+"TRAJEC_wrapped.xyz"
+# Rough attempt at automating target file detection regardless of OS
+folder=""
+if platform.system() == "Windows":
+    folder = "E:\Data\CO2\AIMD\Liquid\PBE-MT\9.0\\2000K\\"
+elif platform.system() == "Linux":
+    username = os.getusername()
+    path_in_usb = "/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K"
+    folder = "/media/" + username + path_in_usb;
+# Targetting file
+file = "TRAJEC_wrapped.xyz"
+# Joining folder and file
+filepath = os.path.join(folder,file)
 #====================================================================
 
 # Physical parameters
@@ -32,6 +48,17 @@ dt = timestep*5;
 a=9.0; b=9.0; c=9.0;
 # Number of atoms
 nb_atoms = 96;
+# Names of atoms
+name=[];
+# Position at t
+r  = np.zeros(( nb_atoms, 3 )); 
+# Positions at t-dt
+r0 = np.zeros(( nb_atoms, 3 )); 
+# velocities x,y,z
+v  = np.zeros(( nb_atoms, 3 ));
+# storing velocities 
+v_store = np.empty(( nb_atoms, 3 ));
+#========================================================
 #========================================================
 
 #==================
@@ -68,28 +95,6 @@ def minDist( r, r0, a, b, c ):
     return dr;
 #========================================================
 
-#======================================================== 
-def printXYZ( matrix ):
-    for i in range( matrix[:,0].size ):
-        for j in range( matrix[0,:].size ):
-            print( matrix[i,j] );
-    return
-#=======================================================
-
-#============
-# Atom Names
-#========================================================
-name=[];
-# Position at t
-r  = np.zeros(( nb_atoms, 3 )); 
-# Positions at t-dt
-r0 = np.zeros(( nb_atoms, 3 )); 
-# velocities x,y,z
-v  = np.zeros(( nb_atoms, 3 ));
-# storing velocities 
-v_store = np.empty(( nb_atoms, 3 ));
-#========================================================
-
 #====================
 # Reading TRAJEC.xyz
 #========================================================
@@ -101,7 +106,8 @@ with open( filepath, "r" ) as fp:
     while( readXYZstep( fp, nb_atoms, r ) != False ):
         # Compute speeds using finite elements
         v = (minDist( r, r0, a, b, c ))/dt;
-        v_store = np.append( v_store, v)
+        if step < 10:
+            np.append( v_store, v);
         # Remembers last positions
         r0=np.copy( r ); 
         # Incrementing steps
