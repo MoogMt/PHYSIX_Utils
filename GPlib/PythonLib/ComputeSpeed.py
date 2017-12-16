@@ -107,12 +107,12 @@ with open( filepath, "r" ) as fp:
         # Compute speeds using finite elements
         v = (minDist( r, r0, a, b, c ))/dt;
         if step < 10:
-            np.append( v_store, v);
+            v_store = np.append( v_store, v);
         # Remembers last positions
         r0=np.copy( r ); 
         # Incrementing steps
         print(step)
         step += 1;
-print(v_store.size);
+print(v_store.size/v.size);
 #========================================================
         
