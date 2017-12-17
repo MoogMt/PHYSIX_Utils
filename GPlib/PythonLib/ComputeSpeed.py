@@ -51,7 +51,7 @@ a=9.0; b=9.0; c=9.0;
 nb_atoms = 96;
 # Step Reading parameters
 start_step = 2000;
-end_step = -1;
+end_step = 10000000;
 stride_comp = 1;
 #--------------------------------------------------------
 # Initiating variables of interest
@@ -99,6 +99,9 @@ def minDist( r, r0, a, b, c ):
     for i in range(r[:,0].size):
         for j in range( len( cell ) ):
             dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] )
+            if (dr[i,j] > 1.0 ) :
+                print("dr=");
+                print(dr[i,j])
     return dr;
 #========================================================
 
@@ -114,14 +117,18 @@ with open( filepath, "r" ) as fp:
     if readXYZstep( fp, nb_atoms, r0 ) == False :
         print("Error Reading File!")
     # Reading all other steps  
-    while( readXYZstep( fp, nb_atoms, r ) != False ):
+    while( readXYZstep( fp, nb_atoms, r ) != False & step <= end_step ):
         # Compute speeds using finite elements
         v = (minDist( r, r0, a, b, c ))/dt;
+        if np.max(v) > 1.0 :
+            print("v=");
+            print(np.max(v));
         # Storing velocities in a vector
-        v_store = np.append( v_store, v);
+        #v_store = np.append( v_store, v, 1);
         # Remembers position for next step
         r0 = np.copy( r ); 
         # Incrementing steps
+        #print(step)
         step += 1;
 #========================================================
 
