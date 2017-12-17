@@ -36,6 +36,7 @@ file = "TRAJEC_wrapped.xyz"
 filepath = os.path.join(folder,file)
 #====================================================================
 
+#=======================
 # Physical parameters
 #========================================================
 # Step
@@ -48,6 +49,13 @@ dt = timestep*5;
 a=9.0; b=9.0; c=9.0;
 # Number of atoms
 nb_atoms = 96;
+# Step Reading parameters
+start_step = 2000;
+end_step = -1;
+stride_comp = 1;
+#--------------------------------------------------------
+# Initiating variables of interest
+#--------------------------------------------------------
 # Names of atoms
 name=[];
 # Position at t
@@ -58,7 +66,6 @@ r0 = np.zeros(( nb_atoms, 3 ));
 v  = np.zeros(( nb_atoms, 3 ));
 # storing velocities 
 v_store = np.empty(( nb_atoms, 3 ));
-#========================================================
 #========================================================
 
 #==================
@@ -98,21 +105,29 @@ def minDist( r, r0, a, b, c ):
 #====================
 # Reading TRAJEC.xyz
 #========================================================
+# Due to the repetition of lots of additions it might 
+# actually be more efficient to first compute the number of 
+# steps and initiate the v_store with that amount of memory 
+# then fill it than dynamically filling it...
 with open( filepath, "r" ) as fp:
-    # Reading first step
+    # Reading first step, initiates atomic positions
     if readXYZstep( fp, nb_atoms, r0 ) == False :
         print("Error Reading File!")
     # Reading all other steps  
     while( readXYZstep( fp, nb_atoms, r ) != False ):
         # Compute speeds using finite elements
         v = (minDist( r, r0, a, b, c ))/dt;
-        if step < 10:
-            v_store = np.append( v_store, v);
-        # Remembers last positions
-        r0=np.copy( r ); 
+        # Storing velocities in a vector
+        v_store = np.append( v_store, v);
+        # Remembers position for next step
+        r0 = np.copy( r ); 
         # Incrementing steps
-        print(step)
         step += 1;
-print(v_store.size/v.size);
 #========================================================
+
+# Computing number of steps
+nb_steps = v_store.size/v.size;
+
+# DOING OPERATION ON THE VECTOR
+
         
