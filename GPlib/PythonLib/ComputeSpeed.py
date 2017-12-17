@@ -74,10 +74,10 @@ SPRINT = False;
 # Rough attempt at automating target file detection regardless of OS
 folder=""
 if platform.system() == "Windows":
-    folder = "E:\Data\CO2\AIMD\Liquid\PBE-MT\9.0\\2000K\\"
+    folder = "E:\Data\CO2\AIMD\Liquid\PBE-MT\9.8\\2000K\\"
 elif platform.system() == "Linux":
     username = os.getusername()
-    path_in_usb = "/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K"
+    path_in_usb = "/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K"
     folder = "/media/" + username + path_in_usb;
 # Targetting file
 file = "TRAJEC_wrapped.xyz"
@@ -138,7 +138,7 @@ with open( filepath, "r" ) as fp:
     while( readXYZstep( fp, nb_atoms, r ) != False & step <= end_step ):
         # Compute speeds using finite elements
         if step > start_step:
-            v = (minDist( r, r0, a, b, c )*1e-9)/(dt*1e-15);
+            v = (minDist( r, r0, a, b, c )*1e-10)/(dt*1e-15);
             # Storing velocities in a vector
             v_store[:,:,step] = v
         # Remembers position for next step
@@ -159,25 +159,29 @@ vdos=np.zeros(nb_step*2-1);
 for i in range(nb_atoms):
     for j in range(ndim):
         vdos = np.add(vdos,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
-
+    vdos=dct(vdos,norm='ortho')/3
+vdos /= nb_atoms;
+    
 c_atoms = np.arange(0,31,1)
 vdos_C=np.zeros(nb_step*2-1);
 for i in c_atoms:
     for j in range(ndim):
         vdos_C = np.add(vdos_C,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
-        
+    vdos_C=dct(vdos_C,norm='ortho')/3
+vdos_C /= c_atoms.size
+
 o_atoms = np.arange(32,95,1)
 vdos_O=np.zeros(nb_step*2-1);
 for i in o_atoms:
     for j in range(ndim):
         vdos_O = np.add(vdos_O,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
+    vdos_O=dct(vdos_O,norm='ortho')/3
+vdos_O /= o_atoms.size
+
         
 x = np.arange(0, nb_step*2-1, 1);
-plt.xlim([0,45000])
-plt.plot(x,dct(vdos))
-plt.figure();
-plt.plot(x,dct(vdos_C))
-plt.figure();
-plt.plot(x,dct(vdos_O))
-
-
+plt.plot(x*0.266852 ,np.sqrt(vdos**2))
+plt.figure()
+plt.plot(x*0.266852 ,np.sqrt(vdos_O**2))
+plt.figure()
+plt.plot(x*0.266852 ,np.sqrt(vdos_C**2))
