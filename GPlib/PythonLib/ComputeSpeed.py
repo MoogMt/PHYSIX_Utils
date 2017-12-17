@@ -5,12 +5,14 @@ Computing VDOS
 @author: CondensedOtters
 """
 
+#============================
 # Importing useful libraries
+#==================================
 import os
 import platform
 import numpy as np
-import scipy as sci
 import matplotlib.pyplot as plt
+#==================================
 
 #==================
 # XYZ files
@@ -56,10 +58,7 @@ def minDist( r, r0, a, b, c ):
     cell=[ a, b, c ];
     for i in range(r[:,0].size):
         for j in range( len( cell ) ):
-            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] )
-            if (dr[i,j] > 1.0 ) :
-                print("dr=");
-                print(dr[i,j])
+            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] );
     return dr;
 #========================================================
 
@@ -106,7 +105,7 @@ nb_atoms = 96;
 # Nb of step in the simulations
 nb_step = (int)(countXYZstep(filepath,nb_atoms));
 # Reading Step parameters
-start_step = 2000;
+start_step = 5000;
 end_step = 10000000;
 stride_comp = 1;
 #--------------------------------------------------------
@@ -138,9 +137,10 @@ with open( filepath, "r" ) as fp:
     # Reading all other steps  
     while( readXYZstep( fp, nb_atoms, r ) != False & step <= end_step ):
         # Compute speeds using finite elements
-        v = (minDist( r, r0, a, b, c ))/dt;
-        # Storing velocities in a vector
-        v_store[:,:,step] = v
+        if step > start_step:
+            v = (minDist( r, r0, a, b, c )*1e-9)/(dt*1e-15);
+            # Storing velocities in a vector
+            v_store[:,:,step] = v
         # Remembers position for next step
         r0 = np.copy( r ); 
         # Incrementing steps
@@ -160,7 +160,24 @@ for i in range(nb_atoms):
     for j in range(ndim):
         vdos = np.add(vdos,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
 
+c_atoms = np.arange(0,31,1)
+vdos_C=np.zeros(nb_step*2-1);
+for i in c_atoms:
+    for j in range(ndim):
+        vdos_C = np.add(vdos_C,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
+        
+o_atoms = np.arange(32,95,1)
+vdos_O=np.zeros(nb_step*2-1);
+for i in o_atoms:
+    for j in range(ndim):
+        vdos_O = np.add(vdos_O,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
+        
 x = np.arange(0, nb_step*2-1, 1);
 plt.xlim([0,45000])
 plt.plot(x,dct(vdos))
+plt.figure();
+plt.plot(x,dct(vdos_C))
+plt.figure();
+plt.plot(x,dct(vdos_O))
+
 
