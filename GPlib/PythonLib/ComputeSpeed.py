@@ -89,12 +89,16 @@ filepath = os.path.join(folder,file)
 #=======================
 # Physical parameters
 #========================================================
+# Number of dimension
+ndim = 3;
 # Step
 step = 0;
 # Timestep
 timestep = 0.5;
+# Sim print stride
+sim_stride = 5;
 # Timelaps
-dt = timestep*5;
+dt = timestep*sim_stride;
 # Cell
 a=9.0; b=9.0; c=9.0;
 # Number of atoms
@@ -149,7 +153,14 @@ nb_steps = v_store.size/v.size;
 
 # DOING OPERATION ON THE VECTOR
 from scipy.fftpack import fft, dct
+from scipy import signal
+    
+vdos=np.zeros(nb_step*2-1);
+for i in range(nb_atoms):
+    for j in range(ndim):
+        vdos = np.add(vdos,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
 
-plt.plot(fft(v_store[1,1,:]).real)
+x = np.arange(0, nb_step*2-1, 1);
+plt.xlim([0,45000])
+plt.plot(x,dct(vdos))
 
-        
