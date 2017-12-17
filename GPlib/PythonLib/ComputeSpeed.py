@@ -1,17 +1,67 @@
 # -*- coding: utf-8 -*-
 """
-COMPUTING SPEED
+Computing VDOS
 
 @author: CondensedOtters
-
-
 """
 
 # Importing useful libraries
 import os
 import platform
 import numpy as np
+import scipy as sci
 import matplotlib.pyplot as plt
+
+#==================
+# XYZ files
+#========================================================
+def countXYZstep( filepath_ , nb_atoms_ ):
+    count = 0; 
+    read = True;
+    with open( filepath_, "r" ) as fp:
+        while( read ): 
+            for i in range(nb_atoms+2):
+                line=fp.readline();
+                if line == "":
+                    read = False;
+                    break;
+                else: count += 1;
+    return count/(nb_atoms+2);
+def readXYZstep( file_pointer , nb_atoms , r_ ):
+    for i in range(nb_atoms+2):
+        line = file_pointer.readline();
+        line_part = (line.rstrip("\n")).split()
+        if line == "":
+            return False
+        if i >= 2:
+            for j in range(3):
+                r_[i-2,j] = line_part[j+1];
+    return True
+#========================================================
+
+#========================
+# Cell related functions
+#========================================================
+def minDir( x , x0, a ):
+    dx=x-x0;
+    if dx > a*0.5: 
+        return dx-a
+    elif dx<-a*0.5: 
+        return dx+a;
+    else: 
+        return dx;
+#--------------------------------------------------------
+def minDist( r, r0, a, b, c ):
+    dr = np.zeros(( r[:,0].size, 3 ));
+    cell=[ a, b, c ];
+    for i in range(r[:,0].size):
+        for j in range( len( cell ) ):
+            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] )
+            if (dr[i,j] > 1.0 ) :
+                print("dr=");
+                print(dr[i,j])
+    return dr;
+#========================================================
 
 # Determining P,T to target and if sprint
 #====================================================================
@@ -49,7 +99,9 @@ dt = timestep*5;
 a=9.0; b=9.0; c=9.0;
 # Number of atoms
 nb_atoms = 96;
-# Step Reading parameters
+# Nb of step in the simulations
+nb_step = (int)(countXYZstep(filepath,nb_atoms));
+# Reading Step parameters
 start_step = 2000;
 end_step = 10000000;
 stride_comp = 1;
@@ -65,44 +117,7 @@ r0 = np.zeros(( nb_atoms, 3 ));
 # velocities x,y,z
 v  = np.zeros(( nb_atoms, 3 ));
 # storing velocities 
-v_store = np.empty(( nb_atoms, 3 ));
-#========================================================
-
-#==================
-# Reading XYZ step
-#========================================================
-def readXYZstep( file_pointer , nb_atoms , r_ ):
-    for i in range(nb_atoms+2):
-        line = file_pointer.readline()
-        line_part = (line.rstrip("\n")).split()
-        if line == "":
-            return False
-        if i >= 2:
-            for j in range(3):
-                r_[i-2,j] = line_part[j+1];
-    return True
-#========================================================
-
-#========================================================
-def minDir( x , x0, a ):
-    dx=x-x0;
-    if dx > a*0.5: 
-        return dx-a
-    elif dx<-a*0.5: 
-        return dx+a;
-    else: 
-        return dx;
-#--------------------------------------------------------
-def minDist( r, r0, a, b, c ):
-    dr = np.zeros(( r[:,0].size, 3 ));
-    cell=[ a, b, c ];
-    for i in range(r[:,0].size):
-        for j in range( len( cell ) ):
-            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] )
-            if (dr[i,j] > 1.0 ) :
-                print("dr=");
-                print(dr[i,j])
-    return dr;
+v_store = np.empty(( nb_atoms, 3, nb_step ));
 #========================================================
 
 #====================
@@ -120,21 +135,21 @@ with open( filepath, "r" ) as fp:
     while( readXYZstep( fp, nb_atoms, r ) != False & step <= end_step ):
         # Compute speeds using finite elements
         v = (minDist( r, r0, a, b, c ))/dt;
-        if np.max(v) > 1.0 :
-            print("v=");
-            print(np.max(v));
         # Storing velocities in a vector
-        #v_store = np.append( v_store, v, 1);
+        v_store[:,:,step] = v
         # Remembers position for next step
         r0 = np.copy( r ); 
         # Incrementing steps
-        #print(step)
+        print(step)
         step += 1;
 #========================================================
-
+print(np.max(v_store));
 # Computing number of steps
 nb_steps = v_store.size/v.size;
 
 # DOING OPERATION ON THE VECTOR
+from scipy.fftpack import fft, dct
+
+plt.plot(fft(v_store[1,1,:]).real)
 
         
