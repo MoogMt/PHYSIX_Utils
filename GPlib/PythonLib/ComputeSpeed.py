@@ -159,7 +159,7 @@ vdos=np.zeros(nb_step*2-1);
 for i in range(nb_atoms):
     for j in range(ndim):
         vdos = np.add(vdos,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
-    vdos=dct(vdos,norm='ortho')/3
+    vdos/=3
 vdos /= nb_atoms;
     
 c_atoms = np.arange(0,31,1)
@@ -167,7 +167,7 @@ vdos_C=np.zeros(nb_step*2-1);
 for i in c_atoms:
     for j in range(ndim):
         vdos_C = np.add(vdos_C,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
-    vdos_C=dct(vdos_C,norm='ortho')/3
+    vdos_C/=3
 vdos_C /= c_atoms.size
 
 o_atoms = np.arange(32,95,1)
@@ -175,13 +175,13 @@ vdos_O=np.zeros(nb_step*2-1);
 for i in o_atoms:
     for j in range(ndim):
         vdos_O = np.add(vdos_O,signal.correlate(v_store[i,j,:],v_store[i,j,:]))
-    vdos_O=dct(vdos_O,norm='ortho')/3
+    vdos_O/=3
 vdos_O /= o_atoms.size
 
         
 x = np.arange(0, nb_step*2-1, 1);
-plt.plot(x*0.266852 ,np.sqrt(vdos**2))
+plt.plot(x*0.266852 ,np.sqrt(dct(vdos,norm='ortho')**2))
 plt.figure()
-plt.plot(x*0.266852 ,np.sqrt(vdos_O**2))
+plt.plot(x*0.266852 ,np.sqrt(dct(vdos_C,norm='ortho')**2))
 plt.figure()
-plt.plot(x*0.266852 ,np.sqrt(vdos_C**2))
+plt.plot(x*0.266852 ,np.sqrt(dct(vdos_O,norm='ortho')**2))
