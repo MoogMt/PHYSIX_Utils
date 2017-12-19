@@ -89,7 +89,7 @@ peta  = 1e15;
 # Sigmoid PLUMED function
 #===================================================================
 def sigm(x_,x0_,n_,m_):
-    return (1-(x_/x0_)**n_)/(1-(x_/x0_)**m_);
+    return (1-(x_/x0_+0.0000001)**n_)/(1-(x_/x0_+0.0000001)**m_);
 def sigMatrix(matrix_,x0_,n_,m_):
     if type( matrix_ ) == int or  type(matrix_) == float :
         return sigm(matrix_,x0_,n_,m_);
@@ -130,7 +130,7 @@ def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_ ):
     r_  = np.zeros(( nb_atoms_, 3 ));
     # Coordinances
     coord_avg_  = np.zeros( nb_step_ );
-    coord_list_ = np.zeros(( nb_atoms_, nb_step_ )); 
+    coord_list_ = np.zeros(( nb_atoms_, nb_step_-start_step )); 
     #========================================================
     
     #====================
