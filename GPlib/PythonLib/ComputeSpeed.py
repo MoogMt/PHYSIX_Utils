@@ -124,71 +124,45 @@ def computeVDOS(filepath, nb_atoms_, a , b, c, ndim, start_step, end_step, times
     for i in range(nb_atoms_):
         for j in range(ndim):
             vdos = np.add(vdos,signal.correlate(v_store[i,j,:],v_store[i,j,:],mode="same",method="fft"))
-            vdos = abs(dct(vdos/(ndim*nb_atoms_),type=2,norm="ortho"));
+    # Normalization + FFT (DCT type 2)
+    vdos = abs(dct(vdos/(ndim*nb_atoms_),type=2,norm="ortho"));
+    # Keeping only even indexes
     vdos2=np.empty([])
     for k in range(vdos.size):
         if k%2 == 0:
             vdos2 = np.append(vdos2,vdos[k])
+    # Keeping only odd indexes
     vdos3=np.empty([])
     for i in range(vdos.size):
         if i%2 != 0:
             vdos3 = np.append(vdos2,vdos[i])
-    return  nb_step-start_step, vdos2/(nb_step-start_step), vdos3/(nb_step-start_step)
+    return  nb_step-start_step, vdos/(nb_step-start_step), vdos2/(nb_step-start_step), vdos3/(nb_step-start_step)
 #========================================================
 
-""" Overly clever stuff
-# Folder parameters
-#====================================================================
-# Rough attempt at automating target file detection regardless of OS
-folder=""
-if platform.system() == "Windows":
-    folder = "E:\Data\CO2\AIMD\Liquid\PBE-MT\8.82\2500K\\"
-elif platform.system() == "Linux":
-    import getpass
-    username = getpass.getuser()
-    path_in_usb = "/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2500K"
-    folder = "/media/" + username + path_in_usb;
-# Targetting file
-file = "TRAJEC_wrapped.xyz"
-# Joining folder and file
-filepath = os.path.join(folder,file)
-#====================================================================
-"""
-
+timestep = 0.483776856
 dt=5*0.483776856
 
-# Plotting vdos
+# Computing VDOS
 #========================================================
-nbstep_882, vdos_882, vdos= computeVDOS("/media/moog/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2500K/TRAJEC.xyz", 96, 8.82, 8.82, 8.82, ndim, 2000, 1000000000, 0.483776856, 5);
-nbstep_900, vdos_900, vdos2 = computeVDOS("/media/moog/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2500K/TRAJEC.xyz",  96, 9.00, 9.00, 9.00, ndim, 2000, 1000000000, 0.483776856, 5);
-#nbstep_910, vdos_910 = computeVDOS("/media/moog/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.1/2000K/TRAJEC.xyz",  96, 9.10, 9.10, 9.10, ndim, 2000, 1000000000, 0.483776856, 5);
-nbstep_980, vdos_980, vdos3 = computeVDOS("/media/moog/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2500K/TRAJEC.xyz",  96, 9.80, 9.80, 9.80, ndim, 2000, 1000000000, 0.483776856, 5);
+nbstep_882, vdos_882, vdos_882_p , vdos_882_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC.xyz", 96, 8.82, 8.82, 8.82, ndim, 2000, 1000000000, 0.483776856, 5);
+nbstep_900, vdos_900, vdos_900_p , vdos_900_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC.xyz",  96, 9.00, 9.00, 9.00, ndim, 2000, 1000000000, 0.483776856, 5);
+nbstep_910, vdos_910, vdos_910_p , vdos_910_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.1/2000K/TRAJEC.xyz",  96, 9.10, 9.10, 9.10, ndim, 2000, 1000000000, 0.483776856, 5);
+nbstep_980, vdos_980, vdos_980_p , vdos_980_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC.xyz",  96, 9.80, 9.80, 9.80, ndim, 2000, 1000000000, 0.483776856, 5);
+
+# Plotting VDOS
 x882 = np.arange(0, vdos_882.size , 1);
 x900 = np.arange(0, vdos_900.size , 1);
-#x910 = np.arange(0, vdos_910.size , 1);
+x910 = np.arange(0, vdos_910.size , 1);
 x980 = np.arange(0, vdos_980.size , 1);
+plt.plot((x980/(nbstep_980*dt*femto))/Tera*Thz2cm,vdos_980+120000,'c.');
+plt.plot((x910/(nbstep_910*dt*femto/5))/Tera*Thz2cm,vdos_910*5+100000,'g.');
+plt.plot((x900/(nbstep_900*dt*femto))/Tera*Thz2cm,vdos_900+50000,'b.');
+plt.plot((x882/(nbstep_882*dt*femto))/Tera*Thz2cm,vdos_882,'r.');
+plt.legend(["60GPa - 2000K","50GPa - 2000K (9.1)", "50GPa - 2000K (9.0)","40GPa - 2000K"])
 plt.ylabel("VDOS (arb. u.)");
 plt.xlabel("Wavenumber (cm-1)");
-plt.xlim([0,3000]);
-plt.plot((x882/(nbstep_882*dt*femto))/Tera*Thz2cm,vdos_882+2000,'r-');
-plt.plot((x900/(nbstep_900*dt*femto))/Tera*Thz2cm,vdos_900+1000,'b-');
-#plt.plot((x910/(nbstep_910*dt*femto))/Tera*Thz2cm,vdos_910,'g.');
-plt.plot((x980/(nbstep_980*dt*femto))/Tera*Thz2cm,vdos_980,'c-');
-plt.legend(["60GPa - 2500K","50GPa - 2500K", "40GPa - 2500K"])
+plt.xlim([0,6000])
 plt.show();
 
-x882 = np.arange(0, vdos.size , 1);
-x900 = np.arange(0, vdos2.size , 1);
-#x910 = np.arange(0, vdos_910.size , 1);
-x980 = np.arange(0, vdos3.size , 1);
-plt.ylabel("VDOS (arb. u.)");
-plt.xlabel("Wavenumber (cm-1)");
-plt.xlim([0,3000]);
-plt.plot((x882/(nbstep_882*dt*femto))/Tera*Thz2cm,vdos+2000,'r-');
-plt.plot((x900/(nbstep_900*dt*femto))/Tera*Thz2cm,vdos2+1000,'b-');
-#plt.plot((x910/(nbstep_910*dt*femto))/Tera*Thz2cm,vdos_910,'g.');
-plt.plot((x980/(nbstep_980*dt*femto))/Tera*Thz2cm,vdos3,'c-');
-plt.legend(["60GPa - 2500K","50GPa - 2500K", "40GPa - 2500K"])
-plt.show();
 
 #========================================================
