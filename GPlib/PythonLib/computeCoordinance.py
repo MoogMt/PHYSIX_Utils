@@ -55,10 +55,11 @@ def minDir( x , x0, a ):
 #--------------------------------------------------------
 #--------------------------------------------------------
 def minDist( r, r0, cell):
-    if type(r) == float :
+    if np.ndim(r) == 1 :
         dr = 0;
         for j in range( len( cell ) ):
-            dr[j] = minDir( r[j], r0[j] , cell[j] );
+            dr += minDir( r[j], r0[j] , cell[j] )**2;
+        dr = np.sqrt(dr);
     else:
         dr = np.zeros(( r[:,0].size, 3 ));
         for i in range(r[:,0].size):
@@ -90,28 +91,43 @@ peta  = 1e15;
 def sigm(x_,x0_,n_,m_):
     return (1-(x_/x0_)**n_)/(1-(x_/x0_)**m_);
 def sigMatrix(matrix_,x0_,n_,m_):
-    if type( matrix_ ) == int | type(matrix_) == float :
+    if type( matrix_ ) == int or  type(matrix_) == float :
         return sigm(matrix_,x0_,n_,m_);
     else:
         sig=np.vectorize(sigm);
         return sig(matrix_,x0_,n_,m_)
 #====================================================================
 
+# Contact Matrix
+#====================================================================
+def computeContactMatrix( r_, cell_ ):
+    x0_ =  1.8; n_ = 6; m_= 36;
+    matrix_ = np.zeros((len(r_),len(r_)));
+    for i in range( len(r_) ):
+        for j in np.arange( i, len(r_), 1 ):
+            value_ = minDist( r_[i,:], r_[j,:], cell_ );
+            matrix_[i,j] = sigm( value_, x0_, n_, m_ ); 
+            matrix_[j,i] = sigm( value_, x0_, n_, m_ );
+    return matrix_;
+#====================================================================
 
-
-#===========================================================================
-def computeCoordiance(r_, cell_ ):
-    # Sigmoid parameters
-    x0_ =  1.8; n_ = 8; m_= 16;
-    return sigMatrix(computeContactMatrix(r_),x0_,n_,m_);
-#----------------------------------------------------------------------            
-def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_):
+#==============================================================================
+def computeCoordFromCM( matrix_ ):           
+    coord_vec = np.zeros(( len( matrix_ ) ));
+    for i in range( coord_vec.size ):
+        value = 0;
+        for j in range( coord_vec.size ):
+            value += matrix_[i,j];
+        coord_vec[i] = value;
+    return 
+#------------------------------------------------------------------------------
+def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_ ):
     #================
     # Init variables
     #========================================================
     step_ = 0; # Number of step of the simulation
     nb_step_ = (int)( countXYZstep( filepath_, nb_atoms_ ) ); 
-    r  = np.zeros(( nb_atoms_, 3 ));
+    r_  = np.zeros(( nb_atoms_, 3 ));
     # Coordinances
     coord_avg_  = np.zeros( nb_step_ );
     coord_list_ = np.zeros(( nb_atoms_, nb_step_ )); 
@@ -123,11 +139,12 @@ def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_):
     # Opening file
     with open( filepath_, "r" ) as fp_:
         # Reading file
-        while( readXYZstep( fp_, nb_atoms_, r ) != False & step_ <= end_step_ ):
+        while( readXYZstep( fp_, nb_atoms_, r_ ) != False & step_ <= end_step_ ):
             # Compute speeds using finite elements
             if step_ >= start_step_:
                 #DO STUFF HERE
-                coord_list_[:,step_-start_step_] = computeCoordiance(r);
+                contact_matrix_ = computeContactMatrix(r_,cell_);
+                coord_list_[:,step_-start_step_] = computeCoordFromCM( contact_matrix_ );
                 coord_avg_[step_-start_step_] = np.mean(coord_list_[:,step_-start_step_]);
             # Incrementing steps
             print(step_)
@@ -137,7 +154,11 @@ def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_):
     return coord_avg_, coord_list_;
 #====================================================================
 
+nb_atoms = 96;
+start_step = 5000;
+end_step = 10000000;
+cell = np.array([8.82,8.82,8.82])
 
-
+coord882 = computeCoord( "/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC_wrapped.xyz" , nb_atoms , start_step, end_step, cell)
 
 

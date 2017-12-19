@@ -58,7 +58,7 @@ def minDist( r, r0, a, b, c ):
     cell=[ a, b, c ];
     for i in range(r[:,0].size):
         for j in range( len( cell ) ):
-            dr[i,j] += minDir( r[i,j], r0[i,j] , cell[j] );
+            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] );
     return dr;
 #========================================================
 
