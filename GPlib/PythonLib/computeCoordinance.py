@@ -54,16 +54,15 @@ def minDir( x , x0, a ):
         return dx;
 #--------------------------------------------------------
 #--------------------------------------------------------
-def minDist( r, r0, a, b, c ):
+def minDist( r, r0, cell):
     if type(r) == float :
         dr = 0;
         for j in range( len( cell ) ):
-            dr[j] = minDir( r[i,j], r0[i,j] , cell[j] );
+            dr[j] = minDir( r[j], r0[j] , cell[j] );
     else:
         dr = np.zeros(( r[:,0].size, 3 ));
-        cell=[ a, b, c ];
         for i in range(r[:,0].size):
-            for j in range( len( cell ) ):
+            for j in range( len( cell )-3 ):
                 dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] );
     return dr;
 #========================================================
@@ -85,21 +84,26 @@ tera  = 1e12
 peta  = 1e15;
 #====================================================================
 
+#===========================
 # Sigmoid PLUMED function
 #===================================================================
-def sigmRational(x_,x0_,n_,m_):
+def sigm(x_,x0_,n_,m_):
     return (1-(x_/x0_)**n_)/(1-(x_/x0_)**m_);
+def sigMatrix(matrix_,x0_,n_,m_):
+    if type( matrix_ ) == int | type(matrix_) == float :
+        return sigm(matrix_,x0_,n_,m_);
+    else:
+        sig=np.vectorize(sigm);
+        return sig(matrix_,x0_,n_,m_)
 #====================================================================
+
+
 
 #===========================================================================
 def computeCoordiance(r_, cell_ ):
-    coord_i = np.zeros( )
-    x0 =  1.8
-    n = 8; m= 16;
-    for i in range(r_.size):
-        for j in range(r_.size):
-            coord_i[i] += sigmRational(distMin(), x0, n , m )
-                
+    # Sigmoid parameters
+    x0_ =  1.8; n_ = 8; m_= 16;
+    return sigMatrix(computeContactMatrix(r_),x0_,n_,m_);
 #----------------------------------------------------------------------            
 def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_):
     #================

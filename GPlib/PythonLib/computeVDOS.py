@@ -58,7 +58,7 @@ def minDist( r, r0, a, b, c ):
     cell=[ a, b, c ];
     for i in range(r[:,0].size):
         for j in range( len( cell ) ):
-            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] );
+            dr[i,j] += minDir( r[i,j], r0[i,j] , cell[j] );
     return dr;
 #========================================================
 
@@ -147,10 +147,10 @@ a_882 = 8.82; a_900 = 9.00; a_910 = 9.10; a_980 = 9.80 # Cell parameters
 #=======================
 # Computing VDOS vs P
 #========================================================
-nbstep_882, vdos_882, vdos_882_p , vdos_882_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_900, vdos_900, vdos_900_p , vdos_900_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC.xyz",  nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
-nbstep_910, vdos_910, vdos_910_p , vdos_910_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.1/2000K/TRAJEC.xyz",  nb_atoms, a_910, a_910, a_910, ndim, start_step, end_step, dt );
-nbstep_980, vdos_980, vdos_980_p , vdos_980_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC.xyz",  nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
+nbstep_882, vdos_882, vdos_882_p , vdos_882_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
+nbstep_900, vdos_900, vdos_900_p , vdos_900_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC_wrapped.xyz",  nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
+nbstep_910, vdos_910, vdos_910_p , vdos_910_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.1/2000K/TRAJEC_wrapped.xyz",  nb_atoms, a_910, a_910, a_910, ndim, start_step, end_step, dt );
+nbstep_980, vdos_980, vdos_980_p , vdos_980_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC_wrapped.xyz",  nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
 #========================================================
 
 #====================
@@ -175,9 +175,9 @@ plt.show();
 #===================================
 # Computing VDOS vs T at molecular
 #========================================================
-nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2500K/TRAJEC.xyz",  nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/3000K/TRAJEC.xyz",  nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
+nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
+nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2500K/TRAJEC_wrapped.xyz", nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
+nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/3000K/TRAJEC_wrapped.xyz", nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
 #========================================================
 
 #=================================
@@ -199,9 +199,9 @@ plt.show();
 #===================================
 # Computing VDOS vs T at 50GPa
 #========================================================
-nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2500K/TRAJEC.xyz",  nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/TRAJEC.xyz",  nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
+nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
+nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2500K/TRAJEC_wrapped.xyz", nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
+nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/TRAJEC_wrapped.xyz", nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
 #========================================================
 
 #=================================
@@ -223,9 +223,9 @@ plt.show();
 #===================================
 # Computing VDOS vs T at 60GPa
 #========================================================
-nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2500K/TRAJEC.xyz",  nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/TRAJEC.xyz",  nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
+nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
+nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2500K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
+nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
 #========================================================
 
 #=================================
@@ -236,7 +236,7 @@ x2500 = np.arange(0, vdos_2500_p.size , 1);
 x3000 = np.arange(0, vdos_3000_p.size , 1);
 plt.plot((x2000/(nbstep_2000*dt*femto))/Tera*Thz2cm,vdos_2000_p,'c.');
 plt.plot((x2500/(nbstep_2500*dt*femto))/Tera*Thz2cm,vdos_2500_p+50000,'g.');
-plt.plot((x3000/(nbstep_3000*dt*femto))/Tera*Thz2cm,vdos_3000_p+120000,'b.');
+plt.plot((x3000/(nbstep_3000*dt*femto))/Tera*Thz2cm,vdos_3000_p+100000,'b.');
 plt.legend(["60GPa - 2000K","60GPa - 2500K", "60GPa - 3000K"])
 plt.ylabel("VDOS (arb. u.)");
 plt.xlabel("Wavenumber (cm-1)");
