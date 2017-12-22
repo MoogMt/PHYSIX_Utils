@@ -9,10 +9,11 @@ Computing VDOS
 # Importing useful libraries
 #==================================
 import numpy as np
+import numba as nb
 import matplotlib.pyplot as plt
-from scipy.fftpack import dct
-from scipy import signal
 #==================================
+
+
 
 #==================
 # XYZ files
@@ -44,28 +45,28 @@ def readXYZstep( file_pointer , nb_atoms , r_ ):
 #========================
 # Cell related functions
 #========================================================
-def minDir( x , x0, a ):
-    dx=x-x0;
-    if dx > a*0.5: 
-        return dx-a
-    elif dx<-a*0.5: 
-        return dx+a;
+def minDir( x_ , x0_, a_ ):
+    dx_=x_-x0_;
+    if dx_ > a_*0.5: 
+        return dx_-a_
+    elif dx_<-a_*0.5: 
+        return dx_+a_;
     else: 
-        return dx;
+        return dx_;
 #--------------------------------------------------------
 #--------------------------------------------------------
-def minDist( r, r0, cell):
-    if np.ndim(r) == 1 :
-        dr = 0;
-        for j in range( len( cell ) ):
-            dr += minDir( r[j], r0[j] , cell[j] )**2;
-        dr = np.sqrt(dr);
+def minDist( r_, r0_, cell_):
+    if np.ndim(r_) == 1 :
+        dr_ = 0;
+        for j in range( len( cell_ ) - 3 ):
+            dr_ += minDir( r_[j], r0_[j] , cell_[j] )**2;
+        dr_ = np.sqrt(dr_);
     else:
-        dr = np.zeros(( r[:,0].size, 3 ));
-        for i in range(r[:,0].size):
-            for j in range( len( cell )-3 ):
-                dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] );
-    return dr;
+        dr_ = np.zeros(( r_[:,0].size, 3 ));
+        for i in range(r_[:,0].size):
+            for j in range( len( cell_ )-3 ):
+                dr_[i,j] = minDir( r_[i,j], r0_[i,j] , cell_[j] );
+    return dr_;
 #========================================================
 
 #=======================
@@ -104,7 +105,7 @@ def computeContactMatrix( r_, cell_ ):
     x0_ =  1.8; n_ = 6; m_= 36;
     matrix_ = np.zeros((len(r_),len(r_)));
     for i in range( len(r_) ):
-        for j in np.arange( i, len(r_), 1 ):
+        for j in np.arange( i+1, len(r_), 1 ):
             value_ = minDist( r_[i,:], r_[j,:], cell_ );
             matrix_[i,j] = sigm( value_, x0_, n_, m_ ); 
             matrix_[j,i] = sigm( value_, x0_, n_, m_ );
@@ -113,13 +114,13 @@ def computeContactMatrix( r_, cell_ ):
 
 #==============================================================================
 def computeCoordFromCM( matrix_ ):           
-    coord_vec = np.zeros(( len( matrix_ ) ));
-    for i in range( coord_vec.size ):
+    coord_vec_ = np.zeros(( len( matrix_ ) ));
+    for i in range( coord_vec_.size ):
         value = 0;
-        for j in range( coord_vec.size ):
+        for j in range( coord_vec_.size ):
             value += matrix_[i,j];
-        coord_vec[i] = value;
-    return 
+        coord_vec_[i] = value;
+    return coord_vec_
 #------------------------------------------------------------------------------
 def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_ ):
     #================
@@ -129,8 +130,7 @@ def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_ ):
     nb_step_ = (int)( countXYZstep( filepath_, nb_atoms_ ) ); 
     r_  = np.zeros(( nb_atoms_, 3 ));
     # Coordinances
-    coord_avg_  = np.zeros( nb_step_ );
-    coord_list_ = np.zeros(( nb_atoms_, nb_step_-start_step )); 
+    coord_list_ = np.zeros(( nb_atoms_, nb_step_- start_step_ )); 
     #========================================================
     
     #====================
@@ -141,24 +141,52 @@ def computeCoord( filepath_ , nb_atoms_ , start_step_, end_step_, cell_ ):
         # Reading file
         while( readXYZstep( fp_, nb_atoms_, r_ ) != False & step_ <= end_step_ ):
             # Compute speeds using finite elements
-            if step_ >= start_step_:
-                #DO STUFF HERE
+            if step_ >= start_step_ :
                 contact_matrix_ = computeContactMatrix(r_,cell_);
-                coord_list_[:,step_-start_step_] = computeCoordFromCM( contact_matrix_ );
-                coord_avg_[step_-start_step_] = np.mean(coord_list_[:,step_-start_step_]);
+                coord_list_[:,step_-start_step_] = computeCoordFromCM( contact_matrix_ ); 
             # Incrementing steps
             print(step_)
             step_ += 1;
     #========================================================
     
-    return coord_avg_, coord_list_;
+    return coord_list_;
 #====================================================================
 
+#-----------------
+# Local paramters
+#----------------------------------------------
 nb_atoms = 96;
 start_step = 5000;
-end_step = 10000000;
-cell = np.array([8.82,8.82,8.82])
+end_step = 100000000;
+sim_stride = 5;
+sim_dt = 0.00048;
+dt = sim_stride*sim_dt;
+#----------------------------------------------
+# Cells
+cell882 = np.array([8.82,8.82,8.82,90,90,90]);
+cell900 = np.array([9,9,9,90,90,90]);
+cell980 = np.array([9.8,9.8,9.8,90,90,90]);
+#----------------------------------------------
 
-coord882 = computeCoord( "/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC_wrapped.xyz" , nb_atoms , start_step, end_step, cell)
+#------------------------
+# Computing coordinance
+#----------------------------------------------
+print("Now Dealing with 8.82 - 2000K");
+coord_list_882 = computeCoord( "/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC_wrapped.xyz" , nb_atoms , start_step, end_step, cell882)
+print("Now Dealing with 9.00 - 2000K");
+coord_list_900 = computeCoord( "/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC_wrapped.xyz" , nb_atoms , start_step, end_step, cell900)
+print("Now Dealing with 9.80 - 2000K");
+coord_list_980 = computeCoord( "/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC_wrapped.xyz" , nb_atoms , start_step, end_step, cell980)
+#----------------------------------------------
 
+coord_total_882 = coord_list_882.reshape(coord_list_882[:,:].size)
+coord_total_900 = coord_list_900.reshape(coord_list_900[:,:].size)
+coord_total_980 = coord_list_980.reshape(coord_list_980[:,:].size)
 
+hist882 = np.histogram(coord_total_882,bins=200,normed=True)[1]
+hist900 = np.histogram(coord_total_900,bins=200,normed=True)[1]
+hist980 = np.histogram(coord_total_980,bins=200,normed=True)[1]
+
+plt.hist(hist882)
+plt.hist(hist900)
+plt.hist(hist980)

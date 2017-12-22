@@ -44,29 +44,28 @@ def readXYZstep( file_pointer , nb_atoms , r_ ):
 #========================
 # Cell related functions
 #========================================================
-def minDir( x , x0, a ):
-    dx=x-x0;
-    if dx > a*0.5: 
-        return dx-a
-    elif dx<-a*0.5: 
-        return dx+a;
+def minDir( x_ , x0_, a_ ):
+    dx_ = x_ - x0_;
+    if dx_ > a_*0.5: 
+        return dx_-a_
+    elif dx_< - a_*0.5: 
+        return dx_ + a_;
     else: 
-        return dx;
-#--------------------------------------------------------
-def minDist( r, r0, a, b, c ):
-    dr = np.zeros(( r[:,0].size, 3 ));
-    cell=[ a, b, c ];
-    for i in range(r[:,0].size):
-        for j in range( len( cell ) ):
-            dr[i,j] = minDir( r[i,j], r0[i,j] , cell[j] );
-    return dr;
+        return dx_;
+#========================================================
+        
+#========================================================
+def addVector( r_, r0_ ):
+    dr_ = np.zeros(( r_[:,0].size, 3 ));
+    for i in range(r_[:,0].size):
+        for j in range( 3 ):
+            dr_[i,j] = r_[i,j] + r0_[i,j];
+    return dr_;
 #========================================================
 
 #=======================
 # Physical parameters
 #========================================================
-# Number of dimension
-ndim = 3;
 femto = 1e-15;
 Tera = 1e12
 Thz2cm = 100/2.99792;
@@ -74,7 +73,7 @@ angstrom = 1e-10;
 #====================================================================
 
 #===================================================================
-def computeVDOS(filepath_, nb_atoms_, a_ , b_, c_, ndim_, start_step_, end_step_, dt_ ):
+def computeVDOS(filepath_, nb_atoms_, start_step_, end_step_, dt_ ):
     # Step
     step_ = 0;
     # Nb of step in the simulations
@@ -100,7 +99,7 @@ def computeVDOS(filepath_, nb_atoms_, a_ , b_, c_, ndim_, start_step_, end_step_
         while( readXYZstep( fp, nb_atoms_, r ) != False & step_ <= end_step_ ):
             # Compute speeds using finite elements
             if step_ >= start_step_:
-                v = minDist( r, r0, a_, b_, c_ )/dt_*angstrom/femto;
+                v = addVector( r, -r0 )/dt_*angstrom/femto;
                 # Storing velocities in a vector
                 v_store[:,:,step_-start_step_] = v
             # Remembers position for next step
@@ -115,21 +114,11 @@ def computeVDOS(filepath_, nb_atoms_, a_ , b_, c_, ndim_, start_step_, end_step_
     #========================================================
     vdos_=np.zeros((nb_step_-start_step_-1));
     for i in range(nb_atoms_):
-        for j in range(ndim_):
-            vdos_ = np.add(vdos_,signal.correlate(v_store[i,j,:],v_store[i,j,:],mode="same",method="fft"))
+        v_ = v_store[i,0,0]*v_store[i,0,:]+v_store[i,1,0]*v_store[i,1,:]+v_store[i,2,0]*v_store[i,2,:];
+        vdos_ = np.add(vdos_,signal.correlate(v_,v_,mode="same",method="fft"))
     # Normalization + FFT (DCT type 2)
-    vdos_ = abs(dct(vdos_/(ndim_*nb_atoms_),type=2,norm="ortho"));
-    # Keeping only even indexes
-    vdos_e_=np.empty([])
-    for k in range(vdos_.size):
-        if k%2 == 0:
-            vdos_e_ = np.append(vdos_e_,vdos_[k])
-    # Keeping only odd indexes
-    vdos_o_=np.empty([])
-    for i in range(vdos_.size):
-        if i%2 != 0:
-            vdos_o_ = np.append(vdos_o_,vdos_[i])
-    return  nb_step_-start_step_, vdos_/(nb_step_-start_step_), vdos_e_/(nb_step_-start_step_), vdos_o_/(nb_step_-start_step_)
+    vdos_ = abs(dct(vdos_/(nb_atoms_),type=2,norm="ortho"));
+    return  nb_step_-start_step_, vdos_
 #========================================================
     
 #========================
@@ -147,23 +136,23 @@ a_882 = 8.82; a_900 = 9.00; a_910 = 9.10; a_980 = 9.80 # Cell parameters
 #=======================
 # Computing VDOS vs P
 #========================================================
-nbstep_882, vdos_882, vdos_882_p , vdos_882_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_900, vdos_900, vdos_900_p , vdos_900_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC_wrapped.xyz",  nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
-nbstep_910, vdos_910, vdos_910_p , vdos_910_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.1/2000K/TRAJEC_wrapped.xyz",  nb_atoms, a_910, a_910, a_910, ndim, start_step, end_step, dt );
-nbstep_980, vdos_980, vdos_980_p , vdos_980_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC_wrapped.xyz",  nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
+nbstep_882, vdos_882 = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC.xyz", nb_atoms, start_step, end_step, dt );
+nbstep_900, vdos_900 = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC.xyz",  nb_atoms, start_step, end_step, dt );
+nbstep_910, vdos_910 = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.1/2000K/TRAJEC.xyz",  nb_atoms, start_step, end_step, dt );
+nbstep_980, vdos_980 = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC.xyz",  nb_atoms, start_step, end_step, dt );
 #========================================================
 
 #====================
 # Plotting VDOS vs P
 #========================================================
-x882 = np.arange(0, vdos_882_p.size , 1);
-x900 = np.arange(0, vdos_900_p.size , 1);
-x910 = np.arange(0, vdos_910_p.size , 1);
-x980 = np.arange(0, vdos_980_p.size , 1);
-plt.plot((x980/(nbstep_980*dt*femto))/Tera*Thz2cm,vdos_980_p+140000,'c.');
-plt.plot((x910/(nbstep_910*dt*femto/5))/Tera*Thz2cm,vdos_910_p*5+100000,'g.');
-plt.plot((x900/(nbstep_900*dt*femto))/Tera*Thz2cm,vdos_900_p+50000,'b.');
-plt.plot((x882/(nbstep_882*dt*femto))/Tera*Thz2cm,vdos_882_p,'r.');
+x882 = np.arange(0, vdos_882.size , 1);
+x900 = np.arange(0, vdos_900.size , 1);
+x910 = np.arange(0, vdos_910.size , 1);
+x980 = np.arange(0, vdos_980.size , 1);
+plt.plot((x980/(nbstep_980*dt*femto))/2/Tera*Thz2cm,vdos_980+140000,'c.');
+plt.plot((x910/(nbstep_910*dt*femto))/10/Tera*Thz2cm,vdos_910*5+100000,'g.');
+plt.plot((x900/(nbstep_900*dt*femto))/2/Tera*Thz2cm,vdos_900+50000,'b.');
+plt.plot((x882/(nbstep_882*dt*femto))/2/Tera*Thz2cm,vdos_882,'r.');
 plt.legend(["40GPa - 2000K","50GPa - 2000K (9.1)", "50GPa - 2000K (9.0)","60GPa - 2000K"])
 plt.ylabel("VDOS (arb. u.)");
 plt.xlabel("Wavenumber (cm-1)");
@@ -171,75 +160,3 @@ plt.xlim([0,3000])
 plt.show();
 #========================================================
 
-
-#===================================
-# Computing VDOS vs T at molecular
-#========================================================
-nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
-nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/2500K/TRAJEC_wrapped.xyz", nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
-nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.8/3000K/TRAJEC_wrapped.xyz", nb_atoms, a_980, a_980, a_980, ndim, start_step, end_step, dt );
-#========================================================
-
-#=================================
-# Plotting VDOS vs Tat molecular 
-#========================================================
-x2000 = np.arange(0, vdos_2000_p.size , 1);
-x2500 = np.arange(0, vdos_2500_p.size , 1);
-x3000 = np.arange(0, vdos_3000_p.size , 1);
-plt.plot((x2000/(nbstep_2000*dt*femto))/Tera*Thz2cm,vdos_2000_p,'c.');
-plt.plot((x2500/(nbstep_2500*dt*femto))/Tera*Thz2cm,vdos_2500_p+200000,'g.');
-plt.plot((x3000/(nbstep_3000*dt*femto))/Tera*Thz2cm,vdos_3000_p+400000,'b.');
-plt.legend(["30GPa - 2000K","30GPa - 2500K", "30GPa - 3000K"])
-plt.ylabel("VDOS (arb. u.)");
-plt.xlabel("Wavenumber (cm-1)");
-plt.xlim([0,3000])
-plt.show();
-#========================================================
-
-#===================================
-# Computing VDOS vs T at 50GPa
-#========================================================
-nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
-nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/2500K/TRAJEC_wrapped.xyz", nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
-nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/TRAJEC_wrapped.xyz", nb_atoms, a_900, a_900, a_900, ndim, start_step, end_step, dt );
-#========================================================
-
-#=================================
-# Plotting VDOS vs T at 50GPa 
-#========================================================
-x2000 = np.arange(0, vdos_2000_p.size , 1);
-x2500 = np.arange(0, vdos_2500_p.size , 1);
-x3000 = np.arange(0, vdos_3000_p.size , 1);
-plt.plot((x2000/(nbstep_2000*dt*femto))/Tera*Thz2cm,vdos_2000_p,'c.');
-plt.plot((x2500/(nbstep_2500*dt*femto))/Tera*Thz2cm,vdos_2500_p+50000,'g.');
-plt.plot((x3000/(nbstep_3000*dt*femto))/Tera*Thz2cm,vdos_3000_p+120000,'b.');
-plt.legend(["50GPa - 2000K","50GPa - 2500K", "50GPa - 3000K"])
-plt.ylabel("VDOS (arb. u.)");
-plt.xlabel("Wavenumber (cm-1)");
-plt.xlim([0,3000])
-plt.show();
-#========================================================
-
-#===================================
-# Computing VDOS vs T at 60GPa
-#========================================================
-nbstep_2000, vdos_2000, vdos_2000_p , vdos_2000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2000K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_2500, vdos_2500, vdos_2500_p , vdos_2500_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/2500K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-nbstep_3000, vdos_3000, vdos_3000_p , vdos_3000_i = computeVDOS("/media/moogmt/KINGSTON/Data/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/TRAJEC_wrapped.xyz", nb_atoms, a_882, a_882, a_882, ndim, start_step, end_step, dt );
-#========================================================
-
-#=================================
-# Plotting VDOS vs T at 60GPa 
-#========================================================
-x2000 = np.arange(0, vdos_2000_p.size , 1);
-x2500 = np.arange(0, vdos_2500_p.size , 1);
-x3000 = np.arange(0, vdos_3000_p.size , 1);
-plt.plot((x2000/(nbstep_2000*dt*femto))/Tera*Thz2cm,vdos_2000_p,'c.');
-plt.plot((x2500/(nbstep_2500*dt*femto))/Tera*Thz2cm,vdos_2500_p+50000,'g.');
-plt.plot((x3000/(nbstep_3000*dt*femto))/Tera*Thz2cm,vdos_3000_p+100000,'b.');
-plt.legend(["60GPa - 2000K","60GPa - 2500K", "60GPa - 3000K"])
-plt.ylabel("VDOS (arb. u.)");
-plt.xlabel("Wavenumber (cm-1)");
-plt.xlim([0,3000])
-plt.show();
-#========================================================

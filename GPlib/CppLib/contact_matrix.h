@@ -52,6 +52,8 @@ ContactMatrix makeContactMatrix ( AtomList & atom_list, const Cell cell , const 
 ContactMatrix makeContactMatrixDistance ( AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type );
 // Connections - modifies the cm
 void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
+// SoftConnection
+ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , int n, int m , double r0);
 // Distances - modifies the cm
 void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
 // Distances and Connection - modifies the contact matrices

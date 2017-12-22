@@ -70,6 +70,30 @@ ContactMatrix makeContactMatrixDistance ( AtomList & atom_list , const Cell cell
   return { nb_atoms, lut_type, matrix };
 }
 //--------------------------------------------------------------------------------------
+ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , int n, int m , double r0)
+// Constructs soft contact matrix
+{
+  // Determines the number of atoms
+  int nb_atoms = atom_list.x.size();
+
+  // Initialize contact matrix with 0s
+  std::vector<double> matrix; matrix.assign(nb_atoms*nb_atoms,0.);
+
+  // Loop over all pairs of atoms
+  for ( int i=0 ; i < nb_atoms-1 ; i++ )
+    {
+      for ( int j=i+1 ; j < nb_atoms ; j++ )
+	{
+	  double dist = sigmoidPlumed(distdistanceAtomsSq( atom_list , i , j , cell),r0,n,m);
+	  matrix[i*nb_atoms+j] = dist;
+	  matrix[j*nb_atoms+i] = dist; 
+	}
+    }
+
+  // Sending results
+  return { nb_atoms, lut_type, matrix };
+}
+//--------------------------------------------------------------------------------------
 void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on )
 // Constructs the full contact matrix
 {

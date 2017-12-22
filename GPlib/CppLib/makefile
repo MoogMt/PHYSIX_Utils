@@ -13,7 +13,8 @@ OBJwrap = wrap.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram
 OBJcomp = compress.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJmolid = mol_id.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJcHist = computeHist.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
-OBJhistangles = hist_angles.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 									
+OBJhistangles = hist_angles.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+OBJcoord = softCoord.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 									
 
 %.o: %.c $(DEPS)
 	$(CPP) -c -o $@ $< $(CFLAGS)
@@ -39,6 +40,8 @@ molid: $(OBJmolid)
 hist_p: $(OBJcHist)
 	$(CPP) -o $@ $^ $(CFLAGS)
 hist_angles: $(OBJhistangles)
+	$(CPP) -o $@ $^ $(CFLAGS)
+coord: $(OBJcoord)
 	$(CPP) -o $@ $^ $(CFLAGS)
 
 clean:

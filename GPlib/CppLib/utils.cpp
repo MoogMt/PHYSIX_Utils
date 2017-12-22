@@ -78,6 +78,15 @@ double roundUp( double number )
 }
 //==========================================================
 
+//================
+// SIGMOID PLUMED
+//==========================================================
+double sigmoidPlumed( double r, double r0, int n, int m )
+{
+  return (1-pow((r/r0),n)+0.0000000001)/(1-pow(r/r0,m)+0.0000000001)
+}
+//==========================================================
+
 //=========
 // AVERAGE
 //==========================================================
@@ -322,6 +331,16 @@ double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vec
   std::vector<double> normal = crossProduct( vector1, vector2 );
   std::vector<double> vector = difference( point_plan , point_outside  );
   return abs(scalarProduct( normal , vector ) ) / norm( normal );
+}
+//-----------------------------------------------------------------------
+double cumSum( std::vector<double> vector )
+{
+  sum = 0;
+  for ( int i=0; i < vector.size() ; i++ )
+    {
+      sum += vector[i]
+    }
+  return sum;
 }
 //=================================================================
 
