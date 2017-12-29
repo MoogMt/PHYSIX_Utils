@@ -70,7 +70,7 @@ ContactMatrix makeContactMatrixDistance ( AtomList & atom_list , const Cell cell
   return { nb_atoms, lut_type, matrix };
 }
 //--------------------------------------------------------------------------------------
-ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , int n, int m , double r0)
+ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , double r0 , int n, int m )
 // Constructs soft contact matrix
 {
   // Determines the number of atoms
@@ -84,7 +84,7 @@ ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , c
     {
       for ( int j=i+1 ; j < nb_atoms ; j++ )
 	{
-	  double dist = sigmoidPlumed(distdistanceAtomsSq( atom_list , i , j , cell),r0,n,m);
+	  double dist = sigmoidPlumed( sqrt(distanceAtomsSq( atom_list , i , j , cell)) ,r0,n,m);
 	  matrix[i*nb_atoms+j] = dist;
 	  matrix[j*nb_atoms+i] = dist; 
 	}

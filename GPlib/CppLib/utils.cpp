@@ -83,7 +83,7 @@ double roundUp( double number )
 //==========================================================
 double sigmoidPlumed( double r, double r0, int n, int m )
 {
-  return (1-pow((r/r0),n)+0.0000000001)/(1-pow(r/r0,m)+0.0000000001)
+  return (1-pow((r/r0),n)+0.0000000001)/(1-pow(r/r0,m)+0.0000000001);
 }
 //==========================================================
 
@@ -335,10 +335,10 @@ double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vec
 //-----------------------------------------------------------------------
 double cumSum( std::vector<double> vector )
 {
-  sum = 0;
+  double sum = 0;
   for ( int i=0; i < vector.size() ; i++ )
     {
-      sum += vector[i]
+      sum += vector[i];
     }
   return sum;
 }

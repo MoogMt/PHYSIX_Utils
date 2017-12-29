@@ -24,7 +24,7 @@ double min(std::vector<double> vector);
 //---------------------------------
 int max( int int1, int int2 );
 double max ( double real1, double real2 );
-double max(std::vector<double> vector);
+double max( std::vector<double> vector );
 //---------------------------------
 // ROUNDING
 //---------------------------------

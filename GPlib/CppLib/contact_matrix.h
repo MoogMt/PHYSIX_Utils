@@ -53,7 +53,7 @@ ContactMatrix makeContactMatrixDistance ( AtomList & atom_list, const Cell cell 
 // Connections - modifies the cm
 void makeContactMatrix ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
 // SoftConnection
-ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , int n, int m , double r0);
+ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_type , double r0 , int n, int m);
 // Distances - modifies the cm
 void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
 // Distances and Connection - modifies the contact matrices
@@ -116,6 +116,7 @@ int getAtomNeighboursNb( const Contact_Matrix & cm , const int atom_index , cons
 std::vector<int> getAtomsNeighboursNb( const Contact_Matrix & cm , const std::vector<int> atom_index_list , const double cut_off_radius );
 std::vector<int> getTypeNeighboursNb( const Contact_Matrix & cm , const std::string type , const double cut_off_radius ) ;
 double getTypeCoordinance( const Contact_Matrix & cm , const std::string type , const double cut_off_radius );
+
 //==========================================================================================
 
 //====================
