@@ -102,7 +102,7 @@ int main( void )
     {
       if ( step % comp_step == 0 && step >= start_step && step <= end_step )
 	{
-	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 1.8 , 10 , 40 );
+	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 2 , 6 , 60 );
 	  if ( step == start_step )
 	    {
 	      atom_indexesC = cm.lut_list.types[0].atom_index;;
@@ -135,7 +135,7 @@ int main( void )
   // MAKING HISTOGRAMS
   //----------------------------------------------------
   int nb_box = 200;
-  std::cout << "Making histograms: This can take a while...."
+  std::cout << "Making histograms: This can take a while...." << std::endl;
   writeHistogram( matrixC_out , normalizeHistogram( makeRegularHistogram( coord_C , min( coord_C ) , max( coord_C ) , nb_box ) ) );
   writeHistogram( matrixO_out , normalizeHistogram( makeRegularHistogram( coord_O , min( coord_O ) , max( coord_O ) , nb_box ) ) );
   writeHistogram( matrixAll_out , normalizeHistogram( makeRegularHistogram( coord_total , min( coord_total ) , max( coord_total ) , nb_box ) ) );
