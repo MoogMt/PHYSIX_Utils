@@ -3,13 +3,10 @@
 Repository for all usefull scripts and codes for the PHYSIX team of IMPMC
 
 Contains:
-- GPlib: A small C++ library that can do most of the data analysis for most codes used in molecular dynamics, plus a few other AI calculations
-- LAMMPS: Set of codes (Fortran, Julia, Bash) that were used to do specific pre/post-processing for simulations with LAMMPS
-- Gromacs: Set of codes (Fortran & Bash) that were used to do specific pre/post-processing for simulations with GROMACS
-- QE : Same thing as above for Quantum Espresso, also most of it is in Julia.
-- Map : Set of codes to do PIV-based maps (PIV: Permutation Invariant Vector)
+- GPlib: Set of functions or bits of codes in several languages (C++,Fortran,Julia,Python) that are used to build the other codes that are in the repository. Should be used to write scripts in order to avoid dealing with software-specific format and not rewrite already written code.
+- LAMMPS, GROMACS, QE, CPMD, PLUMED: Scripts that works as is in various languages (C++,Julia) allowing to do post-processing or input generation for the software in question.
 
-This project is very much ongoing...
+This project is its infancy, any input, correction or comment is welcome. 
 
 Current participants:
 - Fabio Pietrucci, Assistant Professor
