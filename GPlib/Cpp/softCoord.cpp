@@ -108,7 +108,6 @@ int main( void )
 	      atom_indexesC = cm.lut_list.types[0].atom_index;;
 	      atom_indexesO = cm.lut_list.types[1].atom_index;
 	    }
-
 	  matrixAll_stock << step << " ";
 	  for ( int i = 0 ; i < atom_indexesC.size() ; i++ )
 	    {

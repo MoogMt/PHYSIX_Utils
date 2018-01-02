@@ -119,15 +119,13 @@ int main( void )
   //----------------------------------------------------
   while( readStepXYZfast( input , atom_list , lut_list, true, true ) )
     {
-      // Calculating indexes
-      if ( step == start_step )
-	{
-	  makeContactMatrixDistance( cm , atom_list, cell , cut_off , lut_list );
-	  atom_indexesC = cm.lut_list.types[0].atom_index;
-	  atom_indexesO = cm.lut_list.types[1].atom_index;
-	}
       if ( step % comp_step == 0 && step >= start_step && step <= end_step )
 	{
+	  if ( step == start_step )
+	    {
+	      atom_indexesC = getSpecieIndex( cm, "C" );
+	      atom_indexesO = getSpecieIndex( cm, "O" );
+	    }
 	  makeContactMatrixDistance( cm , atom_list, cell , cut_off , lut_list );
 	  appendVector( CC1 , getNNearest( cm , 1 , atom_indexesC , atom_indexesC ) );
 	  appendVector( CC2 , getNNearest( cm , 2 , atom_indexesC , atom_indexesC ) );

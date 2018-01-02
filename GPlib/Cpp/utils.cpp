@@ -353,6 +353,35 @@ double it2real (  std::istream_iterator<std::string> iterator )
 }
 //=================================================================
 
+//====================================
+// COMPUTING AUTOCORRELATION FUNCTION
+//=================================================================
+std::vector<double> autocorrelation( const std::vector<double> & in )
+{
+  std::vector<double> out;
+  for ( int i=0 ; in.size() ; i++ )
+    {
+      for ( int j=0 ; in.size() ; j++ )
+	{	
+	  out.push_back( in[j]*in[j-i] );
+	}
+    }
+  return out;
+}
+std::vector<double> autocorrelation( const std::vector<double> & in, int stride )
+{
+  std::vector<double> out;
+  for ( int i=0 ; in.size() ; i ++ )
+    {
+      for ( int j=0 ; in.size() ; j+=stride )
+	{	
+	  out.push_back( in[j]*in[j-i] );
+	}
+    }
+  return out;
+}
+//=================================================================
+
 //=======
 // ARRAY
 //======================================================

@@ -254,6 +254,27 @@ ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::vect
 }
 //=================================================================================================
 
+//============
+// GET SPECIE
+//==================================================
+std::vector<int> getSpecieIndex( const ContactMatrix & cm, std::string specie )
+{
+  std::vector<int> index;
+  for ( int i=0; i < cm.lut_list.type_name.size() ; i++ )
+    {
+      if( cm.lut_list.type_name[i] == specie )
+	{
+	  index = cm.lut_list.types[i].atom_index;
+	}
+    }
+  if ( index.size() == 0 )
+    {
+      std::cout << "Chemical specie " << specie << " was not found in the box." << std::endl; 
+    }
+  return index;
+}
+//==================================================
+
 //===========
 // CONNECTED
 //==================================================

@@ -18,7 +18,7 @@
 
 //================
 // CONTACT MATRIX
-//====================================================================
+//===================================================================================================================
 // Restricted Matrix
 //--------------------------------------------------------
 struct Contact_Matrix
@@ -35,11 +35,11 @@ struct ContactMatrix
   AllTypeLUT lut_list;        // LUT list
   std::vector<double> matrix; // Contact_Matrix
 };
-//====================================================================
+//===================================================================================================================
 
 //=======
 // MAKE
-//==================================================================================================
+//===================================================================================================================
 // Restricted Matrix
 //-------------------------------------------------------------------------------------------------
 Contact_Matrix makeContactMatrix ( std::vector<Atom> & atom_list , const Cell box );
@@ -58,20 +58,26 @@ ContactMatrix makeContactMatrixSoft ( AtomList & atom_list , const Cell cell , c
 void makeContactMatrixDistance ( ContactMatrix & cm , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
 // Distances and Connection - modifies the contact matrices
 void makeContactMatrix ( ContactMatrix & cm_connect , ContactMatrix & cm_distance , AtomList & atom_list, const Cell cell , const CutOffMatrix cut_off , const AllTypeLUT lut_list , const bool go_on = true );
-//==================================================================================================
+//===================================================================================================================
 
 //===================
 // EXTRACTING MATRIX
-//=================================================================================================
+//===================================================================================================================
 ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::string specie1 , const std::string specie2 );
 ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::vector<int> atom_list1 , const std::vector<int> atom_list2 );
-//=================================================================================================
+//===================================================================================================================
+
+//============
+// GET SPECIE
+//===============================================================================
+std::vector<int> getSpecieIndex( const ContactMatrix & cm, std::string specie );
+//===============================================================================
 
 //=============
 // CONNECTION
-//=====================================================
+//=====================================================================
 bool connected( const ContactMatrix & cm , const int i , const int j);
-//=====================================================
+//=====================================================================
 
 //=========
 // SORTING
@@ -81,7 +87,7 @@ void sortContactMatrix( ContactMatrix & cm );
 
 //============
 // DISTANCES
-//==================================================================================================
+//=================================================================================================
 // Restricted Contact Matrix
 double getDistance( const Contact_Matrix & cm , const int atom_index1, const int atom_index2 );
 //------------------------------------------------------------------------------------------------
@@ -91,33 +97,32 @@ double getDistance( const ContactMatrix & cm , const int atom_index1 , const int
 
 //========
 // Angles
-//=================================================================================================
+//===================================================================================================================
 double getAngle( const Contact_Matrix & cm , const int atom_center_index , const int atom_2_index, const int atom_3_index );
-//---------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------
 double getAngle( const ContactMatrix & cm , const int atom_A , const int atom_B , const int atom_C );
-//=================================================================================================
+//===================================================================================================================
 
 //=========
 // CONTACT
-//==================================================================================================
+//===================================================================================================================
 std::vector<double> getAtomContact( const Contact_Matrix & cm , const int atom_index );
 std::vector<double> getAtomContact( const Contact_Matrix & cm , const int atom_index, const std::string specie );
 void writeAtomContact( std::ofstream & file , const Contact_Matrix & cm , const std::vector<int> atom_index );
-//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------------------------
 std::vector<double> getAtomContact( const ContactMatrix & cm , const int atom_index );
 std::vector<double> getAtomContact( const ContactMatrix & cm , const int atom_index , const std::string specie );
-//==================================================================================================
+//===================================================================================================================
 
 //=============
 // COORDINANCE
-//==========================================================================================
+//===================================================================================================================
 int getAtomNeighboursNb( const Contact_Matrix & cm , const int atom_index , const double cut_off_radius );
 int getAtomNeighboursNb( const Contact_Matrix & cm , const int atom_index , const std::string specie , const double cut_off_radius );
 std::vector<int> getAtomsNeighboursNb( const Contact_Matrix & cm , const std::vector<int> atom_index_list , const double cut_off_radius );
 std::vector<int> getTypeNeighboursNb( const Contact_Matrix & cm , const std::string type , const double cut_off_radius ) ;
 double getTypeCoordinance( const Contact_Matrix & cm , const std::string type , const double cut_off_radius );
-
-//==========================================================================================
+//===================================================================================================================
 
 //====================
 // NEAREST NEIGHBORS

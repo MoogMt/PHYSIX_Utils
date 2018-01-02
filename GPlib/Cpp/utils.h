@@ -113,12 +113,18 @@ double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vec
 double cumSum( std::vector<double> vector );
 //============================================================================
 
-
 //============
 // CONVERSION
 //============================================================================
 double it2real (  std::istream_iterator<std::string> iterator );
 //============================================================================
+
+//====================================
+// COMPUTING AUTOCORRELATION FUNCTION
+//====================================================================
+std::vector<double> autocorrelation( const std::vector<double> & in );
+std::vector<double> autocorrelation( const std::vector<double> & in, int stride );
+//====================================================================
 
 //=======
 // ARRAY
