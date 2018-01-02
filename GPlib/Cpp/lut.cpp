@@ -17,7 +17,7 @@ bool testType ( const AllTypeLUT lut_all, const int atom_index ,  const int type
 //---------------------------------------------------------------
 bool testType( const TypeLUT lut , const std::string specie )
 {
-  if ( lut.type_name == specie ) return true;
+  if ( lut.name == specie ) return true;
   else return false;
 }
 //---------------------------------------------------------------
@@ -79,7 +79,7 @@ void addAtom2LUT( std::vector<TypeLUT>  & list , const std::string name , const 
 {
   for ( int i=0 ; i < list.size() ; i++ )
     {
-      if ( name == list[i].type_name )
+      if ( name == list[i].name )
 	{
 	  list[i].atom_index.push_back( index );
 	  return;
@@ -93,7 +93,7 @@ void addAtom2LUT( std::vector<TypeLUT> & list , const Atom atom )
 {
   for ( int i=0 ; i < list.size() ; i++ )
     {
-      if ( atom.name == list[i].type_name )
+      if ( atom.name == list[i].name )
 	{
 	  list[i].atom_index.push_back( atom.index );
 	  return;
@@ -114,9 +114,9 @@ void addAtom2LUT( AllTypeLUT & list , const Atom atom )
 {
   list.type_name.push_back( atom.name );
   bool check = false;
-  for ( int i=0 ; list.types.size() ; i++ )
+  for ( int i=0 ; i < list.types.size() ; i++ )
     {
-      if ( list.types[i].type_name == atom.name )
+       if ( list.types[i].name == atom.name )
 	{
 	  list.type_index.push_back( list.types[i].index );
 	  check=true;
@@ -128,7 +128,7 @@ void addAtom2LUT( AllTypeLUT & list , const Atom atom )
       list.type_index.push_back( list.types.size()  );
     }
   addAtom2LUT( list.types , atom.name , atom.index );
-} 
+}
 //======================================================================
 
 //==========

@@ -18,6 +18,8 @@
 //===============================
 struct TypeLUT
 {
+  std::string name;
+  int index;
   std::vector<int> atom_index;
 };
 //==============================

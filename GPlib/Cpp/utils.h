@@ -108,6 +108,10 @@ double norm( std::vector<double> vector );
 //-----------------------------------------------------------------------------
 double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vector2 , std::vector<double> point_outside , std::vector<double> point_plan );
 //-----------------------------------------------------------------------------
+// Unique
+//-----------------------------------------------------------------------------
+bool unique( std::vector<std::string> names );
+//-----------------------------------------------------------------------------
 // Cumulative sum
 //-----------------------------------------------------------------------------
 double cumSum( std::vector<double> vector );

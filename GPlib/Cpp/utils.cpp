@@ -342,7 +342,19 @@ double cumSum( std::vector<double> vector )
     }
   return sum;
 }
-//=================================================================
+//-----------------------------------------------------------------------
+bool unique( std::vector<std::string> names )
+{
+  for ( int i=0 ; i < names.size()-1 ; i++ )
+    {
+      for ( int j=i+1 ;j < names.size() ; j++ )
+	{
+	  if ( names[i] == names[j] ) return false;
+	}
+    }
+  return true;
+}
+//======================================================================
 
 //=============
 // CONVERSION
@@ -359,9 +371,9 @@ double it2real (  std::istream_iterator<std::string> iterator )
 std::vector<double> autocorrelation( const std::vector<double> & in )
 {
   std::vector<double> out;
-  for ( int i=0 ; in.size() ; i++ )
+  for ( int i=0 ; i  < in.size() ; i++ )
     {
-      for ( int j=0 ; in.size() ; j++ )
+      for ( int j=0 ; j < in.size() ; j++ )
 	{	
 	  out.push_back( in[j]*in[j-i] );
 	}
@@ -371,10 +383,11 @@ std::vector<double> autocorrelation( const std::vector<double> & in )
 std::vector<double> autocorrelation( const std::vector<double> & in, int stride )
 {
   std::vector<double> out;
-  for ( int i=0 ; in.size() ; i ++ )
+  for ( int i=0 ; i < in.size() ; i ++ )
     {
-      for ( int j=0 ; in.size() ; j+=stride )
-	{	
+      for ( int j=0 ; j < in.size() ; j+=stride )
+	{
+	  std::cout << "size " <<  in.size() << " " << j << " " << j-i << std::endl;
 	  out.push_back( in[j]*in[j-i] );
 	}
     }

@@ -12,7 +12,7 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
   int nb_atoms = 0 ; // Numbers
   std::string line ; // Contains one line
   //---------------------------------------------------------------
-  
+
   //------------------------------------------
   // Getting the number of atoms in the step
   //-----------------------------------------------------------------------------------
@@ -86,11 +86,12 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
 		  return false;
 	    }
 	  atoms.index[i] = i;
-	  if (  !(same_type) || fill_lut )  addAtom2LUT( lut_list , { atoms.names[ i ] , atoms.x[ i ] , atoms.y[ i ] , atoms.z[ i ] , atoms.index[ i ] } );
+	  if (  !(same_type) || fill_lut ) addAtom2LUT( lut_list , { atoms.names[ i ] , atoms.x[ i ] , atoms.y[ i ] , atoms.z[ i ] , atoms.index[ i ] } );
 	}
       i++;
     }
   //-------------------------------------------------------------------------------------
+
 
   return true; 
 }
