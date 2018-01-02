@@ -10,4 +10,4 @@ This project is its infancy, any input, correction or comment is welcome.
 
 Current participants:
 - Fabio Pietrucci, Assistant Professor
-- Mathieu Moog aka "CondensedOtters" , 2nd year PHD student
+- Mathieu Moog aka "CondensedOtters" , 2nd year PhD student
