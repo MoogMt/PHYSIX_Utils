@@ -354,6 +354,20 @@ bool unique( std::vector<std::string> names )
     }
   return true;
 }
+//-----------------------------------------------------------------------
+void normalize( std::vector<double> & vector )
+{
+  double sum=0;
+  for ( int i=0 ; i < vector.size() ; i++ )
+    {
+      sum += vector[i];
+    }
+  for( int i=0 ; i < vector.size() ; i++ )
+    {
+      vector[i] = vector[i]/sum;
+    }
+  return;
+}
 //======================================================================
 
 //=============
@@ -373,11 +387,14 @@ std::vector<double> autocorrelation( const std::vector<double> & in )
   std::vector<double> out;
   for ( int i=0 ; i  < in.size() ; i++ )
     {
+      double value = 0;
       for ( int j=0 ; j < in.size() ; j++ )
 	{	
-	  out.push_back( in[j]*in[j-i] );
+	  value += in[j]*in[j-i];
 	}
+      out.push_back( value );
     }
+  normalize(out);
   return out;
 }
 std::vector<double> autocorrelation( const std::vector<double> & in, int stride )
@@ -385,12 +402,15 @@ std::vector<double> autocorrelation( const std::vector<double> & in, int stride 
   std::vector<double> out;
   for ( int i=0 ; i < in.size() ; i ++ )
     {
+      double value = 0;
       for ( int j=0 ; j < in.size() ; j+=stride )
 	{
-	  std::cout << "size " <<  in.size() << " " << j << " " << j-i << std::endl;
-	  out.push_back( in[j]*in[j-i] );
+	  if ( j-i < 0 ) std::cout << "j-i " << j-i << std::endl;
+	  value +=  in[j]*in[j-i] ;
 	}
+      out.push_back(value);
     }
+  normalize(out);
   return out;
 }
 //=================================================================
