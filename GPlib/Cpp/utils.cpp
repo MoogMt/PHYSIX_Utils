@@ -385,40 +385,20 @@ double it2real (  std::istream_iterator<std::string> iterator )
 std::vector<double> autocorrelation( const std::vector<double> & in )
 {
   std::vector<double> out;
-  out.assign(in.size(),0.);
-  for ( int i=0 ; i  < in.size() ; i++ )
+  out.assign( in.size(), 0.);
+  for ( int j=0 ; j  < in.size() ; j++ )
     {
-      int count=0;
-      for ( int j=0; j < in.size() ; j++ )
+      for ( int i=0 ; i < in.size()-j ; i++ )
 	{
-	  if ( i+j < in.size() )
-	    {
-	      out[i] += in[j]*in[i+j];
-	      count++;
-	    }
-	  else break;
+	  out[j] += in[i]*in[j];
 	}
-      out[i] /= (double)count;
+      out[j] = out[j]/((double)(in.size()-j));
     }
-  for ( int i=0 ; i < out.size() ; i++ ) out[i]/out[0];
-  return out;
-}
-//-----------------------------------------------------------------
-std::vector<double> autocorrelation( const std::vector<double> & in, int stride )
-{
-  std::vector<double> out;
-  out.assign(in.size(),0.);
-  for ( int i=0 ; i  < in.size() ; i++ )
+  // Normalize
+  for ( int i=0 ; i < out.size() ; i++ )
     {
-      int count=0;
-      for ( int j=0; j < in.size() ; j += stride )
-	{
-	  out[i] += in[j]*in[i+j];
-	  count++;
-	}
-      out[i] /= (double)count;
+      out[i] = out[i]/out[0];
     }
-  for ( int i=0 ; i < out.size() ; i++ ) out[i]/out[0];
   return out;
 }
 //=================================================================
