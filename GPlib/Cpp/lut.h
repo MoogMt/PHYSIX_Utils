@@ -68,4 +68,10 @@ std::vector<TypeLUT> makeLUT( const std::vector<Atom> atoms );
 void makeLUT( AllTypeLUT & lut_list , const std::vector<std::string> names );
 //=============================================================================================
 
+//============
+// Get Indexes
+//=============================================================================================
+std::vector<int> getSpecieIndex( const AllTypeLUT & lut_maj, std::string specie );
+//=============================================================================================
+
 #endif

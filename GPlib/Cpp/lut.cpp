@@ -171,3 +171,24 @@ void makeLUT( AllTypeLUT & lut_list , const std::vector<std::string> names )
   return;
 }
 //=======================================================================================
+
+//============
+// GET SPECIE
+//==================================================
+std::vector<int> getSpecieIndex( const AllTypeLUT & lut_maj, std::string specie )
+{
+  std::vector<int> index;
+  for ( int i=0 ; i < lut_maj.types.size(); i++ )
+    {
+      if ( lut_maj.types[i].name == specie )
+	{
+	  return lut_maj.types[i].atom_index;
+	}
+    }
+  if ( index.size() == 0 )
+    {
+      std::cout << "Chemical specie " << specie << " was not found in the box." << std::endl;
+    }
+  return index;
+}
+//==================================================

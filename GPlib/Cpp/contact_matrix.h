@@ -67,12 +67,6 @@ ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::stri
 ContactMatrix extractContactMatrix( const ContactMatrix old_cm , const std::vector<int> atom_list1 , const std::vector<int> atom_list2 );
 //===================================================================================================================
 
-//============
-// GET SPECIE
-//===============================================================================
-std::vector<int> getSpecieIndex( const ContactMatrix & cm, std::string specie );
-//===============================================================================
-
 //=============
 // CONNECTION
 //=====================================================================

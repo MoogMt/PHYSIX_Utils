@@ -42,7 +42,7 @@ int main( void )
   //--------------------------------------
   int step       = 1;  // Step counter
   int start_step = 2000; // Start step
-  int end_step   = 100000; // End Step 
+  int end_step   = 10000000; // End Step 
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
 
@@ -109,10 +109,10 @@ int main( void )
 
   //--------------
   // Atom Indexes
-  //-------------------------
+  //------------------------------
   std::vector<int> atom_indexesC;
   std::vector<int> atom_indexesO;
-  //-------------------------
+  //------------------------------
 
   //-------------------
   // Reading XYZ file
@@ -123,8 +123,16 @@ int main( void )
 	{
 	  if ( step == start_step )
 	    {
-	      atom_indexesC = getSpecieIndex( cm, "C" );
-	      atom_indexesO = getSpecieIndex( cm, "O" );
+	      atom_indexesC = getSpecieIndex( lut_list , "C" );
+	      if ( atom_indexesC.size() == 0 )
+		{
+		  return 1;
+		}
+	      atom_indexesO = getSpecieIndex( lut_list , "O" );
+	      if ( atom_indexesO.size() == 0 )
+		{
+		  return 1;
+		}
 	    }
 	  makeContactMatrixDistance( cm , atom_list, cell , cut_off , lut_list );
 	  appendVector( CC1 , getNNearest( cm , 1 , atom_indexesC , atom_indexesC ) );
