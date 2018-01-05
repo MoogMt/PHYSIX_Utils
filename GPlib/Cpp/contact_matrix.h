@@ -82,6 +82,11 @@ bool connected( const ContactMatrix & cm , const int i , const int j);
 //=========
 // SORTING
 //=============================================
+/* sortContactMatrix
+Aim: 
+Input: A full contact matrix (ContactMatrix)
+Output: Nothing
+*/
 void sortContactMatrix( ContactMatrix & cm );
 //=============================================
 

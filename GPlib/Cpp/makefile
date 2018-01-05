@@ -15,7 +15,7 @@ OBJmolid = mol_id.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histog
 OBJcHist = computeHist.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJhistangles = hist_angles.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJcoord = softCoord.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
-OBJcorr = correlation.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 									
+OBJcorr = correlation.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 
 
 %.o: %.c $(DEPS)
 	$(CPP) -c -o $@ $< $(CFLAGS)

@@ -1,4 +1,5 @@
 !http://en.wikipedia.org/wiki/Discrete_cosine_transform DCT-II
+  !program dct2
 program dct2
 implicit none
 !functions
@@ -30,31 +31,25 @@ if(argcount==0) then
 endif
 
 do i=1,argcount
-  call GETARG(i,wq_char)
-  if(INDEX(wq_char,'-N_atoms').NE.0)THEN
-    CALL GETARG(i+1,wq_char)
-    READ(wq_char,*)nat
-    CYCLE
-  endif
-
-  if(INDEX(wq_char,'-vv_file').NE.0)THEN
-    CALL GETARG(i+1,wq_char)
-    READ(wq_char,*)vv_file
-    CYCLE
-  endif
-
-  if(INDEX(wq_char,'-out').NE.0)THEN
-    CALL GETARG(i+1,wq_char)
-    READ(wq_char,*)prefix
-    CYCLE
-  endif
-
-  if(INDEX(wq_char,'-index_file').NE.0)THEN
-    spec_on=.true.
-    CALL GETARG(i+1,wq_char)
-    READ(wq_char,*)index_file
-    CYCLE
-  endif
+   call GETARG(i,wq_char)
+   IF(INDEX(wq_char,'-N_atoms').NE.0)THEN
+      CALL GETARG(i+1,wq_char)
+      READ(wq_char,*)nat
+      CYCLE
+   ELSE IF(INDEX(wq_char,'-vv_file').NE.0)THEN
+      CALL GETARG(i+1,wq_char)
+      READ(wq_char,*)vv_file
+      CYCLE
+   ELSE IF(INDEX(wq_char,'-out').NE.0)THEN
+      CALL GETARG(i+1,wq_char)
+      READ(wq_char,*)prefix
+      CYCLE
+   ELSE IF(INDEX(wq_char,'-index_file').NE.0)THEN
+      spec_on=.true.
+      CALL GETARG(i+1,wq_char)
+      READ(wq_char,*)index_file
+      CYCLE
+   ENDIF
 enddo
 
 
