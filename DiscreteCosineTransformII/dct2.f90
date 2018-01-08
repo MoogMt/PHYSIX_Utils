@@ -65,15 +65,6 @@ program dct2
         CALL GETARG(i+1,wq_char)
         READ(wq_char,*)index_file
         CYCLE
-     ELSE
-        ! If the flag is not recognised, prints help
-        print'(a)', 'USAGE: /!\ SINCE WE WENT FROM DCT TO DCT2 THE FREQ ARE PROBABLY OFF'
-        print'(a)', './dct2.x -N_atoms n_atoms -index_file file.index -vv_file vv.dat -out prefix'
-        print'(a)', '[-N_atoms n_atoms       ] (the numer of atoms)'
-        print'(a)', '[-index_file file.index ] (index (start at 0) of atoms whose contribution is to be computed as the sum of the individual VACF (format: N_index\n i1 i2 ... iN on the same line))'
-        print'(a)', '[-vv_file vv.dat        ] (file where the VACF is stored (format: t a1(t) a2(t) ... aN(t)) default=vv.dat, time in fs'
-        print'(a)', '[-out prefix            ] (prefix for the spectrum. the program and adds .real'
-        stop
      ENDIF
   enddo
   
