@@ -1,8 +1,8 @@
 !-------
 ! DCT2
-!-------------------------------------------------------------
-! Performs the discrete cosine transform of type II
-!-------------------------------------------------------------
+!-------------------------------------------------------------------------------------------------
+! Performs the discrete cosine transform of type II on velocity autocorrelation to get the vdos
+!-------------------------------------------------------------------------------------------------
 !http://en.wikipedia.org/wiki/Discrete_cosine_transform DCT-II
 program dct2
   
@@ -31,35 +31,49 @@ program dct2
   
   ! If no flags or arguments, prints help
   if(argcount==0) then
+     ! Usage
      print'(a)', 'USAGE: /!\ SINCE WE WENT FROM DCT TO DCT2 THE FREQ ARE PROBABLY OFF'
      print'(a)', './dct2.x -N_atoms n_atoms -index_file file.index -vv_file vv.dat -out prefix'
-     print'(a)', '[-N_atoms n_atoms       ] (the numer of atoms)'
-     print'(a)', '[-index_file file.index ] (index (start at 0) of atoms whose contribution is to be computed as the sum of the individual VACF (format: N_index\n i1 i2 ... iN on the same line))'
-     print'(a)', '[-vv_file vv.dat        ] (file where the VACF is stored (format: t a1(t) a2(t) ... aN(t)) default=vv.dat'
-     print'(a)', '[-out prefix            ] (prefix for the spectrum. the program adds .real .im and .mod default=spectrum'
+     print'(a)', '[-N_atoms n_atoms       ] NECESSARY - the numer of atoms '
+     print'(a)', '[-index_file file.index ] OPTIONNAL - index (start at 0) of atoms whose contribution is to be computed as the sum of the individual VACF - format: N_index\n i1 i2 ... iN on the same line'
+     print'(a)', '[-vv_file vv.dat        ] OPTIONNAL - file where the VACF is stored (format: t a1(t) a2(t) ... aN(t) - t in fs - default=vv.dat'
+     print'(a)', '[-out prefix            ] OPTIONNAL - prefix for the spectrum, program adds .real'
      stop
   endif
 
   ! GETTING FLAGS ARGUMENTS
   do i=1,argcount
      call GETARG(i,wq_char)
+     ! Necessary, get the number of atoms
      IF(INDEX(wq_char,'-N_atoms').NE.0)THEN
         CALL GETARG(i+1,wq_char)
         READ(wq_char,*)nat
         CYCLE
+     ! Optionnal, name of input file
      ELSE IF(INDEX(wq_char,'-vv_file').NE.0)THEN
         CALL GETARG(i+1,wq_char)
         READ(wq_char,*)vv_file
         CYCLE
+     ! Optionnal, name of output file
      ELSE IF(INDEX(wq_char,'-out').NE.0)THEN
         CALL GETARG(i+1,wq_char)
         READ(wq_char,*)prefix
         CYCLE
+     ! Optionnal, index file to compute only some atoms
      ELSE IF(INDEX(wq_char,'-index_file').NE.0)THEN
         spec_on=.true.
         CALL GETARG(i+1,wq_char)
         READ(wq_char,*)index_file
         CYCLE
+     ELSE
+        ! If the flag is not recognised, prints help
+        print'(a)', 'USAGE: /!\ SINCE WE WENT FROM DCT TO DCT2 THE FREQ ARE PROBABLY OFF'
+        print'(a)', './dct2.x -N_atoms n_atoms -index_file file.index -vv_file vv.dat -out prefix'
+        print'(a)', '[-N_atoms n_atoms       ] (the numer of atoms)'
+        print'(a)', '[-index_file file.index ] (index (start at 0) of atoms whose contribution is to be computed as the sum of the individual VACF (format: N_index\n i1 i2 ... iN on the same line))'
+        print'(a)', '[-vv_file vv.dat        ] (file where the VACF is stored (format: t a1(t) a2(t) ... aN(t)) default=vv.dat, time in fs'
+        print'(a)', '[-out prefix            ] (prefix for the spectrum. the program and adds .real'
+        stop
      ENDIF
   enddo
   
@@ -117,8 +131,11 @@ program dct2
 
   ! Computes the total time of simulation (assumes unit fs)
   total_time=(t(n)-t(1))*1.d-3
-  
+
+  ! Computation constant
   pif=4*datan(1.d0)/n
+
+  ! Initialize vector
   y=0.d0
   z=0.d0
   y_all=0.d0
@@ -127,8 +144,10 @@ program dct2
   z_spec=0.d0
 
   ! DCT Type 2
-  do i=1,n !loop to get the components
-     do j=1,n !loop to get the sum
+  ! - Loop to get the components
+  do i=1,n
+     ! Loop to get the sum
+     do j=1,n 
         ! Compute the FFT component
         tmp_dble=dcos(pif*(j-0.5)*(i-1))
         do k=1,nat
