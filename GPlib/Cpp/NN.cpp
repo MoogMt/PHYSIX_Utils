@@ -144,7 +144,7 @@ int main( void )
 	  appendVector( OC1 , getNNearest( cm , 1 , atom_indexesO , atom_indexesC ) );
 	  appendVector( OC2 , getNNearest( cm , 2 , atom_indexesO , atom_indexesC ) );
 	  appendVector( OO1 , getNNearest( cm , 1 , atom_indexesO , atom_indexesO ) );
-	  std::cout << "step: " << step << std::endl;
+	  std::cout << "step: " << step << '\xd';
 	}
       step++;
      }
