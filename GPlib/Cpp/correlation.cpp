@@ -111,7 +111,6 @@ int main( void )
   n_step = velocity_x.size()/(double)(nb_atoms);
   std::vector<double> velocity_auto; velocity_auto.assign( n_step, 0. );
   std::vector<double> velocity_temp; velocity_temp.assign( n_step, 0. );
-  std::vector<double> velocity_temp0; velocity_temp0.assign( n_step, 0. );
   // Compute autocorrelation velocity for each atom and averages the results
   for ( int i=0 ; i < nb_atoms ; i++)
     {
@@ -123,18 +122,13 @@ int main( void )
 	  double vy2 = velocity_y[ i ]*velocity_y[ i + j*nb_atoms ];
 	  double vz2 = velocity_z[ i ]*velocity_z[ i + j*nb_atoms ];
 	  velocity_temp[j] =  vx2 + vy2 + vz2 ;
-	  vx2 = velocity_x[ i ]*velocity_x[ i ];
-	  vy2 = velocity_y[ i ]*velocity_y[ i ];
-	  vz2 = velocity_z[ i ]*velocity_z[ i ];
-	  velocity_temp0[j] =  vx2 + vy2 + vz2 ;
 	}
       // Computation in itself
       autocorrelation( velocity_temp );
-      autocorrelation( velocity_temp0 );
-       // Averages with other atoms
+      // Averages with other atoms
       for ( int j=0 ; j < n_step ; j++ )
 	{
-	  velocity_auto[j] += velocity_temp[j]/velocity_temp0[j];
+	  velocity_auto[j] += velocity_temp[j];
 	}
      }
   // Normalize
@@ -151,7 +145,7 @@ int main( void )
   // Writting data
   //--------------------------------------------------------------
   std::cout << "Writting VACF" << std::endl;
-  for ( int i=0; i < velocity_auto.size() ; i++ )
+  for ( int i=0; i < 6000 ; i++ )
     {
       corr << i*sim_timestep << " " << velocity_auto[i] << std::endl;
     }
