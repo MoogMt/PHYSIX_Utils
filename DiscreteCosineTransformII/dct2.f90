@@ -88,25 +88,35 @@ program dct2
   allocate(xnew(nat,n),xnew_all(n),xnew_spec(n))
   allocate(z(nat,n),z_all(n),z_spec(n))
   allocate(modulus(nat,n),modulus_all(n),modulus_spec(n))
+
+  ! Reads the velocity autocorrelation
   do i=1,n
+     ! Reading line i
      read(40,*) t(i),(x(k,i),k=1,nat)
+
+     ! Summing all contributions from all atoms
      tmp_dble=0.d0
      do k=1,nat
-        tmp_dble=tmp_dble+x(k,i)
+        tmp_dble = tmp_dble + x(k,i)
      enddo
+     ! Final correlation
      x_all(i)=tmp_dble
-     
+
+     ! Summing contributions from specified atom indexes
      tmp_dble=0.d0
      do k=1,nindex
         kk=atom_index(k)+1 ! +1 because they are index (they start at 0)
         tmp_dble=tmp_dble+x(kk,i)
      enddo
+     ! Final correlation
      x_spec(i)=tmp_dble
+     
   end do
+  ! Close the file
   close(40)
-  
+
+  ! Computes the total time of simulation (assumes unit fs)
   total_time=(t(n)-t(1))*1.d-3
-  !print*,'the total time is ', total_time,' ps (read assumed fs)'
   
   pif=4*datan(1.d0)/n
   y=0.d0
@@ -115,24 +125,30 @@ program dct2
   z_all=0.d0
   y_spec=0.d0
   z_spec=0.d0
-  
+
+  ! DCT Type 2
   do i=1,n !loop to get the components
      do j=1,n !loop to get the sum
+        ! Compute the FFT component
         tmp_dble=dcos(pif*(j-0.5)*(i-1))
         do k=1,nat
            y(k,i)=y(k,i)+x(k,j)*tmp_dble
         enddo
+        ! FFT for all atoms
         y_all(i)=y_all(i)+x_all(j)*tmp_dble
+        ! FFT for only specific atoms
         y_spec(i)=y_spec(i)+x_spec(j)*tmp_dble
      enddo
   enddo
+
+  ! Normalization
+  !y=y/dble(n)
+  !y_all=y_all/dble(n)
+  !y_spec=y_spec/dble(n)
   
-  ! y=y/dble(n)
-  ! 
-  ! y_all=y_all/dble(n)
-  ! y_spec=y_spec/dble(n)
-  
+  ! Open output file for all atoms
   open(unit=32, file=trim(adjustl(prefix))//'.real', action = 'write')
+  ! Write DCT2 to file for all atoms
   do i=1,n
      write(32,'(2f20.12,$)') DBLE(i-1)/2.d0*1./total_time*thz2cm1, y_all(i)
      do k=1,nat
@@ -141,7 +157,7 @@ program dct2
      write(32,'(a)') ' '
   end do
   close(32)
-
+  ! Output file for specified atoms
   if(spec_on) then
      open(unit=62, file=trim(adjustl(prefix))//'_index.real', action = 'write')
      do i=1,n
@@ -151,35 +167,35 @@ program dct2
   endif
   
   ! backward discrete cosine transform (the inverse of DCT-II is DCT-III*2/n)
-  pif=4*datan(1.d0)/n
+  !pif=4*datan(1.d0)/n
   
-  do k=1,nat
-     xnew(k,:)=0.5d0*y(k,1)
-  enddo
-  xnew_all(:)=0.5d0*y_all(1)
-  xnew_spec(:)=0.5d0*y_spec(1)
+  !do k=1,nat
+  !   xnew(k,:)=0.5d0*y(k,1)
+  !enddo
+  !xnew_all(:)=0.5d0*y_all(1)
+  !xnew_spec(:)=0.5d0*y_spec(1)
   
-  do i=1,n
-     do j=2,n
-        tmp_dble=dcos(pif*(j-1.d0)*(i-0.5d0))
-        do k=1,nat
-           xnew(k,i)=xnew(k,i)+y(k,j)*tmp_dble
-        enddo
-        xnew_all(i)=xnew_all(i)+y_all(j)*tmp_dble
-        xnew_spec(i)=xnew_spec(i)+y_spec(j)*tmp_dble
-     enddo
-  enddo
-  xnew=xnew*2.d0/n
-  xnew_all=xnew_all*2.d0/n
-  xnew_spec=xnew_spec*2.d0/n
+ ! do i=1,n
+  !   do j=2,n
+  !      tmp_dble=dcos(pif*(j-1.d0)*(i-0.5d0))
+  !      do k=1,nat
+  !         xnew(k,i)=xnew(k,i)+y(k,j)*tmp_dble
+  !      enddo
+  !      xnew_all(i)=xnew_all(i)+y_all(j)*tmp_dble
+  !      xnew_spec(i)=xnew_spec(i)+y_spec(j)*tmp_dble
+  !   enddo
+  !enddo
+  !xnew=xnew*2.d0/n
+  !xnew_all=xnew_all*2.d0/n
+  !xnew_spec=xnew_spec*2.d0/n
   ! 
-  do i=1,n
-     do k=1,nat
-        if(abs(x(k,i)-xnew(k,i))>=0.0000001d0) write(*,*) x(k,i), xnew(k,i), x(k,i)-xnew(k,i)
-     enddo
-     if(abs(x_all(i)-xnew_all(i))>=0.0000001d0) write(*,*) x_all(i), xnew_all(i), x_all(i)-xnew_all(i)
-     if(abs(x_spec(i)-xnew_spec(i))>=0.0000001d0) write(*,*) x_spec(i), xnew_spec(i), x_spec(i)-xnew_spec(i)
-  end do
+  !do i=1,n
+  !   do k=1,nat
+  !      if(abs(x(k,i)-xnew(k,i))>=0.0000001d0) write(*,*) x(k,i), xnew(k,i), x(k,i)-xnew(k,i)
+  !   enddo
+  !   if(abs(x_all(i)-xnew_all(i))>=0.0000001d0) write(*,*) x_all(i), xnew_all(i), x_all(i)-xnew_all(i)
+  !   if(abs(x_spec(i)-xnew_spec(i))>=0.0000001d0) write(*,*) x_spec(i), xnew_spec(i), x_spec(i)-xnew_spec(i)
+  !end do
   
 end program dct2
 

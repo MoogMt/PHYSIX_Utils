@@ -384,20 +384,20 @@ double it2real (  std::istream_iterator<std::string> iterator )
 //=================================================================
 void autocorrelation( std::vector<double> & in )
 {
-  std::vector<double> out;
-  out.assign( in.size(), 0.);
-  for ( int j=0 ; j  < in.size() ; j++ )
+  int N = in.size();
+  std::vector<double> out;  out.assign( N, 0.); 
+  for ( int j=0 ; j < N ; j++ )
     {
-      for ( int i=0 ; i < in.size()-j ; i++ )
+      for ( int i=0 ; i < N-j ; i++ )
 	{
-	  out[j] += in[i]*in[j];
+	  out[j] += in[i]*in[i+j];
 	}
       out[j] = out[j]/((double)(in.size()-j));
     }
   // Normalize
-  for ( int i=0 ; i < in.size() ; i++ )
+  for ( int i=0 ; i < N ; i++ )
     {
-      in[i] = out[i]/out[0];
+      in[i] = out[i];///out[0];
     }
   out.clear();
   return;

@@ -114,6 +114,8 @@ int main( void )
   std::vector<int> atom_indexesO;
   //------------------------------
 
+  std::cout <<"Starting..." << step << '\xd';
+
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
@@ -144,7 +146,7 @@ int main( void )
 	  appendVector( OC1 , getNNearest( cm , 1 , atom_indexesO , atom_indexesC ) );
 	  appendVector( OC2 , getNNearest( cm , 2 , atom_indexesO , atom_indexesC ) );
 	  appendVector( OO1 , getNNearest( cm , 1 , atom_indexesO , atom_indexesO ) );
-	  std::cout << "step: " << step << '\xd';
+	  std::cout << "Computing nearest neighbours, step: " << step << '\xd';
 	}
       step++;
      }
@@ -153,6 +155,7 @@ int main( void )
   //----------------------
   // Writting histograms
   //--------------------------------------------------------------------------
+  std::cout << "Making Histograms, this can take a while... " << std::endl;
   writeHistogram( outputCC_1nn , normalizeHistogram( makeRegularHistogram( CC1 , hist_start , hist_end , nb_box ) ) );
   writeHistogram( outputCC_2nn , normalizeHistogram( makeRegularHistogram( CC2 , hist_start , hist_end , nb_box ) ) );
   writeHistogram( outputCO_1nn , normalizeHistogram( makeRegularHistogram( CO1 , hist_start , hist_end , nb_box ) ) );
@@ -183,6 +186,8 @@ int main( void )
   //----------------------
   input.close();
    //----------------------
+
+  std::cout << "All done! " << std::endl;
   
   return 0;
 }
