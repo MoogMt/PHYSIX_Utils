@@ -130,7 +130,7 @@ double it2real (  std::istream_iterator<std::string> iterator );
 //====================================
 // COMPUTING AUTOCORRELATION FUNCTION
 //====================================================================
-void autocorrelation( std::vector<double> & in );
+void autocorrelation( std::vector<double> & in , double frac );
 //====================================================================
 
 //=======

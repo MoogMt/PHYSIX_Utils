@@ -382,11 +382,16 @@ double it2real (  std::istream_iterator<std::string> iterator )
 //====================================
 // COMPUTING AUTOCORRELATION FUNCTION
 //=================================================================
-void autocorrelation( std::vector<double> & in )
+void autocorrelation( std::vector<double> & in , double frac )
 {
   int N = in.size();
-  std::vector<double> out;  out.assign( N, 0.); 
-  for ( int j=0 ; j < N ; j++ )
+  std::vector<double> out;  out.assign( N, 0.);
+  if ( frac > 1 || frac < 0 )
+    {
+      std::cout << "frac doit etre compris entre 0 et 1..." << std::endl;
+      return;
+    }
+  for ( int j=0 ; j < N*frac ; j++ )
     {
       for ( int i=0 ; i < N-j ; i++ )
 	{
@@ -397,7 +402,7 @@ void autocorrelation( std::vector<double> & in )
   // Normalize
   for ( int i=0 ; i < N ; i++ )
     {
-      in[i] = out[i];///out[0];
+      in[i] = out[i];
     }
   out.clear();
   return;

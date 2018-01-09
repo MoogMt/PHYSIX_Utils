@@ -54,11 +54,21 @@ int main( void )
   int n_step = 0;
   int sim_stride = 5;     
   double timestep = 0.5;
-  double sim_timestep = sim_stride*timestep;
   double femto=1e-15;
   double angstrom=1e-10;
   //---------------------------------------------------
 
+  //------------------
+  // Input from user
+  //---------------------------------------------------
+  std::cout << "Simulation Stride: ";
+  std::cin >> sim_stride;
+  double sim_timestep = sim_stride*timestep;
+  std::cout << "Fraction to cut: ";
+  double frac; 
+  std::cin >> frac;
+  //---------------------------------------------------
+  
   //---------------
   // Initializers
   //--------------------------------------------------
@@ -124,89 +134,31 @@ int main( void )
 	  velocity_temp[j] =  vx2 + vy2 + vz2 ;
 	}
       // Computation in itself
-      autocorrelation( velocity_temp );
+      autocorrelation( velocity_temp, frac );
       // Averages with other atoms
       for ( int j=0 ; j < n_step ; j++ )
 	{
 	  velocity_auto[j] += velocity_temp[j];
 	}
-     }
+    }
   // Normalize
-  std::cout << "Computing general VACF" << std::endl;
-  double max_velocity = max( velocity_auto );
-  for ( int i=0; i < velocity_auto.size(); i++ )
+  double max_auto = max(velocity_auto);
+  for ( int i=0 ; i < velocity_auto.size() ; i++ )
     {
-      velocity_auto[i] = velocity_auto[i]/max_velocity;
+      velocity_auto[i] = velocity_auto[i]/max_auto;
     }
   //-------------------------------------------------------------- 
-
 
   //---------------
   // Writting data
   //--------------------------------------------------------------
   std::cout << "Writting VACF" << std::endl;
-  for ( int i=0; i < 6000 ; i++ )
+  for ( int i=0; i < velocity_auto.size() ; i++ )
     {
       corr << i*sim_timestep << " " << velocity_auto[i] << std::endl;
     }
-  //---------------------------------------------------------------
+  //---------------------------------------------------------------  
   
-  
-  //-----------------------
-  // Computing Correlation
-  //------------------------------------------------------------
-  /*int nb_atoms = atom_list.x.size();
-  n_step = velocity_x.size()/(double)(nb_atoms);
-  std::vector<std::vector<double> > velocity_auto;
-  std::vector<double> velocity_temp; velocity_temp.assign( n_step, 0. );
-  std::vector<double> velocity_temp0; velocity_temp0.assign( n_step, 0. );
-  // Compute autocorrelation velocity for each atom and averages the results
-  for ( int i=0 ; i < nb_atoms ; i++)
-    {
-      std::cout << "Computing VACF for atom " << i << std::endl;
-      // Calculation of the scalar product of velocities
-      for ( int j=0 ; j < n_step ; j++ )
-	{
-	  double vx2 = velocity_x[ i ]*velocity_x[ i + j*nb_atoms ];
-	  double vy2 = velocity_y[ i ]*velocity_y[ i + j*nb_atoms ];
-	  double vz2 = velocity_z[ i ]*velocity_z[ i + j*nb_atoms ];
-	  velocity_temp[j] =  vx2 + vy2 + vz2 ;
-	  double vx2 = velocity_x[ i ]*velocity_x[ i ];
-	  double vy2 = velocity_y[ i ]*velocity_y[ i ];
-	  double vz2 = velocity_z[ i ]*velocity_z[ i ];
-	  velocity_temp0[j] =  vx2 + vy2 + vz2 ;
-	}
-      // Computation in itself
-      autocorrelation( velocity_temp );
-      autocorrelation( velocity_temp0 );
-      // Normalization
-      double max_velocity = max( velocity_temp );
-      for ( int i=0; i < velocity_temp.size(); i++ )
-	{
-	  velocity_temp[i] = velocity_temp[i]/(max_velocity*velocity_temp0[i]);
-	}
-      // Stock
-      velocity_auto.push_back( velocity_temp );
-      // Back to 0
-      for ( int j=0; j < velocity_temp.size(); j++ ) velocity_temp[j] = 0;
-    }
-  //--------------------------------------------------------------
-
-  //------------------
-  // Writting it down
-  //--------------------------------------------------------------
-  for ( int i=0; i < velocity_auto[0].size(); i++ )
-    {
-      corr << i*sim_timestep << " " ;
-      for ( int j=0; j < velocity_auto.size(); j++ )
-	{
-	  corr << velocity_auto[j][i] << " ";
-	}
-      corr << std::endl;
-    }
-  //--------------------------------------------------------------
-  */
-
   //-----------------------------
   // Closing flux for histograms
   //-----------------------------------

@@ -37,13 +37,13 @@ struct BinReal
 // Bins
 //------------------------------------------------------------------------------
 Bin emptyBin();
-double center(Bin bin);
-Bin makeBinReal( double begin , double end , int value );
-bool overlap( Bin bin1, Bin bin2 );
-void fillBin( Bin &bin , std::vector<double> data );
-Bin makeBin( int bin_min, int bin_max, std::vector<double> data );
-Bin addBinsMin( Bin bin1, Bin bin2);
-Bin addBinsMax( Bin bin1, Bin bin2 );
+double center( const Bin bin );
+Bin makeBinReal( const double begin , const double end , const int value );
+bool overlap( const Bin bin1, const Bin bin2 );
+void fillBin( Bin &bin , const std::vector<double> data );
+Bin makeBin( const int bin_min, const int bin_max, const std::vector<double> data );
+Bin addBinsMin( const Bin bin1, const Bin bin2 );
+Bin addBinsMax( const Bin bin1, const Bin bin2 );
 //------------------------------------------------------------------------------
 
 //----------------
@@ -51,61 +51,64 @@ Bin addBinsMax( Bin bin1, Bin bin2 );
 //------------------------------------------------------------------------------
 // Regular histogram
 //------------------------------------------------------------------------------
-std::vector<Bin> makeRegularHistogram( std::vector<double> data , double x_min , double x_max , int number_bins );
-std::vector<Bin> makeRegularHistogram( std::vector<double> data_x , std::vector<double> data_y , int number_bins );
+std::vector<Bin> makeRegularHistogram( const std::vector<double> data , const double x_min , const double x_max , const int number_bins );
+std::vector<Bin> makeRegularHistogram( const std::vector<double> data_x , const std::vector<double> data_y , const int number_bins );
 // Custom histogram
 //------------------------------------------------------------------------------
-std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<double> bins_limits);
-std::vector<Bin> makeHistograms( std::vector<double> data, std::vector<Bin> bins);
-std::vector<Bin> addHistograms( std::vector<Bin> hist1 , std::vector<Bin> hist2 );
-double getTotalValue( std::vector<Bin> hist );
-void writeHistogram( std::ofstream & file , std::vector<Bin> hist );
-void writeHistogram( std::string file_name , std::vector<Bin> hist );
+std::vector<Bin> makeHistograms( const std::vector<double> data, const std::vector<double> bins_limits );
+std::vector<Bin> makeHistograms( const std::vector<double> data, const std::vector<Bin> bins );
+std::vector<Bin> addHistograms( const std::vector<Bin> hist1 , const std::vector<Bin> hist2 );
+double getTotalValue( const std::vector<Bin> hist );
+void writeHistogram( std::ofstream & file , const std::vector<Bin> hist );
+void writeHistogram( std::string file_name , const std::vector<Bin> hist );
 //------------------------------------------------------------------------------
 
 //-----------
 // Bin Real
 //------------------------------------------------------------------------------
-BinReal emptyBinReal();
-double center( BinReal bin );
-bool overlap( BinReal bin1 , BinReal bin2 );
-BinReal makeBinReal( double begin , double end , double value );
-void fillBin( BinReal &bin , std::vector<double> data );
-BinReal makeBinReal( double bin_min, double bin_max, std::vector<double> dat);
-BinReal addBinsMin( BinReal bin1, BinReal bin2);
-BinReal addBinsMax( BinReal bin1, BinReal bin2 );
+BinReal emptyBinReal( );
+double center( const BinReal bin );
+bool overlap( const BinReal bin1 , const BinReal bin2 );
+BinReal makeBinReal( const double begin , const double end , const double value );
+void fillBin( BinReal &bin , const std::vector<double> data );
+BinReal makeBinReal( const double bin_min, const double bin_max, const std::vector<double> dat);
+BinReal addBinsMin( const BinReal bin1, const BinReal bin2 );
+BinReal addBinsMax( const BinReal bin1, const BinReal bin2 );
 //------------------------------------------------------------------------------
 
 //-----------------
 // Real Histogram
 //------------------------------------------------------------------------------
-std::vector<BinReal> normalizeHistogram( std::vector<Bin> hist );
-void writeHistogram( std::ofstream & file , std::vector<BinReal> hist );
-void writeHistogram( std::string file_name , std::vector<BinReal> hist );
-bool checkSizeHists( std::vector<BinReal> hist , std::vector<BinReal> hist2 );
-bool checkSizeHists( std::vector< std::vector<BinReal> > hist_list );
-void writeBinReal( std::ofstream & file , BinReal bin, bool wcenter);
-void writeBinRealCenter( std::ofstream & file, BinReal bin );
-void writeHistBinCenter( std::ofstream & file , std::vector<BinReal> hist , int index );
-void writeHistBin( std::ofstream & file , std::vector<BinReal> hist, int index , bool wcenter );
-void writeHistograms( std::ofstream & file , std::vector< std::vector<BinReal> > hist_list );
+double getTotalValue( const std::vector<BinReal> hist );
+std::vector<BinReal> normalizeHistogram( const std::vector<Bin> hist );
+std::vector<BinReal> normalizeHistogram( const std::vector<BinReal> hist );
+void writeHistogram( std::ofstream & file , const std::vector<BinReal> hist );
+void writeHistogram( const std::string file_name , const std::vector<BinReal> hist );
+bool checkSizeHists( const std::vector<BinReal> hist , const std::vector<BinReal> hist2 );
+bool checkSizeHists( const std::vector< std::vector<BinReal> > hist_list );
+void writeBinReal( std::ofstream & file , const BinReal bin, const bool wcenter);
+void writeBinRealCenter( std::ofstream & file, const BinReal bin );
+void writeHistBinCenter( std::ofstream & file , const std::vector<BinReal> hist , const int index );
+void writeHistBin( std::ofstream & file , const std::vector<BinReal> hist, const int index , const bool wcenter );
+void writeHistograms( std::ofstream & file , const std::vector< std::vector<BinReal> > hist_list );
 //------------------------------------------------------------------------------
 
 //-----------------------
 // Integrate Histograms
 //-------------------------------------------------------------------------------------
-double average( std::vector<BinReal> & histogram );
-double variance( std::vector<BinReal> & histogram );
-double integrateHistogram( std::vector<BinReal> & histogram );
-double integrateHistogram( std::vector<BinReal> & histogram , double start , double end );
+double average( const std::vector<BinReal> & histogram );
+double variance( const std::vector<BinReal> & histogram );
+double integrateHistogram( const std::vector<BinReal> & histogram );
+double integrateHistogram( const std::vector<BinReal> & histogram , const double start , const double end );
 //-------------------------------------------------------------------------------------
 
 //----
 // IO
 //-------------------------------------------------------------------------------------
-void readRegularHistogram( std::string file_name , std::vector<Bin> & histogram );
-std::vector<Bin> readRegularHistogram( std::string file_name );
-std::vector<BinReal> readRegularHistogramReal( std::string file_name );
+void readRegularHistogram( const std::string file_name , std::vector<Bin> & histogram );
+void readRegularHistogram( const std::string file_name , std::vector<BinReal> & histogram );
+std::vector<Bin> readRegularHistogram( const std::string file_name );
+std::vector<BinReal> readRegularHistogramReal( const std::string file_name );
 //-------------------------------------------------------------------------------------
 
 //======================================================================================
