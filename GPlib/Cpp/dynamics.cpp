@@ -132,23 +132,38 @@ int main( void )
 	    }
 	  else
 	    {
-	      int changes = 0; int c_changes=0; int o_changes=0;
+	      int c_changes=0; int o_changes=0;
 	      for ( int i=0 ; i < atom_indexesC.size() ; i++ )
 		{
 		  double sum = cumSum( getAtomContact( cm , atom_indexesC[i] ) );
-		  if( (sum-2.5)*(coordinanceC[i]-2.5) < 0  )
+		  if( ( sum - 2.5 )*( coordinanceC[i] - 2.5 ) < 0  )
 		    {
-		      
+		      c_changes++;
+		    }
+		  else if ( ( sum - 3.5 )*( coordinanceC[i] - 3.5 ) < 0  )
+		    {
+		      c_changes++;
 		    }
 		  else
 		    {
-		      
+		      lifetime[i]++;
 		    }
 		}
+	      changes << step << " " << c_changes << std::endl;
 	      for ( int i=0 ; i < atom_indexesO.size() ; i++ )
 		{
 		  double sum = cumSum( getAtomContact( cm , atom_indexesO[i] ) );
+		  if( ( sum - 1.5 )*( coordinanceC[i] - 1.5 ) < 0  )
+		    {
+		      o_changes++;
+		    }
+		  else
+		    {
+		      lifetime[i]++;
+		    }
 		}
+	      changes << step << " " << o_changes << std::endl;
+	      changes << step << " " << c_changes + o_changes << std::endl;
 	    }
 	  std::cout << step << std::endl;
 	}
