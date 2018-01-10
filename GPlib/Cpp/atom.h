@@ -47,13 +47,6 @@ double distanceAtoms(Atom i, Atom j);
 std::vector<double> distanceFromPoint( AtomList atom_list , std::vector<double> point );
 //=============================================================================================
 
-//===========
-// VELOCITY
-//=============================================================================================
-//void computeVelocities( AtomList & atom_list , AtomList & atom_list_prev, std::vector<double> & vx, std::vector<double> & vy, std::vector<double> & vz );
-//std::vector<double> velocityAutoCorr( const std::vector<double> & vx, const std::vector<double> & vy, const std::vector<double> & vz, const int nb_atoms , const int nb_step );
-//=============================================================================================
-
 //=======
 // MOVE 
 //=============================================================================================
