@@ -1,4 +1,4 @@
-//---------------
+7//---------------
 // External Libs
 //-------------------
 #include <fstream>
@@ -105,8 +105,8 @@ int main( void )
 	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 2 , 15 , 60 );
 	  if ( step == start_step )
 	    {
-	      atom_indexesC = cm.lut_list.types[0].atom_index;;
-	      atom_indexesO = cm.lut_list.types[1].atom_index;
+	      atom_indexesC = getSpecieIndex( lut_list, "C" );
+	      atom_indexesO = getSpecieIndex( lut_list, "O" );
 	    }
 	  matrixAll_stock << step << " ";
 	  for ( int i = 0 ; i < atom_indexesC.size() ; i++ )
