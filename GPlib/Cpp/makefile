@@ -1,4 +1,5 @@
 CPP=g++
+
 CFLAGS=-std=gnu++11 -O3 -W -Wall -ansi -pedantic -I.
 
 DEPS = utils.h atom.h cell.h cutoff.h contact_matrix.h xyz.h  histogram.h sim.h pdb.h molecules.h lut.h bonds.h
@@ -16,7 +17,9 @@ OBJcHist = computeHist.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o h
 OBJhistangles = hist_angles.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJcoord = softCoord.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJcorr = correlation.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
-OBJnormalize = normalize.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o 
+OBJnormalize = normalize.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+OBJdune = dynamics.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+
 
 %.o: %.c $(DEPS)
 	$(CPP) -c -o $@ $< $(CFLAGS)
@@ -33,7 +36,9 @@ ratio: $(OBJhistratio)
 	$(CPP) -o $@ $^ $(CFLAGS)
 diffusion: $(OBJdiff)
 	$(CPP) -o $@ $^ $(CFLAGS)
-wrap: $(OBJwrap)
+wrap: $(OBJdyn)
+	$(CPP) -o $@ $^ $(CFLAGS)
+dune: $(OBJdune)
 	$(CPP) -o $@ $^ $(CFLAGS)
 compress: $(OBJcomp)
 	$(CPP) -o $@ $^ $(CFLAGS)
@@ -48,7 +53,7 @@ coord: $(OBJcoord)
 correlation: $(OBJcorr)
 	$(CPP) -o $@ $^ $(CFLAGS)
 normalize: $(OBJnormalize)
-	$(CPP) -o $@ $^ $(CFLAGS)	
+	$(CPP) -o $@ $^ $(CFLAGS)
 
 clean:
 	rm -rf *.o 

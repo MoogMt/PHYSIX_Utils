@@ -40,9 +40,16 @@ int main( void )
   //--------
   // Output
   //--------------------------------------------------------------------------------
-  std::ofstream graph_molecules ( "graph_molecules.dat" ,  std::ios::out );
-  //-------------------------------------------------------------------------------
-
+  std::ofstream C2_out ("C2_out.dat",  std::ios::out );
+  std::ofstream C3_out ("C3_out.dat",  std::ios::out );
+  std::ofstream C4_out ("C4_out.dat",  std::ios::out );
+  std::ofstream O1_out ("O1_out.dat",  std::ios::out );
+  std::ofstream O2_out ("O2_out.dat",  std::ios::out );
+  std::ofstream changesC ("changesC.dat",  std::ios::out );
+  std::ofstream changesO ("changesO.dat",  std::ios::out );
+  std::ofstream changes ("changes_out.dat",  std::ios::out );
+  //--------------------------------------------------------------------------------
+  
   //----------------------
   // Physical parameters
   //--------------------------------------
@@ -57,8 +64,7 @@ int main( void )
   //--------------------------------------------------
   AtomList  atom_list;  // Atoms in cell
   AllTypeLUT lut_list; // LUT for types
-  ContactMatrix cm_connection;    // Contact Matrix
-  ContactMatrix cm_distance;    // Contact Matrix
+  ContactMatrix cm;    // Contact Matrix
   //--------------------------------------------------
 
   //--------------  
@@ -111,21 +117,23 @@ int main( void )
     {
       if ( step % comp_step == 0 && step >= start_step && step < end_step)
 	{
-	  makeContactMatrix( cm_distance , atom_list, cell , cut_off , lut_list );
+	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 2 , 15 , 60 );
 	  if ( step == start_step )
 	    {
-	      nb_atoms = atom_list.names.size();
+	      int nb_atoms = atom_list.names.size();
 	      // Get index of species
 	      atom_indexesC = getSpecieIndex( lut_list, "C" );
 	      atom_indexesO = getSpecieIndex( lut_list, "O" );
 	      // Initializing
 	      lifetime.assign( nb_atoms , 0. );
-	      coordinance.assign( nb_atoms, 0. );
+	      coordinanceC.assign( atom_indexesC.size(), 0. );
+	      coordinanceO.assign( atom_indexesO.size(), 0. );
+	      // Compute initial stuff
 	       for ( int i=0 ; i < atom_indexesC.size() ; i++ )
 		{
 		  coordinanceC[i] = cumSum( getAtomContact( cm , atom_indexesC[i] ) );
 		}
-	      for ( int i=0 ; i < atom_indexesO.size() ; i++ )
+	       for ( int i=0 ; i < atom_indexesO.size() ; i++ )
 		{
 		  coordinanceO[i] = cumSum( getAtomContact( cm , atom_indexesO[i] ) );
 		}
@@ -136,33 +144,65 @@ int main( void )
 	      for ( int i=0 ; i < atom_indexesC.size() ; i++ )
 		{
 		  double sum = cumSum( getAtomContact( cm , atom_indexesC[i] ) );
-		  if( ( sum - 2.5 )*( coordinanceC[i] - 2.5 ) < 0  )
+		  if( ( sum - 2.5 )*( coordinanceC[atom_indexesC[i]] - 2.5 ) < 0  )
 		    {
+		      if ( sum - 2.5 < 0 )
+			{
+			  lifetime_C2.push_back( lifetime[i] );
+			  lifetime[i] = 0;
+			}
+		      else
+			{
+			  lifetime_C3.push_back( lifetime[i] );
+			  lifetime[i] = 0;
+			}
 		      c_changes++;
 		    }
 		  else if ( ( sum - 3.5 )*( coordinanceC[i] - 3.5 ) < 0  )
 		    {
+		      if ( sum - 3.5 < 0 )
+			{
+			  lifetime_C3.push_back( lifetime[i] );
+			  lifetime[i] = 0;
+			}
+		      else
+			{
+			  lifetime_C4.push_back( lifetime[i] );
+			  lifetime[i] = 0;
+			}
 		      c_changes++;
 		    }
 		  else
 		    {
-		      lifetime[i]++;
+		      lifetime[atom_indexesC[i]]++;
 		    }
+		  coordinanceC[i] = sum;
 		}
-	      changes << step << " " << c_changes << std::endl;
+	      changesC << step << " " << c_changes << std::endl;
 	      for ( int i=0 ; i < atom_indexesO.size() ; i++ )
 		{
 		  double sum = cumSum( getAtomContact( cm , atom_indexesO[i] ) );
-		  if( ( sum - 1.5 )*( coordinanceC[i] - 1.5 ) < 0  )
+		  if( ( sum - 1.5 )*( coordinanceO[atom_indexesO[i]] - 1.5 ) < 0  )
 		    {
+		      if ( sum - 1.5 < 0 )
+			{
+			  lifetime_O1.push_back( lifetime[i] );
+			  lifetime[i] = 0;
+			}
+		      else
+			{
+			  lifetime_O2.push_back( lifetime[i] );
+			  lifetime[i] = 0;
+			}
 		      o_changes++;
 		    }
 		  else
 		    {
-		      lifetime[i]++;
+		      lifetime[atom_indexesO[i]]++;
 		    }
+		  coordinanceO[i] = sum;
 		}
-	      changes << step << " " << o_changes << std::endl;
+	      changesO << step << " " << o_changes << std::endl;
 	      changes << step << " " << c_changes + o_changes << std::endl;
 	    }
 	  std::cout << step << std::endl;
@@ -170,7 +210,23 @@ int main( void )
       step++;
     }
   //----------------------------------------------------
-  
+
+  int nb_box = 100;
+  writeHistogram( C2_out , normalizeHistogram( makeRegularHistogram( lifetime_C2 , min(lifetime_C2) , max(lifetime_C2) , nb_box ) ) );
+  writeHistogram( C3_out , normalizeHistogram( makeRegularHistogram( lifetime_C3 , min(lifetime_C3) , max(lifetime_C3) , nb_box ) ) );
+  writeHistogram( C4_out , normalizeHistogram( makeRegularHistogram( lifetime_C4 , min(lifetime_C4) , max(lifetime_C4) , nb_box ) ) );
+  writeHistogram( O1_out , normalizeHistogram( makeRegularHistogram( lifetime_O1 , min(lifetime_O1) , max(lifetime_O1) , nb_box ) ) );
+  writeHistogram( O2_out , normalizeHistogram( makeRegularHistogram( lifetime_O2 , min(lifetime_O2) , max(lifetime_O2) , nb_box ) ) );  
+
+  // Close
+  C2_out.close();
+  C3_out.close();
+  C4_out.close();
+  O1_out.close();
+  O2_out.close();
+  changesC.close();
+  changesO.close();
+  changes.close();
   
   return 0;
 }
