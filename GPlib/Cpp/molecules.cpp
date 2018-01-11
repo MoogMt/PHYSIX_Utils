@@ -77,6 +77,13 @@ std::vector<MoleculeBasic> makeMoleculesBasic( const ContactMatrix & cm )
 	  // then we have found all molecules.
 	} while ( sum( try1, cm.nb_atoms ) != 0 );
       // Add molecule to list
+      if ( molecule.names.size() > 96 )
+	{
+	  std::cout << "Problem " << std::endl;
+	  std::cout << "size1: " << molecule.names.size() << std::endl;
+	  std::cout << "size2: " << molecule.atom_index.size() << std::endl;
+	  std::cout << "index: " << molecule.atom_index[i] << std::endl;
+	}
       mol_list.push_back( molecule );
     }
   //-----------------------------------------------------------------------
@@ -133,11 +140,24 @@ std::vector<Molecule> makeMolecules( const ContactMatrix & cm )
 		    }
 		}
 	    }
-	  // copy the new connection 
+	  // copy the new connection
 	  copy( try2 , try1 , cm.nb_atoms );
 	  // If the connection vector is null then we have found all atoms to the molecule
 	} while ( sum( try1, cm.nb_atoms ) != 0 );
       // Add molecule to the molecule list
+      std::cout << "index: " << molecule.atom_index.size() << std::endl; 
+      std::cout << "size: " <<  molecule.names.size() << std::endl;
+      for ( int i=0; i < molecule.atom_index.size()-1 ; i++ )
+	{
+	  for ( int j=i+1; j < molecule.atom_index.size() ; j++ )
+	    {
+	      if ( molecule.atom_index[i] == molecule.atom_index[j] )
+		{
+		  std::cout << "index_ : " <<  i << " " << molecule.atom_index[i] << std::endl;
+		  std::cout << "index_ : " <<  j << " " << molecule.atom_index[j] << std::endl;
+		}
+	    }
+	}
       mol_list.push_back( molecule );
     }
   //-----------------------------------------------------------------------

@@ -40,7 +40,6 @@ int main( void )
   //--------
   // Output
   //--------------------------------------------------------------------------------
-  std::ofstream graph_molecules ( "graph_molecules.dat" ,  std::ios::out );
   std::ofstream hist_molecules ( "hist_molecules.dat" ,  std::ios::out );
   //-------------------------------------------------------------------------------
   std::ofstream co2_stock_in_out ( "co2_stock_in_out.dat" ,  std::ios::out );
@@ -75,49 +74,13 @@ int main( void )
   std::ofstream distance_from_plan_alone( "distance_from_plan_alone.dat" , std::ios::out );
   std::ofstream distance_from_plan_hist_alone( "distance_from_plan_hist_alone.dat" , std::ios::out );
   std::ofstream distance_from_plan_hist_in( "distance_from_plan_hist_in.dat" , std::ios::out );
-  std::ofstream dfp_in_r1_time( "dfp_in_r1_time.dat" , std::ios::out );
-  std::ofstream dfp_in_r2_time( "dfp_in_r2_time.dat" , std::ios::out );
-  std::ofstream dfp_alone_r1_time( "dfp_alone_r1_time.dat" , std::ios::out );
-  std::ofstream dfp_alone_r2_time( "dfp_alone_r2_time.dat" , std::ios::out );
-  std::ofstream dfp_in_r1_hist( "dfp_in_r1_hist.dat" , std::ios::out );
-  std::ofstream dfp_in_r2_hist( "dfp_in_r2_hist.dat" , std::ios::out );
-  std::ofstream dfp_alone_r1_hist( "dfp_alone_r1_hist.dat" , std::ios::out );
-  std::ofstream dfp_alone_r2_hist( "dfp_alone_r2_hist.dat" , std::ios::out );
-  std::ofstream dfp_in_r1_1th_hist( "dfp_in_r1_1th_hist" , std::ios::out );
-  std::ofstream dfp_in_r1_2th_hist( "dfp_in_r1_2th_hist" , std::ios::out );
-  std::ofstream dfp_in_r1_3th_hist( "dfp_in_r1_3th_hist" , std::ios::out );
-  std::ofstream dfp_in_r1_4th_hist( "dfp_in_r1_4th_hist" , std::ios::out );
-  std::ofstream dfp_in_r1_5th_hist( "dfp_in_r1_5th_hist" , std::ios::out );
-  std::ofstream dfp_in_r2_1th_hist( "dfp_in_r2_1th_hist" , std::ios::out );
-  std::ofstream dfp_in_r2_2th_hist( "dfp_in_r2_2th_hist" , std::ios::out );
-  std::ofstream dfp_in_r2_3th_hist( "dfp_in_r2_3th_hist" , std::ios::out );
-  std::ofstream dfp_in_r2_4th_hist( "dfp_in_r2_4th_hist" , std::ios::out );
-  std::ofstream dfp_in_r2_5th_hist( "dfp_in_r2_5th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r1_1th_hist( "dfp_alone_r1_1th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r1_2th_hist( "dfp_alone_r1_2th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r1_3th_hist( "dfp_alone_r1_3th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r1_4th_hist( "dfp_alone_r1_4th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r1_5th_hist( "dfp_alone_r1_5th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r2_1th_hist( "dfp_alone_r2_1th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r2_2th_hist( "dfp_alone_r2_2th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r2_3th_hist( "dfp_alone_r2_3th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r2_4th_hist( "dfp_alone_r2_4th_hist" , std::ios::out );
-  std::ofstream dfp_alone_r2_5th_hist( "dfp_alone_r2_5th_hist" , std::ios::out );
-  //-------------------------------------------------------------------
-  std::ofstream dfp_0_1th_hist( "dfp_0_1th_hist" , std::ios::out );
-  std::ofstream dfp_0_2th_hist( "dfp_0_2th_hist" , std::ios::out );
-  std::ofstream dfp_0_3th_hist( "dfp_0_3th_hist" , std::ios::out );
-  std::ofstream dfp_0_4th_hist( "dfp_0_4th_hist" , std::ios::out );
-  std::ofstream dfp_0_5th_hist( "dfp_0_5th_hist" , std::ios::out );
-  //-------------------------------------------------------------------
-  std::ofstream dfp_0_store_hist( "dfp_0_store_hist" , std::ios::out );
   //--------------------------------------------------------------------------------
   
   //----------------------
   // Physical parameters
   //--------------------------------------
   int step       = 1;  // Step counter
-  int start_step = 2000; // Start step
+  int start_step = 4000; // Start step
   int end_step   = 1000000; // End step
   int comp_step  = 1; // Frequency of computation
   //--------------------------------------
@@ -143,14 +106,6 @@ int main( void )
   //-------------------------------------
   int co4_in = 0, co4_alone = 0; std::vector<double> co4_stock_in; std::vector<double> co4_stock_alone; std::vector<double> co4_ratio;
   //-------------------------------------
-  std::vector<double> dfp_in_r1 , dfp_in_r2 , dfp_alone_r1 , dfp_alone_r2;
-  std::vector<double> dfp_in_r1_1th , dfp_in_r2_1th, dfp_alone_r1_1th, dfp_alone_r2_1th;
-  std::vector<double> dfp_in_r1_2th , dfp_in_r2_2th, dfp_alone_r1_2th, dfp_alone_r2_2th;
-  std::vector<double> dfp_in_r1_3th , dfp_in_r2_3th, dfp_alone_r1_3th, dfp_alone_r2_3th;
-  std::vector<double> dfp_in_r1_4th , dfp_in_r2_4th, dfp_alone_r1_4th, dfp_alone_r2_4th;
-  std::vector<double> dfp_in_r1_5th , dfp_in_r2_5th, dfp_alone_r1_5th, dfp_alone_r2_5th;
-  std::vector<double> dfp_0_1th , dfp_0_2th , dfp_0_3th , dfp_0_4th , dfp_0_5th ;
-  std::vector<double> dfp_0_store;
   // Distance From Plan
   std::vector<double> distPlanC3 , distPlanC3_in, distPlanC3_alone ;
   //----------------------------------------------------------------------
@@ -171,7 +126,7 @@ int main( void )
   double hist_start_ratio = -0.001 , hist_end_ratio = 1.05;
   double hist_co2_start   = -0.001 , hist_co2_end = 1.05;
   int nb_box_ratio = 200 , nb_box = 96, nb_box2 = 1000, nb_co2_box = 200;
-  std::vector<Bin> hist, hist_co2;
+  std::vector<Bin> hist_co2;
   //-----------------------------------------
 
   //--------------------
@@ -211,6 +166,7 @@ int main( void )
 	  //-------
 	  // Index
 	  //---------------------------------------------------
+	  
 	  atom_indexesC = cm_distance.lut_list.types[0].atom_index;
 	  atom_indexesO = cm_distance.lut_list.types[1].atom_index;
 	  //---------------------------------------------------
@@ -220,7 +176,18 @@ int main( void )
 	  //----------------------------------------------------
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
 	  //----------------------------------------------------
-	  
+
+	  /*for ( int i=0 ; i < molecules.size() ; i++ )
+	    {
+	       if ( molecules[i].names.size() > 96 )
+		{
+		  std::cout << "2----------------------------------------------" << std::endl;
+		  std::cout << "2size: " << molecules[i].names.size() << std::endl;
+		  std::cout << "2index: " << i << std::endl;
+		  std::cout << "2----------------------------------------------" << std::endl;
+		}
+	    }
+	  */
 	  //-----------------
 	  // Reinitialialize
 	  //----------------------------------------------------
@@ -234,6 +201,7 @@ int main( void )
 	  //-----------------------------------------------------------------------------
 	  for ( int i=0 ; i < molecules.size() ; i++  )
 	    {
+	      sizes.push_back( molecules[i].names.size());
 	      for ( int j=0 ; j < molecules[i].atom_index.size() ; j++ )
 		{
 		  std::vector<double> angles = getAngleAtom( cm_distance , molecules[i] , molecules[i].atom_index[j] );
@@ -262,67 +230,12 @@ int main( void )
 			  if ( molecules[j].names.size() == 4 )
 			    {
 			      distance_from_plan_alone << step << " " << dist << std::endl;
-			      if ( dist > 0)
-				{
-				  if ( dist < 0.35 )
-				    {
-				      dfp_alone_r1_time << step << " " << dist << std::endl;
-				      dfp_alone_r1.push_back( dist );
-				      dfp_alone_r1_1th.push_back( getNNearest( cm_distance , 1 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r1_2th.push_back( getNNearest( cm_distance , 2 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r1_3th.push_back( getNNearest( cm_distance , 3 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r1_4th.push_back( getNNearest( cm_distance , 4 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r1_5th.push_back( getNNearest( cm_distance , 5 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				    }
-				  else
-				    {
-				      dfp_alone_r2_time << step << " " << dist << std::endl;
-				      dfp_alone_r2.push_back( dist );
-				      dfp_alone_r2_1th.push_back( getNNearest( cm_distance , 1 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r2_2th.push_back( getNNearest( cm_distance , 2 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r2_3th.push_back( getNNearest( cm_distance , 3 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r2_4th.push_back( getNNearest( cm_distance , 4 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_alone_r2_5th.push_back( getNNearest( cm_distance , 5 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				    }
-				}
 			      distPlanC3_alone.push_back( dist );
 			      co3_alone++;
 			    }
 			  else
 			    {
 			      distance_from_plan_in << step << " " << dist << std::endl;
-			      if ( dist > 0)
-				{
-				  if ( dist < 0.35 )
-				    {
-				      dfp_in_r1_time << step << " " << dist << std::endl;
-				      dfp_in_r1.push_back( dist );
-				      dfp_in_r1_1th.push_back( getNNearest( cm_distance , 1 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r1_2th.push_back( getNNearest( cm_distance , 2 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r1_3th.push_back( getNNearest( cm_distance , 3 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r1_4th.push_back( getNNearest( cm_distance , 4 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r1_5th.push_back( getNNearest( cm_distance , 5 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				    }
-				  else
-				    {
-				      dfp_in_r2_time << step << " " << dist << std::endl;
-				      dfp_in_r2.push_back( dist );
-				      dfp_in_r2_1th.push_back( getNNearest( cm_distance , 1 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r2_2th.push_back( getNNearest( cm_distance , 2 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r2_3th.push_back( getNNearest( cm_distance , 3 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r2_4th.push_back( getNNearest( cm_distance , 4 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				      dfp_in_r2_5th.push_back( getNNearest( cm_distance , 5 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				    }
-				}
-			      else
-				{
-				  dfp_0_store.push_back( dist );
-				  dfp_0_1th.push_back(getNNearest( cm_distance , 1 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				  dfp_0_2th.push_back(getNNearest( cm_distance , 2 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				  dfp_0_3th.push_back(getNNearest( cm_distance , 3 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				  dfp_0_4th.push_back(getNNearest( cm_distance , 4 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				  dfp_0_5th.push_back(getNNearest( cm_distance , 5 , atom_indexesC , atom_indexesO )[molecules[i].atom_index[j]] );
-				}
 			      distPlanC3_in.push_back( dist );
 			      co3_in++;
 			    }		  
@@ -412,67 +325,26 @@ int main( void )
   writeHistogram( co3_ratio_out , normalizeHistogram( makeRegularHistogram( co3_ratio , min( co3_ratio) , max( co3_ratio) , nb_box ) ) );
   writeHistogram( co4_ratio_out , normalizeHistogram( makeRegularHistogram( co4_ratio , min( co4_ratio) , max( co4_ratio) , nb_box ) ) );
   // Distances from plan
-  writeHistogram( distance_from_plan_hist_alone , normalizeHistogram( makeRegularHistogram( distPlanC3_alone , -0.0001 , max( distPlanC3_alone ), nb_box ) ) );
-  writeHistogram( distance_from_plan_hist_in , normalizeHistogram( makeRegularHistogram( distPlanC3_in , -0.0001 , max( distPlanC3_alone ), nb_box ) ) );
-  writeHistogram( dfp_in_r1_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1 , min(  dfp_in_r1 ) , max( dfp_in_r1 ) , nb_box ) ) );
-  writeHistogram( dfp_in_r2_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2 , min(  dfp_in_r2 ) , max( dfp_in_r2 ) , nb_box ) ) );
-  /*writeHistogram( dfp_alone_r1_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1 , min( dfp_alone_r1 ) , max( dfp_alone_r1 ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2 , min( dfp_alone_r2 ) , max( dfp_alone_r2 ), nb_box ) ) );*/
-  //----------------------------------------------
-  writeHistogram( dfp_in_r1_1th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_1th , min( dfp_in_r1_1th ) , max( dfp_in_r1_1th ), nb_box ) ) );
-  std::cout << "check" << std::endl;
-  writeHistogram( dfp_in_r1_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_2th , min( dfp_in_r1_2th ) , max( dfp_in_r1_2th ), nb_box ) ) );
-    std::cout << "check" << std::endl;
-  writeHistogram( dfp_in_r1_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_3th , min( dfp_in_r1_3th ) , max( dfp_in_r1_3th ), nb_box ) ) );
-  std::cout << "check" << std::endl;
-  writeHistogram( dfp_in_r1_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_4th , min( dfp_in_r1_4th ) , max( dfp_in_r1_4th ), nb_box ) ) );
-  std::cout << "check" << std::endl;
-  writeHistogram( dfp_in_r1_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r1_5th , min( dfp_in_r1_5th ) , max( dfp_in_r1_5th ), nb_box ) ) );
-  //----------------------------------------------
-  writeHistogram( dfp_in_r2_1th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_1th , min( dfp_in_r2_1th ) , max( dfp_in_r2_1th ), nb_box ) ) );
-  writeHistogram( dfp_in_r2_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_2th , min( dfp_in_r2_2th ) , max( dfp_in_r2_2th ), nb_box ) ) );
-  writeHistogram( dfp_in_r2_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_3th , min( dfp_in_r2_3th ) , max( dfp_in_r2_3th ), nb_box ) ) );
-  writeHistogram( dfp_in_r2_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_4th , min( dfp_in_r2_4th ) , max( dfp_in_r2_4th ), nb_box ) ) );
-  writeHistogram( dfp_in_r2_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_in_r2_5th , min( dfp_in_r2_5th ) , max( dfp_in_r2_5th ), nb_box ) ) );
-  //
-  writeHistogram( dfp_0_1th_hist , normalizeHistogram( makeRegularHistogram( dfp_0_1th , min( dfp_0_1th ) , max( dfp_0_1th ), nb_box ) ) );
-  writeHistogram( dfp_0_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_0_2th , min( dfp_0_2th ) , max( dfp_0_2th ), nb_box ) ) );
-  writeHistogram( dfp_0_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_0_3th , min( dfp_0_3th ) , max( dfp_0_3th ), nb_box ) ) );
-  writeHistogram( dfp_0_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_0_4th , min( dfp_0_4th ) , max( dfp_0_4th ), nb_box ) ) );
-  writeHistogram( dfp_0_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_0_5th , min( dfp_0_5th ) , max( dfp_0_5th ), nb_box ) ) );
-  //
-  writeHistogram( dfp_0_store_hist , normalizeHistogram( makeRegularHistogram( dfp_0_store , min( dfp_0_store ) , max( dfp_0_store ), nb_box ) ) );
-  
-  /*
+  writeHistogram( distance_from_plan_hist_alone , normalizeHistogram( makeRegularHistogram( distPlanC3_alone , 0 , max( distPlanC3_alone ), nb_box ) ) );
+  writeHistogram( distance_from_plan_hist_in , normalizeHistogram( makeRegularHistogram( distPlanC3_in , 0 , max( distPlanC3_in ), nb_box ) ) );
     //----------------------------------------------
-  writeHistogram( dfp_alone_r1_1th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1_1th , min( dfp_alone_r1_1th ) , max( dfp_alone_r1_1th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r1_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1_2th , min( dfp_alone_r1_2th ) , max( dfp_alone_r1_2th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r1_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1_3th , min( dfp_alone_r1_3th ) , max( dfp_alone_r1_3th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r1_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1_4th , min( dfp_alone_r1_4th ) , max( dfp_alone_r1_4th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r1_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r1_5th , min( dfp_alone_r1_5th ) , max( dfp_alone_r1_5th ), nb_box ) ) );
-    //----------------------------------------------
-  writeHistogram( dfp_alone_r2_1th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_1th , min( dfp_alone_r2_1th ) , max( dfp_alone_r2_1th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_2th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_2th , min( dfp_alone_r2_2th ) , max( dfp_alone_r2_2th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_3th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_3th , min( dfp_alone_r2_3th ) , max( dfp_alone_r2_3th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_4th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_4th , min( dfp_alone_r2_4th ) , max( dfp_alone_r2_4th ), nb_box ) ) );
-  writeHistogram( dfp_alone_r2_5th_hist , normalizeHistogram( makeRegularHistogram( dfp_alone_r2_5th , min( dfp_alone_r2_5th ) , max( dfp_alone_r2_5th ), nb_box ) ) );*/
-  //-------------------------------------------------------
-  
+
   //-----------------
   // Size histograms
   //---------------------------------------------------------
-  for ( int i=0 ; i < hist.size() ; i++ )
+  std::vector<Bin> hist = makeRegularHistogram( sizes , min( sizes )-0.5 , max( sizes) +0.5 , nb_box );
+  for (int i =0 ; i < hist.size() ; i ++ )
     {
-      hist[i].value = hist[i].value*center(hist[i]);
+      hist[i].value *= center(hist[i]);
     }
-  writeHistogram( hist_molecules , normalizeHistogram( makeRegularHistogram( sizes , hist_start , hist_end , nb_box ) ) );
+  writeHistogram( hist_molecules , normalizeHistogram( hist ) );
   //----------------------------------------------------
 
   //--------------
   //Closing fluxes
   //----------------------
   input.close();
-  graph_molecules.close();
+  //-----------------------
   hist_molecules.close();
   //-----------------------
   // CO2/3/4
@@ -504,46 +376,6 @@ int main( void )
   //----------------------
   distance_from_plan_alone.close();
   distance_from_plan_hist_alone.close();
-  //----------------------
-  dfp_alone_r1_time.close();
-  dfp_alone_r1_hist.close();
-  dfp_in_r1_hist.close();
-  //----------------------
-  dfp_alone_r2_time.close();
-  dfp_alone_r2_hist.close();
-  dfp_in_r2_hist.close();
-  //----------------------
-  dfp_in_r1_1th_hist.close();
-  dfp_in_r1_2th_hist.close();
-  dfp_in_r1_3th_hist.close();
-  dfp_in_r1_4th_hist.close();
-  dfp_in_r1_5th_hist.close();
-  //----------------------
-  dfp_in_r2_1th_hist.close();
-  dfp_in_r2_2th_hist.close();
-  dfp_in_r2_3th_hist.close();
-  dfp_in_r2_4th_hist.close();
-  dfp_in_r2_5th_hist.close();
-  //----------------------
-  dfp_alone_r1_1th_hist.close();
-  dfp_alone_r1_2th_hist.close();
-  dfp_alone_r1_3th_hist.close();
-  dfp_alone_r1_4th_hist.close();
-  dfp_alone_r1_5th_hist.close();
-  //----------------------
-  dfp_alone_r2_1th_hist.close();
-  dfp_alone_r2_2th_hist.close();
-  dfp_alone_r2_3th_hist.close();
-  dfp_alone_r2_4th_hist.close();
-  dfp_alone_r2_5th_hist.close();
-  //----------------------
-  dfp_0_1th_hist.close();
-  dfp_0_2th_hist.close();
-  dfp_0_3th_hist.close();
-  dfp_0_4th_hist.close();
-  dfp_0_5th_hist.close();
-  //----------------------
-  dfp_0_store_hist.close();
   //----------------------
   
   return 0;

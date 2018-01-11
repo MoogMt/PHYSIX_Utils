@@ -323,14 +323,15 @@ std::vector<double> crossProduct( std::vector<double> vector1 , std::vector<doub
 //-----------------------------------------------------------------------
 double norm( std::vector<double> vector )
 {
-  return sqrt(abs( scalarProduct( vector , vector ) ));
+  return sqrt( scalarProduct( vector , vector ) );
 }
 //-----------------------------------------------------------------------
 double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vector2 , std::vector<double> point_outside , std::vector<double> point_plan )
 {
   std::vector<double> normal = crossProduct( vector1, vector2 );
   std::vector<double> vector = difference( point_plan , point_outside  );
-  return abs(scalarProduct( normal , vector ) ) / norm( normal );
+  double value = scalarProduct( normal , vector )/ norm( normal );
+  return sqrt(value*value);
 }
 //-----------------------------------------------------------------------
 double cumSum( std::vector<double> vector )
