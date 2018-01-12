@@ -1,0 +1,2 @@
+mpirun -np 4 ../piv_clustering.x -filexyz traj-ice-melting.xyz -bsize 12.8 12.8 12.8 \
+-method 2 -coord1_param 2.6 0.6 -algorithm 1 -cutoff_daura 1.2 &> log1
