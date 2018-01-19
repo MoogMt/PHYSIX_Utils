@@ -42,6 +42,7 @@ int main( void )
   // Output
   //-------------------------------------
   std::ofstream press_out("pressure.dat");
+  std::ofstream block_press_out("block_pressure.dat");
   //-------------------------------------
 
   //------------------------
@@ -74,17 +75,6 @@ int main( void )
   std::vector<Bin> press_hist;
   //----------------------------------------------------
 
-  //-----------
-  // Tolerance
-  //----------------------------------------------------
-  double tolerance = -1 ; 
-  while ( tolerance > 1 || tolerance < 0 )
-    {
-      std::cout << "Tolerance: ";
-      std::cin >> tolerance;
-    }
-  //----------------------------------------------------
-    
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
@@ -105,10 +95,17 @@ int main( void )
   writeHistogram( press_out , normalizeHistogram( makeRegularHistogram( press_vec , min( press_vec ) , max( press_vec) , 200 ) ) );
   //---------------------------------------------------------------
 
+  // Prints block average
+  //---------------------------------------------------------------
+  for ( int i=5000 ; i < press_vec.size()*0.8 ; i += 100 )
+    {
+      block_press_out << i << " " << blockAverage( press_vec , i ) << std::endl;
+    }
+  //---------------------------------------------------------------
+  
   //----------------------------------------------
   // Print average and variance of the pressure 
   //---------------------------------------------------------------
-  std::cout << "Block Average Pressure: " << blockaverage( press_vec , tolerance , 100, 100) << std::endl;
   std::cout << "Average Pressure: " << average( press_vec )  << std::endl;
   //---------------------------------------------------------------
   
@@ -118,6 +115,7 @@ int main( void )
   input.close();
   press_in.close();
   press_out.close();
+  block_press_out.close();
   //----------------------
   
   return 0;

@@ -67,7 +67,7 @@ double cumSum( const std::vector<double> vector );
 // Average
 //---------------------------------------------------------------------
 double average( const std::vector<double> vector );
-double blockaverage( const std::vector<double> vector, const double tolerance , const int block_size_start, const int block_size_inc );
+double blockAverage( const std::vector<double> vector, const int block_size );
 //---------------------------------------------------------------------
 //--------
 // Switch
