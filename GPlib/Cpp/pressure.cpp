@@ -43,6 +43,20 @@ int main( void )
   //-------------------------------------
   std::ofstream press_out("pressure.dat");
   //-------------------------------------
+
+  //------------------------
+  // Checking if file exists
+  //-------------------------------------------------------------
+  if ( press_out )
+    {
+      std::cout << "File STRESS open" << std::endl;
+    }
+  else
+    {
+      std::cout << "File STRESS does not exists!" << std::endl;
+      return 0;
+    }
+  //-------------------------------------------------------------
   
   //----------------------
   // Physical parameters
@@ -58,33 +72,44 @@ int main( void )
   //----------------------------------------------------
   double pressure; std::vector<double> press_vec ;
   std::vector<Bin> press_hist;
-  int step_press = 0;
   //----------------------------------------------------
-  
+
+  //-----------
+  // Tolerance
+  //----------------------------------------------------
+  double tolerance = -1 ; 
+  while ( tolerance > 1 || tolerance < 0 )
+    {
+      std::cout << "Tolerance: ";
+      std::cin >> tolerance;
+    }
+  //----------------------------------------------------
+    
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------
   while(  readPressure( press_in, pressure ) )
     {
-      if ( step % comp_step == 0 && step > start_step && step < end_step )
+      if ( step % comp_step == 0 && step >= start_step && step < end_step )
 	{
 	  press_vec.push_back( pressure );
-	  step_press++;
-	  std::cout << step << std::endl;
+	  std::cout << "Computing pressure, step: " << step << std::endl;
 	}      
       step++;
      }
   //----------------------------------------------------
 
   //------------
-  // Histograms
+  // Histogram
   //---------------------------------------------------------------
-  // Technical values
-  double hist_start = min( press_vec ) ;
-  double hist_end   = max( press_vec );
-  int nb_box        = 750;
+  writeHistogram( press_out , normalizeHistogram( makeRegularHistogram( press_vec , min( press_vec ) , max( press_vec) , 200 ) ) );
   //---------------------------------------------------------------
-  writeHistogram( press_out , normalizeHistogram( makeRegularHistogram( press_vec , hist_start , hist_end , nb_box ) ) );
+
+  //----------------------------------------------
+  // Print average and variance of the pressure 
+  //---------------------------------------------------------------
+  std::cout << "Block Average Pressure: " << blockaverage( press_vec , tolerance , 100, 100) << std::endl;
+  std::cout << "Average Pressure: " << average( press_vec )  << std::endl;
   //---------------------------------------------------------------
   
   //--------------

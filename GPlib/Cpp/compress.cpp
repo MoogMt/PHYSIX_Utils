@@ -42,13 +42,36 @@ int main(void)
   std::ofstream O_position( "O_position.cpmd" , std::ios::out );
   std::ofstream xyz( "position.xyz" , std::ios::out );
   //-------------------------------------------------------------
+
+  //----
+  // As
+  //-------------------------------------------------------------
+  double a_prev;
+  std::cout << "Give the present a: ";
+  std::cin >> a_prev;
+  double b_prev;
+  std::cout << "Give the present b: ";
+  std::cin >> b_prev;
+  double c_prev;
+  std::cout << "Give the present c: ";
+  std::cin >> c_prev;
+  double a_new;
+  std::cout << "Give the new a: ";
+  std::cin >> a_new;
+  double b_new;
+  std::cout << "Give the new b: ";
+  std::cin >> b_new;
+  double c_new;
+  std::cout << "Give the new c: ";
+  std::cin >> c_new;
+  //-------------------------------------------------------------
   
   //----------------------
   // Physical parameters
   //----------------------------------------------------------------
-  double frac_a = 0.923469388;
-  double frac_b = 0.923469388;
-  double frac_c = 0.923469388;
+  double frac_a = a_new/a_prev;
+  double frac_b = b_new/b_prev;
+  double frac_c = c_new/c_prev;
   //----------------------------------------------------------------
 
   //---------------
@@ -61,17 +84,9 @@ int main(void)
   //---------------
   // Reading cell
   //---------------------------------
-  Cell cell;
-  if ( ! readParamCell( "cell.param" , cell ) ) return 1;
+  Cell cell = { a_prev , b_prev , c_prev , 90 , 90 , 90 };
   //---------------------------------
 
-  //-----------------
-  // Reading Cut-Off
-  //-------------------------------------------------------------------
-  CutOffMatrix cut_off;
-  if ( ! readCutOff( "cut_off.dat" , cut_off , lut_list ) ) return 1;
-  //-------------------------------------------------------------------
-  
   //-------------------
   // Reading XYZ file
   //----------------------------------------------------

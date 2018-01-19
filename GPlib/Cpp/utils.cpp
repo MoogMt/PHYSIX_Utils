@@ -99,16 +99,6 @@ double average(std::vector<int> data)
     }
   return average/((double)(data.size())); // Returning the average
 }
-//----------------------------------------------------------
-double average(std::vector<double> data)
-{
-  double average=0;                   // Average
-  for( int i=0; i<data.size(); i++)   
-    {
-      average += data[i];
-    }
-  return average/data.size(); // Returning the average
-}
 //==========================================================
 
 //======
@@ -143,7 +133,52 @@ int computeSep(int atom_index, int nb_atoms)
 //========
 // VECTORS
 //==============================================================================
-void switchV( std::vector<int> & vector , int index1 , int index2 )
+double cumSum( const std::vector<double> vector )
+{
+  double sum = 0;
+  for ( int i=0; i < vector.size() ; i++ )
+    {
+      sum += vector[i];
+    }
+  return sum;
+}
+//------------------------------------------------------------------
+double average( const std::vector<double> vector )
+{
+  double avg = cumSum( vector )/vector.size();
+}
+//------------------------------------------------------------------
+double blockaverage( const std::vector<double> vector, const double tolerance, const int block_size_start, const int block_size_inc  )
+{
+  int size = block_size_start;
+  double avg = 0;
+  double avg_prec = average( vector );
+  while( size < vector.size() )
+    {
+      int j=0;
+      avg = 0;
+      while( j < vector.size() )
+	{
+	  double local_avg = 0;
+	  for( int i=0 ; i < size ; i++ )
+	    {
+	      local_avg += vector[ i + j ];
+	    }
+	  local_avg = local_avg/(double)(size);
+	  avg += local_avg;
+	  j += size;
+	  if ( j+size >= vector.size() ) break;
+	}
+      avg = avg/(double)(j/size);
+      if ( fabs( avg - avg_prec ) < tolerance*avg_prec ) break;
+      std::cout << "size: " << size << " avg: " << avg << std::endl;
+      avg_prec = avg;
+      size += block_size_inc ;
+    }
+  return avg;
+}
+//------------------------------------------------------------------
+void switchV( std::vector<int> & vector , const int index1 , const int index2 )
 {
   double stock = vector[index1];
   vector[ index1 ] = vector[ index2 ];
@@ -151,7 +186,7 @@ void switchV( std::vector<int> & vector , int index1 , int index2 )
   return;
 }
 //-------------------------------------------------------
-void switchV( std::vector<double> & vector , int index1 , int index2 )
+void switchV( std::vector<double> & vector , const int index1 , const int index2 )
 {
   double stock = vector[index1];
   vector[ index1 ] = vector[ index2 ];
@@ -334,15 +369,6 @@ double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vec
   return sqrt(value*value);
 }
 //-----------------------------------------------------------------------
-double cumSum( std::vector<double> vector )
-{
-  double sum = 0;
-  for ( int i=0; i < vector.size() ; i++ )
-    {
-      sum += vector[i];
-    }
-  return sum;
-}
 //-----------------------------------------------------------------------
 bool unique( std::vector<std::string> names )
 {

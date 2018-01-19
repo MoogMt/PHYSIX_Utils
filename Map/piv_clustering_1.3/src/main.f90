@@ -91,7 +91,7 @@ program clustering_dmsd
     integer::i,j,k,l,m,n,ii,jj,kk,mm,nn
     double precision::tmpr
     logical::ok_invert
-    double precision::volume
+    double precision::volume, volume0
     ! debug: integer::tbeg,tend,tpbc=0,tsqr=0,tcoo=0,tbeg0,tend0,ttot=0,tall=0,tsor=0
     
 #ifdef MPI
@@ -696,6 +696,9 @@ program clustering_dmsd
             ! So we transpose to get back column vectors.
             h=transpose(h)
             call invert(h,hi,ok_invert,volume)
+            if ( n .eq. 1 ) then
+               volume0 = volume
+            endif
             if (.not.ok_invert) then
               write(*,*) 'ERROR: impossible to invert h matrix (it is singular)'
               stop
@@ -860,7 +863,7 @@ program clustering_dmsd
                     endif
                   endif
                   ! ---------
-
+                  d = d*(volume0/volume)**0.33333333
                   ! debug: call system_clock(tbeg)
                   if(method.eq.2) then !IF
                     if(coordtype.eq.1) then !IF

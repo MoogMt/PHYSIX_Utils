@@ -42,7 +42,6 @@ double sigmoidPlumed( double r, double r0, int n, int m );
 // AVERAGES
 //============================================================================
 double average(std::vector<int> data);
-double average(std::vector<double> data);
 //============================================================================
 
 //======
@@ -60,12 +59,21 @@ int computeSep(int atom_index, int nb_atoms);
 
 //=========
 // VECTORS
-//============================================================================
+//===========================================================================
+// Cumulative sum
+//-----------------------------------------------------------------------------
+double cumSum( const std::vector<double> vector );
+//-----------------------------------------------------------------------------
+// Average
+//---------------------------------------------------------------------
+double average( const std::vector<double> vector );
+double blockaverage( const std::vector<double> vector, const double tolerance , const int block_size_start, const int block_size_inc );
+//---------------------------------------------------------------------
 //--------
 // Switch
 //---------------------------------------------------------------------
-void switchV( std::vector<int> & vector , int index1 , int index2 );
-void switchV( std::vector<double> & vector , int index1 , int index2 );
+void switchV( std::vector<int> & vector , const int index1 , const int index2 );
+void switchV( std::vector<double> & vector , const int index1 , const int index2 );
 //----------------------------------------------------------------------
 // Init
 //--------------------------------------------------------
@@ -111,10 +119,6 @@ double getDistanceFromPlan( std::vector<double> vector1, std::vector<double> vec
 // Unique
 //-----------------------------------------------------------------------------
 bool unique( std::vector<std::string> names );
-//-----------------------------------------------------------------------------
-// Cumulative sum
-//-----------------------------------------------------------------------------
-double cumSum( std::vector<double> vector );
 //-----------------------------------------------------------------------------
 // Normalize
 //-----------------------------------------------------------------------------
