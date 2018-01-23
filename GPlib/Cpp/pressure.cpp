@@ -97,7 +97,7 @@ int main( void )
 
   // Prints block average
   //---------------------------------------------------------------
-  for ( int i=5000 ; i < press_vec.size()*0.8 ; i += 100 )
+  for ( int i=100 ; i < press_vec.size()*0.8 ; i += 100 )
     {
       block_press_out << i << " " << blockAverage( press_vec , i ) << std::endl;
     }

@@ -165,8 +165,7 @@ int main( void )
 
 	  //-------
 	  // Index
-	  //---------------------------------------------------
-	  
+	  //---------------------------------------------------	  
 	  atom_indexesC = cm_distance.lut_list.types[0].atom_index;
 	  atom_indexesO = cm_distance.lut_list.types[1].atom_index;
 	  //---------------------------------------------------
@@ -177,17 +176,15 @@ int main( void )
 	  std::vector<Molecule> molecules = makeMolecules( cm_connection );
 	  //----------------------------------------------------
 
-	  /*for ( int i=0 ; i < molecules.size() ; i++ )
+	  for ( int i=0 ; i < molecules.size() ; i++ )
 	    {
-	       if ( molecules[i].names.size() > 96 )
+	      if ( molecules[i].names.size() > 96 )
 		{
-		  std::cout << "2----------------------------------------------" << std::endl;
-		  std::cout << "2size: " << molecules[i].names.size() << std::endl;
-		  std::cout << "2index: " << i << std::endl;
-		  std::cout << "2----------------------------------------------" << std::endl;
+		  std::cout << "step:" << step << " ";
+		  std::cout << "size: " << molecules[i].names.size() << std::endl;
 		}
 	    }
-	  */
+	  
 	  //-----------------
 	  // Reinitialialize
 	  //----------------------------------------------------
@@ -301,7 +298,7 @@ int main( void )
 	  //-------------
 	  // Step making
 	  //----------------------------------------------------
-	  std::cout << step << std::endl;
+	  //std::cout << step << std::endl;
 	  //----------------------------------------------------
 	  
 	}      

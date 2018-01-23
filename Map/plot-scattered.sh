@@ -1,12 +1,14 @@
+echo "check"
+
 awk '{
  if(NR==1) { n=$1; dmax=$2 }else {
    for (i=1;i<=n;i++) { print NR-1,i,$i*dmax }
  }
 }' FRAME_TO_FRAME.MATRIX > map
 
+echo "check"
 
-
-awk 'BEGIN{ niter=8000000; bestmaxd=0. }
+awk 'BEGIN{ niter=2000000; bestmaxd=0. }
 {
  if(NF>0 && FILENAME=="map"){ d[$1,$2]=$3 }
 # if(FILENAME=="restart"){ 
@@ -15,10 +17,10 @@ awk 'BEGIN{ niter=8000000; bestmaxd=0. }
 # }
 }END{
 
- n=40
- k=0.01
+ n=30
+ k=0.02
  s=0.005
- kT=0.00000005
+ kT=0.0000002
  
  srand()
 
