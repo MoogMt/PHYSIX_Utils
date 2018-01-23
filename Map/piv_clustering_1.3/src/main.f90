@@ -36,7 +36,7 @@ program clustering_dmsd
   logical::found
   
   !Limitations
-  integer::ARRAY_SIZE=100E+06
+  integer::ARRAY_SIZE=100E+06 ! Arbitrary....
   integer::max_frames
   
   !parameters
@@ -100,8 +100,6 @@ program clustering_dmsd
   call MPI_Comm_rank(MPI_COMM_WORLD, mpirank, mpierror)
 #endif
   
-  !=========================== READING INPUT =====================================
-
   !--------------------------------------
   ! Master Worker sends starting message
   !----------------------------------------------------------------------------
@@ -217,390 +215,437 @@ program clustering_dmsd
       ! Getting output prefix 
       !----------------------------------------------------------------      
       if(index(wq_char,'-out').ne.0)then
-        call getarg(i+1,wq_char)
-        read(wq_char,*) out_file
-        cycle
-     endif
-     
-     !----------------------------------------------------------------      
-     if(index(wq_char,'-array_size').ne.0)then
-        call getarg(i+1,wq_char)
-        read(wq_char,*) ARRAY_SIZE
-        cycle
-     endif
-
-     if(index(wq_char,'-method').ne.0)then
-        call getarg(i+1,wq_char)
-        read(wq_char,*) method 
-        cycle
-     endif
-
+         call getarg(i+1,wq_char)
+         read(wq_char,*) out_file
+         cycle
+      endif
+      ! Get limitation on the size of the array 
+      !----------------------------------------------------------------      
+      if(index(wq_char,'-array_size').ne.0)then
+         call getarg(i+1,wq_char)
+         read(wq_char,*) ARRAY_SIZE
+         cycle
+      endif
+      ! Getting the method to be used for clustering
+      !----------------------------------------------------------------      
+      if(index(wq_char,'-method').ne.0)then
+         call getarg(i+1,wq_char)
+         read(wq_char,*) method 
+         cycle
+      endif
+      ! Getting distance range
+      !----------------------------------------------------------------      
       if(index(wq_char,'-coord1_range').ne.0)then
-        if(coordtype.eq.2) then
-          print'(a)', 'ERROR: coord type 1 and 2 are mutually esclusive !'
-          stop
-        endif
-        coordtype=1
-        call getarg(i+1,wq_char)
-        read(wq_char,*) x90p 
-        call getarg(i+2,wq_char)
-        read(wq_char,*) x10p
-        l1=dlog((1.d0-f90p)/f90p)
-        l2=dlog((1.d0-f10p)/f10p)
-        coord_lambda=(l1-l2)/(x90p-x10p)
-        coord_d0=x90p-l1/coord_lambda
-        coord_r0=1.d0/coord_lambda
-        cycle
+         if(coordtype.eq.2) then
+            print'(a)', 'ERROR: coord type 1 and 2 are mutually esclusive !'
+            stop
+         endif
+         coordtype=1
+         call getarg(i+1,wq_char)
+         read(wq_char,*) x90p 
+         call getarg(i+2,wq_char)
+         read(wq_char,*) x10p
+         l1=dlog((1.d0-f90p)/f90p)
+         l2=dlog((1.d0-f10p)/f10p)
+         coord_lambda=(l1-l2)/(x90p-x10p)
+         coord_d0=x90p-l1/coord_lambda
+         coord_r0=1.d0/coord_lambda
+         cycle
       endif
-
+      ! Getting coordinance 1 parameter and choosing it as method (exp)
+      !---------------------------------------------------------------------        
       if(index(wq_char,'-coord1_param').ne.0)then
-        if(coordtype.eq.2) then
-          print'(a)', 'ERROR: coord type 1 and 2 are mutually esclusive !'
-          stop
-        endif
-        coordtype=1
-        call getarg(i+1,wq_char)
-        read(wq_char,*) coord_d0
-        call getarg(i+2,wq_char)
-        read(wq_char,*) coord_r0
-        coord_lambda=1.d0/coord_r0
-        x10p=coord_d0+coord_r0*log(1.d0/f10p-1.d0)
-        x90p=coord_d0+coord_r0*log(1.d0/f90p-1.d0)
-        cycle
+         if(coordtype.eq.2) then
+            print'(a)', 'ERROR: coord type 1 and 2 are mutually esclusive !'
+            stop
+         endif
+         coordtype=1
+         call getarg(i+1,wq_char)
+         read(wq_char,*) coord_d0
+         call getarg(i+2,wq_char)
+         read(wq_char,*) coord_r0
+         coord_lambda=1.d0/coord_r0
+         x10p=coord_d0+coord_r0*log(1.d0/f10p-1.d0)
+         x90p=coord_d0+coord_r0*log(1.d0/f90p-1.d0)
+         cycle
       endif
-
+      ! Getting coordinance 2 parameters method and chosing it (sigmoid, fermi-dirac like function)
+      !----------------------------------------------------------------------------------------------        
       if(index(wq_char,'-coord2_param').ne.0)then
-        if(coordtype.eq.1) then
-          print'(a)', 'ERROR: coord type 1 and 2 are mutually esclusive !'
-          stop
-        endif
-        coordtype=2
-        call getarg(i+1,wq_char)
-        read(wq_char,*) coord_d0 
-        call getarg(i+2,wq_char)
-        read(wq_char,*) coord_r0 
-        call getarg(i+3,wq_char)
-        read(wq_char,*) coord_m 
-        call getarg(i+4,wq_char)
-        read(wq_char,*) coord_n 
-        cycle
+         if(coordtype.eq.1) then
+            print'(a)', 'ERROR: coord type 1 and 2 are mutually esclusive !'
+            stop
+         endif
+         coordtype=2
+         call getarg(i+1,wq_char)
+         read(wq_char,*) coord_d0 
+         call getarg(i+2,wq_char)
+         read(wq_char,*) coord_r0 
+         call getarg(i+3,wq_char)
+         read(wq_char,*) coord_m 
+         call getarg(i+4,wq_char)
+         read(wq_char,*) coord_n 
+         cycle
       endif
-
+      ! Option to not sort the PIV vector (saves time...)
+      !----------------------------------------------------------------------------------------------        
       call getarg(i,wq_char)
       if(index(wq_char,'-nosort').ne.0)then
-        sort=.false.
-        cycle
+         sort=.false.
+         cycle
       endif
-
+      ! Choosing clustering algorithm and if kmenoid, number of cluster to find
+      !----------------------------------------------------------------------------------------------        
       call getarg(i,wq_char)
       if(index(wq_char,'-algorithm').ne.0)then
-        call getarg(i+1,wq_char)
-        read(wq_char,*) algorithm
-        if(algorithm.gt.1) then
-          n_clusters=algorithm
-          algorithm=2
-        endif
-        cycle
+         call getarg(i+1,wq_char)
+         read(wq_char,*) algorithm
+         if(algorithm.gt.1) then
+            n_clusters=algorithm
+            algorithm=2
+         endif
+         cycle
       endif
-
+      ! Getting cut-off for daura cut-off method
+      !----------------------------------------------------------------------------------------------        
       if(index(wq_char,'-cutoff_daura').ne.0)then
-        call getarg(i+1,wq_char)
-        read(wq_char,*) cutoff 
-        cycle
+         call getarg(i+1,wq_char)
+         read(wq_char,*) cutoff 
+         cycle
       endif
-
+      ! Getting to cut-off for coefficent of matrix
+      !----------------------------------------------------------------------------------------------        
       if(index(wq_char,'-cutoff_clcoeff').ne.0)then
-        call getarg(i+1,wq_char)
-        read(wq_char,*) cutoff_clcoeff 
-        cycle
+         call getarg(i+1,wq_char)
+         read(wq_char,*) cutoff_clcoeff 
+         cycle
       endif
-
+      ! Restarting PIV from unfinished calculation 
+      !----------------------------------------------------------------------------------------------        
       call getarg(i,wq_char)
       if(index(wq_char,'-restart_piv').ne.0)then
-        restart_piv=.true.
-        cycle
+         restart_piv=.true.
+         cycle
       endif
-
+      ! Restarting Matrix from unfinished calculation
+      !----------------------------------------------------------------------------------------------        
       call getarg(i,wq_char)
       if(index(wq_char,'-restart_matrix').ne.0)then
-        restart_piv=.true.
-        restart_matrix=.true.
-        cycle
+         restart_piv=.true.
+         restart_matrix=.true.
+         cycle
       endif
-
+      ! Doing network analysis ( 2d Projection using damped dynamics ) 
+      !----------------------------------------------------------------------------------------------        
       call getarg(i,wq_char)
       if(index(wq_char,'-network_analysis').ne.0)then
-        network_analysis=.true.
-        cycle
+         network_analysis=.true.
+         cycle
       endif
-
+      ! Chosing to compute rdf function
+      !----------------------------------------------------------------------------------------------        
       call getarg(i,wq_char)
       if(index(wq_char,'-rdf').ne.0)then
-        do_rdf=.true.
-        rdf(:)=0.d0
-        cycle
+         do_rdf=.true.
+         rdf(:)=0.d0
+         cycle
       endif
+   enddo
+   !--------------------------------------------------------------------------------------------------
 
-    enddo
-
-    if(in_filetype.eq.0) then
+   ! Checks that an input file was specified
+   !----------------------------------------------------------------------------------------------        
+   if(in_filetype.eq.0) then
       print'(a)', 'ERROR: you must specify an in input trajectory file!'
       stop
-    endif
+   endif
+   !----------------------------------------------------------------------------------------------        
 
-    if((method.eq.2.or.method.eq.3).and.(coordtype.eq.0)) then
+   ! Checks that a coordination function has been choosen (if method distance or SPRINT)
+   !----------------------------------------------------------------------------------------------        
+   if((method.eq.2.or.method.eq.3).and.(coordtype.eq.0)) then
       print'(a)', 'ERROR: with method = 2 or 3 you must specify a coordination function !'
       stop
-    endif
-
-   ! print options
-   if(mpirank.eq.0) then
-     write(*,'(a)') '-----------------------------------------------'
-     if(in_filetype.eq.1) then
-       write(*,'(a,a)')         '-filexyz           ',trim(in_file)
-       write(*,'(a,3f9.3)')     '-bsize             ',box_size(1:3)
-     else
-       write(*,'(a,a)')         '-filepdb           ',trim(in_file)
-     endif
-     write(*,'(a,a)')         '-out               ',trim(out_file)
-     write(*,'(a,i12)')       '-array_size        ',ARRAY_SIZE
-     write(*,'(a,i1)')        '-method            ',method
-     if(coordtype.eq.1) then
-       write(*,'(a,2f8.4)')     '-coord1_param       ',coord_d0,coord_r0
-     endif
-     if(coordtype.eq.2) then
-       write(*,'(a,2f8.4,2i3)') '-coord2_param       ',coord_d0,coord_r0,coord_m,coord_n 
-     endif
-     write(*,'(a,l)')         '-nosort            ',.not.sort
-     write(*,'(a,i1)')        '-algorithm         ',algorithm
-     write(*,'(a,f8.4)')      '-cutoff_daura      ',cutoff
-     write(*,'(a,f8.4)')      '-cutoff_clcoeff    ',cutoff_clcoeff
-     write(*,'(a,l)')         '-network_analysis  ',network_analysis
-     write(*,'(a,l)')         '-restart_piv       ',restart_piv
-     write(*,'(a,l)')         '-restart_matrix    ',restart_matrix
-     write(*,'(a)') '-----------------------------------------------'
    endif
+   !----------------------------------------------------------------------------------------------        
 
+   ! On master worker, prints options
+   !---------------------------------------------------
+   if(mpirank.eq.0) then
+      write(*,'(a)') '-----------------------------------------------'
+      if(in_filetype.eq.1) then
+         write(*,'(a,a)')         '-filexyz           ',trim(in_file)
+         write(*,'(a,3f9.3)')     '-bsize             ',box_size(1:3)
+      else
+         write(*,'(a,a)')         '-filepdb           ',trim(in_file)
+      endif
+      write(*,'(a,a)')         '-out               ',trim(out_file)
+      write(*,'(a,i12)')       '-array_size        ',ARRAY_SIZE
+      write(*,'(a,i1)')        '-method            ',method
+      if(coordtype.eq.1) then
+         write(*,'(a,2f8.4)')     '-coord1_param       ',coord_d0,coord_r0
+      endif
+      if(coordtype.eq.2) then
+         write(*,'(a,2f8.4,2i3)') '-coord2_param       ',coord_d0,coord_r0,coord_m,coord_n 
+      endif
+      write(*,'(a,l)')         '-nosort            ',.not.sort
+      write(*,'(a,i1)')        '-algorithm         ',algorithm
+      write(*,'(a,f8.4)')      '-cutoff_daura      ',cutoff
+      write(*,'(a,f8.4)')      '-cutoff_clcoeff    ',cutoff_clcoeff
+      write(*,'(a,l)')         '-network_analysis  ',network_analysis
+      write(*,'(a,l)')         '-restart_piv       ',restart_piv
+      write(*,'(a,l)')         '-restart_matrix    ',restart_matrix
+      write(*,'(a)') '-----------------------------------------------'
+   endif
+   !---------------------------------------------------
+   
+   ! Cut-off for matrix if coordinance
+   !---------------------------------------------------
+   if(algorithm.eq.2) cutoff=1.d10
+   !---------------------------------------------------
 
-    if(algorithm.eq.2) cutoff=1.d10 
-    if(mpirank.eq.0) then
-
+   ! The master ranks prints information
+   !_------------------------------------------------------------------------------
+   if(mpirank.eq.0) then
+      ! If using using distances
+      !---------------------------------------------------
       if(method.eq.1) then
-        print'(a)', 'computing the frame-to-frame distance matrix based on cartesian distances'
+         print'(a)', 'computing the frame-to-frame distance matrix based on cartesian distances'
+      ! If using coordinance
+      !---------------------------------------------------
       elseif(method.eq.2) then
-        print'(a)', 'computing the frame-to-frame distance matrix based on coordination function ='
-        if(coordtype.eq.1) then
-          print'(a,f5.2,a,f5.2,a,f5.2,a,f4.1,a,f5.2,a,f4.1)', '  f(d)=1/(1+exp((d-d0)/r0)) d0=',coord_d0,', r0=',coord_r0,' so that f(',x90p,')=',f90p,' and f(',x10p,')=',f10p
-        endif
-        if(coordtype.eq.2) then
-          print'(a,f5.2,a,f5.2,a,i2,a,i2)', '  (1-x**m)/(1-x**n), x=(d-d0)/r0,  d0=',coord_d0,', r0=',coord_r0,', m=',coord_m,', n=',coord_n
-        endif
+         print'(a)', 'computing the frame-to-frame distance matrix based on coordination function ='
+         if(coordtype.eq.1) then
+            print'(a,f5.2,a,f5.2,a,f5.2,a,f4.1,a,f5.2,a,f4.1)', '  f(d)=1/(1+exp((d-d0)/r0)) d0=',coord_d0,', r0=',coord_r0,' so that f(',x90p,')=',f90p,' and f(',x10p,')=',f10p
+         endif
+         if(coordtype.eq.2) then
+            print'(a,f5.2,a,f5.2,a,i2,a,i2)', '  (1-x**m)/(1-x**n), x=(d-d0)/r0,  d0=',coord_d0,', r0=',coord_r0,', m=',coord_m,', n=',coord_n
+         endif
+      ! If method SPRINT
+      !----------------------------
       elseif(method.eq.3) then
-        print'(a)', 'computing the frame-to-frame distance matrix based on SPRINT, with coordination function ='
-        if(coordtype.eq.1) then
-          print'(a,f5.2,a,f5.2,a,f5.2,a,f4.1,a,f5.2,a,f4.1)', '  f(d)=1/(1+exp((d-d0)/r0)) d0=',coord_d0,', r0=',coord_r0,' so that f(',x90p,')=',f90p,' and f(',x10p,')=',f10p
-        endif
-        if(coordtype.eq.2) then
-          print'(a,f5.2,a,f5.2,a,i2,a,i2)', '  (1-x**m)/(1-x**n), x=(d-d0)/r0,  d0=',coord_d0,', r0=',coord_r0,', m=',coord_m,', n=',coord_n
-        endif
+         print'(a)', 'computing the frame-to-frame distance matrix based on SPRINT, with coordination function ='
+         if(coordtype.eq.1) then
+            print'(a,f5.2,a,f5.2,a,f5.2,a,f4.1,a,f5.2,a,f4.1)', '  f(d)=1/(1+exp((d-d0)/r0)) d0=',coord_d0,', r0=',coord_r0,' so that f(',x90p,')=',f90p,' and f(',x10p,')=',f10p
+         endif
+         if(coordtype.eq.2) then
+            print'(a,f5.2,a,f5.2,a,i2,a,i2)', '  (1-x**m)/(1-x**n), x=(d-d0)/r0,  d0=',coord_d0,', r0=',coord_r0,', m=',coord_m,', n=',coord_n
+         endif
+      !-------------------------------------
       else
-        print'(a)', 'ERROR: no such method'
-        stop
+         ! If method is different than 1,2 or 3, exit...
+         print'(a)', 'ERROR: no such method'
+         stop
       endif
+      !--------------------------------------
 
+      !-------------------------------------
+      ! Print information about sorting PIV 
+      !-----------------------------------------------------------------
       if(sort) then
-        print'(a)', 'sorting the PIV to remove the permutation symmetry'
+         print'(a)', 'sorting the PIV to remove the permutation symmetry'
       else
-        print'(a)', 'not sorting: clusters will distinguish equivalent structures with different labelling'
+         print'(a)', 'not sorting: clusters will distinguish equivalent structures with different labelling'
       endif
+      !-----------------------------------------------------------------
 
+      ! Print information about the clustering method
+      !-----------------------------------------------------------------
       if(algorithm.eq.1) then
-        print'(a,f10.6)', 'clustering with the daura algorithm: cutoff =',cutoff
+         print'(a,f10.6)', 'clustering with the daura algorithm: cutoff =',cutoff
       elseif(algorithm.eq.2) then
-        print'(a,i4)', 'clustering with the kmedoids algorithm: N_clusters = ', N_clusters
+         print'(a,i4)', 'clustering with the kmedoids algorithm: N_clusters = ', N_clusters
       else
-        print'(a)', 'ERROR: no such method for clustering'
-        stop
+         print'(a)', 'ERROR: no such method for clustering'
+         stop
       endif
+      !-----------------------------------------------------------------
 
-      if(cutoff_clcoeff>0.d0) print'(a,f10.6)', 'cutoff for computation of clustering coefficients =',cutoff_clcoeff      
+      ! Prints various informations
+      !-----------------------------------------------------------------
+      if(cutoff_clcoeff>0.d0) print'(a,f10.6)', 'cutoff for computation of clustering coefficients =',cutoff_clcoeff 
       if(restart_piv) print'(a)',"restarting with PIV in PIV.*"
       if(restart_matrix)   print'(a)',"restarting with the matrix in FRAME_TO_FRAME.MATRIX"
       if(network_analysis) print'(a)',"performing analysis of the network and printing file network.svg"
+      !-----------------------------------------------------------------
+   endif
+   !-----------------------------------------------------------------
 
-    endif 
-
-!=========================== INITIALIZATON AND TRAJECTORY ======================
-
-    if(mpirank.eq.0) then
+   !-------------------------
+   ! Prints starting method
+   !-----------------------------------------------------------------
+   if(mpirank.eq.0) then
       write(*,*) 
       write(*,*) "*** initialization ***"
       write(*,*) 
-    endif
+   endif
+   !-----------------------------------------------------------------
 
-!--------------- reading trajectory ------------------------
-    if(mpirank.eq.0) write(*,*) "reading trajectory..."
-    open(read101,file=in_file,status="old")
-    if (in_filetype.eq.1) then ! ----- xyz
+
+   !=========================== INITIALIZATON AND TRAJECTORY ======================
+   !--------------- reading trajectory ------------------------
+   if(mpirank.eq.0) write(*,*) "reading trajectory..."
+   open(read101,file=in_file,status="old")
+   if (in_filetype.eq.1) then ! ----- xyz
       read(read101,*),n_atoms
       n_steps=get_n_lines(read101)
       n_steps=n_steps/(n_atoms+2)
       allocate(atom_positions(n_steps,n_atoms,3),comments(n_steps),spec(n_atoms),spec0(n_atoms))
 !      if(mpirank.eq.0) then
-        do n=1,n_steps
-          read(read101,*),
-          read(read101,'(a)'),comments(n)
-          do i=1,n_atoms
+      do n=1,n_steps
+         read(read101,*),
+         read(read101,'(a)'),comments(n)
+         do i=1,n_atoms
             read(read101,*), spec(i),(atom_positions(n,i,k),k=1,N_dim)
             if (n.eq.1) then
-              spec0(i)=spec(i)
+               spec0(i)=spec(i)
             else
-              if (spec(i).ne.spec0(i)) then
-                write(*,*) "ERROR: mismatch of elements"
-                write(*,'(a,i9,a,i6,2x,a)') "frame ",1," : atom ",i,spec0(i)
-                write(*,'(a,i9,a,i6,2x,a)') "frame ",n," : atom ",i,spec(i)
-                write(*,*) "you must have the same sequence of elements in each frame"
-                stop
-              endif
+               if (spec(i).ne.spec0(i)) then
+                  write(*,*) "ERROR: mismatch of elements"
+                  write(*,'(a,i9,a,i6,2x,a)') "frame ",1," : atom ",i,spec0(i)
+                  write(*,'(a,i9,a,i6,2x,a)') "frame ",n," : atom ",i,spec(i)
+                  write(*,*) "you must have the same sequence of elements in each frame"
+                  stop
+               endif
             endif
-          enddo
-        enddo
-!      endif
-    elseif (in_filetype.eq.2) then ! ----- pdb
-       ! format for each frame: CRYST1, MODEL, ATOM, CRYST1, MODEL, ATOM, ...
-       n_steps=0
-       n_cryst1=0
-       n_atoms=0
-       found=.false.
-       !----------------------------------------------
-       ! Count the number of structures, steps and atoms
-       !---------------------------------------------
-       do
-          read(read101,'(a80)',iostat=ios) line
-          if (ios/=0) exit
-          if (line(1:6).eq."CRYST1") n_cryst1=n_cryst1+1 ! number of crystal types...
-          if (line(1:5).eq."MODEL") n_steps=n_steps+1    ! number of steps...
-          if (line(1:4).eq."ATOM".and.n_steps.eq.1) n_atoms=n_atoms+1 ! number of atoms
-       enddo
-       !------------------------------------------------
-       ! Check that the format is ok
-       !------------------------------------------------
-       if (mpirank.eq.0.and.n_cryst1.ne.n_steps) then
-          write(*,*) "ERROR in pdb file: to each MODEL must correspond a CRYST1 (see manual)"
-          stop
-       endif
-       !-------------
-       ! Rewind file
-       !----------------
-       rewind(read101)
-       !----------------
-       !----------------------------
-       ! Allocate all data vectors
-       !----------------------------
-       allocate(atom_positions(n_steps,n_atoms,3),comments(n_steps),spec(n_atoms),spec0(n_atoms),cell(n_steps,6))
-       !----------------------------
-!      if(mpirank.eq.0) then
-        n=0
-        nn=0
-        ! Read the files 
-        do
-          read(read101,'(a80)',iostat=ios) line
-          if (ios/=0) exit
-          if (line(1:6).eq."CRYST1") then
+         enddo
+      enddo
+      !      endif
+   elseif (in_filetype.eq.2) then ! ----- pdb
+      ! format for each frame: CRYST1, MODEL, ATOM, CRYST1, MODEL, ATOM, ...
+      n_steps=0
+      n_cryst1=0
+      n_atoms=0
+      found=.false.
+      !----------------------------------------------
+      ! Count the number of structures, steps and atoms
+      !---------------------------------------------
+      do
+         read(read101,'(a80)',iostat=ios) line
+         if (ios/=0) exit
+         if (line(1:6).eq."CRYST1") n_cryst1=n_cryst1+1 ! number of crystal types...
+         if (line(1:5).eq."MODEL") n_steps=n_steps+1    ! number of steps...
+         if (line(1:4).eq."ATOM".and.n_steps.eq.1) n_atoms=n_atoms+1 ! number of atoms
+      enddo
+      !------------------------------------------------
+      ! Check that the format is ok
+      !------------------------------------------------
+      if (mpirank.eq.0.and.n_cryst1.ne.n_steps) then
+         write(*,*) "ERROR in pdb file: to each MODEL must correspond a CRYST1 (see manual)"
+         stop
+      endif
+      !-------------
+      ! Rewind file
+      !----------------
+      rewind(read101)
+      !----------------
+      !----------------------------
+      ! Allocate all data vectors
+      !----------------------------
+      allocate(atom_positions(n_steps,n_atoms,3),comments(n_steps),spec(n_atoms),spec0(n_atoms),cell(n_steps,6))
+      !----------------------------
+      !      if(mpirank.eq.0) then
+      n=0
+      nn=0
+      ! Read the files 
+      do
+         read(read101,'(a80)',iostat=ios) line
+         if (ios/=0) exit
+         if (line(1:6).eq."CRYST1") then
             nn=nn+1
             read(line(7:),*) cell(nn,1:6)
-          endif
-          if (line(1:5).eq."MODEL") then
+         endif
+         if (line(1:5).eq."MODEL") then
             n=n+1
             read(line(6:),'(a)') comments(n)
             i=0
-          endif
-          if (line(1:4).eq."ATOM") then
+         endif
+         if (line(1:4).eq."ATOM") then
             i=i+1      
             read(line(13:16),*) spec(i)
             read(line(31:54),*) (atom_positions(n,i,k),k=1,N_dim)
             if (n.eq.1) then
-              spec0(i)=spec(i)
+               spec0(i)=spec(i)
             else
-              if (spec(i).ne.spec0(i)) then
-                write(*,*) "ERROR: mismatch of elements"
-                write(*,'(a,i9,a,i6,2x,a)') "frame ",1," : atom ",i,spec0(i)
-                write(*,'(a,i9,a,i6,2x,a)') "frame ",n," : atom ",i,spec(i)
-                write(*,*) "you must have the same sequence of elements in each frame"
-                stop
-              endif
+               if (spec(i).ne.spec0(i)) then
+                  write(*,*) "ERROR: mismatch of elements"
+                  write(*,'(a,i9,a,i6,2x,a)') "frame ",1," : atom ",i,spec0(i)
+                  write(*,'(a,i9,a,i6,2x,a)') "frame ",n," : atom ",i,spec(i)
+                  write(*,*) "you must have the same sequence of elements in each frame"
+                  stop
+               endif
             endif
-          endif
-        enddo
-!      endif
-    endif
-    close(read101)
-    
+         endif
+      enddo
+      !      endif
+   endif
+   close(read101)
+   
 #ifdef MPI
-    !    call MPI_Bcast(atom_positions,N_steps*N_atoms*N_dim,MPI_double_precision,0,MPI_COMM_WORLD,mpierror)
+   !    call MPI_Bcast(atom_positions,N_steps*N_atoms*N_dim,MPI_double_precision,0,MPI_COMM_WORLD,mpierror)
 #endif
-    
-    ! If no parallelizationm prints technical stuff
-    !------------------------------------------------------
-    if(mpirank.eq.0) then
-       print '(a,a,i6,a,i8)', trim(in_file)," has N_atoms =",N_atoms," N_steps =",N_steps
-    endif
-    !------------------------------------------------------
-
-    !--------------------------------------------------------------
-    ! Compute size of vector (N*(N-1))/2 except for SPRINT where N
-    !--------------------------------------------------------------
-    if(method.eq.1 .or. method.eq.2 .or. method.eq.4)then
-       vec_size=N_atoms*(N_atoms-1)/2 
-    else
-       vec_size=N_atoms
-    endif
-    !--------------------------------------------------------------
-    
-    !------------------------------------
-    ! if no parallelization
-    !-------------------------------------
-    if(mpirank.eq.0) then
-       ! If the size of the memory is too big, then use alternative slow method
-       if( (N_steps*N_atoms*(N_atoms-1)/2.gt.ARRAY_SIZE) .and. (N_steps*N_steps).gt.ARRAY_SIZE) then
-          ! Warning that the program is going slow or quit
-          print'(a)', 'WARNING: You probably are going to run out of memory.. Stopping there !'
-          ! Quitting
-          stop
-       endif
-       ! Prints Matrix related stuff
-       print '(a,i10,a,i10,a,i14)', 'PIV is going to be  ',N_steps,' x',vec_size,' =',N_steps*vec_size
-       print '(a,i10,a,i10,a,i14)', 'frame-to-frame distance matrix is going to be     ',N_steps,' x',N_steps,' =',N_steps*N_steps
-    endif
-    !--------------------------------------
-
-    !--------------------------------
-    ! Compute max and min value in v
-    !---------------------------------------------
-    if(method.eq.1)then
+   
+   ! If no parallelizationm prints technical stuff
+   !------------------------------------------------------
+   if(mpirank.eq.0) then
+      print '(a,a,i6,a,i8)', trim(in_file)," has N_atoms =",N_atoms," N_steps =",N_steps
+   endif
+   !------------------------------------------------------
+   
+   !--------------------------------------------------------------
+   ! Compute size of vector (N*(N-1))/2 except for SPRINT where N
+   !--------------------------------------------------------------
+   if(method.eq.1 .or. method.eq.2 .or. method.eq.4)then
+      vec_size=N_atoms*(N_atoms-1)/2 
+   else
+      vec_size=N_atoms
+   endif
+   !--------------------------------------------------------------
+   
+   !------------------------------------
+   ! if no parallelization
+   !-------------------------------------
+   if(mpirank.eq.0) then
+      ! If the size of the memory is too big, then use alternative slow method
+      if( (N_steps*N_atoms*(N_atoms-1)/2.gt.ARRAY_SIZE) .and. (N_steps*N_steps).gt.ARRAY_SIZE) then
+         ! Warning that the program is going slow or quit
+         print'(a)', 'WARNING: You probably are going to run out of memory.. Stopping there !'
+         ! Quitting
+         stop
+      endif
+      ! Prints Matrix related stuff
+      print '(a,i10,a,i10,a,i14)', 'PIV is going to be  ',N_steps,' x',vec_size,' =',N_steps*vec_size
+      print '(a,i10,a,i10,a,i14)', 'frame-to-frame distance matrix is going to be     ',N_steps,' x',N_steps,' =',N_steps*N_steps
+   endif
+   !--------------------------------------
+   
+   !--------------------------------
+   ! Compute max and min value in v
+   !---------------------------------------------
+   if(method.eq.1)then
        ! Min distance is 0
-       min_v=0.d0
-       if (pbc_type.eq.1) then
-          ! If orthomrombic
-          max_v=dsqrt(3.d0)*maxval(box_size)/2.d0
-       else
-          ! Else...
-          max_v=sum(cell(n,1:3))/2.d0 ! empirical ...
-       endif
-    elseif(method.eq.2 .or. method.eq.4)then
-       ! 1 - linked, 0 - not linked.
-       min_v=0.d0
-       max_v=1.d0
-    elseif(method.eq.3)then
+      min_v=0.d0
+      if (pbc_type.eq.1) then
+         ! If orthomrombic
+         max_v=dsqrt(3.d0)*maxval(box_size)/2.d0
+      else
+         ! Else...
+         max_v=sum(cell(n,1:3))/2.d0 ! empirical ...
+      endif
+   elseif(method.eq.2 .or. method.eq.4)then
+      ! 1 - linked, 0 - not linked.
+      min_v=0.d0
+      max_v=1.d0
+   elseif(method.eq.3)then
        ! SPRINT Method max
-       min_v=0.d0
-       max_v=max_sprint
-    endif
-    !---------------------------------------------
-
-    !---------
-    ! SPECIES
-    !---------------------------------------------
+      min_v=0.d0
+      max_v=max_sprint
+   endif
+   !---------------------------------------------
+   
+   !---------
+   ! SPECIES
+   !---------------------------------------------
     allocate(n2s(N_atoms))
     allocate(n2t(N_atoms))
     max_s=N_atoms
