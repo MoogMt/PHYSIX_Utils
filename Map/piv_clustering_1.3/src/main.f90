@@ -680,15 +680,25 @@ program clustering_dmsd
   allocate(n2t(N_atoms))    ! Names of species
   allocate(s2n(max_s,N_atoms)) ! Specie Matrix?
   !-----------------------------------------------------------------------------
+
+  !-------------------------------------
   ! Getting all different species in box
   !------------------------------------------------------
   nat_spec(:)=0 ! index specie
   ns=0          ! dummy var
   ! Loop over all atoms
+  !------------------------------------------------------------------------------------
   do i=1,N_atoms
-     ! Flag 
+     
+     !---------------------------
+     ! Initialize existence flag
+     !---------------------------
      in=.false.
+     !---------------------------
+
+     !----------------------------------------
      ! Loop over all already existing species
+     !---------------------------------------------------
      do is=1,ns
         ! If specie already exists...
         if(s(is).eq.spec(i)) then
@@ -704,7 +714,11 @@ program clustering_dmsd
            s2n(is,nat_spec(is))=i
         endif
      enddo
+     !----------------------------------------------------
+
+     !---------------------------
      ! If specie does not exists
+     !-----------------------------------------
      if(.not. in ) then
         ! Increments the size
         ns=ns+1
@@ -719,26 +733,63 @@ program clustering_dmsd
         ! Specie Matrix?
         s2n(ns,nat_spec(ns))=i
      endif
+     !------------------------------------------
+     
   enddo
-  !---------------------------------------------
+  !---------------------------------------------------------------------------------------
 
-  ! If Methods Relying on BIG ASS PIV (method 4? ??? ) 
-  if(method.eq.1.or.method.eq.2.or.method.eq.4)then
-     ! GROUPS (group formed by the pairs of all atoms of species i and of species j)
+  !---------------
+  ! Making groups
+  !------------------------------------------------------------------------------------------
+  ! A group is formed by the pairs of all atoms of species i and of species j), necessary
+  ! only if using PIV, not for SPRINT
+  !------------------------------------------------------------------------------------------
+  if( method .eq. 1 .or. method .eq. 2 )then
+
+     !--------------------------
+     ! Maximum size for a group
+     !-----------------------------
      max_g=ns*(ns+1)/2
      max_gs=N_atoms*(N_atoms-1)/2
+     !-----------------------------
+
+     !----------------------------
+     ! Allocating for group pairs
+     !--------------------------------
      allocate(s2g(ns,ns))
      allocate(g2s(max_g,max_g))
      allocate(n2g(N_atoms,N_atoms,2))
      allocate(g2n(max_g,max_gs,2))
      allocate(gs(max_g))
-     s2g=-1
-     ng=0
+     !--------------------------------
+
+     !---------------------
+     ! Initialize variables
+     !------------------------------
+     s2g=-1    ! ?
+     ng=0      ! Number of groups
+     !------------------------------
+
+     !-------------------
+     ! Computing groups
+     !----------------------------------------------------------------------------
      do i=1,N_atoms-1
+
+        !----------
         is=n2s(i)
+        !----------
+
+        !
+        !------------------------------------------------------------------
         do j=i+1,N_atoms
+           !---------------------------
+           ! Initialize flag and dummy
+           !---------------------------
            js=n2s(j)
            in=.false.
+           !----------------------------
+           
+           !------------------------------------------------------------
            do ig=1,ng
               if( (s2g(is,js).eq.ig) .or. (s2g(js,is).eq.ig) ) then
                  in=.true.
@@ -749,6 +800,9 @@ program clustering_dmsd
                  g2n(ig,gs(ig),2)=j
               endif
            enddo
+           !------------------------------------------------------------
+
+           !------------------------
            if(.not.in) then
               ng=ng+1
               s2g(is,js)=ng
@@ -759,32 +813,63 @@ program clustering_dmsd
               g2n(ng,1,2)=j
               gs(ng)=1
            endif
+           !-----------------------
+           
         enddo
+        !--------------------------------------------------------------------
+        
      enddo
-
-
+     !-----------------------------------------------------------------------------------
+     
+     !-------------------------------------------------------------------------------------------------------------------------
      ! From here we have gs(ig) (the group size) and g2n(ig,gs,2) which associates ig (group id) and gs (instance in group ig)
      ! - with the atom pair (2) i,j (where i,j are the index of the atom in the original xyz file)
      ! - Therefore we only need to loop overall groups and over the group size in each group to compute all-to-all distance matrix
      ! - and arrange it in vector of distance like vector=( (distances species1-species1)  (distances species1-species2) ... (distances species2-species3) ...  )
      ! - which is easy to sort over
+     !--------------------------------------------------------------------------------------------------------------------------
 
-     vec_size=0 ! the number of pairs nat*(nat-1)/2
+     !-------------------------------------
+     ! Vector size for the computing pairs
+     !------------------------------------------------------------------------
+     ! Number of Pairs
+     vec_size=0   
+     ! Loop over the number of groups?
      do ig=1,ng
+        !------------------------------------------------
+        ! For the main worker write the group information
+        !-------------------------------------------------------------------------
         if(mpirank.eq.0) then
            print'(a6,i3,a3,a4,a3,a4,a6,i7,a12,$)'," group ",ig," (",trim(adjustl(s(g2s(ig,1))))," - ",adjustl(s(g2s(ig,2))),") has ",gs(ig)," atom pairs"
            print*
         endif
-        vec_size=vec_size+gs(ig)
+        !-------------------------------------------------------------------------
+
+        !-------------------------------
+        ! Add group size to total size
+        !-------------------------------
+        vec_size = vec_size + gs(ig)
+        !-------------------------------
      enddo
-
+     !------------------------------------------------------------------------
+     
   endif
-  ! for sprint we do not need groups, only species.
+  !------------------------------------------------------------------------------------------
 
-  !===================== CONVERT TRAJECTORY INTO PIV =========
+  !---------------
+  ! Computing PIV
+  !---------------------------------------------------------------------------------------------------------------------------
   if(.not.restart_piv) then
 
+     !----------------------------------
+     ! Writing in file for each worker
+     !-----------------------------------
      write(svf_name,*),mpirank+1
+     !-----------------------------------
+
+     !-----------------------------------
+     ! ??? Name of the file to write in
+     !------------------------------------------------------------
      svf_name=trim(adjustl(svf_basename))//trim(adjustl(svf_name))
 #ifdef STREAM
      open(unit=svu_write+mpirank,file=trim(adjustl(svf_name)),form='unformatted', access='stream')
@@ -794,18 +879,30 @@ program clustering_dmsd
      endif
      open(unit=svu_write+mpirank,file=trim(adjustl(svf_name)),form='unformatted', access='direct',recl=vec_size*sizeofshortint )
 #endif
+     !-----------------------------------------------------------------
 
+     !----------------------------------------
+     ! Sending information that computing PIV
+     !-----------------------------------------------------
      if(mpirank.eq.0) then
         write(*,*) 
         write(*,*) "*** trajectory ***"
         write(*,*) 
         print '(a,$)', 'computing PIV for each frame...'
      endif
+     !-----------------------------------------------------
 
+     !----------------------------------------------
+     ! Allocate for distance, position and v_matrix
+     !-----------------------------------------------
      allocate(v_to_write(vec_size))  
      allocate(r(N_atoms,N_dim))
      allocate(dr(N_dim))
-
+     !-----------------------------------------------
+     
+     !---------------------------------------------
+     ! If SPRINT Allocation for vector of size N
+     !---------------------------------------------
      if(method.eq.3)then
         allocate(contacts(N_atoms,N_atoms))
         allocate(v(N_atoms))
@@ -814,23 +911,45 @@ program clustering_dmsd
         allocate(vsorted(N_atoms))
         allocate(n2o(N_atoms))
      endif
+     !----------------------------------------------
 
-     n_record=0
-     progress_bar=-1
+     !----------------------------------------------
+     n_record=0        ! For parallel computation
+     progress_bar=-1   ! Progress along calculation
+     !----------------------------------------------
 
-     do n=1,n_steps ! loop over steps
+     !-----------------
+     ! Loop Over Steps
+     !----------------------------------------------------------------------------------------------------------------
+     do n=1,n_steps
 
+        !----------------------------------
+        ! Computinng and printing progress
+        !------------------------------------------------------------------------------------
         if((mpirank.eq.0).and.(n_steps.gt.20)) then
            if (mod(n,n_steps/20).eq.0) print '(i3,a,$)',nint(dble(100*n)/dble(n_steps)),"%"
         endif
+        !------------------------------------------------------------------------------------
 
+        !------------------------------
+        ! Initialization of distances
+        !------------------------------
         r(:,:)=atom_positions(n,:,:)
+        !-------------------------------
 
-        ! build h matrix for pbc
+        !---------------------------------------------
+        ! Building H Matrix for PBC (non orthorombic)
+        !------------------------------------------------------------------------------------------------------------
         if (pbc_type.eq.2) then
+
+           !-------------------------------------
            cell(n,4:6)=dcos(cell(n,4:6)*deg2pi)
            cell(n,2:3)=cell(n,2:3)/cell(n,1)
-           ! compatiblity between angle
+           !-------------------------------------
+
+           !-------------------------------------
+           ! Testing compatiblity between angle
+           !------------------------------------------------------------------------
            if (acos(cell(n,4))+acos(cell(n,5)).lt.acos(cell(n,6))) then
               write(*,*) 'error: alpha + beta < gamma'
               stop
@@ -841,6 +960,11 @@ program clustering_dmsd
               write(*,*) 'error: gamma + alpha < beta'
               stop
            endif
+           !------------------------------------------------------------------------
+           
+           !---------------------
+           ! Computing H matrix
+           !--------------------------------------------------------------------------------
            h(:,:)=0.d0
            tmpr=dsqrt(1.d0-cell(n,6)**2)
            h(1,1)=cell(n,1)
@@ -850,38 +974,99 @@ program clustering_dmsd
            h(3,2)=cell(n,1)*cell(n,3)*(cell(n,4)-cell(n,5)*cell(n,6))/tmpr
            tmpr=(1.d0+2.d0*cell(n,4)*cell(n,5)*cell(n,6)-cell(n,4)**2-cell(n,5)**2-cell(n,6)**2)
            h(3,3)=cell(n,1)*cell(n,3)*dsqrt(tmpr/(1.d0-cell(n,6)**2))
+           !----------------------------------------------------------------------------------
+
+           !--------------------------------------------------------------------------
            ! note: here h contains vectors a b c as row vectors, not column vectors! 
            ! So we transpose to get back column vectors.
+           !--------------------------------------------------------------------------
            h=transpose(h)
+           !---------------
+
+           !--------------
+           ! Inverting H
+           !-------------------------------------
            call invert(h,hi,ok_invert,volume)
-           ! Keep v0 to rescale for PIV
-           if ( n .eq. 1 ) then
+           !-------------------------------------
+           
+           !---------------------------------------------
+           ! Keeping the memory of volume0 for rescaling
+           !------------------------------------------------------
+           if ( n .eq. 1 .and. rescale ) then
               volume0 = volume
            endif
+           !-------------------------------------------------------
+
+           !------------------------------------------------------
+           ! If there is a problem in the inversion of cell matrix
+           !-------------------------------------------------------------------
            if (.not.ok_invert) then
               write(*,*) 'ERROR: impossible to invert h matrix (it is singular)'
               stop
            endif
+           !--------------------------------------------------------------------
+
+           !----------------
+           ! Debug for cell
+           !---------------------------------------------------------
            ! write(99,'(3f8.3,10x,3f8.3)') h(1,:),hi(1,:) ! debug
            ! write(99,'(3f8.3,10x,3f8.3)') h(2,:),hi(2,:) ! debug
            ! write(99,'(3f8.3,10x,3f8.3)') h(3,:),hi(3,:) ! debug
+           !---------------------------------------------------------
+
         endif
+        !--------------------------------------------------------------------------------------------------------
 
-        if(method.eq.1.or.method.eq.2.or.method.eq.4)then ! >>> use pairs (distances or coordination functions)
-
+        !--------------------------------------------------
+        ! Computing contact matrix, either PIV or SPRINT
+        !----------------------------------------------------------------------------------------------------
+        if( method .eq. 1 .or. method .eq. 2 ) then
+           !---------------------------------------
+           ! Compute PIV
+           !--------------------------------------------------------------------------------------------------
+           ! >>> use pairs (distances or coordination functions)
+           !--------------------------------------------------------------------------------------------------
            if(mod(n-1,mpisize).eq.mpirank) then  ! ensuring that each proc computes the piv at a different step
+              !----
               np=1
+              !------
+              
+              !----------------------------
+              ! Compute node number
+              !-----------------------------
               n_record=n_record+1
+              !-----------------------------
+
+              ! Debug for MPI clock
               ! debug: call system_clock(tbeg0)
+
+              !------------------------------------------------------------------------------------
               do ig=1,ng
+
                  gsi=gs(ig)
+
+                 !-------------
+                 ! Debug Clock
+                 !---------------------------------
                  ! debug: call system_clock(tbeg)
+                 !---------------------------------
+
+                 !--------------------------------
+                 ! Cleaning previous allocations
+                 !-------------------------------------
                  if(allocated(v)) deallocate(v)
                  if(allocated(vint)) deallocate(vint)
                  if(allocated(n2o)) deallocate(n2o)
+                 !-------------------------------------
+                 
+                 !---------------
+                 ! Reallocating
+                 !--------------------------------------
                  allocate(v(gsi))
                  allocate(vint(gsi))
                  allocate(n2o(gsi))
+                 !--------------------------------------
+                 
                  ! debug: call system_clock(tend)
                  ! debug: tall=tall+(tend-tbeg)
 
@@ -989,13 +1174,29 @@ program clustering_dmsd
 
                  ! --- heavy loop (note: putting IF commands outside does not help, at least with -O3)
                  do i=1,gsi
+
+                    !--------
+                    ! Group
+                    !--------------
                     ii=g2n(ig,i,1)
                     jj=g2n(ig,i,2)
+                    !---------------
+
+                    !-------------
+                    ! Debug clock
+                    !---------------------------------
                     ! debug: call system_clock(tbeg)
-                    if (pbc_type.eq.1) then !IF
+                    !---------------------------------
+
+                    !--------------------------------
+                    ! Minimum image squared distance
+                    !------------------------------------
+                    if (pbc_type.eq.1) then
+                       ! Orthorombic
                        dr=r(ii,:)-r(jj,:)
                        dr=dr-box_size*nint(dr/box_size)
                     else
+                       ! Non Orthorombic
                        do k=1,3 ! scaled coords
                           s1(k)=sum(hi(k,:)*r(ii,:))
                           s2(k)=sum(hi(k,:)*r(jj,:))
@@ -1008,89 +1209,172 @@ program clustering_dmsd
                           dr(k)=sum(h(k,:)*ds(:))
                        enddo
                     endif
+                    !-----------------------------------
+
+                    !-------------
+                    ! Debug Clock
+                    !---------------------------------
                     ! debug: call system_clock(tend)
                     ! debug: tpbc=tpbc+(tend-tbeg)
                     ! debug: call system_clock(tbeg)
+                    !---------------------------------
+                    
+                    !----------
+                    ! Distance
+                    !----------------------------
                     d=dsqrt(dot_product(dr,dr))
+                    !----------------------------
+
+                    !-------------
+                    ! Debug clock
+                    !-----------------------------------
                     ! debug: call system_clock(tend)
                     ! debug: tsqr=tsqr+(tend-tbeg)
+                    !-----------------------------------
 
-                    ! ---rdf--- from 0 to 10A, resolution 0.05 A
+                    !-------------------------------------------------------
+                    ! Compute RDF from 0 to 10A with a resolution of 0.05A
+                    ! -----------------------------------------------------
                     if (do_rdf) then !IF
                        if (d<10.d0) then !IF
                           rdf(1+int(d*20.d0))=rdf(1+int(d*20.d0))+1.d0
                        endif
                     endif
-                    ! ---------
-                    ! If Rescale flag 
+                    ! ---------------------------------------------------------
+
+                    !--------------------------
+                    ! Rescaling between phase
+                    ! ------------------------------------
                     if ( rescale ) then
                        d = d*(volume0/volume)**0.33333333
                     endif
+                    ! ------------------------------------
+
+                    !------------
+                    ! Debug Clock
+                    !----------------------------------
                     ! debug: call system_clock(tbeg)
-                    if(method.eq.2) then !IF
-                       if(coordtype.eq.1) then !IF
+                    !----------------------------------
+
+                    !------------------------------
+                    ! Applying switching function
+                    !-------------------------------------------------------
+                    if(method.eq.2) then 
+                       if(coordtype.eq.1) then 
                           d=1.d0/(1.d0+dexp(coord_lambda*(d-coord_d0)))
                        else  
                           tmpr=(d-coord_d0)/coord_r0
                           d=(1.d0-tmpr**coord_m)/(1.d0-tmpr**coord_n)
                        endif
                     endif
+                    !--------------------------------------------------------
+
+                    !-------------
+                    ! Debug Clock
+                    !---------------------------------
                     ! debug: call system_clock(tend)
                     ! debug: tcoo=tcoo+(tend-tbeg)
+                    !---------------------------------
+
+                    !----------------
+                    ! Filling Matrix
+                    !----------------
                     v(i)=d
                     n2o(i)=i
+                    !----------------
+                    
                  enddo
-                 ! --- end of heavy loop
+                 !--------------------------------------------------------------------------------------
+                 ! End of heavy loop
+                 !-------------------
 
                  do i=1,gsi
                     vint(i)=real2shortint(v(i),max_v,min_v)
                  enddo
 
                  ! debug: call system_clock(tbeg)
+
+                 ! Sorting PIV
+                 !------------------------------------------------------------------
                  if(sort) then !IF
                     ! debug: write(99,*) "sizeofshortint,size(vint),minval(vint),maxval(vint) =",sizeofshortint,size(vint),minval(vint),maxval(vint)
                     ! debug: write(100+n,'(i12)') vint
                     call counting_sort(size(vint),vint,minval(vint),maxval(vint))
                     ! debug: write(200+n,'(i12)') vint
                  endif
+                 !------------------------------------------------------------------
+
+                 ! Debug Clock
+                 !---------------------------------
                  ! debug: call system_clock(tend)
                  ! debug: tsor=tsor+(tend-tbeg)
+                 !---------------------------------
 
+                 !--------------------------------------------------------------------
                  do i=1,gsi
                     v_to_write(np+i-1)=vint(i)
                  enddo
-
                  !                do i=1,gsi
                  !                  v_to_write(np+i-1)=real2shortint(v(i),max_v,min_v)
                  !                enddo
+                 !--------------------------------------------------------------------
 
+                 ! Number of group?
                  np=np+gsi
 
               enddo
+
+              ! Debug clock
+              !-----------------------------------
               ! debug: call system_clock(tend0)
               ! debug: ttot=ttot+(tend0-tbeg0)
+              !----------------------------------
+
+              
+              ! Record for restart
+              !---------------------------------------------
 #ifdef STREAM
               do j=1,vec_size
                  write(svu_write+mpirank) v_to_write(j)
               enddo
 #else
               write(svu_write+mpirank,rec=n_record) v_to_write
-#endif              
+#endif
+              !---------------------------------------------
            endif
 
         elseif(method.eq.3)then ! >>> use sprint
+           ! SPRINT Method
+           !---------------------------------------------------------------------------------------------------
+           if(mod(n-1,mpisize).eq.mpirank) then  ! Worker
+              
+              !--------------------
+              ! Number of worker
+              !------------------------
+              n_record = n_record+1
+              !-----------------------
 
-           if(mod(n-1,mpisize).eq.mpirank) then  ! ensuring that each proc computes the piv at a different step
-              n_record=n_record+1
-              ! contact matrix
-              contacts(:,:)=0.d0
+              !--------------------------
+              ! Compute Contact Matrix
+              !--------------------------------------------------------------
+              contacts(:,:)=0.d0 ! All at 0
+              ! Compute only the superior diagonal, faster
+              !--------------------------------------------------------------
               do i=1,N_atoms-1
+                 !------------------------------------------------------------
                  do j=i+1,N_atoms
-!!!!PBC!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
+
+                    ! Min Image Distance
+                    !---------------------------------------
+                    ! - Orthorombic PBC
+                    !----------------------------------------
                     if (pbc_type.eq.1) then
                        dr=r(i,:)-r(j,:)
                        dr=dr-box_size*nint(dr/box_size)
                     else
+                    !----------------------------------------
+                    ! - Non orthorombic PBC
+                    !----------------------------------------
                        do k=1,3 ! scaled coords
                           s1(k)=sum(hi(k,:)*r(i,:))
                           s2(k)=sum(hi(k,:)*r(j,:))
@@ -1103,30 +1387,62 @@ program clustering_dmsd
                           dr(k)=sum(h(k,:)*ds(:))
                        enddo
                     endif
+                    !---------------------------------------
+                    
+                    !----------------------------
+                    ! Compute distance
+                    !_---------------------------
                     d=dsqrt(dot_product(dr,dr))
+                    !----------------------------
 
-                    ! ---rdf--- from 0 to 10A, resolution 0.05 A
+                    !------------------------------------
+                    ! Compute RDF 0-10A, 0.05 Resolution
+                    !----------------------------------------------------
                     if (do_rdf) then !IF
                        if (d<10.d0) then !IF
                           rdf(1+int(d*20.d0))=rdf(1+int(d*20.d0))+1.d0
                        endif
                     endif
-                    ! ---------
+                    !----------------------------------------------------
 
+                    !------------------------------
+                    ! Applying switching function
+                    !--------------------------------------------------
                     if(coordtype.eq.1) then
                        d=1.d0/(1.d0+dexp(coord_lambda*(d-coord_d0)))
                     else  
                        tmpr=(d-coord_d0)/coord_r0
                        d=(1.d0-tmpr**coord_m)/(1.d0-tmpr**coord_n)
                     endif
+                    !--------------------------------------------------
+
+                    !---------------------
+                    ! Fill Matrix
+                    !---------------------
                     contacts(i,j)=d
-                    contacts(j,i)=d 
+                    contacts(j,i)=d
+                    !---------------------
+                   
                  enddo
+                 !-----------------------------------------------------------------
               enddo
-              ! compute non-sorted sprint
+              !---------------------------------------------------------------------
+
+              !-----------------
+              ! Compute SPRINT
+              !-------------------------------
               call sprint(N_atoms,contacts,v)
+              !-------------------------------
+
+              !-----------------------
+              ! Sort SPRINT or not...
+              !-------------------------------------------------------------
               if(sort)then
-                 ! first reorder species ...
+                 ! SORTING....
+                 
+                 !-------------------------------
+                 ! Reordering species
+                 !--------------------------------
                  i=0
                  do is=1,ns
                     do j=1,nat_spec(is)
@@ -1134,48 +1450,89 @@ program clustering_dmsd
                        vsorted(i)=v(s2n(is,j))
                     enddo
                  enddo
-                 ! ... then sort within each species
+                 !--------------------------------
+
+                 !--------------------------
+                 ! Sort within each species
+                 !------------------------------------------------------------------
                  do is=1,ns
-                    if(is.eq.1)then
-                       j=1
+
+                    if(is.eq.1) then
+                       j = 1
                     else
-                       j=sum(nat_spec(1:is-1))+1
+                       j = sum(nat_spec(1:is-1))+1
                     endif
+
                     do i=1,nat_spec(is)
-                       n2o(i)=i
+                       n2o(i) = i
                     enddo
+
                     vtmp(1:nat_spec(is))=vsorted(j:j+nat_spec(is)-1)
+                    
                     ! note: here we call quicksort over real array,
                     ! if it gets too slow switch to counting_sort as above...
                     call dlasrt2('I',nat_spec(is),vtmp,n2o,lapack_err)
-                    if(vtmp(nat_spec(is))>max_sprint)then
+                    
+                    !------------------------------------------------------------------
+                    ! Check that the size is not above the maximum SPRINT allowed size
+                    !------------------------------------------------------------------------------------
+                    if( vtmp(nat_spec(is)) > max_sprint )then
                        write(*,*) "ERROR: sprint > max_sprint. Increase max_sprint and recompile. Exiting."
                        stop
                     endif
+                    !------------------------------------------------------------------------------------
+
                     vsorted(j:j+nat_spec(is)-1)=vtmp(1:nat_spec(is))
+                    
                  enddo
+                 !------------------------------------------------------------------
+                 
               else
+                 
+                 ! Do not Sort
+                 !---------------
                  vsorted=v
+                 !---------------
+                 
               endif
+              !-------------------------------------------------------------
+
+              !--------------------
+              ! Debug for SPRINT
+              !----------------------------------------------------
               ! debug ! write(*,*) "SPRINT:"                     
-              ! debug ! write(*,'(1000f8.3)') vsorted(1:N_atoms) 
-              ! write integer vectors to files
+              ! debug ! write(*,'(1000f8.3)') vsorted(1:N_atoms)
+              !----------------------------------------------------
+
+              !--------------------------------
+              ! Write integer vectors to files
+              !------------------------------------------------------
               do i=1,N_atoms
                  v_to_write(i)=real2shortint(vsorted(i),max_v,min_v)
               enddo
+              !------------------------------------------------------
 #ifdef STREAM
+              ! - Writting V to restart
+              !------------------------------------------------------
               do j=1,vec_size
                  write(svu_write+mpirank) v_to_write(j)
               enddo
+              !------------------------------------------------------
 #else
+              !  - Writting V to restart
+              !------------------------------------------------------
               write(svu_write+mpirank,rec=n_record) v_to_write
+              !------------------------------------------------------
 #endif              
-           endif
+           endif ! End of thread
+           !-------------------------------------------------------------------------------------------------
+        endif ! End of method
+        !----------------------------------------------------------------------------------------------------
+     enddo ! Loop Over Step
+     !-------------------------------------------------------------------------------------------------------
 
-        endif ! if method
-
-     enddo ! loop over steps
-
+     ! Closing Files and cleaning up memory
+     !---------------------------------------
      close(svu_write+mpirank)
      if(allocated(v))deallocate(v)
      if(allocated(vint))deallocate(vint)
@@ -1183,9 +1540,14 @@ program clustering_dmsd
      if(allocated(vsorted))deallocate(vsorted)
      if(allocated(n2o))deallocate(n2o)
      deallocate(r,dr,v_to_write)
+     !---------------------------------------
+     
+  endif ! End of PIV computation
+  !------------------------------------------------------------------------------------------------------------
 
-  endif ! if not restart_piv
-
+  !-------------------
+  ! Cleaning up memory
+  !----------------------------------------------------
   deallocate(n2s,s,nat_spec,s2n)
   if(method.eq.1.or.method.eq.2.or.method.eq.4) then
      deallocate(s2g,g2s,n2g,g2n,gs)
@@ -1193,8 +1555,16 @@ program clustering_dmsd
   if(method.eq.3)then
      if(allocated(contacts))deallocate(contacts)
   endif
+  !----------------------------------------------------
 
+  !----------------------------------------
+  ! Trying to compute frame to frame matrix
+  !-------------------------------------------------------------------------------------------------------------
   if(.not.restart_matrix) then
+
+     !--------------------------
+     ! Tries to allocate matrix
+     !-------------------------------------------------------------------------------------------------------------
      if(nint(sqrt(dble(ARRAY_SIZE))).lt.nint(dble(ARRAY_SIZE)/dble(vec_size)))then
         max_frames=nint(sqrt(dble(ARRAY_SIZE)))
      else
@@ -1204,40 +1574,105 @@ program clustering_dmsd
 #ifdef MPI
      call MPI_Barrier(MPI_COMM_WORLD, mpierror)
 #endif
+     !-------------------------------------------------------------------------------------------------------------
+    
+     !-------------------------
+     ! Main Worker prints data
+     !-----------------------------------------------------------------------------------------------------------------------
      if(mpirank.eq.0) then
+        
+        !--------------
+        ! Debug Clock
+        !----------------------------------------------------------------------------------------------
         ! debug: write(*,*) 
         ! debug: write(*,'(a,6i7)') '*** timing pbc,sqr,coo,all,sor =',tpbc,tsqr,tcoo,tall,tsor,ttot
+        !----------------------------------------------------------------------------------------------
+
+        !------------------------
+        ! Number of frames read
+        !----------------------------------------------------------------------------------------------------------------------
         print*,' DONE'   ! From here we have n_frames vectors of size vec_size which is sorted wihtin each group of distance
         print '(a,i8)', 'max_frames read at a time', max_frames
+        !----------------------------------------------------------------------------------------------------------------------
+        
      endif
+     !-----------------------------------------------------------------------------------------------------------------------
 
-     !---rdf---
+     !----------------
+     ! Computing RDF 
+     !------------------------------------------------------------------------------------------------------------------
      if (do_rdf) then
+        
+        !-----------------------------------------------------------
+        ! Computing MPI RDF or just use the previously computed one
+        !----------------------------------------------------------------------------------------------------
 #ifdef MPI
         call MPI_Reduce(rdf, rdf_global, 200, MPI_DOUBLE_PRECISION, MPI_SUM, 0, MPI_COMM_WORLD, mpierror);
 #else
         rdf_global=rdf
 #endif
+        !----------------------------------------------------------------------------------------------------
+        
+        !-------------------------------------------
+        ! Main Worker prints compute and prints RDF
+        !--------------------------------------------------------------------------------------------------------------
         if (mpirank.eq.0) then
+
+           !--------------
+           ! Opening data
+           !---------------------------------------------------------------------------
            write(*,*)
-           write(*,*) "writing reduced distribution function to rdf.dat"
+           write(*,*) "writing reduced distribution function to rdf.dat" ! Output file
+           !-----------------------------------------------------------------------------
+           
+           !-------------------------------
+           ! Opening file to write RDF in
+           !-----------------------------------------
            open(345,file="rdf.dat",status="unknown")
+           !-----------------------------------------
+
+           !-------------------------------
+           ! Compute Volume if orthorombic
+           !-------------------------------------------------------------
            if (pbc_type.eq.1) volume=box_size(1)*box_size(2)*box_size(3)
-           write(345,*) '# r , g(r) , N(r).      volume=',volume
-           rdf_global=rdf_global*2.d0/dble(n_atoms*n_steps)
+           !-------------------------------------------------------------
+
+           !-------------------
+           ! Header of file
+           !---------------------------------------------------------------------------
+           write(345,*) '# r , g(r) , N(r).      volume=',volume           
+           !---------------------------------------------------------------------------
+           
+           !-----------
+           ! Init RDF
+           !---------------------------------------------------------------------
+           rdf_global=rdf_global*2.d0/dble(n_atoms*n_steps)                ! Compute rdf
            rdf_n=0.d0
+           !---------------------------------------------------------------------
+
+           !--------------------------------
+           ! Compute and write RDF to file
+           !----------------------------------------------------------------------------------------------------
            do i=1,200
               d=dble(i-1)*0.05
               tmpr=(4.d0*3.14159265d0/3.d0) * ((d+0.05)**3-d**3)
               rdf_n=rdf_n+rdf_global(i)
-              write(345,'(f8.3,2f16.3)') d,rdf_global(i)/(tmpr*dble(n_atoms)/volume),rdf_n
+              write(345,'(f8.3,2f16.3)') d,rdf_global(i)/(tmpr*dble(n_atoms)/volume),rdf_n  ! Write RDF to file
               ! note: here volume is that of the last frame, it can be a bad approximation if cell is not stable...
            enddo
+           !----------------------------------------------------------------------------------------------------
+
+           !-------------------------------
+           ! Closing File and exit message
+           !--------------------------------
            close(345)
            write(*,*) "DONE"
+           !----------------------------------
+           
         endif
+        !-----------------------------------------------------------------------------------------------------------------
      endif
-     !---------
+     !-----------------------------------------------------------------------------------------------------------------
 
 
      !==================== COMPUTE FRAME-TO-FRAME DISTANCE MATRIX ==================================
@@ -1246,7 +1681,8 @@ program clustering_dmsd
      allocate(v1(vec_size),v2(vec_size))
      allocate(reduced_piv1(max_frames,vec_size))
      allocate(reduced_piv2(max_frames,vec_size))
-     allocate(frame2frame(n_steps,n_steps)) !this way of doing is not appropriate for more than ~25'000 steps
+     allocate(frame2frame(n_steps,n_steps))
+     !this way of doing is not appropriate for more than ~25'000 steps
      !a fix is to write on disk as before or scatter and gather the matrices
      !the way is implemented now has to change !
 
@@ -1352,56 +1788,93 @@ program clustering_dmsd
      deallocate(n2t,atom_positions)
   else !from there we only carry the operations on 1 proc the endif is at the end of the program
      print*, ' DONE'
+
+     !------------------------------------------------------------------------------------------
      if(.not.restart_matrix) then
+
         print '(a,$)', 'writing to disk FRAME_TO_FRAME.MATRIX...'
+
         open(unit=write204, file = "FRAME_TO_FRAME.MATRIX")
+
         distmax=maxval(frame2frame)
+
         write(write204,'(i12,f20.10)') n_steps,distmax
+
         do i=1,n_steps
            do j=1,n_steps
               write(write204,'(f8.5,$)'),frame2frame(i,j)/distmax
            enddo
            write(write204,*),""
         enddo
+
         close(write204)
+        
         print*, ' DONE'
+        !-----------------------------------------------------------------------------------------
      else
+
         print '(a,$)', 'reading from disk FRAME_TO_FRAME.MATRIX...'
+
         allocate(frame2frame(n_steps,n_steps))
+
         open(unit=read104, file = "FRAME_TO_FRAME.MATRIX")
+
         read(read104,*) readnsteps,distmax
+
         if(readnsteps.ne.n_steps)then
            write(*,*) 'ERROR: mismatch between n_steps in FRAME_TO_FRAME.MATRIX and from trajectory. Exiting.'
            stop
+
         endif
+
         do i=1,n_steps
            read(read104,*) (frame2frame(i,j),j=1,n_steps)
         enddo
-        close(read104)
-        frame2frame=frame2frame*distmax
-        print*, ' DONE'
-     endif
 
-     ! ----- some output -----
+        close(read104)
+
+        frame2frame=frame2frame*distmax
+
+        print*, ' DONE'
+        
+     endif
+    if
+     !-------------------------------------------------------------------------------------------
+
+     !----------------------------------------
+     ! Printing information about structures
+     !-----------------------------------------------------------------------------------------------
      dista=sum(frame2frame(:,:))/dble(n_steps**2)
      dista2=sum(frame2frame(:,:)**2)/dble(n_steps**2)
      dista2=dsqrt(dista2-dista*dista)
      write(*,'(a,3f12.6)') ' aver, rmsd, max dist. between frames =',dista,dista2,distmax
+     !-------------------------------------------------------------------------------------------------
 
-     !==================== CLUSTERING ===============================================
-
+     !--------------
+     ! Clustering
+     !-----------------------------------------------------------------------------------------------------------------
+     ! Start message
+     !--------------------------------
      write(*,*) 
      write(*,*) "*** clustering ***"
-     write(*,*) 
-
+     write(*,*)
+     !---------------------------------
+     ! Clustering in itself
+     !---------------------------------------------------------------------------------------------------------------
      select case (algorithm)
+        ! Daura
      case (1)
         call daura_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff)
+        ! Kmenoid
      case (2)
         call kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members)
      end select
-
-     !--- computing clustering coefficients
+     !----------------------------------------------------------------------------------------------------------------
+     !-----------------------------------------------------------------------------------------------------------------
+     
+     !-------------------------------------
+     ! Computing clustering coefficients
+     !------------------------------------------------------------------------------------------------------------------------------------------------
      if (cutoff_clcoeff>0.d0) then
         allocate(clustering_coefficients(n_clusters))
         call compute_clustering_coefficients(frame2frame,n_steps, n_clusters,cluster_members,cluster_size, clustering_coefficients,cutoff_clcoeff)
@@ -1412,13 +1885,17 @@ program clustering_dmsd
         write(*,*)
         deallocate(clustering_coefficients)
      endif
-
-     !--- printing cluster structures
+     !------------------------------------------------------------------------------------------------------------------------------------------------
+     
+     !-------------------------------
+     ! Printing cluster structures
+     !------------------------------------------------------------------------------------------------------------------------------
      tmp_char=out_file
      print '(a,i8,a,i5)','we have identified ',n_clusters,' clusters, the biggest is of size ', cluster_size(1)
      print '(a,$)','printing cluster structures to files...'
      tot_acs=0
      open(unit=write202,file='centers.xyz')
+     !---------------------------------------------------------------------------------------------------------------------
      do k=1,n_clusters ! 
         write(out_file,*) k
         out_file=trim(tmp_char)//trim(adjustl(out_file))//'.xyz'
@@ -1449,10 +1926,18 @@ program clustering_dmsd
 
         close(write201)
      enddo
+     !---------------------------------------------------------------------------------------------------------------------------------
+     ! Closing file
+     !---------------
      close(write202)
+     ! Done Message
+     !---------------
      print '(a)',' DONE'
+     !------------------------------------------------------------------------------------------------------------------------------
 
-     !--- printing cluster network
+     !--------------------------
+     ! Prints cluster network
+     !----------------------------------------------------------------------
      if (network_analysis) then
         allocate(cluster_link(n_clusters,n_clusters))
         cluster_link=0
@@ -1479,17 +1964,28 @@ program clustering_dmsd
         call print_network(n_clusters,cluster_link)
         deallocate(cluster_link)
      endif
+     !----------------------------------------------------------------------------
 
      !--- cleaning up...
+     !---------------------------------------------------------------------------------------
      deallocate(cluster_centers,cluster_members,cluster_size,atom_positions,n2t,frame2frame)
+     !---------------------------------------------------------------------------------------
+
+     ! Exit message
+     !---------------------------------------
      write(*,*) 
      write(*,*) '*** end of program ***'
+     !---------------------------------------
 
-  endif !this is the end of the NODE 0
+  endif ! End for main worker
+  !-------------------------------------------------------------------------------------------------------------------------------------
+
+  !------------
+  ! Close MPI
+  !-------------------------------------
 #ifdef MPI
   call MPI_Finalize(mpierror)
 #endif
-
-
+  !-------------------------------------
 
 end program clustering_dmsd
