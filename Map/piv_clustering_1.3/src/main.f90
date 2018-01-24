@@ -481,17 +481,26 @@ program clustering_dmsd
    endif
    !-----------------------------------------------------------------
 
-
-   !=========================== INITIALIZATON AND TRAJECTORY ======================
-   !--------------- reading trajectory ------------------------
+   ! Read trajectory with master worker
+   !------------------------------------------------------------------
    if(mpirank.eq.0) write(*,*) "reading trajectory..."
    open(read101,file=in_file,status="old")
-   if (in_filetype.eq.1) then ! ----- xyz
+   ! Reads XYZ
+   if (in_filetype.eq.1) then
+      ! Get number of atoms
+      !-----------------------
       read(read101,*),n_atoms
+      !--------------------------
+      ! Get number of lines
+      !----------------------------
       n_steps=get_n_lines(read101)
       n_steps=n_steps/(n_atoms+2)
+      !---------------------------
+      ! Allocate vectors
+      !-----------------------------------------------------------------------------------------
       allocate(atom_positions(n_steps,n_atoms,3),comments(n_steps),spec(n_atoms),spec0(n_atoms))
-!      if(mpirank.eq.0) then
+      !-----------------------------------------------------------------------------------------
+      !      if(mpirank.eq.0) then
       do n=1,n_steps
          read(read101,*),
          read(read101,'(a)'),comments(n)
@@ -511,8 +520,11 @@ program clustering_dmsd
          enddo
       enddo
       !      endif
+   ! Reads PDB
    elseif (in_filetype.eq.2) then ! ----- pdb
       ! format for each frame: CRYST1, MODEL, ATOM, CRYST1, MODEL, ATOM, ...
+      ! Init steps, cell line, number of atoms, found?
+      !-----------------------------------------------
       n_steps=0
       n_cryst1=0
       n_atoms=0
@@ -580,12 +592,13 @@ program clustering_dmsd
       !      endif
    endif
    close(read101)
-   
+
+   ! Launch MPI broadcast of data
 #ifdef MPI
    !    call MPI_Bcast(atom_positions,N_steps*N_atoms*N_dim,MPI_double_precision,0,MPI_COMM_WORLD,mpierror)
 #endif
    
-   ! If no parallelizationm prints technical stuff
+   ! Prints number of atoms and steps
    !------------------------------------------------------
    if(mpirank.eq.0) then
       print '(a,a,i6,a,i8)', trim(in_file)," has N_atoms =",N_atoms," N_steps =",N_steps
@@ -602,9 +615,9 @@ program clustering_dmsd
    endif
    !--------------------------------------------------------------
    
-   !------------------------------------
-   ! if no parallelization
-   !-------------------------------------
+   !----------------------------------------------------
+   ! Checks is matrix size is ok and prints information
+   !-------------------------------------------------------------------------
    if(mpirank.eq.0) then
       ! If the size of the memory is too big, then use alternative slow method
       if( (N_steps*N_atoms*(N_atoms-1)/2.gt.ARRAY_SIZE) .and. (N_steps*N_steps).gt.ARRAY_SIZE) then
@@ -617,7 +630,7 @@ program clustering_dmsd
       print '(a,i10,a,i10,a,i14)', 'PIV is going to be  ',N_steps,' x',vec_size,' =',N_steps*vec_size
       print '(a,i10,a,i10,a,i14)', 'frame-to-frame distance matrix is going to be     ',N_steps,' x',N_steps,' =',N_steps*N_steps
    endif
-   !--------------------------------------
+   !-------------------------------------------------------------------------
    
    !--------------------------------
    ! Compute max and min value in v
@@ -643,40 +656,62 @@ program clustering_dmsd
    endif
    !---------------------------------------------
    
-   !---------
-   ! SPECIES
+   !--------------------------------
+   ! Get atomic species in the box
+   !---------------------------------------------------
+   max_s=N_atoms ! Maximum number of different species
+   !---------------------------------------------------
+   ! Allocate memory 
+   !-----------------------------------------------------------------------------
+   allocate(s(max_s))        ! Repertory of species for atoms
+   allocate(nat_spec(max_s)) ! Vector containing number of atoms per species
+   allocate(n2s(N_atoms))    ! Index of species 
+   allocate(n2t(N_atoms))    ! Names of species
+   allocate(s2n(max_s,N_atoms)) ! Specie Matrix?
+   !-----------------------------------------------------------------------------
+   ! Getting all different species in box
+   !------------------------------------------------------
+   nat_spec(:)=0 ! index specie
+   ns=0          ! dummy var
+   ! Loop over all atoms
+   do i=1,N_atoms
+      ! Flag 
+      in=.false.
+      ! Loop over all already existing species
+      do is=1,ns
+         ! If specie already exists...
+         if(s(is).eq.spec(i)) then
+            ! Indicates that specie exists
+            in=.true.
+            ! Add index of atom to specie listing
+            n2s(i)=is
+            ! Add name of atom to specie listing
+            n2t(i)=spec(i)
+            ! Increments number of aton for that specie
+            nat_spec(is)=nat_spec(is)+1
+            ! Update Specie Matrix
+            s2n(is,nat_spec(is))=i
+         endif
+      enddo
+      ! If specie does not exists
+      if(.not.in) then
+         ! Increments the size
+         ns=ns+1
+         ! Add specie to specie listing
+         s(ns)=spec(i)
+         ! Add one label for new specie
+         n2s(i)=ns
+         ! Add name to specie listing
+         n2t(i)=spec(i)
+         ! Increment number of atom for that specie
+         nat_spec(ns)=nat_spec(ns)+1
+         ! Specie Matrix?
+         s2n(ns,nat_spec(ns))=i
+      endif
+   enddo
    !---------------------------------------------
-    allocate(n2s(N_atoms))
-    allocate(n2t(N_atoms))
-    max_s=N_atoms
-    allocate(s(max_s))
-    allocate(nat_spec(max_s))
-    allocate(s2n(max_s,N_atoms))
-    nat_spec(:)=0
-    ns=0
-    do i=1,N_atoms
-       in=.false.
-       do is=1,ns
-          if(s(is).eq.spec(i)) then
-             in=.true.
-             n2s(i)=is
-             n2t(i)=spec(i)
-             nat_spec(is)=nat_spec(is)+1
-             s2n(is,nat_spec(is))=i
-          endif
-       enddo
-       
-       if(.not.in) then
-          ns=ns+1
-          s(ns)=spec(i)
-          n2s(i)=ns
-          n2t(i)=spec(i)
-          nat_spec(ns)=nat_spec(ns)+1
-          s2n(ns,nat_spec(ns))=i
-       endif
-    enddo
-    !---------------------------------------------
-    
+   
+   ! If Methods Relying on BIG ASS PIV (method 4? ??? ) 
     if(method.eq.1.or.method.eq.2.or.method.eq.4)then
        ! GROUPS (group formed by the pairs of all atoms of species i and of species j)
        max_g=ns*(ns+1)/2
@@ -736,7 +771,6 @@ program clustering_dmsd
   ! for sprint we do not need groups, only species.
   
   !===================== CONVERT TRAJECTORY INTO PIV =========
-  
   if(.not.restart_piv) then
      
      write(svf_name,*),mpirank+1
