@@ -55,6 +55,7 @@ program clustering_dmsd
   double precision,allocatable,dimension(:,:)::cell
   logical::in
   logical::rescale
+  logical::slow
   character(len=3),allocatable,dimension(:)::s,n2t
   integer::is,js,ns,max_s,ig,ng,max_g,max_gs,gsi,vec_size,np,iat
   integer,allocatable,dimension(:)::nat_spec
@@ -1690,7 +1691,9 @@ program clustering_dmsd
      allocate(v1(vec_size),v2(vec_size))
      allocate(reduced_piv1(max_frames,vec_size))
      allocate(reduced_piv2(max_frames,vec_size))
-     allocate(frame2frame(n_steps,n_steps))
+     if ( .not. slow ) then
+        allocate(frame2frame(n_steps,n_steps))
+     endif
      !---------------------------------------------
      !this way of doing is not appropriate for more than ~25'000 steps
      !a fix is to write on disk as before or scatter and gather the matrices
@@ -1781,7 +1784,7 @@ program clustering_dmsd
               !-------
               ! Index
               !------------------
-              real_stepi=m+i-1
+              real_stepi = m+i-1
               !-------------------
 
               !------------------
@@ -1829,8 +1832,12 @@ program clustering_dmsd
                           !------------------------------------------
                           ! Filling up the matrix
                           !-------------------------------------------
-                          frame2frame(real_stepi,real_stepj)=dmsd     ! - in which case frame2frame(m,n) takes the value of the dmsd; if they are not
-                          frame2frame(real_stepj,real_stepi)=dmsd     ! - frame2frame frame2frame(m,n) remains at 0.d0 (inital value)
+                          if ( .not. slow ) then
+                             frame2frame(real_stepi,real_stepj)=dmsd     ! - in which case frame2frame(m,n) takes the value of the dmsd; if they are not
+                             frame2frame(real_stepj,real_stepi)=dmsd     ! - frame2frame frame2frame(m,n) remains at 0.d0 (inital value)
+                          else
+                             write(313,*) real_stepi, real_stepj , dmsd
+                          endif
                           !-------------------------------------------
                           
                        endif
@@ -1895,22 +1902,26 @@ program clustering_dmsd
      !--------------------------
      ! Collecting matrix element 
      !---------------------------------------
-     allocate(frame2frame_save(n_steps,n_steps))
-     ! If MPI....
-#ifdef MPI
-     call MPI_Allreduce(frame2frame,frame2frame_save,n_steps*n_steps,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD, mpierror) ! Since every proc has either 0.d0 or the dmsd value
-     frame2frame=frame2frame_save                                                                                           ! - the sum of all the matrices on each proc will give the corrct matrix
-#else
-     ! If Serial
-     frame2frame_save=frame2frame
-#endif
-     !--------------------------------------------
+     if ( .not. slow ) then
      
-     !------------------
-     ! Cleaning memory
-     !--------------------------------------
-     deallocate(frame2frame_save)
-     !---------------------------------------
+        allocate(frame2frame_save(n_steps,n_steps))
+        ! If MPI....
+#ifdef MPI
+        call MPI_Allreduce(frame2frame,frame2frame_save,n_steps*n_steps,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD, mpierror) ! Since every proc has either 0.d0 or the dmsd value
+        frame2frame=frame2frame_save                                                                                           ! - the sum of all the matrices on each proc will give the corrct matrix
+#else
+        ! If Serial
+        frame2frame_save=frame2frame
+#endif
+
+        !--------------------------------------------
+        
+        !------------------
+        ! Cleaning memory
+        !--------------------------------------
+        deallocate(frame2frame_save)
+        !---------------------------------------
+     endif
      
   endif ! End of computation of matrix
   !-------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -1964,7 +1975,12 @@ program clustering_dmsd
         !-------------------------------------------
         ! Computing max distance from frame to frame
         !_----------------------------------------------
-        distmax=maxval(frame2frame)
+        if ( .not. slow ) then
+           distmax=maxval(frame2frame)
+        else
+           distmax=0
+           ! Read file
+        endif
         !_----------------------------------------------
 
         !-------------------------------
@@ -1976,16 +1992,21 @@ program clustering_dmsd
         !-------------------------------------------------------------------
         ! Writting frame to frame distances, normalized by max distances
         !-------------------------------------------------------------------
-        ! Loop over steps
-        do i=1,n_steps
+        if ( .not. slow ) then 
            ! Loop over steps
-           do j=1,n_steps
-              ! Writting
-              write(write204,'(f8.5,$)'),frame2frame(i,j)/distmax
+           do i=1,n_steps
+              ! Loop over steps
+              do j=1,n_steps
+                 ! Writting
+                 write(write204,'(f8.5,$)'),frame2frame(i,j)/distmax
+              enddo
+              ! Endline
+              write(write204,*),""
            enddo
-           ! Endline
-           write(write204,*),""
-        enddo
+        else
+           ! Read, normalize and write
+           write(204,'(f8.6,$)') , dist/distmax
+        endif
         !_------------------------------------------------------------------
 
         !---------------
@@ -2033,9 +2054,13 @@ program clustering_dmsd
      !----------------------------------------
      ! Printing information about structures
      !-----------------------------------------------------------------------------------------------
-     dista=sum(frame2frame(:,:))/dble(n_steps**2)
-     dista2=sum(frame2frame(:,:)**2)/dble(n_steps**2)
-     dista2=dsqrt(dista2-dista*dista)
+     if ( .not. slow ) then
+        dista=sum(frame2frame(:,:))/dble(n_steps**2)
+        dista2=sum(frame2frame(:,:)**2)/dble(n_steps**2)
+        dista2=dsqrt(dista2-dista*dista)
+     else
+        ! compute dista, etc....
+     endif
      write(*,'(a,3f12.6)') ' aver, rmsd, max dist. between frames =',dista,dista2,distmax
      !-------------------------------------------------------------------------------------------------
      
