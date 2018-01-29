@@ -569,7 +569,7 @@ program clustering_dmsd
      !      if(mpirank.eq.0) then
      n=0
      nn=0
-     ! Read the files 
+      ! Read the files 
      do
         read(read101,'(a80)',iostat=ios) line
         if (ios/=0) exit
@@ -992,9 +992,7 @@ program clustering_dmsd
            !---------------------------------------------
            ! Keeping the memory of volume0 for rescaling
            !------------------------------------------------------
-           if ( n .eq. 1 .and. rescale ) then
-              volume0 = volume
-           endif
+
            !-------------------------------------------------------
 
            !------------------------------------------------------
@@ -1013,10 +1011,16 @@ program clustering_dmsd
            ! write(99,'(3f8.3,10x,3f8.3)') h(2,:),hi(2,:) ! debug
            ! write(99,'(3f8.3,10x,3f8.3)') h(3,:),hi(3,:) ! debug
            !---------------------------------------------------------
-
+        else
+           ! for XYZ file
+           volume = box_size(1)*box_size(2)*box_size(3)
         endif
         !--------------------------------------------------------------------------------------------------------
 
+        if ( n .eq. 1 .and. rescale ) then
+           volume0 = volume
+        endif
+        
         !--------------------------------------------------
         ! Computing contact matrix, either PIV or SPRINT
         !----------------------------------------------------------------------------------------------------
@@ -1774,7 +1778,6 @@ program clustering_dmsd
            ! Loop Over frames
            !-------------------------------------------------------------------------------------------------------------------
            do i=1,max_frames
-
               !-------
               ! Index
               !------------------
