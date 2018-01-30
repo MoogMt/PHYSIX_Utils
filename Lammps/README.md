@@ -1,4 +1,4 @@
-## INSTALLATION AND COMPILATION ##
+## LAMNMPS INSTALLATION AND COMPILATION ##
 
 - If there is a bug in the compilation of LAMMPS + PLUMED, always get a new tarball
 
