@@ -12,7 +12,9 @@ make veryclean
 - On MeSU, it is necessary to add an intel lib for PLUMED or compilation will crash
 
 - On Ada:
+
   -> Always use the --with-scalapack="intel" option for ./configure or compilation will crash
+  
   -> Add latest gcc compiler module for PLUMED or compilation will crash
 
 Sometimes helps, as it uses scalapack from intel not mkl which tends to makes the compilation go banana
