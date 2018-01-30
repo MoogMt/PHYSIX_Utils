@@ -5,6 +5,8 @@ STUFF ABOUT INSTALLING QE:
 - NEVER use the -j N option when doing make plumed, this will make you think it does patch, when actually it does not...
 (lost lots of time due to this qwerk)
 
+- PLUMED does not work with QE for version 6.x onwards , revert to 5.x 
+
 - ALWAYS use the method "more is better" when loading modules. The more modules you load, the best chance you have to
 see the compilation suceed.
 
