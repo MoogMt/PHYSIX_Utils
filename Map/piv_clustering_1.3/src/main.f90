@@ -74,7 +74,8 @@ program clustering_dmsd
   double precision,allocatable,dimension(:,:)::r
 
   !frame-to-frame "distance" matrix
-  double precision::dmsd,distmax,dista,dista2
+  integer f2f_i, f2f_j
+  double precision::dmsd,distmax,dista,dista2,f2f_ij
   integer::real_stepi,real_stepj,readnsteps
   integer(kind=sizeofshortint),allocatable,dimension(:,:)::reduced_piv1,reduced_piv2
   double precision,allocatable,dimension(:)::v1,v2
@@ -148,6 +149,7 @@ program clustering_dmsd
         print'(a)', "[-network_analysis ] analyze the network formed by cluster centers, and plot it in network.svg"
         print'(a)', "[-rdf              ] save the total radial distribution function in file rdf.dat"
         print'(a)', "[-rescale          ] activates rescaling for phases with different volumes."
+        print'(a)', "[-slow             ] uses slow method to handle very very large data."
      endif
   endif
   ! If no argument, stops the program
@@ -166,6 +168,7 @@ program clustering_dmsd
   cutoff_clcoeff=0.d0
   in_filetype=0
   rescale = .false.
+  slow = .false.
   !-------------------------------------------------------
 
   !-----------------------
@@ -359,6 +362,13 @@ program clustering_dmsd
      call getarg(i,wq_char)
      if(index(wq_char,'-rescale').ne.0)then
         rescale=.true.
+        cycle
+     endif
+     ! Chosing slow
+     !----------------------------------------------------------------------------------------------        
+     call getarg(i,wq_char)
+     if(index(wq_char,'-slow').ne.0)then
+        slow=.true.
         cycle
      endif
   enddo
@@ -634,9 +644,9 @@ program clustering_dmsd
      ! If the size of the memory is too big, then use alternative slow method
      if( (N_steps*N_atoms*(N_atoms-1)/2.gt.ARRAY_SIZE) .and. (N_steps*N_steps).gt.ARRAY_SIZE) then
         ! Warning that the program is going slow or quit
-        print'(a)', 'WARNING: You probably are going to run out of memory.. Stopping there !'
-        ! Quitting
-        stop
+        print'(a)', 'WARNING: You probably are going to run out of memory.. using slow method !'
+        ! Activating slow
+        slow = .true.
      endif
      ! Prints Matrix related stuff
      print '(a,i10,a,i10,a,i14)', 'PIV is going to be  ',N_steps,' x',vec_size,' =',N_steps*vec_size
@@ -966,14 +976,23 @@ program clustering_dmsd
            !---------------------
            ! Computing H matrix
            !--------------------------------------------------------------------------------
+           ! Initialize to 0
            h(:,:)=0.d0
-           tmpr=dsqrt(1.d0-cell(n,6)**2)
+           ! h(1,1) = a 
            h(1,1)=cell(n,1)
+           ! h(2,1) = a*b*cos(gamma)
            h(2,1)=cell(n,1)*cell(n,2)*cell(n,6)
+           ! Compute sin(gamma) = sqrt(1-cos(gamma)**2)
+           tmpr=dsqrt(1.d0-cell(n,6)**2)
+           ! h(2,2) = a*b*sin(gamma)
            h(2,2)=cell(n,1)*cell(n,2)*tmpr
+           ! h(3,1) = a*c*cos(beta)
            h(3,1)=cell(n,1)*cell(n,3)*cell(n,5)
+           ! h(3,2) = a*c*sin(beta)
            h(3,2)=cell(n,1)*cell(n,3)*(cell(n,4)-cell(n,5)*cell(n,6))/tmpr
+           ! Compute something horrible
            tmpr=(1.d0+2.d0*cell(n,4)*cell(n,5)*cell(n,6)-cell(n,4)**2-cell(n,5)**2-cell(n,6)**2)
+           ! h(3,3) = a*c*something digusting
            h(3,3)=cell(n,1)*cell(n,3)*dsqrt(tmpr/(1.d0-cell(n,6)**2))
            !----------------------------------------------------------------------------------
 
@@ -990,12 +1009,6 @@ program clustering_dmsd
            call invert(h,hi,ok_invert,volume)
            !-------------------------------------
            
-           !---------------------------------------------
-           ! Keeping the memory of volume0 for rescaling
-           !------------------------------------------------------
-
-           !-------------------------------------------------------
-
            !------------------------------------------------------
            ! If there is a problem in the inversion of cell matrix
            !-------------------------------------------------------------------
@@ -1015,23 +1028,34 @@ program clustering_dmsd
         else
            ! for XYZ file
            volume = box_size(1)*box_size(2)*box_size(3)
+           ! NOTE: would be nice to be able to account for non orthorombic xyz files...
         endif
-        !--------------------------------------------------------------------------------------------------------
+        !------------------------------------------------------------------------------------
 
+        !----------------
+        ! Rescale volume
+        !-------------------------------------
         if ( n .eq. 1 .and. rescale ) then
            volume0 = volume
         endif
+        !------------------------------------
         
         !--------------------------------------------------
         ! Computing contact matrix, either PIV or SPRINT
-        !----------------------------------------------------------------------------------------------------
+        !-------------------------------------------------------------------------------------
         if( method .eq. 1 .or. method .eq. 2 ) then
+
            !---------------------------------------
            ! Compute PIV
-           !--------------------------------------------------------------------------------------------------
-           ! >>> use pairs (distances or coordination functions)
-           !--------------------------------------------------------------------------------------------------
-           if(mod(n-1,mpisize).eq.mpirank) then  ! ensuring that each proc computes the piv at a different step
+           !---------------------------------------------------------------------------------
+           ! Use pairs (distances or coordination functions)
+           !----------------------------------------------------------------------------
+
+           !---------------------------------------------------------------
+           ! ensuring that each proc computes the piv at a different step
+           !---------------------------------------------------------------
+           if(mod(n-1,mpisize).eq.mpirank) then
+              
               !----
               np=1
               !------
@@ -1045,10 +1069,16 @@ program clustering_dmsd
               ! Debug for MPI clock
               ! debug: call system_clock(tbeg0)
 
-              !------------------------------------------------------------------------------------
+              !------------------
+              ! Loop over groups
+              !------------------------------------------------------------------------------
               do ig=1,ng
 
+                 !-------------
+                 ! Group index
+                 !----------------
                  gsi=gs(ig)
+                 !---------------
 
                  !-------------
                  ! Debug Clock
@@ -1071,113 +1101,19 @@ program clustering_dmsd
                  allocate(vint(gsi))
                  allocate(n2o(gsi))
                  !--------------------------------------
-                 
+
+                 !--------------
+                 ! Debug Clock
+                 !-----------------------------------
                  ! debug: call system_clock(tend)
                  ! debug: tall=tall+(tend-tbeg)
+                 !-----------------------------------
 
-                 !!                ! heavy loops: here below I repeat a lot of code, it looks ugly but it is efficient
-                 !!                !              because "if" inside a loop slows down a lot... NOT TRUE: with -O3 it is same speed!
-                 !!                if( (pbc_type.eq.1) .and. (method.eq.2) .and. (coordtype.eq.1) ) then
-                 !!                  do i=1,gsi
-                 !!                    ii=g2n(ig,i,1)
-                 !!                    jj=g2n(ig,i,2)
-                 !!                    dr=r(ii,:)-r(jj,:)
-                 !!                    dr=dr-box_size*nint(dr/box_size)
-                 !!                    d=dsqrt(dot_product(dr,dr))
-                 !!                    d=1.d0/(1.d0+dexp(coord_lambda*(d-coord_d0)))
-                 !!                    v(i)=d
-                 !!                    n2o(i)=i
-                 !!                  enddo
-                 !!                endif
-                 !!                if( (pbc_type.eq.2) .and. (method.eq.2) .and. (coordtype.eq.1) ) then
-                 !!                  do i=1,gsi
-                 !!                    ii=g2n(ig,i,1)
-                 !!                    jj=g2n(ig,i,2)
-                 !!                    do k=1,3 ! scaled coords
-                 !!                      s1(k)=sum(hi(k,:)*r(ii,:))
-                 !!                      s2(k)=sum(hi(k,:)*r(jj,:))
-                 !!                    enddo
-                 !!                    do k=1,3 ! minimum image convention
-                 !!                      ds(k)=s1(k)-s2(k)
-                 !!                      ds(k)=ds(k)-nint(ds(k))
-                 !!                    enddo
-                 !!                    do k=1,3 ! back to angstrom
-                 !!                      dr(k)=sum(h(k,:)*ds(:))
-                 !!                    enddo
-                 !!                    d=dsqrt(dot_product(dr,dr))
-                 !!                    d=1.d0/(1.d0+dexp(coord_lambda*(d-coord_d0)))
-                 !!                    v(i)=d
-                 !!                    n2o(i)=i
-                 !!                  enddo
-                 !!                endif
-                 !!                if( (pbc_type.eq.1) .and. (method.eq.2) .and. (coordtype.eq.2) ) then
-                 !!                  do i=1,gsi
-                 !!                    ii=g2n(ig,i,1)
-                 !!                    jj=g2n(ig,i,2)
-                 !!                    dr=r(ii,:)-r(jj,:)
-                 !!                    dr=dr-box_size*nint(dr/box_size)
-                 !!                    d=dsqrt(dot_product(dr,dr))
-                 !!                    tmpr=(d-coord_d0)/coord_r0
-                 !!                    d=(1.d0-tmpr**coord_m)/(1.d0-tmpr**coord_n)
-                 !!                    v(i)=d
-                 !!                    n2o(i)=i
-                 !!                  enddo
-                 !!                endif
-                 !!                if( (pbc_type.eq.2) .and. (method.eq.2) .and. (coordtype.eq.2) ) then
-                 !!                  do i=1,gsi
-                 !!                    ii=g2n(ig,i,1)
-                 !!                    jj=g2n(ig,i,2)
-                 !!                    do k=1,3 ! scaled coords
-                 !!                      s1(k)=sum(hi(k,:)*r(ii,:))
-                 !!                      s2(k)=sum(hi(k,:)*r(jj,:))
-                 !!                    enddo
-                 !!                    do k=1,3 ! minimum image convention
-                 !!                      ds(k)=s1(k)-s2(k)
-                 !!                      ds(k)=ds(k)-nint(ds(k))
-                 !!                    enddo
-                 !!                    do k=1,3 ! back to angstrom
-                 !!                      dr(k)=sum(h(k,:)*ds(:))
-                 !!                    enddo
-                 !!                    d=dsqrt(dot_product(dr,dr))
-                 !!                    tmpr=(d-coord_d0)/coord_r0
-                 !!                    d=(1.d0-tmpr**coord_m)/(1.d0-tmpr**coord_n)
-                 !!                    v(i)=d
-                 !!                    n2o(i)=i
-                 !!                  enddo
-                 !!                endif
-                 !!                if( (pbc_type.eq.1) .and. (method.ne.2) ) then
-                 !!                  do i=1,gsi
-                 !!                    ii=g2n(ig,i,1)
-                 !!                    jj=g2n(ig,i,2)
-                 !!                    dr=r(ii,:)-r(jj,:)
-                 !!                    dr=dr-box_size*nint(dr/box_size)
-                 !!                    d=dsqrt(dot_product(dr,dr))
-                 !!                    v(i)=d
-                 !!                    n2o(i)=i
-                 !!                  enddo
-                 !!                endif
-                 !!                if( (pbc_type.eq.2) .and. (method.ne.2) ) then
-                 !!                  do i=1,gsi
-                 !!                    ii=g2n(ig,i,1)
-                 !!                    jj=g2n(ig,i,2)
-                 !!                    do k=1,3 ! scaled coords
-                 !!                      s1(k)=sum(hi(k,:)*r(ii,:))
-                 !!                      s2(k)=sum(hi(k,:)*r(jj,:))
-                 !!                    enddo
-                 !!                    do k=1,3 ! minimum image convention
-                 !!                      ds(k)=s1(k)-s2(k)
-                 !!                      ds(k)=ds(k)-nint(ds(k))
-                 !!                    enddo
-                 !!                    do k=1,3 ! back to angstrom
-                 !!                      dr(k)=sum(h(k,:)*ds(:))
-                 !!                    enddo
-                 !!                    d=dsqrt(dot_product(dr,dr))
-                 !!                    v(i)=d
-                 !!                    n2o(i)=i
-                 !!                  enddo
-                 !!                endif
-
-                 ! --- heavy loop (note: putting IF commands outside does not help, at least with -O3)
+                 !------------
+                 ! Heavy loop
+                 !-----------------------------------------------------------------------------
+                 ! note: putting IF commands outside does not help, at least with -O3)
+                 !-----------------------------------------------------------------------------
                  do i=1,gsi
 
                     !--------
@@ -1695,20 +1631,20 @@ program clustering_dmsd
         allocate(frame2frame(n_steps,n_steps))
      endif
      !---------------------------------------------
-     !this way of doing is not appropriate for more than ~25'000 steps
-     !a fix is to write on disk as before or scatter and gather the matrices
-     !the way is implemented now has to change !
+     ! Fast : compute huge matrix
+     ! Slow : write in file and read from it afterward
      !-----------------------------------------------
 
-     ! 
-     !---------------------
-     frame2frame=0.d0
-     v1=0.d0
-     v2=0.d0
-     l=10
-     cutoff2=cutoff**2
-     progress_bar=0
-     !---------------------
+     !----------------
+     ! Init variables
+     !---------------------------------------------
+     frame2frame=0.d0 ! distance frame to frame
+     v1=0.d0 ! v1
+     v2=0.d0 ! v2
+     l=10 ! ?
+     cutoff2=cutoff**2  ! cut_off distance squared
+     progress_bar=0     ! progress bar
+     !---------------------------------------------
 
      !---------------
      ! User message
@@ -1731,6 +1667,14 @@ program clustering_dmsd
      enddo
      !--------------------------------------------------------------------------
 
+     !------------------------------------
+     ! Opening temp file for slow method
+     !------------------------------------
+     if ( slow ) then
+        open( 303 , file = "f2f_temp")
+     endif
+     !-----------------------------------
+     
      !---------------------------------------
      ! Loops going over every pair of frames
      !--------------------------------------------------------------------------------------------------------------------
@@ -1779,7 +1723,7 @@ program clustering_dmsd
            !----------
 
            ! Loop Over frames
-           !-------------------------------------------------------------------------------------------------------------------
+           !-------------------------------------------------------------------------------------------------------------------           
            do i=1,max_frames
               !-------
               ! Index
@@ -1836,7 +1780,8 @@ program clustering_dmsd
                              frame2frame(real_stepi,real_stepj)=dmsd     ! - in which case frame2frame(m,n) takes the value of the dmsd; if they are not
                              frame2frame(real_stepj,real_stepi)=dmsd     ! - frame2frame frame2frame(m,n) remains at 0.d0 (inital value)
                           else
-                             write(313,*) real_stepi, real_stepj , dmsd
+                             ! Writes matrix to file
+                             write(303,*) real_stepi, real_stepj , dmsd
                           endif
                           !-------------------------------------------
                           
@@ -1959,14 +1904,15 @@ program clustering_dmsd
      !----------------------------------------------------
      ! if not restarting from previously computed matrix
      !------------------------------------------------------------------------------------------
-     if(.not.restart_matrix) then
+     if( .not.restart_matrix ) then
 
         !-------------
         ! Out message
         !-------------------------------------------------------
         print '(a,$)', 'writing to disk FRAME_TO_FRAME.MATRIX...'
-        !_--------------------------------------------------------
+        !-------------------------------------------------------
 
+        !-----------------
         ! Opening outfile
         !-------------------------------------------------
         open(unit=write204, file = "FRAME_TO_FRAME.MATRIX")
@@ -1978,10 +1924,26 @@ program clustering_dmsd
         if ( .not. slow ) then
            distmax=maxval(frame2frame)
         else
+           !--------------
+           ! init distmax
+           !--------------
            distmax=0
-           ! Read file
+           !--------------
+
+           !-------------------------------------
+           ! Reads file to compute max distance
+           !-------------------------------------
+           rewind(303)
+           do i=1,n_steps
+              read(303,*) f2f_i, f2f_j, f2f_ij
+              if ( distmax < f2f_ij ) then
+                 distmax = f2f_ij
+              endif
+           enddo
+           !---------------------------------------
+
         endif
-        !_----------------------------------------------
+        !-----------------------------------------------
 
         !-------------------------------
         ! Writting max distance to file
@@ -1992,7 +1954,7 @@ program clustering_dmsd
         !-------------------------------------------------------------------
         ! Writting frame to frame distances, normalized by max distances
         !-------------------------------------------------------------------
-        if ( .not. slow ) then 
+        if ( .not. slow ) then
            ! Loop over steps
            do i=1,n_steps
               ! Loop over steps
@@ -2004,8 +1966,32 @@ program clustering_dmsd
               write(write204,*),""
            enddo
         else
-           ! Read, normalize and write
-           write(204,'(f8.6,$)') , dist/distmax
+           !---------------------------------------------
+           ! Loop over file to sort and normalize folder
+           !---------------------------------------------------
+           open(unit=write205, file = "FRAME_TO_FRAME.MATRIX_TEMP")
+           rewind(303)
+           dista=0
+           do i=1,n_step
+              do j=1,n_step
+                 do while ( i .neq. f2f_i .or. j .neq. f2f_j )
+                    read(303,*) f2f_i, f2f_j, f2f_ij
+                 enddo
+                 dista = dista + f2f_ij
+                 write(205,*) i, j, f2f_ij/distmax
+                 write(204,'(f8.5,$)') f2f_ij/distmax
+                 rewind(303)
+              enddo
+              write(write204,*),""
+           enddo
+           !-----------------------------------------------
+
+           !--------------
+           ! Closing file
+           !----------------
+           close(303)
+           !----------------
+           
         endif
         !_------------------------------------------------------------------
 
@@ -2024,45 +2010,90 @@ program clustering_dmsd
         !-----------------------------------------------------------------------------------------
      else
 
+        !-------------
+        ! Out message
+        !-----------------------------------------------------------
         print '(a,$)', 'reading from disk FRAME_TO_FRAME.MATRIX...'
-
-        allocate(frame2frame(n_steps,n_steps))
-
-        open(unit=read104, file = "FRAME_TO_FRAME.MATRIX")
-
-        read(read104,*) readnsteps,distmax
-
-        if(readnsteps.ne.n_steps)then
-           write(*,*) 'ERROR: mismatch between n_steps in FRAME_TO_FRAME.MATRIX and from trajectory. Exiting.'
-           stop
-           
-        endif
+        !-----------------------------------------------------------
         
+        !------------------------------------------
+        ! Allocate for huge frame to frame matrix
+        !----------------------------------------------------------------
+        ! This is safe as it means the matrix could be written before...
+        allocate(frame2frame(n_steps,n_steps))
+        !----------------------------------------------------------------
+        
+        !----------
+        ! Open file
+        !--------------------------------------------------
+        open(unit=read104, file = "FRAME_TO_FRAME.MATRIX")
+        !--------------------------------------------------
+
+        !-------------------------------------
+        ! Reading number of steps and distmax
+        !--------------------------------------
+        read(read104,*) readnsteps,distmax
+        !--------------------------------------
+
+        !-------------
+        ! Basic Check
+        !--------------------------------------------------------------------------------------
+        if( readnsteps .ne. n_steps ) then
+           write(*,*) 'ERROR: mismatch between n_steps in FRAME_TO_FRAME.MATRIX and from trajectory. Exiting.'
+           stop           
+        endif
+        !--------------------------------------------------------------------------------------
+
+        !------------------------------
+        ! Read frame to frame matrix
+        !-----------------------------------------------------
         do i=1,n_steps
            read(read104,*) (frame2frame(i,j),j=1,n_steps)
         enddo
-        
+        !-----------------------------------------------------
+
+        !--------------
+        ! close file
+        !--------------
         close(read104)
-        
+        !-------------
+
+        ! Renormalize frame to frame
+        !--------------------------------
         frame2frame=frame2frame*distmax
+        !--------------------------------
         
         print*, ' DONE'
         
      endif
      !-------------------------------------------------------------------------------------------
-     
-     !----------------------------------------
-     ! Printing information about structures
-     !-----------------------------------------------------------------------------------------------
+
+     !---------------------------------------------------------
+     ! Computing average distance, rms distance, max distance
+     !--------------------------------------------------------------------------------------
      if ( .not. slow ) then
+        !--------------
+        ! Fast Method
+        !------------------------------------------------
         dista=sum(frame2frame(:,:))/dble(n_steps**2)
         dista2=sum(frame2frame(:,:)**2)/dble(n_steps**2)
         dista2=dsqrt(dista2-dista*dista)
+        !------------------------------------------------
      else
-        ! compute dista, etc....
+        ! Slow Method
+        !------------------------------------------------
+        dista2= dista**2/dble(n_steps**2)
+        dista = dista/dble(n_steps**2)
+        dista2 = dsqrt( dista2 - dista*dista )
+        !------------------------------------------------
      endif
+     !----------------------------------------------------------------------------------
+
+     !------------------------------------
+     ! Printing avg, rms and max distance 
+     !--------------------------------------------------------------------------------------
      write(*,'(a,3f12.6)') ' aver, rmsd, max dist. between frames =',dista,dista2,distmax
-     !-------------------------------------------------------------------------------------------------
+     !--------------------------------------------------------------------------------------
      
      !--------------
      ! Clustering
@@ -2077,18 +2108,30 @@ program clustering_dmsd
      !---------------------------------------------------------------------------------------------------------------
      select case (algorithm)
         ! Daura
+        !-----------------------------------------------------------------------------------
      case (1)
-        call daura_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff)
+        if ( .not. slow ) then
+           call daura_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff)
+        else
+           call daura_algorithm_slow(n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff)
+           !-----------------------------------------------------------------------------------
+        endif
         ! Kmenoid
+        !-----------------------------------------------------------------------------------
      case (2)
-        call kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members)
+        if ( .not. slow ) then
+           call kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members)
+        else
+           call kmedoids_algorithm_slow(n_steps,n_clusters,cluster_size,cluster_centers,cluster_members)
+        endif
+        !-----------------------------------------------------------------------------------
      end select
-     !-----------------------------------------------------------------------------------------------------------------
+     !------------------------------------------------------------------------------------------
      
      !-------------------------------------
      ! Computing clustering coefficients
      !------------------------------------------------------------------------------------------------------------------------------------------------
-     if (cutoff_clcoeff>0.d0) then
+     if ( cutoff_clcoeff > 0.d0 ) then
 
         !--------------------
         ! Allocating memory
@@ -2099,7 +2142,11 @@ program clustering_dmsd
         !-----------------------------
         ! compute clustering coeff
         !--------------------------------------------------------------------------------------------------------------------------------------------
-        call compute_clustering_coefficients(frame2frame,n_steps, n_clusters,cluster_members,cluster_size, clustering_coefficients,cutoff_clcoeff)
+        if ( .not. slow ) then
+           call compute_clustering_coefficients(frame2frame,n_steps, n_clusters,cluster_members,cluster_size, clustering_coefficients,cutoff_clcoeff)
+        else
+           exit
+        endif
         !--------------------------------------------------------------------------------------------------------------------------------------------
 
         !----------------------------------
@@ -2141,7 +2188,7 @@ program clustering_dmsd
 
 
      !?
-     !_---------
+     !----------
      tot_acs=0
      !----------
 
@@ -2200,11 +2247,26 @@ program clustering_dmsd
            jj=cluster_members(k,j)
            !-----------------------------
 
-           !-----------
-           ! Writes all
-           !------------------------------------------------------------------------------------------------------------------------------
-           write(write201,'(i8)') n_atoms ! number of atomes
-           write(write201,'(a,i6,a,f8.3,a,i6,2x,a)') 'member',j,' dist',frame2frame(jj,ii),' frame',jj,trim(adjustl(comments(jj))) ! member, distance, frame
+           !------------------------------
+           ! Writes the number of atoms
+           !----------------------------------------------------
+           write(write201,'(i8)') n_atoms 
+           !----------------------------------------------------
+           
+           !----------------------------
+           if ( .not. slow ) then
+              write(write201,'(a,i6,a,f8.3,a,i6,2x,a)') 'member',j,' dist',frame2frame(jj,ii),' frame',jj,trim(adjustl(comments(jj))) ! member, distance, frame
+           else
+              ! get frame2frame jj ii
+              do f2f_i2=1,ii
+                 do f2f_j2=1,jj
+                    read(304,*) f2f_i, f2f_j, f2f_ij
+                 enddo
+              enddo
+              ! write
+              write(write201,'(a,i6,a,f8.3,a,i6,2x,a)') 'member',j,' dist',f2f_ij,' frame',jj,trim(adjustl(comments(jj))) ! member, distance, frame
+           endif
+           !----------------------------------------------------
            do iat=1,n_atoms
               write(write201,'(a4,3f8.3)'),n2t(iat),(atom_positions(jj,iat,l),l=1,n_dim) ! atomic positions?
            enddo
@@ -2249,21 +2311,27 @@ program clustering_dmsd
         cluster_link=0
         !---------------
 
-        !--------------
+        !--------------=
         ! Opening file
         !------------------------------
         open(unit=789,file="network")
         !------------------------------
 
-        !---------------------
-        ! Loop over clusters
+        !---------------------------
+        ! Loop over clusters pairs
         !---------------------------------------------------------------------------
         do i=1,n_clusters-1
            do j=i+1,n_clusters
-              
+
+              !---------------------------------------
               ! Get the distance between two frames
               !-----------------------------------------------------------
-              dist_ij=frame2frame(cluster_centers(i),cluster_centers(j))
+              if ( .not. slow ) then
+                 dist_ij=frame2frame(cluster_centers(i),cluster_centers(j))
+              else
+                 ! getframe cluster_centeri cluster_centerj
+                 exit
+              endif
               !-----------------------------------------------------------
 
               !------------------------
@@ -2285,8 +2353,13 @@ program clustering_dmsd
                  !--------------------------------------------------
                  ! Computes distances between i and k and j and k
                  !------------------------------------------------------------
-                 dist_ik=frame2frame(cluster_centers(i),cluster_centers(k))
-                 dist_jk=frame2frame(cluster_centers(j),cluster_centers(k))
+                 if ( .not. slow ) then
+                    dist_ik=frame2frame(cluster_centers(i),cluster_centers(k))
+                    dist_jk=frame2frame(cluster_centers(j),cluster_centers(k))
+                 else
+                    !getframe cluster_center_i cluster_center_j
+                    exit
+                 endif
                  !------------------------------------------------------------
                  
                  !----------------------------------------------------------------
@@ -2313,7 +2386,7 @@ program clustering_dmsd
                  !---------------
                  ! Printing info
                  !-------------------------------------
-                 write(789,'(2i6,f12.6)') i,j,dist_ij
+                 write(789,'(2i6,f12.6)') i, j, dist_ij
                  !-------------------------------------
                  
               endif
