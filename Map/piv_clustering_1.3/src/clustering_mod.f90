@@ -4,7 +4,7 @@ contains
 !------------------------------------------------------------------------------------------------------------------------!
 !                                                                                                                        !
 !------------------------------------------------------------------------------------------------------------------------!
-subroutine kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members)
+subroutine kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,slow)
   !!!------------------------------------------------------------------------
   !!! algorithm from H.S.Park and C.H.Jun, Expert Syst. Appl. 36, 3336, 2009.
   !!!------------------------------------------------------------------------
@@ -13,6 +13,7 @@ subroutine kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluste
   integer,intent(in)::n_steps
   double precision,dimension(n_steps,n_steps),intent(in)::frame2frame
   integer,intent(in)::n_clusters
+  logical, intent(in) :: slow
 
   integer,allocatable,dimension(:),intent(out)::cluster_size
   integer,allocatable,dimension(:),intent(out)::cluster_centers
@@ -30,192 +31,222 @@ subroutine kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluste
   integer,allocatable,dimension(:)::cluster_ranking,cluster_centers_tmp
   integer,allocatable,dimension(:,:)::cluster_members_tmp
 
+  !---------------------------------
+  ! Init cluster related variables
+  !-----------------------------------------------------------------------------------------------------------
   max_cluster_size=n_steps
   allocate(cluster_size(n_clusters),cluster_centers(n_clusters),cluster_members(n_clusters,max_cluster_size))
-
+  !-----------------------------------------------------------------------------------------------------------
+  
+  !----------------
+  ! Init cluster
+  !-----------------------------------------------------------------------------------------------------------
   write(*,*) "using k-medoids algorithm ..."
   write(*,*) "  (H.S.Park and C.H.Jun, Expert Syst. Appl. 36, 3336, 2009)"
   write(*,*) "... with k-means++ initialization of centers"
   write(*,*) "  (D.Arthur and S.Vassilvitskii, Proc.18th annual ACM-SIAM symposium on Discrete algorithms, 1027, 2007)"
+  !-----------------------------------------------------------------------------------------------------------
 
-  !!! initialization of medoids (= cluster centers)
-
-!   do i=1,n_steps
-!     dl(i)=sum(frame2frame(i,1:n_steps))
-!   enddo
-!   do i=1,n_steps
-!     v(i)=sum(frame2frame(1:n_steps,i)/dl(1:n_steps))
-!   enddo
-! !debug!  write(*,*) "v ="
-! !debug!  write(*,'(i3,f10.3)') (i,v(i),i=1,n_steps)
-!   
-!   do i=1,n_clusters
-!     cluster_centers(i)=minloc(v(1:n_steps),1)
-! !debug!    write(*,'(a,i3,a,i3)') "medoid ",i," =",cluster_centers(i) 
-!     v(cluster_centers(i))=1.d10
-!   enddo
-
+  !---------------------
+  ! Init random number
+  !-------------------------
   call init_random_seed
   call random_number(r)
+  !-------------------------
+
+  !-------
+  ! Init
+  !---------------------------------------------
   cluster_centers(1)=int(r*dble(n_steps))+1
   good(1:n_steps)=1
   good(cluster_centers(1))=0
+  !---------------------------------------------
+
+  !--------------------
+  ! Loop over clusters
+  !------------------------------------------------------------------------------------------
   do i=2,n_clusters
-    do k=1,n_steps
-      ! if (good(k)==0) cycle
-      dmin=1.d10
-      do j=1,i-1
-        dtmp=frame2frame(k,cluster_centers(j))
-        if(dtmp.lt.dmin) dtmp=dmin
-      enddo  
-      prob(k)=dmin*dmin
-    enddo 
-    dtmp=sum(prob(:))
-    prob(:)=prob(:)/dtmp
-    do k=2,n_steps
-      prob(k)=prob(k)+prob(k-1)
-    enddo
-    found=.false.
-    do while(.not.found)
-      call random_number(r)
-      if (r.lt.prob(1)) then
-        if (good(1)==0) cycle
-        cluster_centers(i)=1
-        good(1)=0
-        found=.true.
-      else
-        do k=2,n_steps
-          if (good(k)==0) cycle
-          if (r.ge.prob(k-1).and.r.lt.prob(k)) then
-            cluster_centers(i)=k
-            good(k)=0
-            found=.true.
-            exit
-          endif
+     do k=1,n_steps
+        ! if (good(k)==0) cycle
+        dmin=1.d10
+        do j=1,i-1
+           dtmp=frame2frame(k,cluster_centers(j))
+           if(dtmp.lt.dmin) dtmp=dmin
         enddo
-      endif
-    enddo
+        prob(k)=dmin*dmin
+     enddo
+     dtmp=sum(prob(:))
+     prob(:)=prob(:)/dtmp
+     do k=2,n_steps
+        prob(k)=prob(k)+prob(k-1)
+     enddo
+     found=.false.
+     do while(.not.found)
+        call random_number(r)
+        if (r.lt.prob(1)) then
+           if (good(1)==0) then
+              cycle
+           endif
+           cluster_centers(i)=1
+           good(1)=0
+           found=.true.
+        else
+           do k=2,n_steps
+              if (good(k)==0) cycle
+              if (r.ge.prob(k-1).and.r.lt.prob(k)) then
+                 cluster_centers(i)=k
+                 good(k)=0
+                 found=.true.
+                 exit
+              endif
+           enddo
+        endif
+     enddo
   enddo
+  !----------------------------------------------------------------------------------------------
+
+  !-----------------------
+  ! Out message for debug
+  !-----------------------------------------------------------------------
   write(*,'(a,1000i6)') "kmeans++:",cluster_centers(1:n_clusters) !debug
+  !-----------------------------------------------------------------------
 
-  !!! loop
-
+  !------------
+  ! Initialize
+  !---------------
   oldcost=1.d10
+  !---------------
+
+  !------
+  ! Loop
+  !-----------------------------------------------------------------------------------------------
   do
+     !---------------------
+     ! Voronoi assignment
+     !---------------------
+     do i=1,n_clusters
+        cluster_size(i)=0
+     enddo
+     !----------------------
 
-  !!! Voronoi assignment
+     !-----------------------------------------------------------
+     do i=1,n_steps
+        dmin=1.d10
+        do j=1,n_clusters
+           if (frame2frame(i,cluster_centers(j))<dmin) then
+              dmin=frame2frame(i,cluster_centers(j))
+              i2cluster(i)=j
+           endif
+        enddo
+        j=i2cluster(i)
+        cluster_size(j)=cluster_size(j)+1      
+        cluster2i(j,cluster_size(j))=i
+     enddo
+     !-------------------------------------------------------------
 
-    do i=1,n_clusters
-      cluster_size(i)=0
-    enddo
-    do i=1,n_steps
-      dmin=1.d10
-      do j=1,n_clusters
-        if (frame2frame(i,cluster_centers(j))<dmin) then
-          dmin=frame2frame(i,cluster_centers(j))
-          i2cluster(i)=j
-        endif
-      enddo
-      j=i2cluster(i)
-      cluster_size(j)=cluster_size(j)+1      
-      cluster2i(j,cluster_size(j))=i
-!debug!      write(*,'(i3,a,i3)') i," -> ",i2cluster(i)
-    enddo
-!debug!    do i=1,n_clusters
-!debug!      write(*,*) "cl",i,"=",cluster2i(i,1:cluster_size(i))
-!debug!    enddo
+     !---------
+     cost=0.d0
+     !---------
 
-  !!! cost (sum of distances of all objects from their medoids)
+     !----------------------------------------------------------
+     do i=1,n_steps
+        cost=cost+frame2frame(i,cluster_centers(i2cluster(i)))
+     enddo
+     !----------------------------------------------------------
 
-    cost=0.d0
-    do i=1,n_steps
-      cost=cost+frame2frame(i,cluster_centers(i2cluster(i)))
-    enddo
-    write(*,'(a,f18.8)') "  cost =",cost
-    if (cost.eq.oldcost) exit
-    oldcost=cost
+     !------------------------------------
+     write(*,'(a,f18.8)') "  cost =",cost
+     !-------------------------------------
+     
+     !--------------------------
+     if (cost.eq.oldcost) exit
+     !--------------------------
 
-  !!! update medoids
+     !------------
+     oldcost=cost
+     !------------
 
-    do i=1,n_clusters
-      dmin=1.d10
-      do j=1,cluster_size(i)
-        dtmp=sum(frame2frame(cluster2i(i,j),cluster2i(i,1:cluster_size(i))))
-        if (dtmp<dmin) then
-          dmin=dtmp
-          newcenter=cluster2i(i,j)
-        endif
-      enddo  
-      cluster_centers(i)=newcenter    
-    enddo
-!debug!    do i=1,n_clusters
-!debug!      write(*,'(a,i3,a,i3)') "medoid ",i," =",cluster_centers(i)
-!debug!    enddo
-
-  !!! loop
-
+     !---------------
+     ! Update medoids
+     !----------------------------------------------------------------------------
+     do i=1,n_clusters
+        dmin=1.d10
+        do j=1,cluster_size(i)
+           dtmp=sum(frame2frame(cluster2i(i,j),cluster2i(i,1:cluster_size(i))))
+           if (dtmp<dmin) then
+              dmin=dtmp
+              newcenter=cluster2i(i,j)
+           endif
+        enddo
+        cluster_centers(i)=newcenter    
+     enddo
+     !-----------------------------------------------------------------------------
+     
   enddo
+  !------------------------------------------------------------------------------------------------
 
-  !!! convergence
 
+  
+!!! convergence
+  
   write(*,*) "  converged"
   cluster_members(:,:)=cluster2i(:,:)
-
-  !!! sorting clusters from largest to smallest
-
+  
+!!! sorting clusters from largest to smallest
+  
   allocate(cluster_ranking(n_clusters))
   do i=1,n_clusters
-    cluster_ranking(i)=i
+     cluster_ranking(i)=i
   enddo
-
+  
   do i=1,n_clusters-1
-    do j=i+1,n_clusters
-      if(cluster_size(j).gt.cluster_size(i)) then
-        ii=cluster_size(j)
-        cluster_size(j)=cluster_size(i)
-        cluster_size(i)=ii
-
-        ii=cluster_ranking(j)
-        cluster_ranking(j)=cluster_ranking(i)
-        cluster_ranking(i)=ii
-      endif
-    enddo
+     do j=i+1,n_clusters
+        if(cluster_size(j).gt.cluster_size(i)) then
+           ii=cluster_size(j)
+           cluster_size(j)=cluster_size(i)
+           cluster_size(i)=ii
+           
+           ii=cluster_ranking(j)
+           cluster_ranking(j)=cluster_ranking(i)
+           cluster_ranking(i)=ii
+        endif
+     enddo
   enddo
-
+  
   allocate(cluster_centers_tmp(n_clusters))
   allocate(cluster_members_tmp(n_clusters,max_cluster_size))
   cluster_centers_tmp=cluster_centers
   cluster_members_tmp=cluster_members
   do i=1,n_clusters
-    cluster_centers(i)=cluster_centers_tmp(cluster_ranking(i))
-    cluster_members(i,1:max_cluster_size)=cluster_members_tmp(cluster_ranking(i),1:max_cluster_size)
+     cluster_centers(i)=cluster_centers_tmp(cluster_ranking(i))
+     cluster_members(i,1:max_cluster_size)=cluster_members_tmp(cluster_ranking(i),1:max_cluster_size)
   enddo
   deallocate(cluster_ranking,cluster_centers_tmp,cluster_members_tmp)
-
+  
   ! check that all frames are assigned and no frame is unassigned
   ass=0
   do i=1,n_clusters
-    do j=1,cluster_size(i)
-      ass(cluster_members(i,j))=ass(cluster_members(i,j))+1
-    enddo
+     do j=1,cluster_size(i)
+        ass(cluster_members(i,j))=ass(cluster_members(i,j))+1
+     enddo
   enddo
   do i=1,n_steps
-    if (ass(i).ne.1) then
-      write(*,*) "ERROR in clustering: frame",i," is assigned ",ass(i)," times !!"
-      stop
-    endif
+     if (ass(i).ne.1) then
+        write(*,*) "ERROR in clustering: frame",i," is assigned ",ass(i)," times !!"
+        stop
+     endif
   enddo 
-
+  
   write(*,*) "DONE"
-
+  
   open(99,file="log-clusters",status="unknown")
   write(99,'(a,1000i5)') "centers: ",cluster_centers
   do i=1,n_clusters
-    write(99,'(i5,a,1000i5)') i,":  ",cluster_members(i,1:cluster_size(i))
+     write(99,'(i5,a,1000i5)') i,":  ",cluster_members(i,1:cluster_size(i))
   enddo
   close(99)
   
-!
+  !
 end subroutine kmedoids_algorithm
 !------------------------------------------------------------------------------------------------------------------------!
 
@@ -470,6 +501,11 @@ subroutine compute_clustering_coefficients(frame2frame,n_steps, n_clusters,clust
     enddo
 end subroutine compute_clustering_coefficients
 !------------------------------------------------------------------------------------------------------------------------!
+
+
+!-----------------------------------
+! Initiate seed for random number
+!-----------------------------------
 subroutine init_random_seed
  integer i, clock
  integer seed (100)
@@ -483,3 +519,4 @@ subroutine init_random_seed
 end subroutine init_random_seed
 
 end module clustering_mod
+!-----------------------------------

@@ -2110,20 +2110,12 @@ program clustering_dmsd
         ! Daura
         !-----------------------------------------------------------------------------------
      case (1)
-        if ( .not. slow ) then
-           call daura_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff)
-        else
-           call daura_algorithm_slow(n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff)
-           !-----------------------------------------------------------------------------------
-        endif
+        call daura_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff, slow)
+        !-----------------------------------------------------------------------------------
         ! Kmenoid
         !-----------------------------------------------------------------------------------
      case (2)
-        if ( .not. slow ) then
-           call kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members)
-        else
-           call kmedoids_algorithm_slow(n_steps,n_clusters,cluster_size,cluster_centers,cluster_members)
-        endif
+        call kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members, slow)
         !-----------------------------------------------------------------------------------
      end select
      !------------------------------------------------------------------------------------------
