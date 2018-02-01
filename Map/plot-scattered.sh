@@ -8,7 +8,7 @@ awk '{
 
 echo "check"
 
-awk 'BEGIN{ niter=2000000; bestmaxd=0. }
+awk 'BEGIN{ niter=1000000; bestmaxd=0. }
 {
  if(NF>0 && FILENAME=="map"){ d[$1,$2]=$3 }
 # if(FILENAME=="restart"){ 
@@ -17,7 +17,7 @@ awk 'BEGIN{ niter=2000000; bestmaxd=0. }
 # }
 }END{
 
- n=30
+ n=180
  k=0.02
  s=0.005
  kT=0.0000002
