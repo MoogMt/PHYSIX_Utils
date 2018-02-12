@@ -21,11 +21,8 @@ subroutine counting_sort(n,array, tmin, tmax)
     cnt(array(i))=cnt(array(i))+1
   enddo
 
-!  forall(i=tmin:tmax)
-!     cnt(i) = count(array == i)
-!  end forall
-
   z = 1
+  
   do i = tmin, tmax
      do while ( cnt(i) > 0 )
         array(z) = i
@@ -33,31 +30,7 @@ subroutine counting_sort(n,array, tmin, tmax)
         cnt(i) = cnt(i) - 1
      enddo
   enddo
+  
 end subroutine counting_sort
 
 
-!program c
-!  implicit none
-!  integer::sizeofshortint
-!  parameter(sizeofshortint=4)
-!  integer(kind=sizeofshortint), dimension(64620) :: array
-!  integer :: i,t1,t2
-!  real :: r
-!
-!  do i=1,size(array)
-!    call random_number(r)
-!    array(i)=nint(r*10000)
-!  enddo
-!
-!  call system_clock(t1)
-!
-!  do i=1,10
-!  call counting_sort(size(array),array,minval(array),maxval(array))
-!  enddo
-!
-!  call system_clock(t2)
-!  write(*,*) "timing =",t2-t1
-!
-!  write(99,'(i6)') array
-!
-!end program c

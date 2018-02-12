@@ -110,7 +110,7 @@ program clustering_dmsd
      write(*,'(a)')      "===================================================="
      write(*,'(a)')      "===        P I V      C L U S T E R I N G        ==="
      write(*,'(a)')      "===================================================="
-     write(*,'(a)')      " version 1.35 - G. A. Gallet and F. Pietrucci, 2014 "
+     write(*,'(a)')      " version 1.35 - G. Allet and F. Pietrucci, 2014 "
      write(*,'(a)')      " please read and cite J.Chem.Phys.139,074101(2013)  "
      write(*,'(a,i4,a)') "            < running on",mpisize," procs >"
      write(*,*) ""
@@ -642,7 +642,7 @@ program clustering_dmsd
   !-------------------------------------------------------------------------
   if(mpirank.eq.0) then
      ! If the size of the memory is too big, then use alternative slow method
-     if( (N_steps*N_atoms*(N_atoms-1)/2.gt.ARRAY_SIZE) .and. (N_steps*N_steps).gt.ARRAY_SIZE) then
+     if( (N_steps*N_atoms*(N_atoms-1)/2.gt.ARRAY_SIZE) .or. (N_steps*N_steps).gt.ARRAY_SIZE) then
         ! Warning that the program is going slow or quit
         print'(a)', 'WARNING: You probably are going to run out of memory.. using slow method !'
         ! Activating slow
@@ -1666,18 +1666,19 @@ program clustering_dmsd
         enddo
      enddo
      !--------------------------------------------------------------------------
-
-     !------------------------------------
-     ! Opening temp file for slow method
-     !------------------------------------
+     
+     !------------------------------
+     ! Opening file for F2F matrix
+     !-----------------------------------------------------------
      if ( slow ) then
-        open( 303 , file = "f2f_temp")
+        open(unit=write204, file = "FRAME_TO_FRAME.MATRIX")
+        write(write204,'(i12,f20.10)') n_steps,distmax
      endif
-     !-----------------------------------
+     !-----------------------------------------------------------
      
      !---------------------------------------
      ! Loops going over every pair of frames
-     !--------------------------------------------------------------------------------------------------------------------
+     !------------------------------------------------------------------------------------------ 
      do m=1,n_steps-1,max_frames
         do n=m+1,n_steps,max_frames
            
@@ -1692,7 +1693,7 @@ program clustering_dmsd
               print'(a,$)','  Broadcasting...'
            endif
            !---------------------------------------------------------------------------------------------------------
-
+           
            !------------------
            ! Broadcast matrix
            !------------------------------------------------------------------------------------------
@@ -1706,7 +1707,7 @@ program clustering_dmsd
 #endif  
 #endif
            !------------------------------------------------------------------------------------------
-
+           
            !---------------
            ! User message
            !-------------------------------------------------------------
@@ -1715,27 +1716,30 @@ program clustering_dmsd
               print'(a,$)','  Computing...'
            endif
            !-------------------------------------------------------------
-
+           
            !-------
            ! Index
            !--------
            mm=0
            !----------
-
+           
+           !-----------------------
+           ! Writting start matrix
+           !---------------------------------------------------
            ! Loop Over frames
-           !-------------------------------------------------------------------------------------------------------------------           
+           !-------------------------------------------------------------------------------------------------------------------
            do i=1,max_frames
               !-------
               ! Index
               !------------------
               real_stepi = m+i-1
               !-------------------
-
+              
               !------------------
               ! Loop over steps
               !------------------------------------------------------------------------------------------------
               if( m+i-1 .le. n_steps-1 ) then
-
+                 
                  !-------------------
                  ! Loop over frames
                  !-----------------------------------------------------------------------------------------------
@@ -1748,15 +1752,15 @@ program clustering_dmsd
                     !-----------------
                     
                     ! -------------------------------------------------------------------------------------------------------------
-                    if(n+j-1.le.n_steps .and. real_stepj.gt.real_stepi) then
+                    if( n+j-1 .le. n_steps .and. real_stepj .gt. real_stepi ) then
                        
                        ! Index 
                        mm=mm+1
                        
                        ! Parallelization in order to go faster
-                       !_---------------------------------------------------------------------------------------------------------
+                       !----------------------------------------------------------------------------------------------------------
                        if(mod(mm,mpisize).eq.mpirank) then  ! easy way of ensuring that each proc computes a different m,n dmsd
-
+                          
                           !------------------------
                           ! Computes PIV distance
                           !--------------------------------------------------------
@@ -1772,18 +1776,39 @@ program clustering_dmsd
                           dmsd=sum((v1(1:vec_size)-v2(1:vec_size))**2)
                           dmsd=dsqrt(dmsd)
                           !-------------------------------------------------------
-
+                          
+                          !-----------------------------
+                          ! Computing sum of distances
+                          !----------------------------
+                          dista = dista + dmsd
+                          !-----------------------------
+                          
                           !------------------------------------------
-                          ! Filling up the matrix
+                          ! Filling up4 the matrix
                           !-------------------------------------------
-                          if ( .not. slow ) then
-                             frame2frame(real_stepi,real_stepj)=dmsd     ! - in which case frame2frame(m,n) takes the value of the dmsd; if they are not
-                             frame2frame(real_stepj,real_stepi)=dmsd     ! - frame2frame frame2frame(m,n) remains at 0.d0 (inital value)
-                          else
-                             ! Writes matrix to file
-                             write(303,*) real_stepi, real_stepj , dmsd
+                          frame2frame(real_stepi,real_stepj)=dmsd     ! - in which case frame2frame(m,n) takes the value of the dmsd; if they are not
+                          frame2frame(real_stepj,real_stepi)=dmsd     ! - frame2frame frame2frame(m,n) remains at 0.d0 (inital value)
+                          !--------------------------------------------
+
+                          !-----------------
+                          ! Compute distmax
+                          !----------------------------
+                          if ( dmsd > distmax ) then
+                             distmax = dmsd
                           endif
-                          !-------------------------------------------
+                          !----------------------------
+
+                          !-----------------------------------
+                          ! If slow method, write F2F matrix
+                          !------------------------------------------------------
+                          if ( slow ) then 
+                             !------------------------------
+                             ! Write frame to frame matrix
+                             !---------------------------------------------------
+                             write(write204,'(f8.5,$)'),frame2frame(i,j)
+                             !---------------------------------------------------
+                          endif
+                          !------------------------------------------------------
                           
                        endif
                        !---------------------------------------------------------------------------------------------------------
@@ -1791,24 +1816,25 @@ program clustering_dmsd
                     !--------------------------------------------------------------------------------------------------------------
                  enddo
                  !--------------------------------------------------------------------------------------------------
+                 write(write204,*),""
               endif
               !------------------------------------------------------------------------------------------------
            enddo
            !-------------------------------------------------------------------------------------------------------------------
-
+           
            ! Broadcast
            !------------------------------------------------
 #ifdef MPI
            call MPI_Barrier(MPI_COMM_WORLD, mpierror)
 #endif
            !------------------------------------------------
-
+           
            !------------------------
            ! Updating progress bar
            !-----------------------------
            progress_bar=progress_bar+1
            !-----------------------------
-
+           
            !-------------------
            ! Printing progress
            !------------------------------------------------------------------------
@@ -1818,7 +1844,6 @@ program clustering_dmsd
            !------------------------------------------------------------------------
            
         enddo
-        !---------------------------------------------------------------------------------------------------------------------------
      enddo
      !---------------------------------------------------------------------------------------------------------------------------
 
@@ -1848,17 +1873,18 @@ program clustering_dmsd
      ! Collecting matrix element 
      !---------------------------------------
      if ( .not. slow ) then
-     
+        ! Allocate frame to frame matrix
         allocate(frame2frame_save(n_steps,n_steps))
-        ! If MPI....
+        ! Reduce matrice to blocks
 #ifdef MPI
-        call MPI_Allreduce(frame2frame,frame2frame_save,n_steps*n_steps,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD, mpierror) ! Since every proc has either 0.d0 or the dmsd value
-        frame2frame=frame2frame_save                                                                                           ! - the sum of all the matrices on each proc will give the corrct matrix
+        ! Since every proc has either 0.d0 or the dmsd value
+        call MPI_Allreduce(frame2frame,frame2frame_save,n_steps*n_steps,MPI_DOUBLE_PRECISION,MPI_SUM,MPI_COMM_WORLD, mpierror)
+        ! - the sum of all the matrices on each proc will give the correct matrix
+        frame2frame=frame2frame_save                                                             
 #else
         ! If Serial
         frame2frame_save=frame2frame
 #endif
-
         !--------------------------------------------
         
         !------------------
@@ -1866,6 +1892,7 @@ program clustering_dmsd
         !--------------------------------------
         deallocate(frame2frame_save)
         !---------------------------------------
+        
      endif
      
   endif ! End of computation of matrix
@@ -1912,49 +1939,14 @@ program clustering_dmsd
         print '(a,$)', 'writing to disk FRAME_TO_FRAME.MATRIX...'
         !-------------------------------------------------------
 
-        !-----------------
-        ! Opening outfile
-        !-------------------------------------------------
-        open(unit=write204, file = "FRAME_TO_FRAME.MATRIX")
-        !-----------------------------------------------------
-
-        !-------------------------------------------
-        ! Computing max distance from frame to frame
-        !_----------------------------------------------
-        if ( .not. slow ) then
-           distmax=maxval(frame2frame)
-        else
-           !--------------
-           ! init distmax
-           !--------------
-           distmax=0
-           !--------------
-
-           !-------------------------------------
-           ! Reads file to compute max distance
-           !-------------------------------------
-           rewind(303)
-           do i=1,n_steps
-              read(303,*) f2f_i, f2f_j, f2f_ij
-              if ( distmax < f2f_ij ) then
-                 distmax = f2f_ij
-              endif
-           enddo
-           !---------------------------------------
-
-        endif
-        !-----------------------------------------------
-
-        !-------------------------------
-        ! Writting max distance to file
-        !_----------------------------------------------
-        write(write204,'(i12,f20.10)') n_steps,distmax
-        !-----------------------------------------------
-
         !-------------------------------------------------------------------
         ! Writting frame to frame distances, normalized by max distances
         !-------------------------------------------------------------------
         if ( .not. slow ) then
+           ! Opening file
+           open(unit=write204, file = "FRAME_TO_FRAME.MATRIX")
+           ! Writting number of steps and distance max
+           write(write204,'(i12,f20.10)') n_steps,distmax
            ! Loop over steps
            do i=1,n_steps
               ! Loop over steps
@@ -1965,49 +1957,18 @@ program clustering_dmsd
               ! Endline
               write(write204,*),""
            enddo
-        else
-           !---------------------------------------------
-           ! Loop over file to sort and normalize folder
-           !---------------------------------------------------
-           open(unit=write205, file = "FRAME_TO_FRAME.MATRIX_TEMP")
-           rewind(303)
-           dista=0
-           do i=1,n_step
-              do j=1,n_step
-                 do while ( i .neq. f2f_i .or. j .neq. f2f_j )
-                    read(303,*) f2f_i, f2f_j, f2f_ij
-                 enddo
-                 dista = dista + f2f_ij
-                 write(205,*) i, j, f2f_ij/distmax
-                 write(204,'(f8.5,$)') f2f_ij/distmax
-                 rewind(303)
-              enddo
-              write(write204,*),""
-           enddo
-           !-----------------------------------------------
-
-           !--------------
            ! Closing file
-           !----------------
-           close(303)
-           !----------------
-           
+           close(write204)
         endif
-        !_------------------------------------------------------------------
-
-        !---------------
-        ! Closing file
-        !----------------
-        close(write204)
-        !----------------
-
+        !-------------------------------------------------------------------
+        
         !---------------
         ! Printing done
         !----------------
         print*, ' DONE'
         !----------------
         
-        !-----------------------------------------------------------------------------------------
+        !----------------------------------------------------------------------------------------
      else
 
         !-------------
@@ -2015,13 +1976,6 @@ program clustering_dmsd
         !-----------------------------------------------------------
         print '(a,$)', 'reading from disk FRAME_TO_FRAME.MATRIX...'
         !-----------------------------------------------------------
-        
-        !------------------------------------------
-        ! Allocate for huge frame to frame matrix
-        !----------------------------------------------------------------
-        ! This is safe as it means the matrix could be written before...
-        allocate(frame2frame(n_steps,n_steps))
-        !----------------------------------------------------------------
         
         !----------
         ! Open file
@@ -2035,35 +1989,40 @@ program clustering_dmsd
         read(read104,*) readnsteps,distmax
         !--------------------------------------
 
-        !-------------
-        ! Basic Check
+        !------------------------------------------
+        ! Allocate for huge frame to frame matrix
+        !----------------------------------------------------------------
+        allocate(frame2frame(n_steps,n_steps))
+        !----------------------------------------------------------------
+
+        !---------------
+        ! Build Matrix
         !--------------------------------------------------------------------------------------
         if( readnsteps .ne. n_steps ) then
+           ! Check for inconsistency
            write(*,*) 'ERROR: mismatch between n_steps in FRAME_TO_FRAME.MATRIX and from trajectory. Exiting.'
            stop           
+        elseif ( n_steps .gt. 10000 ) then
+           ! If matrix is too big, going to use slow method
+           write(*,*) 'WARNING: Given that the size of the matrix may overwhelm memory, using slow method'
+           slow = .true.
+        else
+           ! If all goes well, reads frame to frame matrix
+           !-----------------------------------------------------
+           do i=1,n_steps
+              read(read104,*) (frame2frame(i,j),j=1,n_steps)
+           enddo
+           ! close file
+           close(read104)
+           ! Renormalize frame to frame
+           frame2frame=frame2frame*distmax
+           !--------------------------------
         endif
         !--------------------------------------------------------------------------------------
 
-        !------------------------------
-        ! Read frame to frame matrix
-        !-----------------------------------------------------
-        do i=1,n_steps
-           read(read104,*) (frame2frame(i,j),j=1,n_steps)
-        enddo
-        !-----------------------------------------------------
-
-        !--------------
-        ! close file
-        !--------------
-        close(read104)
-        !-------------
-
-        ! Renormalize frame to frame
-        !--------------------------------
-        frame2frame=frame2frame*distmax
-        !--------------------------------
-        
+        !----------------
         print*, ' DONE'
+        !----------------
         
      endif
      !-------------------------------------------------------------------------------------------
@@ -2071,22 +2030,9 @@ program clustering_dmsd
      !---------------------------------------------------------
      ! Computing average distance, rms distance, max distance
      !--------------------------------------------------------------------------------------
-     if ( .not. slow ) then
-        !--------------
-        ! Fast Method
-        !------------------------------------------------
-        dista=sum(frame2frame(:,:))/dble(n_steps**2)
-        dista2=sum(frame2frame(:,:)**2)/dble(n_steps**2)
-        dista2=dsqrt(dista2-dista*dista)
-        !------------------------------------------------
-     else
-        ! Slow Method
-        !------------------------------------------------
-        dista2= dista**2/dble(n_steps**2)
-        dista = dista/dble(n_steps**2)
-        dista2 = dsqrt( dista2 - dista*dista )
-        !------------------------------------------------
-     endif
+     dista2= dista**2/dble(n_steps**2)
+     dista = dista/dble(n_steps**2)
+     dista2 = dsqrt( dista2 - dista*dista )
      !----------------------------------------------------------------------------------
 
      !------------------------------------
@@ -2098,23 +2044,29 @@ program clustering_dmsd
      !--------------
      ! Clustering
      !-----------------------------------------------------------------------------------------------------------------
+
+     !---------------
      ! Start message
      !--------------------------------
      write(*,*) 
      write(*,*) "*** clustering ***"
      write(*,*)
      !---------------------------------
+
+     !-----------------------
      ! Clustering in itself
-     !---------------------------------------------------------------------------------------------------------------
+     !------------------------------------------------------------------------------------------
      select case (algorithm)
+     case (1)
+        !---------
         ! Daura
         !-----------------------------------------------------------------------------------
-     case (1)
         call daura_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members,cutoff, slow)
+        !-----------------------------------------------------------------------------------
+     case (2)
         !-----------------------------------------------------------------------------------
         ! Kmenoid
         !-----------------------------------------------------------------------------------
-     case (2)
         call kmedoids_algorithm(frame2frame,n_steps,n_clusters,cluster_size,cluster_centers,cluster_members, slow)
         !-----------------------------------------------------------------------------------
      end select
@@ -2122,7 +2074,7 @@ program clustering_dmsd
      
      !-------------------------------------
      ! Computing clustering coefficients
-     !------------------------------------------------------------------------------------------------------------------------------------------------
+     !----------------------------------------------------------------------------------------
      if ( cutoff_clcoeff > 0.d0 ) then
 
         !--------------------
@@ -2134,11 +2086,7 @@ program clustering_dmsd
         !-----------------------------
         ! compute clustering coeff
         !--------------------------------------------------------------------------------------------------------------------------------------------
-        if ( .not. slow ) then
-           call compute_clustering_coefficients(frame2frame,n_steps, n_clusters,cluster_members,cluster_size, clustering_coefficients,cutoff_clcoeff)
-        else
-           exit
-        endif
+        call compute_clustering_coefficients(frame2frame,n_steps, n_clusters,cluster_members,cluster_size, clustering_coefficients,cutoff_clcoeff, slow )
         !--------------------------------------------------------------------------------------------------------------------------------------------
 
         !----------------------------------
@@ -2163,7 +2111,7 @@ program clustering_dmsd
         !----------------------------------
         
      endif
-     !------------------------------------------------------------------------------------------------------------------------------------------------
+     !------------------------------------------------------------------------------------------
 
      !--------------------------
      ! temporary name for files
@@ -2173,16 +2121,16 @@ program clustering_dmsd
      
      !--------------------------------------------------------------
      ! Printing information about number of cluster and largest size
-     !------------------------------------------------------------------------------------------------------------------------------ 
+     !------------------------------------------------------------------------------------------
      print '(a,i8,a,i5)','we have identified ',n_clusters,' clusters, the biggest is of size ', cluster_size(1)
      print '(a,$)','printing cluster structures to files...'
-     !-------------------------------------------------------------------------------------------------------------------------------
+     !-------------------------------------------------------------------------------------------
 
-
-     !?
-     !----------
+     !-------------------------------------
+     ! number of total actual cluster size
+     !-------------------------------------
      tot_acs=0
-     !----------
+     !-------------------------------------
 
      !--------------------------
      ! Opens clusters centers 
@@ -2192,7 +2140,7 @@ program clustering_dmsd
 
      !----------------------
      ! Loop over clusters
-     !---------------------------------------------------------------------------------------------------------------------
+     !------------------------------------------------------------------------------------------
      do k=1,n_clusters ! 
 
         !-------------------
@@ -2208,7 +2156,8 @@ program clustering_dmsd
         open(unit=write201,file=trim(adjustl(out_file)))
         !------------------------------------------------------------
 
-        ! ?
+        !---------------------
+        ! Init cluster values
         !-------------------------
         kk=0
         ii=cluster_centers(k)
@@ -2218,7 +2167,7 @@ program clustering_dmsd
 
         !--------------------------------------
         ! Writes the center to file centers.xyz
-        !----------------------------------------------------------------------------------------------------------------------------
+        !--------------------------------------------------------------------------------------
         write(write202,'(i8)') n_atoms
         write(write202,'(a,i4,a,i6,$)') 'cluster',k,' size',acs
         write(write202,'(a,f7.2,a,f7.2,a,$)') ' pop',dble(acs)/dble(n_steps)*100,'% tot_pop', dble(tot_acs)/dble(n_steps)*100,'%'
@@ -2226,11 +2175,11 @@ program clustering_dmsd
         do iat=1,n_atoms
            write(write202,'(a4,3f8.3)'),n2t(iat),(atom_positions(ii,iat,l),l=1,n_dim)
         enddo
-        !-----------------------------------------------------------------------------------------------------------------------------
+        !------------------------------------------------------------------------------------
 
         !--------------------------------------------
         ! writes all members to file cluster*.xyz
-        !--------------------------------------------------------------------------------------------------------------------
+        !----------------------------------------------------------------------------------------
         do j=1,acs
 
            !---------------------------
@@ -2249,23 +2198,17 @@ program clustering_dmsd
            if ( .not. slow ) then
               write(write201,'(a,i6,a,f8.3,a,i6,2x,a)') 'member',j,' dist',frame2frame(jj,ii),' frame',jj,trim(adjustl(comments(jj))) ! member, distance, frame
            else
-              ! get frame2frame jj ii
-              do f2f_i2=1,ii
-                 do f2f_j2=1,jj
-                    read(304,*) f2f_i, f2f_j, f2f_ij
-                 enddo
-              enddo
-              ! write
+              ! Read frame ij.
               write(write201,'(a,i6,a,f8.3,a,i6,2x,a)') 'member',j,' dist',f2f_ij,' frame',jj,trim(adjustl(comments(jj))) ! member, distance, frame
            endif
            !----------------------------------------------------
            do iat=1,n_atoms
               write(write201,'(a4,3f8.3)'),n2t(iat),(atom_positions(jj,iat,l),l=1,n_dim) ! atomic positions?
            enddo
-           !-------------------------------------------------------------------------------------------------------------------------------
+           !-------------------------------------------------------------------------------------
            
         enddo
-        !-----------------------------------------------------------------------------------------------------------------------
+        !----------------------------------------------------------------------------------------
 
         !-------------
         ! Closing file
@@ -2273,12 +2216,13 @@ program clustering_dmsd
         close(write201)
         !------------------
      enddo
-     !---------------------------------------------------------------------------------------------------------------------------------
+     !--------------------------------------------------------------------------------------
 
      !--------------
      ! Closing file
      !---------------
      close(write202)
+     !---------------
      
      !---------------
      ! Done Message
