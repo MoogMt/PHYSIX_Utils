@@ -32,16 +32,7 @@ from scipy.special import factorial
 # Calcul de l'harmonique spherique
 #------------------------------------------------------------------------------
 def calculHarmoniqueSpherique( l , m , theta, phi):
-    # Tronc commun
-    harm = np.sqrt( ((2*l+1)*factorial(l-m))/((4*np.pi)*(factorial(l+m))) )*lpmn(m,l,np.cos(theta))[0][0][m]
-    # Partie reelle
-    re = harm*np.cos(m*phi);
-    # Partie imaginaire
-    im = harm*np.sin(m*phi);
-    # Module
-    mod = np.sqrt(re**2+im**2)
-    # Retour
-    return re
+    return np.sqrt(2*factorial(l-m)/factorial(l+m))*lpmn(m,l,np.cos(theta))[0][m][l]*np.cos(m*phi)
 #------------------------------------------------------------------------------
 
 #------------------------------
@@ -76,9 +67,9 @@ print(" ")
 # Computes the spherical harmonics
 #-----------------------------------------------------------------------------
 dummy = 0;
-step = 1;
+step = 5;
 # Tableaux pour angles
-theta_tab = np.arange(0,180+1,step); phi_tab = np.arange(0,360+1,2*step)
+theta_tab = np.arange(0,180+1,step); phi_tab = np.arange(0,360+1,step)
 # Tableaux pour les harmoniques spheriques
 x = np.zeros(( len(theta_tab)*len(phi_tab) ))
 y = np.zeros(( len(theta_tab)*len(phi_tab) ))
