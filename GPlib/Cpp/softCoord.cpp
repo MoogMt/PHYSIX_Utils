@@ -1,4 +1,4 @@
-7//---------------
+//---------------
 // External Libs
 //-------------------
 #include <fstream>
@@ -102,7 +102,7 @@ int main( void )
     {
       if ( step % comp_step == 0 && step >= start_step && step <= end_step )
 	{
-	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 2 , 15 , 60 );
+	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 1.75 , 10 , 50 );
 	  if ( step == start_step )
 	    {
 	      atom_indexesC = getSpecieIndex( lut_list, "C" );

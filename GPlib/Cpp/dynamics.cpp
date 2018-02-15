@@ -117,7 +117,7 @@ int main( void )
     {
       if ( step % comp_step == 0 && step >= start_step && step < end_step)
 	{
-	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 2 , 15 , 60 );
+	  cm  = makeContactMatrixSoft( atom_list , cell , cut_off , lut_list , 1.75 , 10 , 50 );
 	  if ( step == start_step )
 	    {
 	      int nb_atoms = atom_list.names.size();
@@ -213,11 +213,23 @@ int main( void )
 
   int nb_box = 100;
   writeHistogram( C2_out , normalizeHistogram( makeRegularHistogram( lifetime_C2 , min(lifetime_C2) , max(lifetime_C2) , nb_box ) ) );
-  writeHistogram( C3_out , normalizeHistogram( makeRegularHistogram( lifetime_C3 , min(lifetime_C3) , max(lifetime_C3) , nb_box ) ) );
-  writeHistogram( C4_out , normalizeHistogram( makeRegularHistogram( lifetime_C4 , min(lifetime_C4) , max(lifetime_C4) , nb_box ) ) );
-  writeHistogram( O1_out , normalizeHistogram( makeRegularHistogram( lifetime_O1 , min(lifetime_O1) , max(lifetime_O1) , nb_box ) ) );
-  writeHistogram( O2_out , normalizeHistogram( makeRegularHistogram( lifetime_O2 , min(lifetime_O2) , max(lifetime_O2) , nb_box ) ) );  
-
+  if ( lifetime_C3.size() > 0 )
+    {
+      writeHistogram( C3_out , normalizeHistogram( makeRegularHistogram( lifetime_C3 , min(lifetime_C3) , max(lifetime_C3) , nb_box ) ) );
+    }
+  if ( lifetime_C4.size() > 0 )
+    {
+      writeHistogram( C4_out , normalizeHistogram( makeRegularHistogram( lifetime_C4 , min(lifetime_C4) , max(lifetime_C4) , nb_box ) ) );
+    }
+  if ( lifetime_O1.size() > 0 )
+    {
+      writeHistogram( O1_out , normalizeHistogram( makeRegularHistogram( lifetime_O1 , min(lifetime_O1) , max(lifetime_O1) , nb_box ) ) );
+    }
+  if ( lifetime_O2.size() > 0 )
+    {
+      writeHistogram( O2_out , normalizeHistogram( makeRegularHistogram( lifetime_O2 , min(lifetime_O2) , max(lifetime_O2) , nb_box ) ) );
+    }
+  
   // Close
   C2_out.close();
   C3_out.close();

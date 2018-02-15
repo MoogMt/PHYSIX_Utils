@@ -43,6 +43,7 @@ int main( void )
   //-------------------------------------
   std::ofstream press_out("pressure.dat");
   std::ofstream block_press_out("block_pressure.dat");
+  std::ofstream pt("pressure_time.dat");
   //-------------------------------------
 
   //------------------------
@@ -82,6 +83,7 @@ int main( void )
     {
       if ( step % comp_step == 0 && step >= start_step && step < end_step )
 	{
+	  pt << step - start_step << " " <<  pressure << std::endl;
 	  press_vec.push_back( pressure );
 	  std::cout << "Computing pressure, step: " << step << std::endl;
 	}      
@@ -116,6 +118,7 @@ int main( void )
   press_in.close();
   press_out.close();
   block_press_out.close();
+  pt.close();
   //----------------------
   
   return 0;
