@@ -5,9 +5,34 @@
 //=================================================================================
 int getStepXYZ( std::ifstream & file )
 {
-  int i=0;
-  while( readStepXYZ() )
-  return nb_lines;
+  // Vars
+  //--------------------------------------
+  int nb_lines=0;    // Number of lines
+  int nb_atoms=0;    // Number of atoms
+  std::string line;  // Line
+  //--------------------------------------
+  
+  // Get number of atoms
+  //------------------------------------------
+  if ( std::getline( file, line ) )
+    {
+      std::istringstream it_string(line);
+      if ( ! ( it_string >> nb_atoms )) return -2;
+    }
+  else return -1;
+  //------------------------------------------
+
+  // Rewind
+  rewind( file );
+
+  // Read whole file to count number of lines
+  while ( std::getline( file, line ) ) nb_lines++;
+
+  // Rewind
+  rewind( file );
+
+  // Returns number of steps
+  return nb_lines/(double)(nb_atoms);
 }
 //=================================================================================
 

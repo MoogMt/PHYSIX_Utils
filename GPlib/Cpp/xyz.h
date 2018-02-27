@@ -1,4 +1,3 @@
-
 #ifndef XYZ_H
 #define XYZ_H
 
@@ -15,15 +14,21 @@
 #include "atom.h"
 #include "lut.h"
 
+//=====================
+// Get Number of steps
+//========================================
+int getStepXYZ( std::ifstream & file );
+//========================================
+
 //======
 // READ
-//=================================================================================================
+//==============================================================================================
 bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut_list , const bool same_type , const bool verbose );
 bool readStepXYZ( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut_list , const bool same_type = true , const bool verbose = true );
 bool readStepXYZ( std::ifstream & file , AtomList & atoms , std::vector<TypeLUT> & lut_list , const bool same_type = true , const bool verbose = true );
 bool readStepXYZ( std::ifstream & file , std::vector<Atom> & atoms , const std::vector<TypeLUT> & lut_list , const bool same_type = true , const bool verbose = true );
 std::vector<Atom> readstepXYZ( std::ifstream & file );
-//================================================================================================
+//==============================================================================================
 
 //=======
 // WRITE
