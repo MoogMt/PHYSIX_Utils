@@ -23,14 +23,14 @@ int getStepXYZ( std::ifstream & file )
   //------------------------------------------
 
   // Rewind
-  rewind( file );
+  file.seekg (0, file.beg);
 
   // Read whole file to count number of lines
   while ( std::getline( file, line ) ) nb_lines++;
 
   // Rewind
-  rewind( file );
-
+  file.seekg (0, file.beg);
+  
   // Returns number of steps
   return nb_lines/(double)(nb_atoms);
 }
