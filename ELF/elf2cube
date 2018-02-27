@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Index of structure
+typeset -i structure=0
+
+# Total number of structures
+typeset -i nb_structures=50
+
+# Adding CPMD2Cube Path
+PATH=$PATH:/gpfs/projects/pr1edw00/pr1edw01/Programs/cpmd2cube/
+
+# Loop over folders
+for (( structure=0 ; structure < $nb_structures ; structure++ ))
+do
+    # Moving into ELF directory
+    cd $structure"_structure/"
+    # Computing CPMD2Cube
+    cpmd2cube.x -dens -center ELF
+    # Moving backward
+    cd ..
+done
