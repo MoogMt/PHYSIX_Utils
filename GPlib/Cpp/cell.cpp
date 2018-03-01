@@ -294,7 +294,7 @@ bool readParamCell( std::string file_name , Cell & cell )
 //===================
 // Reading Pressure
 //==============================================================================================
-bool readPressure( std::ifstream & input , double & pressure )
+bool readPressureCell( std::ifstream & input , double & pressure )
 {
   //----------
   // Variable
@@ -338,5 +338,18 @@ bool readPressure( std::ifstream & input , double & pressure )
   pressure /= 3 ;
   // No end of file met
   return true;
+}
+//-----------------------------------------------------------------------
+bool readPressure( std::ifstream & input , double & pressure )
+{
+  int time = 0;
+  std::string line;
+  if ( getline( input, line ) )
+    {
+      std::istringstream it_string(line);
+      if (  it_string >> time >> pressure ) return true;
+      else return false;
+    }
+  else return false;
 }
 //==============================================================================================

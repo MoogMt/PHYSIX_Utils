@@ -65,6 +65,11 @@ bool readParamCellStep( std::ofstream & file , Cell & cell );
 bool readParamCell( std::string file_name , Cell & cell );
 //=============================================================================================
 
+//==========
+// Pressure
+//=========================================================================
+bool readPressureCell( std::ifstream & input , double & pressure );
 bool readPressure( std::ifstream & input , double & pressure );
-
+//=========================================================================
+  
 #endif 
