@@ -54,12 +54,14 @@ bool readStepXYZfast( std::ifstream & file , AtomList & atoms , AllTypeLUT & lut
   //-----------------------------------------------------------------------------------
   if ( std::getline( file , line ) )
     {
+      //std::cout << "line: " << line << std::endl;
       std::istringstream it_string(line);
       if ( ! ( it_string >> nb_atoms ) )
 	{
 	  if ( verbose ) std::cout << "Problem with file format at line 1." << std::endl;
 	  return false;
 	}
+      //std::cout << "nb_atoms: " << nb_atoms << std::endl;
     }
   else return false;
   //-----------------------------------------------------------------------------------

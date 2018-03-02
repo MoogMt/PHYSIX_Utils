@@ -1,9 +1,20 @@
+#------------
+# Makefile
+#------------
+
+#-------
 CPP=g++
+#-------
 
+#-------------------------------------
 CFLAGS=-std=gnu++11 -O3 -W -Wall -ansi -pedantic -I.
+#-------------------------------------
 
+#-------------------------------------
 DEPS = utils.h atom.h cell.h cutoff.h contact_matrix.h xyz.h  histogram.h sim.h pdb.h molecules.h lut.h bonds.h
+#-------------------------------------
 
+#-------------------------------------
 OBJP = pressure.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJNN = NN.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJmols = make_molecules.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
@@ -19,11 +30,15 @@ OBJcoord = softCoord.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o his
 OBJcorr = correlation.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJnormalize = normalize.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
 OBJdune = dynamics.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+OBJcolvar = readcolvar.o cutoff.o contact_matrix.o cell.o atom.o xyz.o utils.o histogram.o sim.o pdb.o molecules.o lut.o bonds.o
+#-------------------------------------
 
-
+#-------------------------------------
 %.o: %.c $(DEPS)
 	$(CPP) -c -o $@ $< $(CFLAGS)
+#-------------------------------------
 
+#-------------------------------------
 pressure: $(OBJP)
 	$(CPP) -o $@ $^ $(CFLAGS)
 NN: $(OBJNN)
@@ -54,9 +69,16 @@ correlation: $(OBJcorr)
 	$(CPP) -o $@ $^ $(CFLAGS)
 normalize: $(OBJnormalize)
 	$(CPP) -o $@ $^ $(CFLAGS)
+readcol: $(OBJcolvar)
+	$(CPP) -o $@ $^ $(CFLAGS)
+#-------------------------------------
 
+#----------------
+# Cleaning files
+#-----------------------------------
 clean:
-	rm -rf *.o 
+	rm -rf *.o
+#-----------------------------------
 
 
 
