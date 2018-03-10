@@ -18,31 +18,30 @@ function readCube{T1<:AbstractString}( file_name::T1)
     # Oigin position of the density
     #-----------------------------------------------------
     center=Vector{Real}(3)
-    for i=1,3
-        center[i] = parse(Real, split( lines[3] )[i+1] );
+    for i=1:3
+        center[i] = parse(Float64, split( lines[3] )[i+1] );
     end
     #-----------------------------------------------------
 
     # Number of voxels in each direction
     #-----------------------------------------------------
     nb_vox=Vector{Real}(3)
-    for i=1,3
-        nb_vox[i] = parse(Real, split( lines[3+i] )[1] )
+    for i=1:3
+        nb_vox[i] = parse(Float64, split( lines[3+i] )[1] )
     end
     #-----------------------------------------------------
 
     # Reads Cell Matrix
     #-----------------------------------------------------
     cell_matrix=Array{Real}(3,3)
-    for i=1,3
-        for j=1,3
-            cell_matrix[i,j] = parse(Real, split( lines[4+i] )[1+j] )*0.52917721067
+    for i=1:3
+        for j=1:3
+            cell_matrix[i,j] = parse(Float64, split( lines[4+i] )[1+j] )*0.52917721067
         end
     end
-    cell=cell_mod.Cell_matrix(cell_matrix)
     #-----------------------------------------------------
 
-    return nb_atoms, nb_vox, cell
+    return nb_atoms, nb_vox
 end
 
 end
