@@ -4,6 +4,9 @@ mutable struct Atom
     name::AbstractString
     index::Int
     position::Vector{Real}
+    function Atom()
+        new("",-1,[0,0,0]);
+    end
 end
 
 mutable struct AtomList

@@ -1,7 +1,4 @@
 module utils
-#=======#
-# Utils #
-#=======#
 
 #-------------------------------------------------------------------------------
 #  List of useful random functions that I could not fit elsewhere
