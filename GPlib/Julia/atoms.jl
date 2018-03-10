@@ -3,17 +3,16 @@ module atom_mod
 mutable struct Atom
     name::AbstractString
     index::Int
-    x::Real
-    y::Real
-    z::Real
+    position::Vector{Real}
 end
 
 mutable struct AtomList
     names::Vector{AbstractString}
     index::Vector{Int}
-    x::Vector{Real}
-    y::Vector{Real}
-    z::Vector{Real}
+    positions::Array{Real}
+    function AtomList()
+        new([],[],[])
+    end
 end
 
 mutable struct Mass
