@@ -20,9 +20,9 @@ mutable struct Cell_vec
 end
 end
 mutable struct Cell_matrix
-    matrix::Array{Real}
+    matrix::Array{Real,2}
     function Cell_matrix()
-        new([]);
+        new(Array{Real}(3,3));
     end
 end
 

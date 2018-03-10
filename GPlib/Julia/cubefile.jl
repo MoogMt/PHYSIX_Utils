@@ -33,15 +33,21 @@ function readCube{T1<:AbstractString}( file_name::T1)
 
     # Reads Cell Matrix
     #-----------------------------------------------------
-    cell_matrix=Array{Real}(3,3)
+    cell_matrix=cell_mod.Cell_matrix();
     for i=1:3
         for j=1:3
-            cell_matrix[i,j] = parse(Float64, split( lines[4+i] )[1+j] )*0.52917721067
+            cell_matrix.matrix[i,j] = parse(Float64, split( lines[4+i] )[1+j] )*0.52917721067
         end
     end
     #-----------------------------------------------------
 
-    return nb_atoms, nb_vox
+    # Reads atoms
+    atom_list=AtomList();
+    
+
+    # Reads Density
+
+    return nb_atoms, nb_vox, cell_matrix
 end
 
 end

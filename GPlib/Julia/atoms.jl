@@ -16,6 +16,9 @@ mutable struct AtomList
     function AtomList()
         new([],[],[])
     end
+    function AtomList{T1 <: Int}( nb_atoms::T1)
+        new( Vector{AbstractString}(nb_atoms), Vector{Int}(nb_atoms), Vector{Real}(nb_atoms) )
+    end
 end
 
 mutable struct Mass
