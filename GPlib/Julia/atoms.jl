@@ -14,7 +14,7 @@ mutable struct AtomList
     index::Vector{Int}
     positions::Array{Real}
     function AtomList()
-        new([],[],[])
+        new(Vector{Real}(),Vector{Real}(),Array{Real}(0,1))
     end
     function AtomList{T1 <: Int}( nb_atoms::T1)
         new( Vector{AbstractString}(nb_atoms), Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3) )

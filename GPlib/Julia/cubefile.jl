@@ -3,10 +3,23 @@ module cube_mod
 include("atoms.jl");
 include("cell.jl");
 
-mutable struct volume_4d
+#-----------------------------------------------------------------------
+mutable struct Volume
     position::Array{Real}
     value::Vector{Real}
+    function Volume()
+        new(Array{Real}(0,3),Vector{Real}())
+    end
+    function Volume{T2 <: Real}( nb_vox::Vector{T2} )
+        if size(nb_vox)[1] == 3
+            nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
+            new(Array{Real}(nb_tot,3),Vector{Real}(nb_tot))
+        else
+            print("/!\\ Error: Wrong size for the number of voxels.");
+        end
+    end
 end
+#-----------------------------------------------------------------------
 
 # Reads a cube file and returns all or parts of its informations
 function readCube{T1<:AbstractString}( file_name::T1)
@@ -60,7 +73,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     for i=1:nb_atoms
         atom_list.names[i] = split( lines[6+i] )[1]
         for j=1:3
-            atom_list.position[i,j] = parse(Float64, split( lines[4+i])[j] )
+            atom_list.position[i,j] = parse(Float64, split( lines[6+i])[2+j] )
         end
     end
     #----------------------------------------------------
@@ -68,9 +81,16 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #----------------
     # Reads Density
     #----------------------------------------------------
+    nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
+    volume = Volume(nb_tot)
+    for i=1:nb_tot/6
+        for j=1:6
+            
+        end
+    end
     #----------------------------------------------------
 
-    return atom_list, cell_matrix, density
+    return atom_list, cell_matrix, volume
 end
 
 end
