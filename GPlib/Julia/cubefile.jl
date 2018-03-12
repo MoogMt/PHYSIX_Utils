@@ -53,8 +53,12 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-----------------------------------------------------
 
     # Reads atoms
+    #----------------------------------------------------
     atom_list=AtomList(nb_atoms);
-
+    for i=1:nb_atoms
+        atom_list.names[i] = lines[6]
+    end
+    #----------------------------------------------------
 
     # Reads Density
 
