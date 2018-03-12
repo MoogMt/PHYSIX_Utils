@@ -17,7 +17,7 @@ mutable struct AtomList
         new([],[],[])
     end
     function AtomList{T1 <: Int}( nb_atoms::T1)
-        new( Vector{AbstractString}(nb_atoms), Vector{Int}(nb_atoms), Vector{Real}(nb_atoms) )
+        new( Vector{AbstractString}(nb_atoms), Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3) )
     end
 end
 
