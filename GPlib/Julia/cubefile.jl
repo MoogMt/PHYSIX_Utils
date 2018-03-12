@@ -1,10 +1,16 @@
 module cube_mod
 
 include("atoms.jl");
-include("cell.jl")
+include("cell.jl");
+
+mutable struct volume_4d
+    position::Array{Real}
+    value::Vector{Real}
+end
 
 # Reads a cube file and returns all or parts of its informations
 function readCube{T1<:AbstractString}( file_name::T1)
+    #--------------
     # Reading file
     #----------------------
     file=open(file_name);
@@ -12,9 +18,13 @@ function readCube{T1<:AbstractString}( file_name::T1)
     close(file);
     #-----------------------
 
+    #------------------
     # Number of atoms
+    #-----------------------------------------
     nb_atoms = parse(Int,split(lines[3])[1]);
+    #-----------------------------------------
 
+    #--------------------------------
     # Oigin position of the density
     #-----------------------------------------------------
     center=Vector{Real}(3)
@@ -23,6 +33,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     end
     #-----------------------------------------------------
 
+    #-------------------------------------
     # Number of voxels in each direction
     #-----------------------------------------------------
     nb_vox=Vector{Real}(3)
@@ -42,12 +53,12 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-----------------------------------------------------
 
     # Reads atoms
-    atom_list=AtomList();
-    
+    atom_list=AtomList(nb_atoms);
+
 
     # Reads Density
 
-    return nb_atoms, nb_vox, cell_matrix
+    return atom_list, cell_matrix, density
 end
 
 end
