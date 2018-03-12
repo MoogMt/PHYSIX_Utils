@@ -82,10 +82,12 @@ function readCube{T1<:AbstractString}( file_name::T1)
     # Reads Density
     #----------------------------------------------------
     nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
+    nb_col=6
     volume = Volume(nb_tot)
-    for i=1:nb_tot/6
-        for j=1:6
-            
+    offset=6+nb_atoms
+    for i=1:nb_tot/nb_col
+        for j=1:nb_col
+            volume.value[i*nb_col+j]=parse(Float64, split( lines[offset+i])[j] )
         end
     end
     #----------------------------------------------------
