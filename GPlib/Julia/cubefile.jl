@@ -100,12 +100,13 @@ function readCube{T1<:AbstractString}( file_name::T1)
             volume.matrix[index,3] = z
             volume.matrix[index,4] = parse(Float64, split( lines[(Int)(offset+i)])[j] )
             z=z+1;
-            if z == nb_atoms
+            if z == nb_vox[3]
                 z=0;
                 y=y+1;
             end
-            if y == nb_atoms
+            if y == nb_vox[2]
                 y=0;
+                z=0;
                 x=x+1;
             end
         end
