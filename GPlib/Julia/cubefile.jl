@@ -9,9 +9,17 @@ mutable struct Volume
     function Volume()
         new( Array{Real}(0,4) )
     end
-    function Volume{T2 <: Real}( nb_vox::Vector{T2} )
+    function Volume{T1 <: Real}( nb_vox_iso::T1 )
+        if nb_vox_iso > 0
+            new( Array{Real}(nb_vox_iso*nb_vox_iso*nb_vox_iso,4))
+        else
+            print("/!\\ Error: Wrong size for the number of voxels.");
+        end
+    end
+    function Volume{T1 <: Real}( nb_vox::Vector{T1} )
         if size(nb_vox)[1] == 3
-            new( Array{Real}(nb_vox[1]*nb_vox[2]*nb_vox[3],4) )
+            nb_tot = nb_vox[1]+nb_vox[2]+nb_vox[3];
+            new( Array{Real}(nb_tot,4) );
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
         end
@@ -36,17 +44,18 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-----------------------------------------
 
     #--------------------------------
-    # Oigin position of the density
+    # Origin position of the density
     #-----------------------------------------------------
     center=Vector{Real}(3)
     for i=1:3
-dfvhsdefa    end
+        center[i]=parse(Float64,split(lines[3])[1+i])
+    end
     #-----------------------------------------------------
 
     #-------------------------------------
     # Number of voxels in each direction
     #-----------------------------------------------------
-    nb_vox=Vector{Real}(3)
+    nb_vox=Vector{Int}(3)
     for i=1:3
         nb_vox[i] = parse(Float64, split( lines[3+i] )[1] )
     end
@@ -66,11 +75,11 @@ dfvhsdefa    end
     #-------------
     # Reads atoms
     #----------------------------------------------------
-    atom_list=AtomList(nb_atoms);
+    atom_list=atom_mod.AtomList(nb_atoms);
     for i=1:nb_atoms
         atom_list.names[i] = split( lines[6+i] )[1]
         for j=1:3
-            atom_list.position[i,j] = parse(Float64, split( lines[6+i])[2+j] )
+            atom_list.positions[i,j] = parse(Float64, split( lines[6+i])[2+j] )
         end
     end
     #----------------------------------------------------
@@ -80,16 +89,18 @@ dfvhsdefa    end
     #----------------------------------------------------
     nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
     nb_col=6
-    volume = Volume(nb_tot)
-    offset=6+nb_atoms
+    volume = cube_mod.Volume(nb_vox)
+    offset=(Int)(6+nb_atoms+1)
     x=0; y=0; z=0;
     for i=0:nb_tot/nb_col-1
         for j=1:nb_col
-            volume.matrix[1,i*nb_col+j] = x
-            volume.matrix[2,i*nb_col+j] = y
-            volume.matrix[3,i*nb_col+j] = z
-            volume.matrix[4,i*nb_col+j] = parse(Float64, split( lines[offset+i])[j] )
-            z++
+            index=(Int)(i*nb_col+j)
+            volume.matrix[index,1] = x
+            volume.matrix[index,2] = y
+            volume.matrix[index,3] = z
+            print(split( lines[(Int)(offset+i)]),"\n")
+            volume.matrix[index,4] = parse(Float64, split( lines[(Int)(offset+i)])[j] )
+            z=z+1;
             if z == nb_atoms
                 z=0;
                 y=y+1;
