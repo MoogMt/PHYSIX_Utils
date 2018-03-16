@@ -67,7 +67,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     cell_matrix=cell_mod.Cell_matrix();
     for i=1:3
         for j=1:3
-            cell_matrix.matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )
+            cell_matrix.matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*0.52918
         end
     end
     #-----------------------------------------------------
@@ -129,7 +129,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     # Scaling cell vectors by number of voxels
     #--------------------------------------------
     for i=1:3
-        cell_matrix.matrix[i,i]*nb_vox[i]
+        cell_matrix.matrix[i,i]=cell_matrix.matrix[i,i]*nb_vox[i]
     end
     #---------------------------------------------
 
