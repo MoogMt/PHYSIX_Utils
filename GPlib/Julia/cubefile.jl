@@ -18,7 +18,7 @@ mutable struct Volume
     end
     function Volume{T1 <: Real}( nb_vox::Vector{T1} )
         if size(nb_vox)[1] == 3
-            nb_tot = nb_vox[1]+nb_vox[2]+nb_vox[3];
+            nb_tot = nb_vox[1]*nb_vox[2]*nb_vox[3];
             new( Array{Real}(nb_tot,4) );
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
@@ -67,7 +67,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     cell_matrix=cell_mod.Cell_matrix();
     for i=1:3
         for j=1:3
-            cell_matrix.matrix[i,j] = parse(Float64, split( lines[4+i] )[1+j] )*0.52917721067
+            cell_matrix.matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )
         end
     end
     #-----------------------------------------------------
@@ -91,14 +91,13 @@ function readCube{T1<:AbstractString}( file_name::T1)
     nb_col=6
     volume = cube_mod.Volume(nb_vox)
     offset=(Int)(6+nb_atoms+1)
-    x=0; y=0; z=0;
+    x=0.; y=0.; z=0.;
     for i=0:nb_tot/nb_col-1
         for j=1:nb_col
             index=(Int)(i*nb_col+j)
             volume.matrix[index,1] = x
             volume.matrix[index,2] = y
             volume.matrix[index,3] = z
-            print(split( lines[(Int)(offset+i)]),"\n")
             volume.matrix[index,4] = parse(Float64, split( lines[(Int)(offset+i)])[j] )
             z=z+1;
             if z == nb_atoms
@@ -111,15 +110,27 @@ function readCube{T1<:AbstractString}( file_name::T1)
             end
         end
     end
-    # Scaling positions
-    dV=[0,0,0]
+    #----------------------------------------------------
+
+    #------------------------------
+    # Scaling positions for volume
+    #----------------------------------------------------
+    dV=[0.,0.,0.]
     for i=1:3
         for j=1:3
-            dV[i] += cell_matrix[i,j];
+            dV[i] = dV[i] + cell_matrix.matrix[i,j];
         end
-        volume.matrix[i,:] = volume.matrix[i,:]*dV[i];
+        volume.matrix[:,i] = volume.matrix[:,i]*dV[i]+center[i];
     end
     #----------------------------------------------------
+
+    #-------------------------------------------
+    # Scaling cell vectors by number of voxels
+    #--------------------------------------------
+    for i=1:3
+        cell_matrix.matrix[i,i]*nb_vox[i]
+    end
+    #---------------------------------------------
 
     return atom_list, cell_matrix, volume
 end
