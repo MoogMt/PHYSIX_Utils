@@ -136,6 +136,20 @@ function readCube{T1<:AbstractString}( file_name::T1)
     return atom_list, cell_matrix, volume
 end
 
+function traceVolume{ T1 <: Real }( position1::Vector{Real}, position2::Vector{Real} )
+    if size(position1)[1] != 3 || size(position2)[1] != 3
+        return false
+    end
+    indexs1= getClosest(position1);
+    indexs2= getClosest(position2);
+    dindex=index1-index2
+    curseur=indexs1
+    list=Array{Real}(0,3)
+    while distance(curseur,indexs2) > 0
+        vcat(index2,curseur)
+        move(curseur,indexs2)
+    end
+end
 print("Cube Module Loaded!\n")
 
 end
