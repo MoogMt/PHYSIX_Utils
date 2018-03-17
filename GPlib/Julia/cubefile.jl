@@ -141,7 +141,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
 
     return atom_list, cell_matrix, volume
 end
-
+# Trace the volume between two points.
 function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
     if size(position1)[1] != 3 || size(position2)[1] != 3
         return false
@@ -149,13 +149,38 @@ function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{
     indexs1= getClosest( position1, volume);
     indexs2= getClosest( position2, volume);
     dindex=index1-index2
+    # Getting the possible direction
+    direction=Vector{Int}(3)
+    for i=1:3
+        if dindex[i] > 0
+            direction[i] = 1
+        elseif dindex[i] < 0
+            direction[i] = -1
+        else
+            direction = 0
+        end
+    end
+    # Making the move matrix
+    moveMatrix=Array{Int}(7,3)
+    for i=0:1
+        for j=0:1
+            for k=0:1
+                if i+j+k != 0
+                    moveMatrix[i,:]=[i*direction[1],j*direction[2],k*direction[3]])
+                end
+            end
+        end
+    end
+    # Clearing direction
     curseur=indexs1
     list=Array{Real}(0,3)
     while norm(curseur-indexs2) > 0
+
         vcat(index2,curseur)
-        move(curseur,indexs2)
     end
 end
+
+
 print("Cube Module Loaded!\n")
 
 end
