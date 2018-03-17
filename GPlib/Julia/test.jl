@@ -9,6 +9,8 @@ atoms, cell, elf = cube_mod.readCube("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT
 # Wraping atoms
 atoms=cell_mod.wrap(atoms,cell)
 
+
+
 C1=31
 O1=81
 O2=66
