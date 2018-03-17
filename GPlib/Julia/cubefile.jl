@@ -151,7 +151,7 @@ function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{
     dindex=index1-index2
     curseur=indexs1
     list=Array{Real}(0,3)
-    while distance(curseur,indexs2) > 0
+    while norm(curseur-indexs2) > 0
         vcat(index2,curseur)
         move(curseur,indexs2)
     end
