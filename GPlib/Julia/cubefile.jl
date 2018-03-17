@@ -1,7 +1,11 @@
+include("cell.jl")
+
 module cube_mod
 
-include("atoms.jl");
-include("cell.jl");
+import atom_mod.AtomList
+import cell_mod.Cell_matrix
+importall atom_mod
+importall cell_mod
 
 #-----------------------------------------------------------------------
 mutable struct Volume
@@ -64,7 +68,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #--------------------
     # Reads Cell Matrix
     #-----------------------------------------------------
-    cell_matrix=cell_mod.Cell_matrix();
+    cell_matrix=Cell_matrix();
     for i=1:3
         for j=1:3
             cell_matrix.matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*0.52918
@@ -75,7 +79,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-------------
     # Reads atoms
     #----------------------------------------------------
-    atom_list=atom_mod.AtomList(nb_atoms);
+    atom_list=AtomList(nb_atoms);
     for i=1:nb_atoms
         atom_list.names[i] = split( lines[6+i] )[1]
         for j=1:3
@@ -136,12 +140,12 @@ function readCube{T1<:AbstractString}( file_name::T1)
     return atom_list, cell_matrix, volume
 end
 
-function traceVolume{ T1 <: Real }( position1::Vector{Real}, position2::Vector{Real} )
+function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
     if size(position1)[1] != 3 || size(position2)[1] != 3
         return false
     end
-    indexs1= getClosest(position1);
-    indexs2= getClosest(position2);
+    indexs1= getClosest( position1, volume);
+    indexs2= getClosest( position2, volume);
     dindex=index1-index2
     curseur=indexs1
     list=Array{Real}(0,3)
