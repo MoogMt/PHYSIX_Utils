@@ -10,14 +10,21 @@ importall cell_mod
 importall geom
 
 #-----------------------------------------------------------------------
+# Volume 4, nb_vox*nb_vox*nb_vox
+#-----------------------
+# 1-3 for positions
+# 4 for the values
+#-----------------------
 mutable struct Volume
     matrix::Array{Real}
+    nb_vox::Vector{Int}
+    cell_matrix::Array{Real}
     function Volume()
         new( Array{Real}(0,4) )
     end
     function Volume{T1 <: Real}( nb_vox_iso::T1 )
         if nb_vox_iso > 0
-            new( Array{Real}(nb_vox_iso*nb_vox_iso*nb_vox_iso,4))
+            new( Array{Real}(nb_vox_iso*nb_vox_iso*nb_vox_iso,4),[nb_vox_iso,nb_vox_iso,nb_vox_iso])
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
         end
@@ -25,7 +32,7 @@ mutable struct Volume
     function Volume{T1 <: Real}( nb_vox::Vector{T1} )
         if size(nb_vox)[1] == 3
             nb_tot = nb_vox[1]*nb_vox[2]*nb_vox[3];
-            new( Array{Real}(nb_tot,4) );
+            new( Array{Real}(nb_tot,4),nb_vox);
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
         end
@@ -95,7 +102,8 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #----------------------------------------------------
     nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
     nb_col=6
-    volume = cube_mod.Volume(nb_vox)
+    volume = Volume(nb_vox)
+    volume.nb_vox=nb_vox
     offset=(Int)(6+nb_atoms+1)
     x=0.; y=0.; z=0.;
     for i=0:nb_tot/nb_col-1
@@ -141,6 +149,19 @@ function readCube{T1<:AbstractString}( file_name::T1)
 
     return atom_list, cell_matrix, volume
 end
+
+function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
+    indexs=zeroes(1,3)
+    for i=1:volume.nb_vox[1]
+        for j=1:volume.nb_vox[2]
+            for k=1:volume.nb_vox[3]
+
+            end
+        end
+    end
+    return indexs
+end
+
 # Trace the volume between two points.
 function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
     if size(position1)[1] != 3 || size(position2)[1] != 3
@@ -171,15 +192,18 @@ function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{
             end
         end
     end
+    distances=Array{Real}(7,1)
     # Clearing direction
     curseur=indexs1
     list=Array{Real}(0,3)
     while norm(curseur-indexs2) > 0
-
+        for i=1:7
+            test=curseur+moveMatrix[i,:]
+            distance2line(test,)
+        end
         vcat(index2,curseur)
     end
 end
-
 
 print("Cube Module Loaded!\n")
 
