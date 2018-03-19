@@ -14,15 +14,15 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
     pressure=zeros(nb_pressure_points,1)
     if ! diag
         for i=1:nb_pressure_points
-            for j=2:4
-                pressure[î]= parse(Float64,split(lines[1+4*(i-1)*stride+j])[j-1])
+            for j=1:3
+                pressure[i] += parse(Float64,split(lines[1+4*(i-1)*stride+j])[j])
             end
             pressure[i] = pressure[i]/3.
         end
     else
         pressure_matrix=zeros(3,3)
         for i=1:nb_pressure_points
-            for j=2:4
+            for j=1:3
                 line=split(lines[1+4*(i-1)*stride+j])
                 for k=1:3
                     pressure_matrix[j,k]=parse(Float64,line[k])
@@ -30,7 +30,7 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
             end
             eigen_press=eigvals(pressure_matrix)
             for l=1:3
-                pressure[i]=eigen_press[l]
+                pressure[i] += eigen_press[l]
             end
             pressure[i] = pressure[i]/3.
         end

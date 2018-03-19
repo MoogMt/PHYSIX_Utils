@@ -24,7 +24,7 @@ function dist2Line{ T1 <: Real, T2 <: Real}( vector_2_line::Vector{T1}, line_vec
     return abs(scalar(vector_2_line,line_vector))/norm(line_vector)
 end
 
-function pointFromLine{ T1 <: Real, T2 <: Real, T3 <: Real }( point::vector{T1}, line_vector::Vector{T2} , point_in_line::Vector{T3} )
+function pointFromLine{ T1 <: Real, T2 <: Real, T3 <: Real }( point::Vector{T1}, line_vector::Vector{T2} , point_in_line::Vector{T3} )
     return dist2line( point-point_in_line, line_vector )
 end
 
