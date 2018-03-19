@@ -18,3 +18,5 @@ function simpleMoment{T1 <: Real, T2 <: Int}( data::Vector{T1} , n::T2)
     end
     return (moment^n - momentn)/size
 end
+
+end
