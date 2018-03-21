@@ -1,6 +1,6 @@
 module pressure
 
-function readPressureCPMD( file_name::AbstractString , diag::Bool , stride::Int)
+function readPressureCPMD( file_name::AbstractString , diag::Bool , start_step::Int, end_step::Int, stride::Int)
     #--------------
     # Reading file
     #----------------------
