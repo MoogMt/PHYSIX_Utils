@@ -1,6 +1,6 @@
 module pressure
 
-function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
+function readPressureCPMD( file_name::AbstractString , diag::Bool , stride::Int)
     #--------------
     # Reading file
     #----------------------
@@ -40,6 +40,32 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
     end
 
     return pressure
+end
+
+function readStressCPMD( file_name::AbstractString, stride::Int )
+    #--------------
+    # Reading file
+    #----------------------
+    file=open(file_name);
+    lines=readlines(file);
+    close(file);
+    #-----------------------
+
+    # Creation de variables
+    #----------------------------------------------------------
+    nb_stress_points=Int(trunc(size(lines)[1]/(4*stride)))
+    stress=Array{Real}(nb_stress_points,6)
+    #----------------------------------------------------------
+    for i=1:nb_stres_points
+        for j=1:3
+            for k=1:3
+                stress[i,j] = parse(Float64,split(lines[1+4*(i-1)*stride+j])[k])
+            end
+        end
+    end
+    #----------------------------------------------------------
+
+    return stress
 end
 
 end
