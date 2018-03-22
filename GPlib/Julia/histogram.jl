@@ -14,13 +14,21 @@ mutable struct Histogram
     function Histogram()
         new( [],[],[] )
     end
-    function Histogram{ T1 <: Real, T2 <: Int }( data::Array{T1}, nb_box::T2 )
-        if size(data)[2] == 1
-            
-        else
-            print("Error on size of data array. \n")
-            return
+    function Histogram{ T1 <: Real, T2 <: Int }( data::Vector{T1}, nb_box::T2 )
+        # Min and Max
+        min=min(data)
+        max=max(data)
+        # Size of boxes
+        delta=(max-min)/delta
+        # Construction of the boxes
+        begins=Vector{Real}(nb_box)
+        ends=Vector{Real}(nb_box)
+        for i=1:nb_box
+            begins[i]=min
+            ends[i]=
+            min +=delta
         end
+        new(begins,ends,value)
     end
 end
 #-----------------------------------------------------------------------
