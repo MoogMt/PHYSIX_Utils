@@ -62,7 +62,7 @@ for i=1:size(files_ret)[1]
 end
 
 file_PLUMED=["PLUMED/9.4+PLUMED","PLUMED/9.4+PLUMED3"]
-V_PLUMED=[8.82,9.0,9.1,9.2,9.3,9.4,9.5]
+V_PLUMED=[9.4,9.4]
 P_PLUMED=Vector{Real}(size(file_PLUMED)[1])
 dP_PLUMED=Vector{Real}(size(file_PLUMED)[1])
 for i=1:size(file_PLUMED)[1]
@@ -73,14 +73,15 @@ for i=1:size(file_PLUMED)[1]
 end
 
 figure()
-plot(V,P,"r.")
-plot(V,P,"r-")
-plot(Vr,Pr,"b.")
-plot(Vr,Pr,"b-")
+plot(V,P,"r.-")
+plot(Vr,Pr,"b.-")
+legend(["3000K - Up","3000K - Down"])
+xlabel("V (A**3/atom)")
+ylabel("P (kBar)")
 
 figure()
 plot(V,P,"r.-")
-plot([9.4],P_avg,".")
+plot(V_PLUMED,P_PLUMED,".")
 plot(V_25K,P_25K,"c.-")
 plot(V_2K,P_2K,"g.-")
 plot(V_03K,P_03K,".-")
@@ -88,5 +89,9 @@ legend(["3000K","3000K + SPRINT","2500K","2000K","300K"])
 xlabel("V (A**3/atom)")
 ylabel("P (kBar)")
 
-plot(V_Sprint,P_Sprint,"g.")
-legend(["3000K - PBE - Up","3000K - PBE - Down","3000K - PBE - SPRINT"])
+files=["8.82"]
+local_file=string(folder,files[1],"/3000K/STRESS")
+p=pressure.readPressureCPMD( local_file , false , 1)
+# for i=1000:1000:size(p)[1]
+#     print("P = ",statistics.blockAverage(p,i)," kBar\n")
+# end

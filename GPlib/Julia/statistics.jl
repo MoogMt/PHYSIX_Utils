@@ -23,17 +23,21 @@ end
 function blockAverage{T1 <: Real,  T2 <: Int}( data::Vector{T1}, block_size::T2 )
     average=0
     data_size=size(data)[1]
-    nb_block=Int(trunc(size_data/block_size))
+    nb_block=Int(trunc(data_size/block_size))
     # Compute the average of averages
+    count=0
     for i=1:nb_block
-        # Compute the average inside the group
-        local_average=0
-        for j=1:block_size
-            local_average += data[i*block_size+j]
+        if data_size > block_size+i*block_size
+            # Compute the average inside the group
+            local_average=0
+            for j=1:block_size
+                local_average += data[i*block_size+j]
+            end
+            average += local_average/block_size
+            count = count + 1
         end
-        average += local_average/block_size
     end
-    return average/nb_block
+    return average/count
 end
 
 function blockMoment{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Vector{T1}, block_size::T2 , n::T3)
