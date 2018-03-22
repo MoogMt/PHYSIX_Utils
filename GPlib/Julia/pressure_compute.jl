@@ -61,8 +61,15 @@ for i=1:size(files_ret)[1]
     dPr[i]=sqrt(statistics.simpleMoment(p,2))
 end
 
-files_PLUMED=["PLUMED/9.4+PLUMED3"]
-for i=1:size()
+file_PLUMED=["PLUMED/9.4+PLUMED","PLUMED/9.4+PLUMED3"]
+V_PLUMED=[8.82,9.0,9.1,9.2,9.3,9.4,9.5]
+P_PLUMED=Vector{Real}(size(file_PLUMED)[1])
+dP_PLUMED=Vector{Real}(size(file_PLUMED)[1])
+for i=1:size(file_PLUMED)[1]
+    local_file=string(folder,file_PLUMED[i],"/3000K/STRESS")
+    p=pressure.readPressureCPMD( local_file , false , 1)
+    P_PLUMED[i]=statistics.simpleAverage(p)
+    dP_PLUMED[i]=sqrt(statistics.simpleMoment(p,2))
 end
 
 figure()
@@ -73,10 +80,11 @@ plot(Vr,Pr,"b-")
 
 figure()
 plot(V,P,"r.-")
+plot([9.4],P_avg,".")
 plot(V_25K,P_25K,"c.-")
 plot(V_2K,P_2K,"g.-")
 plot(V_03K,P_03K,".-")
-legend(["3000K","2500K","2000K","300K"])
+legend(["3000K","3000K + SPRINT","2500K","2000K","300K"])
 xlabel("V (A**3/atom)")
 ylabel("P (kBar)")
 

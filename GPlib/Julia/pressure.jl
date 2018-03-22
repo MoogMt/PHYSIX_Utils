@@ -1,6 +1,6 @@
 module pressure
 
-function readPressureCPMD( file_name::AbstractString , diag::Bool , start_step::Int, end_step::Int, stride::Int)
+function readPressureCPMD( file_name::AbstractString , diag::Bool , stride::Int)
     #--------------
     # Reading file
     #----------------------
@@ -18,6 +18,10 @@ function readPressureCPMD( file_name::AbstractString , diag::Bool , start_step::
     if ! diag
         for i=1:nb_pressure_points
             for j=1:3
+                if split(lines[1+4*(i-1)*stride+j])[j] == "TOTAL"
+                    print("Target is line ", 1+4*(i-1)*stride+j)
+                    break
+                end
                 pressure[i] += parse(Float64,split(lines[1+4*(i-1)*stride+j])[j])
             end
             pressure[i] = pressure[i]/3.
