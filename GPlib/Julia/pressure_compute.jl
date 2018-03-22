@@ -92,6 +92,11 @@ ylabel("P (kBar)")
 files=["8.82"]
 local_file=string(folder,files[1],"/3000K/STRESS")
 p=pressure.readPressureCPMD( local_file , false , 1)
-# for i=1000:1000:size(p)[1]
-#     print("P = ",statistics.blockAverage(p,i)," kBar\n")
-# end
+P=Vector{Real}(Int(trunc((size(p)[1]-1000)/1000)))
+Gp_size=linspace(1000,size(p)[1],1000)
+for i=1:size(P)[1]
+    index=Int(trunc(i*1000+1000))
+    P[i]=statistics.blockAverage(p,index)
+end
+figure()
+plot(P,"r.-")
