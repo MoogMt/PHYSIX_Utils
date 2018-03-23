@@ -3,6 +3,8 @@ include("geom.jl")
 
 module cube_mod
 
+include("conversion.jl");
+
 import atom_mod.AtomList
 import cell_mod.Cell_matrix
 importall atom_mod
@@ -80,7 +82,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     cell_matrix=Cell_matrix();
     for i=1:3
         for j=1:3
-            cell_matrix.matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*0.52918
+            cell_matrix.matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*Bohr2Ang
         end
     end
     #-----------------------------------------------------
@@ -155,7 +157,7 @@ function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
     for i=1:volume.nb_vox[1]
         for j=1:volume.nb_vox[2]
             for k=1:volume.nb_vox[3]
-                
+
             end
         end
     end
