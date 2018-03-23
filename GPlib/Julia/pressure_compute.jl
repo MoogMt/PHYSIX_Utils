@@ -7,6 +7,9 @@ folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
 files=["8.82","9.0","9.05","9.1","9.15","9.2","9.25","9.3","9.35","9.375","9.4","9.5","9.8"]
 V=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8]
+for i=1:size(V)[1]
+    V[i]=V[i]*V[i]*V[i]/96
+end
 P=Vector{Real}(size(files)[1])
 dP=Vector{Real}(size(files)[1])
 for i=1:size(files)[1]
@@ -18,6 +21,9 @@ end
 
 files_2K=["8.82","9.0","9.05","9.1","9.2","9.3","9.8"]
 V_2K=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
+for i=1:size(V_2K)[1]
+    V_2K[i]=V_2K[i]*V_2K[i]*V_2K[i]/96
+end
 P_2K=Vector{Real}(size(files_2K)[1])
 dP_2K=Vector{Real}(size(files_2K)[1])
 for i=1:size(files_2K)[1]
@@ -29,6 +35,9 @@ end
 
 files_25K=["8.82","9.0","9.05","9.1","9.2","9.3","9.8"]
 V_25K=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
+for i=1:size(V_25K)[1]
+    V_25K[i]=V_25K[i]*V_25K[i]*V_25K[i]/96
+end
 P_25K=Vector{Real}(size(files_25K)[1])
 dP_25K=Vector{Real}(size(files_25K)[1])
 for i=1:size(files_25K)[1]
@@ -40,6 +49,9 @@ end
 
 files_03K=["8.82","9.0","9.2"]
 V_03K=[8.82,9.0,9.2]
+for i=1:size(V_03K)[1]
+    V_03K[i]=V_03K[i]*V_03K[i]*V_03K[i]/96
+end
 sizeV=size(files_03K)[1]
 P_03K=Vector{Real}(sizeV)
 dP_03K=Vector{Real}(sizeV)
@@ -52,6 +64,9 @@ end
 
 files_ret=["8.82","9.0r","9.1r","9.2r","9.3r","9.4r","9.5r"]
 Vr=[8.82,9.0,9.1,9.2,9.3,9.4,9.5]
+for i=1:size(Vr)[1]
+    Vr[i]=Vr[i]*Vr[i]*Vr[i]/96
+end
 Pr=Vector{Real}(size(files_ret)[1])
 dPr=Vector{Real}(size(files_ret)[1])
 for i=1:size(files_ret)[1]
@@ -63,6 +78,9 @@ end
 
 file_PLUMED=["PLUMED/9.4+PLUMED","PLUMED/9.4+PLUMED3"]
 V_PLUMED=[9.4,9.4]
+for i=1:size(V_PLUMED)[1]
+    V_PLUMED[i]=V_PLUMED[i]*V_PLUMED[i]*V_PLUMED[i]/96
+end
 P_PLUMED=Vector{Real}(size(file_PLUMED)[1])
 dP_PLUMED=Vector{Real}(size(file_PLUMED)[1])
 for i=1:size(file_PLUMED)[1]
@@ -72,22 +90,48 @@ for i=1:size(file_PLUMED)[1]
     dP_PLUMED[i]=sqrt(statistics.simpleMoment(p,2))
 end
 
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/BLYP/"
+files=["8.82","9.05","9.2","9.3","9.35","9.4","9.5","9.8"]
+V_BLYP=[8.82,9.05,9.2,9.3,9.35,9.4,9.5,9.8]
+for i=1:size(V_BLYP)[1]
+    V_BLYP[i]=V_BLYP[i]*V_BLYP[i]*V_BLYP[i]/96
+end
+P_BLYP=Vector{Real}(size(files)[1])
+dP_BLYP=Vector{Real}(size(files)[1])
+for i=1:size(files)[1]
+    local_file=string(folder,files[i],"/3000K/STRESS")
+    p=pressure.readPressureCPMD( local_file , false , 1)
+    P_BLYP[i]=statistics.simpleAverage(p)
+    dP_BLYP[i]=sqrt(statistics.simpleMoment(p,2))
+end
+
+V_Boates= [6.6115368589,6.7677450581,6.9401838199,7.0967427501,7.2691378687,7.426135602,7.5988814922,7.7714956737,7.86572052,7.912789266,7.9756498459,8.007058128,8.0384223944,8.0858859278,8.1013706673,8.1330423667,8.1959466238,8.3060950127,8.4943696581,8.6985238304,8.8710939961,9.0595440273,9.4521042151,9.8605002525]
+P_Boates=[72.6449236765,67.3913035844,64.130432577,60.3260863203,56.8840568965,54.8913013081,52.8985522233,50.3623148819,49.275364383,48.5507242135,48.0072424605,47.6449256276,47.1014503782,48.0072424605,46.9202919617,47.6449256276,47.2826087946,46.9202919617,44.0217377873,41.6666653659,38.9492761116,36.7753621068,32.0652172641,27.7173912054]
+
 figure()
-plot(V,P,"r.-")
-plot(Vr,Pr,"b.-")
-legend(["3000K - Up","3000K - Down"])
+plot(V,P/10,"r.-")
+plot(Vr,Pr/10,"b.-")
+plot(V_Boates,P_Boates,"k.-")
+legend(["3000K - Up","3000K - Down","3000K - Boates"])
 xlabel("V (A**3/atom)")
 ylabel("P (kBar)")
 
 figure()
-plot(V,P,"r.-")
-plot(V_PLUMED,P_PLUMED,".")
-plot(V_25K,P_25K,"c.-")
-plot(V_2K,P_2K,"g.-")
-plot(V_03K,P_03K,".-")
-legend(["3000K","3000K + SPRINT","2500K","2000K","300K"])
+plot(V,P/10,"r.-")
+plot(V_BLYP,P_BLYP/10,"b.-")
+plot(V_Boates,P_Boates,"k.-")
+legend(["3000K - PBE","3000K - BLYP","3000K - PBE - Boates"])
 xlabel("V (A**3/atom)")
 ylabel("P (kBar)")
+
+figure()
+plot(V,P/10,"r.-")
+plot(V_25K,P_25K/10,"c.-")
+plot(V_2K,P_2K/10,"g.-")
+plot(V_Boates,P_Boates,"k.-")
+legend(["3000K","2500K","2000K","Boates - 3000K"])
+xlabel("V (A**3/atom)")
+ylabel("P (GPa)")
 
 files=["8.82"]
 local_file=string(folder,files[1],"/3000K/STRESS")
