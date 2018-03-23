@@ -7,9 +7,9 @@ folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
 files=["8.82","9.0","9.05","9.1","9.15","9.2","9.25","9.3","9.35","9.375","9.4","9.5","9.8"]
 V=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8]
-for i=1:size(V)[1]
-    V[i]=V[i]*V[i]*V[i]/96
-end
+# for i=1:size(V)[1]
+#     V[i]=V[i]*V[i]*V[i]/96
+# end
 P=Vector{Real}(size(files)[1])
 dP=Vector{Real}(size(files)[1])
 for i=1:size(files)[1]

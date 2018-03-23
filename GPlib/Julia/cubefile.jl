@@ -155,7 +155,7 @@ function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
     for i=1:volume.nb_vox[1]
         for j=1:volume.nb_vox[2]
             for k=1:volume.nb_vox[3]
-
+                
             end
         end
     end
@@ -169,40 +169,40 @@ function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{
     end
     indexs1= getClosest( position1, volume);
     indexs2= getClosest( position2, volume);
-    dindex=index1-index2
+    # dindex=index1-index2
     # Getting the possible direction
-    direction=Vector{Int}(3)
-    for i=1:3
-        if dindex[i] > 0
-            direction[i] = 1
-        elseif dindex[i] < 0
-            direction[i] = -1
-        else
-            direction = 0
-        end
-    end
-    # Making the move matrix
-    moveMatrix=Array{Int}(7,3)
-    for i=0:1
-        for j=0:1
-            for k=0:1
-                if i+j+k != 0
-                    moveMatrix[i,:]=[i*direction[1],j*direction[2],k*direction[3]])
-                end
-            end
-        end
-    end
-    distances=Array{Real}(7,1)
+    # direction=Vector{Int}(3)
+    # for i=1:3
+    #     if dindex[i] > 0
+    #         direction[i] = 1
+    #     elseif dindex[i] < 0
+    #         direction[i] = -1
+    #     else
+    #         direction = 0
+    #     end
+    # end
+    # # Making the move matrix
+    # moveMatrix=Array{Int}(7,3)
+    # for i=0:1
+    #     for j=0:1
+    #         for k=0:1
+    #             if i+j+k != 0
+    #                 moveMatrix[i,:]=[i*direction[1],j*direction[2],k*direction[3]])
+    #             end
+    #         end
+    #     end
+    # end
+    # distances=Array{Real}(7,1)
     # Clearing direction
-    curseur=indexs1
+    # curseur=indexs1
     list=Array{Real}(0,3)
-    while norm(curseur-indexs2) > 0
-        for i=1:7
-            test=curseur+moveMatrix[i,:]
-            distance2line(test,)
-        end
-        vcat(index2,curseur)
-    end
+    # while norm(curseur-indexs2) > 0
+    #     for i=1:7
+    #         test=curseur+moveMatrix[i,:]
+    #         distance2line(test,)
+    #     end
+    #     vcat(index2,curseur)
+    # end
 end
 
 print("Cube Module Loaded!\n")
