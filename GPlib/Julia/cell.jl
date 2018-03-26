@@ -84,6 +84,4 @@ function wrap{ T1 <: AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2 )
 end
 #---------------------------------------------------------------------------
 
-print("Cell module loaded!\n");
-
 end
