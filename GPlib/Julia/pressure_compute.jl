@@ -1,4 +1,4 @@
-importall pressure
+importall CPMD
 importall statistics
 
 using PyPlot
@@ -144,3 +144,17 @@ for i=1:size(P)[1]
 end
 figure()
 plot(P,"r.-")
+#=========================================================#
+
+
+# MSD
+#=============================================================#
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
+file=string(folder,"9.4/3000K/ENERGIES")
+MSD=CPMD.readEnergy(fileUp_U)[4]
+plot(MSD)
+#=============================================================#
+
+readEnergy("")
+fileDown_U=string(folder,"9.4r/3000K/ENERGIES")
+readEnergy("")

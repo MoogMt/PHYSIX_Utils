@@ -21,11 +21,11 @@ function readEnergy( file_name:: AbstractString )
     # Getting data from lines
     #----------------------------------------------
     for i=1:nb_steps
-        line=split(lines)
+        line=split(lines[i])
         temperature[i]=parse(Float64,line[3])
         e_ks[i]=parse(Float64,line[4])
-        e_class[i]=parse(Float64,lines[5])
-        msd[i]=parse(Float64,lines[7])
+        e_class[i]=parse(Float64,line[5])
+        msd[i]=parse(Float64,line[7])
     end
     #----------------------------------------------
 
