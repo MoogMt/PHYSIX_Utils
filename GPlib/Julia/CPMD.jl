@@ -1,6 +1,38 @@
-module pressure
+module CPMD
 
-function readPressureCPMD( file_name::AbstractString , diag::Bool , stride::Int)
+function readEnergy( file_name:: AbstractString )
+    #--------------
+    # Reading file
+    #----------------------
+    file=open(file_name);
+    lines=readlines(file);
+    close(file);
+    #-----------------------
+
+    # Array Init
+    #----------------------------------------
+    nb_steps=size(lines)[1]
+    temperature=Vector{Real}(nb_steps)
+    e_class=Vector{Real}(nb_steps)
+    e_ks=Vector{Real}(nb_steps)
+    msd=Vector{Real}(nb_steps)
+    #----------------------------------------
+
+    # Getting data from lines
+    #----------------------------------------------
+    for i=1:nb_steps
+        line=split(lines)
+        temperature[i]=parse(Float64,line[3])
+        e_ks[i]=parse(Float64,line[4])
+        e_class[i]=parse(Float64,lines[5])
+        msd[i]=parse(Float64,lines[7])
+    end
+    #----------------------------------------------
+
+    return  temperature, e_ks, e_class, msd
+end
+
+function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
     #--------------
     # Reading file
     #----------------------
@@ -46,7 +78,7 @@ function readPressureCPMD( file_name::AbstractString , diag::Bool , stride::Int)
     return pressure
 end
 
-function readStressCPMD( file_name::AbstractString, stride::Int )
+function readStress( file_name::AbstractString, stride::Int )
     #--------------
     # Reading file
     #----------------------
