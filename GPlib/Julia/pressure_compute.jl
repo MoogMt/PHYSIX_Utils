@@ -150,9 +150,15 @@ plot(P,"r.-")
 # MSD
 #=============================================================#
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
-file=string(folder,"9.4/3000K/ENERGIES")
-MSD=CPMD.readEnergy(fileUp_U)[4]
-plot(MSD)
+P=["8.82","9.0","9.05","9.1","9.2","9.3","9.35","9.4","9.5","9.8"]
+for p in P
+    file=string(folder,p,"/3000K/ENERGIES")
+    MSD=CPMD.readEnergy(file)[4]
+    plot(MSD)
+end
+legend(["8.82","9.0","9.05","9.1","9.2","9.3","9.35","9.4","9.5","9.8"])
+xlabel("Time (timestep)")
+ylabel("MSD(t)")
 #=============================================================#
 
 readEnergy("")
