@@ -172,7 +172,31 @@ xlabel("Time (timestep)")
 ylabel("MSD(t)")
 #=============================================================#
 
-fileUp=string(folder,"9.4r/3000K/ENERGIES")
+fileUp=string(folder,"9.4/3000K/ENERGIES")
 energyUp=CPMD.readEnergy(fileUp)[2]
+fileUpPress=string(folder,"9.4/3000K/STRESS")
+p=pressure.readPressureCPMD( fileUpPress , false , 1)
+sizep=size(p)[1]
+Hu=Vector{Real}(sizep-1000)
+V=9.4*9.4*9.4
+for i=1001:size(p)[1]
+    Hu[i-1000]=energyUp[i]+p[i]*V
+end
+
 fileDown=string(folder,"9.4r/3000K/ENERGIES")
 energyDown=CPMD.readEnergy(fileDown)[2]
+fileDPress=string(folder,"9.4r/3000K/STRESS")
+p=pressure.readPressureCPMD( fileDPress , false , 1)
+sizep=size(p)[1]
+Hd=Vector{Real}(sizep)
+V=9.4*9.4*9.4
+for i=1:size(p)[1]
+    Hd[i]=energyDown[i]+p[i]*V
+end
+
+plot(Hu)
+plot(Hd)
+legend(["Up","Down"])
+xlabel("Time (timestep)")
+ylabel("H = U + PV")
+xlim([0,100000])
