@@ -20,7 +20,6 @@ importall geom
 mutable struct Volume
     matrix::Array{Real}
     nb_vox::Vector{Int}
-    cell_matrix::Array{Real}
     function Volume()
         new( Array{Real}(0,4) )
     end
