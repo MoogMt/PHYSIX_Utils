@@ -146,23 +146,31 @@ end
 
 function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
     # Works for orthorombic
-    params=[0,0,0]
+
+    #------------------
     # Compute lengths
+    #--------------------------------------------
+    params=[0,0,0]
     for i=1:3
         for j=1:3
             params[i]=volume.vox_vec[i,j]**2
         end
         params[i]=sqrt(params[i])
     end
+    #--------------------------------------------
+
+    #----------------------------------------------------
     indexs=[0,0,0]
     for i=1:3
-        indexs[i]=position[i]/params[i]
+        indexs[i]=( position[i] + volume.center[i] )/params[i]
         if indexs[i] - trunc(indexs[i]) > 0.5
             indexs[i]=trunc(indexs[i])+1
         else
             indexs[i] = trunc(indexs[i])
         end
     end
+    #----------------------------------------------------
+
     # Returns the index
     return indexs
 end
