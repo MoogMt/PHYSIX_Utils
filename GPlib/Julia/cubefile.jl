@@ -153,8 +153,24 @@ function readCube{T1<:AbstractString}( file_name::T1)
 end
 
 function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
-    # Works for orthomrombic
-    return [ position[1]/size(volume[1,:])[1], position[2]/size(volume[2,:])[1], position[3]/size(volume[3,:])[1]]
+    # Works for orthorombic
+    params=[0,0,0]
+    # Compute lengths
+    for i=1:3
+        for j=1:3
+            params[i]=volume.vox_vec[i,j]**2
+        end
+        params[i]=sqrt(params[i])
+    end
+    indexs=[0,0,0]
+    for i=1:3
+        indexs[i]=position[i]/params[i]
+        if indexs[i] - trunc(indexs[i]) > 0.5
+            indexs[i]=
+        end
+    end
+    # Returns the index
+    return [position[1]/params[1],position[2]/params[2],position[3]/params[3]]
 end
 
 # Trace the volume between two points.
