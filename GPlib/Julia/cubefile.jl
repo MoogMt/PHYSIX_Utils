@@ -99,8 +99,8 @@ function readCube{T1<:AbstractString}( file_name::T1)
     end
     #----------------------------------------------------
 
-    #----------------
-    # Reads Density
+    #-----------------------
+    # Reads Volumetric Data
     #----------------------------------------------------
     nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
     nb_col=6
@@ -153,15 +153,8 @@ function readCube{T1<:AbstractString}( file_name::T1)
 end
 
 function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
-    indexs=zeroes(1,3)
-    for i=1:volume.nb_vox[1]
-        for j=1:volume.nb_vox[2]
-            for k=1:volume.nb_vox[3]
-
-            end
-        end
-    end
-    return indexs
+    # Works for orthomrombic
+    return [ position[1]/size(volume[1,:])[1], position[2]/size(volume[2,:])[1], position[3]/size(volume[3,:])[1]]
 end
 
 # Trace the volume between two points.
