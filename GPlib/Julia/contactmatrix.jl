@@ -29,13 +29,9 @@ mutable struct ContactMatrix
         matrix=zeros(nb_atoms,nb_atoms)
         for i=1:nb_atoms-1
             for j=i+1:nb_atoms
-                distance=0
-                for k=1:3
-                    distance += (min_dist(atoms.positions[i,k]-atoms.positions[j,k], cell_param.length[k]))^2
-                end
-                distance=sqrt(distance)
-                matrix[i,j]=distance
-                matrix[j,i]=distance
+                dist=distance(atoms,i,j)
+                matrix[i,j]=dist
+                matrix[j,i]=dist
             end
         end
         new(matrix)

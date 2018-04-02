@@ -3,9 +3,6 @@ include("cubefile.jl")
 
 using PyPlot
 
-# Loading file
-atoms, cell, elf = cube_mod.readCube("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/8.82_dyn/0_structure/ELF.cube")
-
 # Wraping atoms
 atoms=cell_mod.wrap(atoms,cell)
 
@@ -14,5 +11,4 @@ O1=81
 O2=66
 O3=70
 
-
-cube_mod.readCube("/home/moogmt/CO2_AIMD/ELF/0_structure/ELF.cube")
+atoms, cell, ELF = cube_mod.readCube("/home/moogmt/CO2_AIMD/ELF/0_structure/ELF.cube")
