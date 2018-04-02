@@ -23,7 +23,7 @@ mutable struct Volume
     nb_vox::Vector{Int}
     origin::Vector{Real}
     function Volume()
-        new( Array{Real}(1,1,1), Vector{Real}(3), Array{Real}(3,3), Vector{Real}(3) )
+        new( Array{Real}(1,1,1), Array{Real}(3,3), Vector{Int}(3),Vector{Real}(3) )
     end
     function Volume{T1 <: Real}( nb_vox_iso::T1 )
         if nb_vox_iso > 0
@@ -79,10 +79,10 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #--------------------
     # Reads Cell Matrix
     #-----------------------------------------------------
-    cell_matrix=Cell_matrix();
+    cell_matrix=Array{Real}(3,3);
     for i=1:3
         for j=1:3
-            cell_matrix.matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*Bohr2Ang
+            cell_matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*Bohr2Ang
         end
     end
     #-----------------------------------------------------
@@ -106,18 +106,18 @@ function readCube{T1<:AbstractString}( file_name::T1)
     nb_col=6
     matrix = Array{Real}( nb_vox[1], nb_vox[2], nb_vox[3] )
     offset=(Int)(6+nb_atoms+1)
-    x=0; y=0; z=0;
+    x=1; y=1; z=1;
     for i=0:nb_tot/nb_col-1
         for j=1:nb_col
-            volume.matrix[x,y,z] = parse(Float64, split( lines[(Int)(offset+i)])[j] )
+            matrix[x,y,z] = parse(Float64, split( lines[(Int)(offset+i)])[j] )
             z=z+1;
-            if z == nb_vox[3]
-                z=0;
+            if z == nb_vox[3]+1
+                z=1;
                 y=y+1;
             end
-            if y == nb_vox[2]
-                y=0;
-                z=0;
+            if y == nb_vox[2]+1
+                y=1;
+                z=1;
                 x=x+1;
             end
         end
@@ -127,8 +127,9 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-----------------
     # Updating volume
     #--------------------------------
+    volume=Volume()
     volume.nb_vox=nb_vox
-    volume.vox_vec=cell.matrix
+    volume.vox_vec=cell_matrix
     volume.matrix=matrix
     volume.origin=center
     #---------------------------------
@@ -136,8 +137,9 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-------------------------------------------
     # Scaling cell vectors by number of voxels
     #--------------------------------------------
+    cell_vecs=Cell_matrix(cell_matrix)
     for i=1:3
-        cell_matrix.matrix[i,i]=cell_matrix.matrix[i,i]*nb_vox[i]
+        cell_vecs.matrix[i,i]=cell_vecs.matrix[i,i]*nb_vox[i]
     end
     #---------------------------------------------
 
@@ -153,7 +155,7 @@ function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
     params=[0,0,0]
     for i=1:3
         for j=1:3
-            params[i]=volume.vox_vec[i,j]**2
+            params[i]=volume.vox_vec[i,j]^2
         end
         params[i]=sqrt(params[i])
     end
@@ -176,7 +178,7 @@ function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
 end
 
 # Trace the volume between two points.
-function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
+function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
     if size(position1)[1] != 3 || size(position2)[1] != 3
         return false
     end
@@ -217,7 +219,5 @@ function traceVolume{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{
     #     vcat(index2,curseur)
     # end
 end
-
-print("Cube Module Loaded!\n")
 
 end

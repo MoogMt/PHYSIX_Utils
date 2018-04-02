@@ -13,3 +13,6 @@ C1=31
 O1=81
 O2=66
 O3=70
+
+
+cube_mod.readCube("/home/moogmt/CO2_AIMD/ELF/0_structure/ELF.cube")

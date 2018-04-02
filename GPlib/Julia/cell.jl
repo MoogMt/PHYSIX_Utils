@@ -35,6 +35,11 @@ mutable struct Cell_matrix
     function Cell_matrix()
         new(Array{Real}(3,3));
     end
+    function Cell_matrix{ T1 <: Real }( matrix::Array{T1})
+        if size(matrix)[1]==3 && size(matrix)[2]==3
+            new( matrix )
+        end
+    end
     function Cell_matrix{ T1 <: Real }( a::T1, b::T1, c::T1 )
         new([[a,0,0],[0,b,0],[0,0,c]])
     end
