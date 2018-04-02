@@ -12,3 +12,4 @@ O2=66
 O3=70
 
 atoms, cell, ELF = cube_mod.readCube("/home/moogmt/CO2_AIMD/ELF/0_structure/ELF.cube")
+a=cube_mod.getClosest(atoms.positions[31,:],ELF)

@@ -64,6 +64,7 @@ function wrap{ T1 <: Real}( position::T1, length::T1 )
     end
     return position
 end
+
 function wrap{ T1 <: AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2 )
     # Computes cell parameters
     #--------------------------------------------

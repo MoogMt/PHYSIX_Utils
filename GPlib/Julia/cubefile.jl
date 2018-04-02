@@ -147,7 +147,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
 end
 
 function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
-    # Works for orthorombic
+    # Works for orthorombic, not yet for non-orthorombic
 
     #------------------
     # Compute lengths
@@ -155,7 +155,8 @@ function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
     params=[0,0,0]
     for i=1:3
         for j=1:3
-            params[i]=volume.vox_vec[i,j]^2
+            print("ELF: ",i," ",j)
+            params[i] += volume.vox_vec[i,j]^2
         end
         params[i]=sqrt(params[i])
     end
