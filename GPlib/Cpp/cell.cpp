@@ -1,10 +1,11 @@
 #include "cell.h"
 
+
 //===========
 // WRAP PBC
 //====================================================================
 double backIn ( double x , double a )
-// Wraps a single position dimension inside PBC  
+// Wraps a single position dimension inside PBC
 {
   // Determining sign
   int sign;
@@ -40,7 +41,7 @@ Atom wrapPBC(Atom atom_in, Cell box)
 // Wraps a signle atom inside cell
 // In:
 // Out:
-{ 
+{
   Atom atom_out;
   atom_out.x = backIn( atom_in.x , box.a );
   atom_out.y = backIn( atom_in.y , box.b );
@@ -157,7 +158,7 @@ std::vector<double> getMinImage( AtomList atom_list , Cell cell , int atom_cente
 // DISTANCE
 //===========================================================================================
 double distAtoms1D( double x1, double x2, double a )
-// returns the distance between two atoms in a given cell 
+// returns the distance between two atoms in a given cell
 {
   double dx = x1 - x2;
   if ( dx >  a*0.5 ) dx -= a;
@@ -166,12 +167,12 @@ double distAtoms1D( double x1, double x2, double a )
 }
 //------------------------------------------------------------------------------------------------
 double distanceAtoms(std::vector<Atom> atoms, int i, int j, Cell box , bool wrap , bool sqrt_test )
-// returns the distance ( square of the distance ) between two atoms 
+// returns the distance ( square of the distance ) between two atoms
 {
   Atom atom_i = atoms[i] ; Atom atom_j =  atoms[j] ;
   if ( wrap )
     {
-      atom_i = wrapPBC( atom_i , box ) ; 
+      atom_i = wrapPBC( atom_i , box ) ;
       atom_j = wrapPBC( atom_j , box ) ;
     }
   double dist = 0 ;
@@ -209,11 +210,11 @@ void writeAtomDistances( std::ofstream & file , std::vector<Atom> atom_list , st
 	  // We don't calculate distance of an atom with itself
 	  if ( atom_index[i] != j )
 	    {
-	      // Writing 
+	      // Writing
 	      file << distanceAtoms(atom_list,atom_index[i],j,box) << std::endl;
 	    }
 	}
-    }  
+    }
   return;
 }
 //===========================================================================================
@@ -256,7 +257,7 @@ bool readParamCellStep( std::ifstream& file , Cell & cell  )
 {
   // Variable
   std::string line; // line of file
-  
+
   // Reads line...
   if ( std::getline( file, line ) )
     {
@@ -276,7 +277,7 @@ bool readParamCell( std::string file_name , Cell & cell )
   // Working variables
   //-------------------------------------------------
   std::ifstream file( file_name.c_str() );
-  //-------------------------------------------------  
+  //-------------------------------------------------
 
   if ( readParamCellStep( file , cell ) )
     {
@@ -311,7 +312,7 @@ bool readPressureCell( std::ifstream & input , double & pressure )
       return false;
     }
   //--------------------------------------
-  
+
   //------------------
   // Reading pressure
   //--------------------------------------

@@ -11,5 +11,6 @@ O1=81
 O2=66
 O3=70
 
-atoms, cell, ELF = cube_mod.readCube("/home/moogmt/CO2_AIMD/ELF/0_structure/ELF.cube")
-a=cube_mod.getClosest(atoms.positions[31,:],ELF)
+atoms1, cell1, ELF1 = cube_mod.readCube("/home/moogmt/CO2_AIMD/ELF/0_structure/ELF.cube")
+a1=cube_mod.getClosest(atoms1.positions[C1,:],ELF1)
+a2=cube_mod.getClosest(atoms1.positions[O1,:],ELF1)

@@ -146,40 +146,40 @@ function readCube{T1<:AbstractString}( file_name::T1)
     return atom_list, cell_matrix, volume
 end
 
-function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
+function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 )
     # Works for orthorombic, not yet for non-orthorombic
-
     #------------------
     # Compute lengths
     #--------------------------------------------
-    params=[0,0,0]
+    params=zeros(3,1)
     for i=1:3
         for j=1:3
-            print("ELF: ",i," ",j)
-            params[i] += volume.vox_vec[i,j]^2
+            params[i] += vol.vox_vec[i,j]
         end
         params[i]=sqrt(params[i])
     end
-    #--------------------------------------------
-
-    #----------------------------------------------------
-    indexs=[0,0,0]
+    # #--------------------------------------------
+    #
+    # #----------------------------------------------------
+    fracs=[0.,0.,0.]
+    index=[0,0,0]
     for i=1:3
-        indexs[i]=( position[i] + volume.center[i] )/params[i]
-        if indexs[i] - trunc(indexs[i]) > 0.5
-            indexs[i]=trunc(indexs[i])+1
+        print("check: ",(position[i] + vol.origin[i])/params[i], "\n" )
+        fracs[i]=( position[i] + vol.origin[i] )/params[i]
+        if fracs[i] - trunc(fracs[i]) > 0.5
+            index[i]=Int(trunc(fracs[i])+1)
         else
-            indexs[i] = trunc(indexs[i])
+            index[i]=Int(trunc(fracs[i]))
         end
     end
-    #----------------------------------------------------
-
-    # Returns the index
-    return indexs
+    # #----------------------------------------------------
+    #
+    # # Returns the index
+    return index
 end
 
 # Trace the volume between two points.
-function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume }( position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
+function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume }(     position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
     if size(position1)[1] != 3 || size(position2)[1] != 3
         return false
     end
