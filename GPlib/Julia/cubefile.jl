@@ -166,11 +166,13 @@ function getClosest{ T1 <: Real}( position::Vector{T1} , volume::Volume )
     for i=1:3
         indexs[i]=position[i]/params[i]
         if indexs[i] - trunc(indexs[i]) > 0.5
-            indexs[i]=
+            indexs[i]=trunc(indexs[i])+1
+        else
+            indexs[i] = trunc(indexs[i])
         end
     end
     # Returns the index
-    return [position[1]/params[1],position[2]/params[2],position[3]/params[3]]
+    return indexs
 end
 
 # Trace the volume between two points.
