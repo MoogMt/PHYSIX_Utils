@@ -58,4 +58,9 @@ function blockMoment{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Vector{T1}, bloc
     return momentn/nb_block - (moment/nb_block)^n
 end
 
+function bootStrap{ T1 <: Real, T2 <: Int}( data::Vector{T1}, sample_size::T2, n::T2)
+    average=0; moment=0;
+    return average, moment; 
+end
+
 end

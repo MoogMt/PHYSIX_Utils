@@ -19,13 +19,14 @@ importall geom
 #-----------------------
 mutable struct Volume
     matrix::Array{Real}
+    vox_vec::Array{Real}
     nb_vox::Vector{Int}
     function Volume()
         new( Array{Real}(0,4) )
     end
     function Volume{T1 <: Real}( nb_vox_iso::T1 )
         if nb_vox_iso > 0
-            new( Array{Real}(nb_vox_iso*nb_vox_iso*nb_vox_iso,4),[nb_vox_iso,nb_vox_iso,nb_vox_iso])
+            new( Array{Real}(nb_vox_iso*nb_vox_iso*nb_vox_iso,4),Array{Real}(3,3),[nb_vox_iso,nb_vox_iso,nb_vox_iso])
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
         end
