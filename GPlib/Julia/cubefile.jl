@@ -21,20 +21,20 @@ mutable struct Volume
     matrix::Array{Real}
     vox_vec::Array{Real}
     nb_vox::Vector{Int}
+    origin::Vector{Real}
     function Volume()
-        new( Array{Real}(0,4) )
+        new( Array{Real}(1,1,1), Vector{Real}(3), Array{Real}(3,3), Vector{Real}(3) )
     end
     function Volume{T1 <: Real}( nb_vox_iso::T1 )
         if nb_vox_iso > 0
-            new( Array{Real}(nb_vox_iso*nb_vox_iso*nb_vox_iso,4),Array{Real}(3,3),[nb_vox_iso,nb_vox_iso,nb_vox_iso])
+            new( Array{Real}( nb_vox_iso, nb_vox_iso, nb_vox_iso), Array{Real}(3,3), [nb_vox_iso, nb_vox_iso, nb_vox_iso] )
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
         end
     end
     function Volume{T1 <: Real}( nb_vox::Vector{T1} )
         if size(nb_vox)[1] == 3
-            nb_tot = nb_vox[1]*nb_vox[2]*nb_vox[3];
-            new( Array{Real}(nb_tot,4),nb_vox);
+            new( Array{Real}(nb_vox[1],nb_vox[2],nb_vox[3]),Array{Real}(3,3),nb_vox);
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
         end
@@ -104,17 +104,12 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #----------------------------------------------------
     nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
     nb_col=6
-    volume = Volume(nb_vox)
-    volume.nb_vox=nb_vox
+    matrix = Array{Real}( nb_vox[1], nb_vox[2], nb_vox[3] )
     offset=(Int)(6+nb_atoms+1)
-    x=0.; y=0.; z=0.;
+    x=0; y=0; z=0;
     for i=0:nb_tot/nb_col-1
         for j=1:nb_col
-            index=(Int)(i*nb_col+j)
-            volume.matrix[index,1] = x
-            volume.matrix[index,2] = y
-            volume.matrix[index,3] = z
-            volume.matrix[index,4] = parse(Float64, split( lines[(Int)(offset+i)])[j] )
+            volume.matrix[x,y,z] = parse(Float64, split( lines[(Int)(offset+i)])[j] )
             z=z+1;
             if z == nb_vox[3]
                 z=0;
@@ -129,17 +124,14 @@ function readCube{T1<:AbstractString}( file_name::T1)
     end
     #----------------------------------------------------
 
-    #------------------------------
-    # Scaling positions for volume
-    #----------------------------------------------------
-    dV=[0.,0.,0.]
-    for i=1:3
-        for j=1:3
-            dV[i] = dV[i] + cell_matrix.matrix[i,j];
-        end
-        volume.matrix[:,i] = volume.matrix[:,i]*dV[i]+center[i];
-    end
-    #----------------------------------------------------
+    #-----------------
+    # Updating volume
+    #--------------------------------
+    volume.nb_vox=nb_vox
+    volume.vox_vec=cell.matrix
+    volume.matrix=matrix
+    volume.origin=center
+    #---------------------------------
 
     #-------------------------------------------
     # Scaling cell vectors by number of voxels
