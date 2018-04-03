@@ -179,6 +179,13 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
 end
 
 function paramVoxVectors{ T1 <: Volume }( volume::T1 )
+    params=Vector{Real}(3)
+    for i=1:3
+        for j=1:3
+            params[i]=volume.vox_vec[i,j]^2
+        end
+        params[i] = sqrt(params[i])
+    end
     return params
 end
 
@@ -193,10 +200,13 @@ function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume, T4 <: Int }(     posit
     # Moving along the lines
     curseur=position1
     for i=1:nb_points
-        indexs = cube_mod.getClosest(curseur,volume) - positions
+        indexs=getClosest(curseur,volume) - positions
+        params=paramVoxVectors(volume)
+        dist=0
         for j=1:3
-
+            dist += (indexs[j]*params[j])^2
         end
+        dist=sqrt(dist)
         curseur += dpos/points
     end
 
