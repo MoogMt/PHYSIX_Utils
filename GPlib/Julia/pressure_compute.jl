@@ -176,7 +176,7 @@ fileUp=string(folder,"9.4/3000K/ENERGIES")
 t,e_ks,e_class,msd=CPMD.readEnergy(fileUp)
 energyUp=Vector{Real}(size(e_ks)[1])
 for i=1:size(e_ks)[1]
-    energyUp[i] = e_ks[i]+e_class[i]
+    energyUp[i] = e_ks[i]-e_class[i]
 end
 fileUpPress=string(folder,"9.4/3000K/STRESS")
 p=pressure.readPressureCPMD( fileUpPress , false , 1)
@@ -191,7 +191,7 @@ fileDown=string(folder,"9.4r/3000K/ENERGIES")
 t,e_ks,e_class,msd=CPMD.readEnergy(fileDown)
 energyDown=Vector{Real}(size(e_ks)[1])
 for i=1:size(e_ks)[1]
-    energyDown[i] = e_ks[i]+e_class[i]
+    energyDown[i] = e_ks[i]-e_class[i]
 end
 fileDPress=string(folder,"9.4r/3000K/STRESS")
 p=pressure.readPressureCPMD( fileDPress , false , 1)

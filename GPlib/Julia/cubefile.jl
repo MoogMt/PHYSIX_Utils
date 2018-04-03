@@ -178,47 +178,31 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
     return index
 end
 
+function paramVoxVectors{ T1 <: Volume }( volume::T1 )
+    return params
+end
+
 # Trace the volume between two points.
-function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume }(     position1::Vector{T1}, position2::Vector{T2}, volume::T3 )
+function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume, T4 <: Int }(     position1::Vector{T1}, position2::Vector{T2}, volume::T3, nb_points::T4 )
     if size(position1)[1] != 3 || size(position2)[1] != 3
         return false
     end
-    indexs1= getClosest( position1, volume);
-    indexs2= getClosest( position2, volume);
-    # dindex=index1-index2
-    # Getting the possible direction
-    # direction=Vector{Int}(3)
-    # for i=1:3
-    #     if dindex[i] > 0
-    #         direction[i] = 1
-    #     elseif dindex[i] < 0
-    #         direction[i] = -1
-    #     else
-    #         direction = 0
-    #     end
-    # end
-    # # Making the move matrix
-    # moveMatrix=Array{Int}(7,3)
-    # for i=0:1
-    #     for j=0:1
-    #         for k=0:1
-    #             if i+j+k != 0
-    #                 moveMatrix[i,:]=[i*direction[1],j*direction[2],k*direction[3]])
-    #             end
-    #         end
-    #     end
-    # end
-    # distances=Array{Real}(7,1)
-    # Clearing direction
-    # curseur=indexs1
-    list=Array{Real}(0,3)
-    # while norm(curseur-indexs2) > 0
-    #     for i=1:7
-    #         test=curseur+moveMatrix[i,:]
-    #         distance2line(test,)
-    #     end
-    #     vcat(index2,curseur)
-    # end
+
+    dpos=position2-position1
+
+    # Moving along the lines
+    curseur=position1
+    for i=1:nb_points
+        indexs = cube_mod.getClosest(curseur,volume) - positions
+        for j=1:3
+
+        end
+        curseur += dpos/points
+    end
+
+    # Sort by distance from point1
+
+    return dist, values
 end
 
 end
