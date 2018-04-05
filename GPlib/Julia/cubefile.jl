@@ -197,16 +197,21 @@ function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume, T4 <: Int }(     posit
 
     dpos=position2-position1
 
+    # Output Tables
+    distances=Vector{Real}(1)
+
     # Moving along the lines
     curseur=position1
     for i=1:nb_points
-        indexs=getClosest(curseur,volume) - positions
+        indexs=getClosest(curseur,volume) - position1
         params=paramVoxVectors(volume)
         dist=0
         for j=1:3
-            dist += (indexs[j]*params[j])^2
+            dist += (indexs[i]*params[j])^2
         end
         dist=sqrt(dist)
+        value=volume.matrix[indexs[1],indexs[2],indexs[3]]
+
         curseur += dpos/points
     end
 

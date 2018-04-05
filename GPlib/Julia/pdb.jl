@@ -2,52 +2,40 @@ module pdb
 
 include("cell.jl");
 
-function readPDB(file::AbstractString)
-  #==========#
-  # Variables
-  #===========================================#
-  atoms=Array(atom,1)  # Atoms
-  empty!(atoms)
-  #-------------------------------
-  cell_name=""         # Cell name
-  #--------------------------------
-  cell_temp=cell([0,0,0]) # Cell structure
-  #==============#
+
+function readPDB( file::AbstractString )
+  #--------------
   # Reading file
-  #========================================#
-  open(file,"r") do f
-    for line in eachline(f)
-      # Getting cell information
-      if ( contains(line,"CRYST1"))
-        all=split(line)
-        a=str2rl(all[2]); b=str2rl(all[3]); c=str2rl(all[4]);
-        alpha=str2rl(all[5]); beta=str2rl(all[6]); gamma=str2rl(all[7]);
-        celltype=all[8]
-        cell_temp=cell(cell_param([a,b,c],[alpha,beta,gamma],celltype))
-      end
-      # Getting name of the cell
-      if ( contains(line,"MODEL") )
-        all=split(line)
-        cell_name=all[2]
-      end
-      # Getting Atoms
-      if ( contains(line,"ATOM") )
-        all=split(line);
-        atome_label=str2int(all[2]); atome_type=all[3];
-        x=str2rl(all[6]); y=str2rl(all[7]); z=str2rl(all[8]);
-        atoms=push!(atoms, atom_basic([x,y,z],atype(atome_type,atome_label)))
-      end
+  #----------------------
+  file=open(file_name);
+  lines=readlines(file);
+  close(file);
+  #-----------------------
+
+  #------------------------------------
+  # Default values and declarations
+  #--------------------------------------------------------------
+  a,b,c,alpha,beta,gamma=0.,0.,0.,90.,90.,90. # Cell parameters
+  #---------------------------------------------------------------
+
+  #----------------------------------------------------
+  # Reading informations
+  #----------------------------------------------------
+  for line in lines
+    if split(line)[1] == "CRYST1"
+        a=parse(Float64,split(line)[2])
+        b=parse(Float64,split(line)[3])
+        c=parse(Float64,split(line)[4])
+        alpha=parse(Float64,split(line)[5])
+        beta=parse(Float64,split(line)[6])
+        gamma=parse(Float64,split(line)[7])
+    elseif split(line)[1] == "ATOM"
+
     end
   end
-  #======================#
-  # Putting All Together
-  #=========================================#
-  # Changing cell name
-  #changeCellName(cell_temp,cell_name)
-  # Adding the atoms
-  setAtoms(cell_temp,atoms)
-  # Returning cell
-  return cell_temp
+  #----------------------------------------------------
+
+  return atoms, cell
 end
 
 function writePDB(cell::cell,file::AbstractString)
