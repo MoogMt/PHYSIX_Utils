@@ -14,52 +14,28 @@ mutable struct AtomList
     index::Vector{Int}
     positions::Array{Real}
     function AtomList()
-        new(Vector{Real}(),Vector{Real}(),Array{Real}(0,1))
+        new(Vector{Real}(),Vector{Real}(),Array{Real}(0,3))
     end
     function AtomList{T1 <: Int}( nb_atoms::T1)
         new( Vector{AbstractString}(nb_atoms), Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3) )
     end
 end
 
-mutable struct Mass
-    mass::Real
+mutable struct AtomMolList
+    atom_names::Vector{AbstractString}
+    atom_index::Vector{Int}
+    mol_names::Vector{AbstractString}
+    mol_index::Vector{Int}
+    positions::Array{Real}
+    function AtomMolList()
+        new(Vector{AbstractString}(),Vector{Int}(),Vector{AbstractString}(),Vector{Int}(),Array{Real}(0,3))
+    end
+    function AtomMolList{ T1 <: Int }( nb_atoms::T1 )
+        new(Vector{AbstractString}( nb_atoms ),Vector{Int}( nb_atoms ) ,Vector{AbstractString}( nb_atoms ), Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3))
+    end
 end
 
-mutable struct MassList
-    mass::Vector{Real}
-end
-
-mutable struct Charge
-    charge::Real
-end
-
-mutable struct ChargeList
-    charge::Vector{Real}
-end
-
-mutable struct Pp
-    pp_name::AbstractString
-    pp_path::AbstractString
-end
-
-mutable struct PPList
-    pp_name::Vector{AbstractString}
-    pp_path::Vector{AbstractString}
-end
-
-mutable struct Molecule
-    name::AbstractString
-    index::Int
-    atoms::AtomList
-end
-
-mutable struct MoleculeList
-    name::Vector{AbstractString}
-    index::Vector{Int}
-    atoms::Vector{AtomList}
-end
-
-function distance{ T1 <: Real, T2 <: Real }( atom1::Vector{Real}, atom2::Vector{Real} )
+function distance{ T1 <: Real, T2 <: Real }( atom1::Vector{T1}, atom2::Vector{T2} )
     dist=0
     for i=1:3
         dist+=(atom1[i]-atom2[i])^2

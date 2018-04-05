@@ -21,6 +21,12 @@ mutable struct Cell_param
     function Cell_param()
         new(0,0,0,0,0,0);
     end
+    function Cell_param{T1 <: Real, T2<: Real, T3 <: Real}( a::T1, b::T2, c::T3)
+        new(a,b,c,90.,90.,90.)
+    end
+    function Cell_param{ T1 <: Real, T2<: Real, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real }( a::T1, b::T2, c::T3, alpha::T4, beta::T5, gamma::T6)
+        new(a,b,c,alpha,beta,gamma)
+    end
 end
 mutable struct Cell_vec
     v1::Vector{Real}

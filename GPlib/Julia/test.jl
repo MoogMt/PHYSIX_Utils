@@ -14,3 +14,7 @@ a1=cube_mod.getClosest(atoms1.positions[C1,:],ELF1)
 a2=cube_mod.getClosest(atoms1.positions[O1,:],ELF1)
 
 da=a2-a1
+
+include("pdb.jl")
+
+test=pdb.readStep( "/media/moogmt/Stock/CO2/Structures/Cmca/SuperFF/Cmca-super.pdb" )
