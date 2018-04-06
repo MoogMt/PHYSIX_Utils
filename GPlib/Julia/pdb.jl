@@ -1,3 +1,4 @@
+include("utils.jl");
 include("atoms.jl");
 include("cell.jl");
 
@@ -5,6 +6,7 @@ module pdb
 
 importall atom_mod
 importall cell_mod
+importall utils
 
 function readStep( file::AbstractString )
   #--------------
@@ -62,19 +64,19 @@ function write{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: Abs
   alpha, beta, gamma = string(cell.alpha), string(cell.beta), string(cell.gamma)
 
   cryst1=string("CRYST1 ",a)
-  cryst1=spaces(cryst1,16-length(cryst1))
+  cryst1=utils.spaces(cryst1,16-length(cryst1))
   cryst1=string(cryst1,b)
-  cryst1=spaces(cryst1,25-length(cryst1))
+  cryst1=utils.spaces(cryst1,25-length(cryst1))
   cryst1=string(cryst1,c)
-  cryst1=spaces(cryst1,34-length(cryst1))
+  cryst1=utils.spaces(cryst1,34-length(cryst1))
   cryst1=string(cryst1,alpha)
-  cryst1=spaces(cryst1,41-length(cryst1))
+  cryst1=utils.spaces(cryst1,41-length(cryst1))
   cryst1=string(cryst1,beta)
-  cryst1=spaces(cryst1,48-length(cryst1))
+  cryst1=utils.spaces(cryst1,48-length(cryst1))
   cryst1=string(cryst1,gamma)
-  cryst1=spaces(cryst1,56-length(cryst1))
+  cryst1=utils.spaces(cryst1,56-length(cryst1))
   cryst1=string(cryst1,"P 1")
-  cryst1=spaces(cryst1,67-length(cryst1))
+  cryst1=utils.spaces(cryst1,67-length(cryst1))
   cryst1=string(cryst1,"1")
   cryst1=string(cryst1,"\n")
   write(out,cryst1)

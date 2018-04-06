@@ -87,7 +87,7 @@ for i=1:size(atoms.atom_names)[1]-1
 end
 #-------------------------------------------------------------------------------
 
-pdb.write(atoms,cell,"test.pdb")
+pdb.write(atoms,cell,"/home/moogmt/test.pdb")
 
 #-------------------------------------------------------------------------------
 file=open("/home/moogmt/test.xyz", "w")
