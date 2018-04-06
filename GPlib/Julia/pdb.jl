@@ -79,38 +79,38 @@ function write{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: Abs
   cryst1=utils.spaces(cryst1,67-length(cryst1))
   cryst1=string(cryst1,"1")
   cryst1=string(cryst1,"\n")
-  write(out,cryst1)
+  Base.write(out,cryst1)
 
-  write(out,string("MODEL X"))
+  Base.write(out,string("MODEL X"))
 
   nb_atoms = size(atoms.atom_names)[1]
   for i=1:nb_atoms
     atom="ATOM"
-    atom=spaces(atom,7-length(atom))
+    atom=utils.spaces(atom,7-length(atom))
     atom=string(atom,atoms.atom_index[i])
-    atom=spaces(atom,13-length(atom))
+    atom=utils.spaces(atom,13-length(atom))
     atom=string(atom,atoms.atom_names[i])
-    atom=spaces(atom,23-length(atom))
+    atom=utils.spaces(atom,23-length(atom))
     atom=string(atom,atoms.mol_names[i])
-    atom=spaces(atom,27-length(atom))
+    atom=utils.spaces(atom,27-length(atom))
     atom=string(atom,atoms.mol_index[i])
-    atom=spaces(atom,31-length(atom))
+    atom=utils.spaces(atom,31-length(atom))
     atom=string(atom,atoms.positions[i,1])
-    atom=spaces(atom,39-length(atom))
+    atom=utils.spaces(atom,39-length(atom))
     atom=string(atom,atoms.positions[i,2])
-    atom=spaces(atom,47-length(atom))
+    atom=utils.spaces(atom,47-length(atom))
     atom=string(atom,atoms.positions[i,3])
-    atom=spaces(atom,55-length(atom))
+    atom=utils.spaces(atom,55-length(atom))
     atom=string(atom,"0.00")
-    atom=spaces(atom,61-length(atom))
+    atom=utils.spaces(atom,61-length(atom))
     atom=string(atom,"0.00")
-    atom=spaces(atom,77-length(atom))
+    atom=utils.spaces(atom,77-length(atom))
     atom=string(atom,atoms.atom_names[i])
     atom=string(atom,"\n")
-    write(out,atom)
+    Base.write(out,atom)
   end
 
-  write(out,"END\n")
+  Base.write(out,"END\n")
 
   close(out)
 
