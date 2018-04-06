@@ -73,7 +73,7 @@ end
 
 
 #-------------------------------------------------------------------------------
-for i=1:count_mol
+for i=0:count_mol-2
     count1=i*5+1
     if atoms.atom_names[count1] != "O1"
         for j=count1+1:5
