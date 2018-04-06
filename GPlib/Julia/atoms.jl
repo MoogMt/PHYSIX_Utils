@@ -59,4 +59,26 @@ function distance{ T1 <: AtomList, T2 <: Int, T3 <: Int}( atoms::T1, index1::T2,
     return sqrt(dist)
 end
 
+function switchAtoms{ T1 <: AtomMolList, T2 <: Int, T3 <: Int }( atoms::T1 , index1::T2, index2::T3 )
+    # Storing
+    a_index=atoms.atom_index[index1]
+    a_name=atoms.atom_names[index1]
+    m_index=atoms.mol_index[index1]
+    m_name=atoms.mol_names[index1]
+    positions=atoms.positions[index1,:]
+    # Moving 1
+    atoms.atom_index[index1]=atoms.atom_index[index2]
+    atoms.atom_names[index1]=atoms.atom_names[index2]
+    atoms.mol_index[index1]=atoms.mol_index[index2]
+    atoms.mol_names[index1]=atoms.mol_names[index2]
+    atoms.positions[index1,:]=atoms.positions[index2,:]
+    # Moving 2
+    atoms.atom_index[index2]=a_index
+    atoms.atom_names[index2]=a_name
+    atoms.mol_index[index2]=m_index
+    atoms.mol_names[index2]=m_name
+    atoms.positions[index2,:]=positions
+    return
+end
+
 end

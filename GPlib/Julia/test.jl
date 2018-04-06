@@ -65,23 +65,49 @@ for i=1:size(atoms.atom_names)[1]-1
     for j=i+1:size(atoms.atom_names)[1]
         if atoms.mol_index[i] > atoms.mol_index[j]
             # Storing
-            a_index=atoms.atom_index[i]
-            a_name=atoms.atom_names[i]
-            m_index=atoms.mol_index[i]
-            m_name=atoms.mol_names[i]
-            positions=atoms.positions[i,:]
-            # Moving 1
-            atoms.atom_index[i]=atoms.atom_index[j]
-            atoms.atom_names[i]=atoms.atom_names[j]
-            atoms.mol_index[i]=atoms.mol_index[j]
-            atoms.mol_names[i]=atoms.mol_names[j]
-            atoms.positions[i,:]=atoms.positions[j,:]
-            # Moving 2
-            atoms.atom_index[j]=a_index
-            atoms.atom_names[j]=a_name
-            atoms.mol_index[j]=m_index
-            atoms.mol_names[j]=m_name
-            atoms.positions[j,:]=positions
+            atom_mod.switchAtoms(atoms,i,j)
+        end
+    end
+end
+#-------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------
+for i=1:count_mol
+    count1=i*5+1
+    if atoms.atom_names[count1] != "O1"
+        for j=count1+1:5
+            count2=i*5+j
+            if atoms.atom_names[count2] == "O1"
+                atom_mod.switchAtoms(atoms,count1,count2)
+            end
+        end
+    end
+    count1=i*5+2
+    if atoms.atom_names[count1] != "C"
+        for j=count1+1:5
+            count2=i*5+j
+            if atoms.atom_names[count2] == "C"
+                atom_mod.switchAtoms(atoms,count1,count2)
+            end
+        end
+    end
+    count1=i*5+3
+    if atoms.atom_names[count1] != "O2"
+        for j=count1+1:5
+            count2=i*5+j
+            if atoms.atom_names[count2] == "O2"
+                atom_mod.switchAtoms(atoms,count1,count2)
+            end
+        end
+    end
+    count1=i*5+4
+    if atoms.atom_names[count1] != "M1"
+        for j=count1+1:5
+            count2=i*5+j
+            if atoms.atom_names[count2] == "M1"
+                atom_mod.switchAtoms(atoms,count1,count2)
+            end
         end
     end
 end
