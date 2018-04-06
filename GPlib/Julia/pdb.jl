@@ -54,7 +54,7 @@ function readStep( file::AbstractString )
   return atoms, cell
 end
 
-function writePDB{ T1 <: AtomMolList, T2 <: Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
+function write{ T1 <: AtomMolList, T2 <: Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
 
   out=open(file,"w")
 
@@ -97,11 +97,11 @@ function writePDB{ T1 <: AtomMolList, T2 <: Cell_param, T3 <: AbstractString }(a
     atom=spaces(atom,27-length(atom))
     atom=string(atom,atoms.mol_index[i])
     atom=spaces(atom,31-length(atom))
-    atom=string(atom,x)
+    atom=string(atom,atoms.positions[i,1])
     atom=spaces(atom,39-length(atom))
-    atom=string(atom,y)
+    atom=string(atom,atoms.positions[i,2])
     atom=spaces(atom,47-length(atom))
-    atom=string(atom,z)
+    atom=string(atom,atoms.positions[i,3])
     atom=spaces(atom,55-length(atom))
     atom=string(atom,"0.00")
     atom=spaces(atom,61-length(atom))
