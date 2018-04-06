@@ -29,7 +29,7 @@ atoms, cell=pdb.readStep( "/home/moogmt/Structures/Cmca-super.pdb" )
 count_mol=1
 count_atoms=1
 nb_atoms=size(atoms.atom_names)[1]
-for i=1:nb_atoms-1
+for i=1:nb_atoms
     if atoms.atom_names[i] == "C"
         atoms.mol_index[i]=count_mol
         atoms.mol_names[i]="CO2"
