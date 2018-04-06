@@ -21,7 +21,7 @@ include("cell.jl")
 include("pdb.jl")
 
 # Reading PDB file
-atoms, cell=pdb.readStep( "/home/moogmt/Structures/Cmca-super.pdb" )
+atoms, cell=pdb.readStep( "/media/moogmt/Stock/CO2/Structures/Cmca/Conv/Cmca.pdb" )
 
 #--------------------
 # Building molecules
@@ -33,36 +33,30 @@ for i=1:nb_atoms
     if atoms.atom_names[i] == "C"
         atoms.mol_index[i]=count_mol
         atoms.mol_names[i]="CO2"
+        count_OM=1
         for j=1:nb_atoms
             if atom_mod.distance(atoms.positions[i,:],atoms.positions[j,:]) < 1.6 && i != j
                 #Adding oxygen to molecule
-                atoms.mol_names[j]="CO2"
-                atoms.mol_index[j]=count_mol
+                atoms.atom_names[j]=string("O",count_OM) # Changing name to O1 or O2
+                atoms.mol_names[j]="CO2"                 # Changing molecule name
+                atoms.mol_index[j]=count_mol             # Putting index of molecule
                 # # Adding fictif mass
-                push!(atoms.mol_names,"CO2")
+                push!(atoms.mol_names,"CO2")                        # Molecule name
                 push!(atoms.mol_index,count_mol)
-                push!(atoms.atom_names,"M1")
+                push!(atoms.atom_names,string("M",count_OM))
                 push!(atoms.atom_index,nb_atoms+count_atoms)
                 x=(atoms.positions[i,1]+atoms.positions[j,1])/2.
                 y=(atoms.positions[i,2]+atoms.positions[j,2])/2.
                 z=(atoms.positions[i,3]+atoms.positions[j,3])/2.
                 atoms.positions=vcat(atoms.positions,[x y z])
                 count_atoms+=1
+                count_OM+=1
             end
         end
         count_mol+=1
     end
 end
 #-------------------------------------------------------------------------------
-
-file=open("/home/moogmt/test.xyz", "w")
-write(file,string(size(atoms.atom_names)[1],"\n"))
-write(file,"STEP X\n")
-for i=1:size(atoms.atom_names)[1]
-    line=string(atoms.atom_names[i]," ",atoms.positions[i,1]," ",atoms.positions[i,2]," ",atoms.positions[i,3],"\n")
-    write(file,line)
-end
-close(file)
 
 #--------------------------------------
 # Sorting atom_list by molecule index
@@ -91,4 +85,15 @@ for i=1:size(atoms.atom_names)[1]
         end
     end
 end
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+file=open("/home/moogmt/test.xyz", "w")
+write(file,string(size(atoms.atom_names)[1],"\n"))
+write(file,"STEP X\n")
+for i=1:size(atoms.atom_names)[1]
+    line=string(atoms.atom_names[i]," ",atoms.positions[i,1]," ",atoms.positions[i,2]," ",atoms.positions[i,3],"\n")
+    write(file,line)
+end
+close(file)
 #-------------------------------------------------------------------------------
