@@ -21,28 +21,32 @@ include("cell.jl")
 include("pdb.jl")
 
 # Reading PDB file
-atoms, cell=pdb.readStep( "/media/moogmt/Stock/CO2/Structures/Cmca/SuperFF/Cmca-super.pdb" )
+atoms, cell=pdb.readStep( "/home/moogmt/Structures/Cmca-super.pdb" )
 
 #--------------------
 # Building molecules
 #------------------------------------------------------------------------------
 count_mol=1
 count_atoms=1
-for i=1:size(atoms)[1]-1
+nb_atoms=size(atoms.atom_names)[1]
+for i=1:nb_atoms-1
     if atoms.atom_names[i] == "C"
         atoms.mol_index[i]=count_mol
         atoms.mol_names[i]="CO2"
-        for j=i+1:size(atoms)[1]
-            if distance(atoms.atom_positions[i,:],atoms.atom_positions[j,:]) < 1.6
-                # Adding oxygen to molecule
+        for j=1:nb_atoms
+            if atom_mod.distance(atoms.positions[i,:],atoms.positions[j,:]) < 1.6 && i != j
+                #Adding oxygen to molecule
                 atoms.mol_names[j]="CO2"
                 atoms.mol_index[j]=count_mol
-                # Adding fictif mass
+                # # Adding fictif mass
                 push!(atoms.mol_names,"CO2")
                 push!(atoms.mol_index,count_mol)
                 push!(atoms.atom_names,"M1")
-                push!(atoms.atom_index,size(atoms)[1]+count_atoms)
-                vcat(atoms.atom_positions,[(atoms.atom_positions[i,1]-atoms.atom_positions[j,1])/2. (atoms.atom_positions[i,2]-atoms.atom_positions[j,2])/2. (atoms.atom_positions[i,3]-atoms.atom_positions[j,3])/2.])
+                push!(atoms.atom_index,nb_atoms+count_atoms)
+                x=(atoms.positions[i,1]+atoms.positions[j,1])/2.
+                y=(atoms.positions[i,2]+atoms.positions[j,2])/2.
+                z=(atoms.positions[i,3]+atoms.positions[j,3])/2.
+                atoms.positions=vcat(atoms.positions,[x y z])
                 count_atoms+=1
             end
         end
@@ -51,20 +55,30 @@ for i=1:size(atoms)[1]-1
 end
 #-------------------------------------------------------------------------------
 
+file=open("/home/moogmt/test.xyz", "w")
+write(file,string(size(atoms.atom_names)[1],"\n"))
+write(file,"STEP X\n")
+for i=1:size(atoms.atom_names)[1]
+    line=string(atoms.atom_names[i]," ",atoms.positions[i,1]," ",atoms.positions[i,2]," ",atoms.positions[i,3],"\n")
+    write(file,line)
+end
+close(file)
 
+#--------------------------------------
 # Sorting atom_list by molecule index
-for i=1:size(atoms)[1]-1
-    for j=1:size(atoms)[1]
+#-------------------------------------------------------------------------------
+for i=1:size(atoms.atom_names)[1]
+    for j=1:size(atoms.atom_names)[1]
         if atoms.atom_index[i] < atoms.atom_index[j]
             # Storing
             a_index=atoms.atom_index[i]
             a_name=atoms.atom_names[i]
             m_index=atoms.mol_index[i]
             m_name=atoms.mol_names[i]
-            positions=atoms.atom_positions[i,:]
+            positions=atoms.positions[i,:]
             # Moving 1
             atoms.atom_index[i]=atoms.atom_index[j]
-            atoms.atoms_names[i]=atoms.atom_names[j]
+            atoms.atom_names[i]=atoms.atom_names[j]
             atoms.mol_index[i]=atoms.mol_index[j]
             atoms.mol_names[i]=atoms.mol_names[j]
             atoms.positions[i,:]=atoms.positions[j,:]
@@ -77,3 +91,4 @@ for i=1:size(atoms)[1]-1
         end
     end
 end
+#-------------------------------------------------------------------------------
