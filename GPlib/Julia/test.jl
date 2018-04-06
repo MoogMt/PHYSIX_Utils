@@ -61,9 +61,9 @@ end
 #--------------------------------------
 # Sorting atom_list by molecule index
 #-------------------------------------------------------------------------------
-for i=1:size(atoms.atom_names)[1]
-    for j=1:size(atoms.atom_names)[1]
-        if atoms.atom_index[i] < atoms.atom_index[j]
+for i=1:size(atoms.atom_names)[1]-1
+    for j=i+1:size(atoms.atom_names)[1]
+        if atoms.mol_index[i] > atoms.mol_index[j]
             # Storing
             a_index=atoms.atom_index[i]
             a_name=atoms.atom_names[i]
@@ -86,6 +86,8 @@ for i=1:size(atoms.atom_names)[1]
     end
 end
 #-------------------------------------------------------------------------------
+
+pdb.write(atoms,cell,"test.pdb")
 
 #-------------------------------------------------------------------------------
 file=open("/home/moogmt/test.xyz", "w")

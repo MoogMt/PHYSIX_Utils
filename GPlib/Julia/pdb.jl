@@ -54,7 +54,7 @@ function readStep( file::AbstractString )
   return atoms, cell
 end
 
-function write{ T1 <: AtomMolList, T2 <: Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
+function write{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
 
   out=open(file,"w")
 
@@ -79,14 +79,10 @@ function write{ T1 <: AtomMolList, T2 <: Cell_param, T3 <: AbstractString }(atom
   cryst1=string(cryst1,"\n")
   write(out,cryst1)
 
-  write(out,string("MODEL X")
+  write(out,string("MODEL X"))
 
   nb_atoms = size(atoms.atom_names)[1]
   for i=1:nb_atoms
-    x=string(cell.atoms[i].position[1])
-    y=string(cell.atoms[i].position[2])
-    z=string(cell.atoms[i].position[3])
-    name=cell.atoms[i].atom_type.name
     atom="ATOM"
     atom=spaces(atom,7-length(atom))
     atom=string(atom,atoms.atom_index[i])
