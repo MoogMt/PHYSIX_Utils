@@ -81,7 +81,7 @@ function write{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: Abs
   cryst1=string(cryst1,"\n")
   Base.write(out,cryst1)
 
-  Base.write(out,string("MODEL X"))
+  Base.write(out,string("MODEL X\n"))
 
   nb_atoms = size(atoms.atom_names)[1]
   for i=1:nb_atoms
@@ -95,11 +95,11 @@ function write{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: Abs
     atom=utils.spaces(atom,27-length(atom))
     atom=string(atom,atoms.mol_index[i])
     atom=utils.spaces(atom,31-length(atom))
-    atom=string(atom,atoms.positions[i,1])
+    atom=string(atom,round(atoms.positions[i,1],3))
     atom=utils.spaces(atom,39-length(atom))
-    atom=string(atom,atoms.positions[i,2])
+    atom=string(atom,round(atoms.positions[i,2],3))
     atom=utils.spaces(atom,47-length(atom))
-    atom=string(atom,atoms.positions[i,3])
+    atom=string(atom,round(atoms.positions[i,3],3))
     atom=utils.spaces(atom,55-length(atom))
     atom=string(atom,"0.00")
     atom=utils.spaces(atom,61-length(atom))

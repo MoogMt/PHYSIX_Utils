@@ -87,15 +87,16 @@ for i=1:size(atoms.atom_names)[1]-1
 end
 #-------------------------------------------------------------------------------
 
-pdb.write(atoms,cell,"/home/moogmt/test.pdb")
-
+#-----------------------
+# Changing atom indexes
 #-------------------------------------------------------------------------------
-file=open("/home/moogmt/test.xyz", "w")
-write(file,string(size(atoms.atom_names)[1],"\n"))
-write(file,"STEP X\n")
 for i=1:size(atoms.atom_names)[1]
-    line=string(atoms.atom_names[i]," ",atoms.positions[i,1]," ",atoms.positions[i,2]," ",atoms.positions[i,3],"\n")
-    write(file,line)
+    atoms.atom_index[i] = i
 end
-close(file)
 #-------------------------------------------------------------------------------
+
+#-----------------
+# Writting PDB
+#------------------------------------------------
+pdb.write(atoms,cell,"/home/moogmt/test.pdb")
+#------------------------------------------------
