@@ -60,6 +60,21 @@ Cell=Union{Cell_param, Cell_vec, Cell_matrix}
 
 # Functions
 #---------------------------------------------------------------------------
+
+function vec2matrix{ T1 <: Cell_vec}( vectors::T1 )
+    matrix=Cell_matrix()
+    for i=1:3
+        matrix.matrix[i,1] = vectors.v1[i]
+    end
+    for i=1:3
+        matrix.matrix[i,2] = vectors.v2[i]
+    end
+    for i=1:3
+        matrix.matrix[i,3] = vectors.v3[i]
+    end
+    return matrix
+end
+
 function wrap{ T1 <: Real}( position::T1, length::T1 )
     sign=-1
     if position < 0
