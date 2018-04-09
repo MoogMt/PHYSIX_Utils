@@ -21,7 +21,8 @@ include("cell.jl")
 include("pdb.jl")
 
 # Reading PDB file
-atoms, cell=pdb.readStep( "/media/moogmt/Stock/CO2/Structures/Cmca/Conv/Cmca.pdb" )
+#atoms, cell=pdb.readStep( "/media/moogmt/Stock/CO2/Structures/Cmca/Conv/Cmca.pdb" )
+atoms, cell=pdb.readStep( "/home/moogmt/Structures/Cmca-super.pdb" )
 
 #--------------------
 # Building molecules
@@ -76,39 +77,17 @@ end
 for i=0:count_mol-2
     count1=i*5+1
     if atoms.atom_names[count1] != "O1"
-        for j=count1+1:5
+        print("count1: ",count1," check: ",atoms.atom_names[count1] ," \n")
+        print("truc:", count1+1," ",5,"\n")
+        for j=count1+1:count_mol*5
             count2=i*5+j
             if atoms.atom_names[count2] == "O1"
                 atom_mod.switchAtoms(atoms,count1,count2)
             end
         end
-    end
-    count1=i*5+2
-    if atoms.atom_names[count1] != "C"
-        for j=count1+1:5
-            count2=i*5+j
-            if atoms.atom_names[count2] == "C"
-                atom_mod.switchAtoms(atoms,count1,count2)
-            end
-        end
-    end
-    count1=i*5+3
-    if atoms.atom_names[count1] != "O2"
-        for j=count1+1:5
-            count2=i*5+j
-            if atoms.atom_names[count2] == "O2"
-                atom_mod.switchAtoms(atoms,count1,count2)
-            end
-        end
-    end
-    count1=i*5+4
-    if atoms.atom_names[count1] != "M1"
-        for j=count1+1:5
-            count2=i*5+j
-            if atoms.atom_names[count2] == "M1"
-                atom_mod.switchAtoms(atoms,count1,count2)
-            end
-        end
+        print("count1: ",count1," check3: ",atoms.atom_names[count1] ," \n")
+    else
+        print("count1: ",count1," check2: ",atoms.atom_names[count1] ," \n")
     end
 end
 #-------------------------------------------------------------------------------
