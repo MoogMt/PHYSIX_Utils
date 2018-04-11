@@ -1,7 +1,11 @@
+include("atoms.jl")
+include("cell.jl")
+
 module contact_matrix
 
 import atom_mod.AtomList
 importall atom_mod
+importall cell_mod
 
 mutable struct ContactMatrix
     ContactMatrix::Array{Real}
