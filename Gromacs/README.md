@@ -1,4 +1,4 @@
-=== COMPILATION STANDARD ===
+===COMPILATION===
 
 ----------------------------------------
 1- Compile your own FFTW3 LIBRARY:
@@ -14,8 +14,7 @@ cd fftw3_folder
 
 -> Preparing Install
 
-fftw_folder=$(pwd)"/install" # install folder
-
+fftw_folder=$(pwd)"/install_fftw" # install folder
 mkdir $fftw_folder           # making folder
 
 -> Configure with float, mpi, shared version and in install folder
@@ -59,7 +58,7 @@ cd plumed2
 
 -> Configuring install
 
-folder_plumed=$(pwd)"install"
+folder_plumed=$(pwd)"install_plumed"
 
 ./configure --prefix=$folder
 
@@ -95,13 +94,19 @@ plumed-patch -p --shared
 
 cd gromacs
 
--> Making compilation folder
+-> Making compilation and installation folder
 
 mkdir build
+mkdir install_build
+grmx_install=$(pwd)"/grmx_install"
 
 -> configuring
 
-cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=/home/moogmt/gromacs-507+PLUMED/install2 -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=/home/moogmt/fftw-3.3.7/install/lib -DFFTWF_INCLUDE_DIR=/home/moogmt/fftw-3.3.7/install/include
+fftw_include=$fftw_folder"/include"
+
+fftw_lib=$fftw_folder"/lib"
+
+cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=$grmx_install -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=$fftw_lib-DFFTWF_INCLUDE_DIR=$fftw_folder
 
 -> Compiling
 
