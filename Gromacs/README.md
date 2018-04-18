@@ -1,4 +1,8 @@
-===COMPILATION===
+========================
+COMPILATION
+========================
+
+Works with Gromacs 5.1.4 et Plumed 2.4.1
 
 ----------------------------------------
 1- Compile your own FFTW3 LIBRARY:
@@ -45,9 +49,6 @@ git clone https://github.com/gromacs/gromacs
 3 - Optionnal - PLUMED PATCHING
 --------------------------------------
 
-/!\ Can't crack it yet /!\ 
-/!\ Something is wrong somewhere in plumed...
-
 -> Get archive from plumed repository
 
 git clone https://github.com/plumed/plumed2
@@ -79,10 +80,6 @@ cd ../gromacs
 -> Patching 
 
 plumed-patch -p --shared 
-
-/!\ This is where problems start to show up...
-(GROMACS : Version 5.1 and 2018)
-(PLUMED: 2.4.1 and current github)
 
 --------------------------------------
 
