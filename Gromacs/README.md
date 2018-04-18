@@ -3,21 +3,21 @@
 ----------------------------------------
 1- Compile your own FFTW3 LIBRARY:
 ----------------------------------------
--- Get archive from site: \\
-http://www.fftw.org/download.html \\
--- Dearchive folder \\
+
+-> Get archive from site, dearchive and go inside folder
+http://www.fftw.org/download.html 
 tar -xvf fftw3_archive
--- Go into folder
 cd fftw3_folder
--- Making local install directory
-fftw_folder=$(pwd)"/install"
-mkdir $fftw_folder
--- Configure with float, mpi, shared version and in install folder
+
+-> Configure Install
+fftw_folder=$(pwd)"/install" # install folder
+mkdir $fftw_folder           # making folder
+# Configure with float, mpi, shared version and in install folder
 ./configure --prefix=$folder --enable-shared --enable-sse2 --enable-float --enable-mpi
--- Compiling fftw
+-> Compiling f
 make -j 8
 make install -j 8
--- Moving back
+-> Moving back
 cd .. 
 ----------------------------------------
 
@@ -32,17 +32,17 @@ git clone https://github.com/gromacs/gromacs
 --------------------------------------
 /!\ Can't crack it yet /!\ 
 /!\ Something is wrong somewhere in plumed...
--- Get archive from plumed repository
+-> Get archive from plumed repository
 git clone https://github.com/plumed/plumed2
--- Moving into folder
+-> Moving into folder
 cd plumed2
--- Configuring install
+-> Configuring install
 folder_plumed=$(pwd)"install"
 ./configure --prefix=$folder
--- Installing
+-> Installing
 make -j 8
 make -j 8 install
--- Moving back
+-> Moving back
 cd ..
 --------------------------------------
 
