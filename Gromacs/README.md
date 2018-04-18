@@ -14,9 +14,9 @@ cd fftw3_folder
 
 -> Preparing Install
 
-fftw_folder=$(pwd)"/install_fftw" # install folder
-mkdir $fftw_folder           # making folder
+fftw_folder=$(pwd)"/install_fftw" 
 
+mkdir $fftw_folder 
 -> Configure with float, mpi, shared version and in install folder
 
 ./configure --prefix=$folder --enable-shared --enable-sse2 --enable-float --enable-mpi
