@@ -12,13 +12,13 @@ tar -xvf fftw3_archive
 
 cd fftw3_folder
 
--> Configure Install
+-> Preparing Install
 
 fftw_folder=$(pwd)"/install" # install folder
 
 mkdir $fftw_folder           # making folder
 
-# Configure with float, mpi, shared version and in install folder
+-> Configure with float, mpi, shared version and in install folder
 
 ./configure --prefix=$folder --enable-shared --enable-sse2 --enable-float --enable-mpi
 
@@ -79,5 +79,22 @@ cd ..
 3 - Bis - Installing GROMACS
 --------------------------------------
 
+-> Moving to gromacs folder
+
+cd gromacs
+
+-> Making compilation folder
+
+mkdir build
+
+-> configuring
+
+cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=/home/moogmt/gromacs-507+PLUMED/install2 -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=/home/moogmt/fftw-3.3.7/install/lib -DFFTWF_INCLUDE_DIR=/home/moogmt/fftw-3.3.7/install/include
+
+-> Compiling
+
+make -j 8
+
+make -j 8 install
 
 --------------------------------------
