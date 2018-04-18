@@ -69,9 +69,21 @@ make -j 8
 
 make -j 8 install
 
--> Moving back
+-> Sourcing plumed-path
 
-cd ..
+source sourcememe.sh
+
+-> Moving back into gromacs folder
+
+cd ../gromacs
+
+-> Patching 
+
+plumed-patch -p --shared 
+
+/!\ This is where problems start to show up...
+(GROMACS : Version 5.1 and 2018)
+(PLUMED: 2.4.1 and current github)
 
 --------------------------------------
 
@@ -94,6 +106,8 @@ cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=/home/moogmt/gromacs-507+PLUMED/ins
 -> Compiling
 
 make -j 8
+
+/!\ Everything explodes here...
 
 make -j 8 install
 
