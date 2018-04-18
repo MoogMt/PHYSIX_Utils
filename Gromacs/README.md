@@ -3,9 +3,9 @@
 ----------------------------------------
 1- Compile your own FFTW3 LIBRARY:
 ----------------------------------------
--- Get archive from site:
-http://www.fftw.org/download.html
--- Dearchive folder
+-- Get archive from site: \\
+http://www.fftw.org/download.html \\
+-- Dearchive folder \\
 tar -xvf fftw3_archive
 -- Go into folder
 cd fftw3_folder
