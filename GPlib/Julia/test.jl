@@ -19,10 +19,14 @@ da=a2-a1
 include("atoms.jl")
 include("cell.jl")
 include("pdb.jl")
+include("xyz.jl")
 
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Cmca/Conv/"
 atoms, cell=pdb.readStep( string(folder,"Cmca.pdb") )
+
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
+xyz.getNbSteps(string(folder,"TRAJEC.xyz"))
 #folder2="/home/moogmt/Structures/"
 #atoms, cell=pdb.readStep( string(folder2,"Cmca-super.pdb") )
 

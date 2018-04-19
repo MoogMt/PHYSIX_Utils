@@ -15,7 +15,7 @@ mutable struct Cell_param
     length::Vector{Real}
     angles::Vector{Real}
     function Cell_param()
-        new(0,0,0,0,0,0);
+        new([0,0,0],[0,0,0]);
     end
     function Cell_param{T1 <: Real, T2<: Real, T3 <: Real}( a::T1, b::T2, c::T3)
         new([a,b,c],[90.,90.,90.])

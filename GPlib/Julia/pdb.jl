@@ -8,7 +8,30 @@ importall atom_mod
 importall cell_mod
 importall utils
 
-function readStep( file::AbstractString )
+function getNbSteps{ T1 <: AbstractString }( file::T1 )
+  count=0
+  count2=0
+  open( file ) do f
+    while !eof(f)
+      col1 =split(readline(f))[1]
+      print("col1: ", col1, "\n")
+      if col1 == "END"
+        count += 1
+      elseif col1 == "CRYST1"
+        count2 +=1
+      end
+    end
+  end
+  print(count2)
+  if count == count2
+    return count
+  else
+    print("Problem in file...\n")
+    return 0
+  end
+end
+
+function readStep{ T1 <: AbstractString }( file::T1 )
   #--------------
   # Reading file
   #----------------------
@@ -24,12 +47,10 @@ function readStep( file::AbstractString )
   nb_atoms=0
   for line in lines
     if split(line)[1] == "CRYST1"
-      cell.a=parse(Float64,split(line)[2])
-      cell.b=parse(Float64,split(line)[3])
-      cell.c=parse(Float64,split(line)[4])
-      cell.alpha=parse(Float64,split(line)[5])
-      cell.beta=parse(Float64,split(line)[6])
-      cell.gamma=parse(Float64,split(line)[7])
+      for i=1:3
+        cell.length[i]=parse(Float64,split(line)[i+1])
+        cell.angles[i]=parse(Float64,split(line)[i+4])
+      end
     elseif split(line)[1] == "ATOM"
       nb_atoms+=1
     end
