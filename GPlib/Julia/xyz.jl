@@ -44,6 +44,26 @@ function readStep{ T1 <:IO , T2 <: Int }( file_handle::T1 , nb_atoms::T2 )
   return atoms
 end
 
+function readFastFile{ T1 <: AbstractString }( file::T1 )
+  #--------------
+  # Reading file
+  #----------------------
+  file=open(file);
+  lines=readlines(file);
+  close(file);
+  #------------------------
+
+  nb_atoms=parse(Float64,split(lines[1])[1])
+  nb_steps=Int(size(lines)[1]/(nb_atoms+2))
+
+  atoms_boxes=Vector{atom.modAtomList}(nb_steps)
+  for i=1:nb_steps
+    atoms_boxes[i].
+  end
+
+  return atoms_boxes
+end
+
 function write{ T1 <: IO, T2 <: atom_mod.AtomList }( file_handle::T1, atoms::T2 )
 
   for i=1:size( atoms.names )[1]
