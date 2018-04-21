@@ -27,13 +27,24 @@ atoms=xyz.readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
 
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
 
-contact_matrix.BuildMatrix(atoms[1],cell)
+loutre1=atoms[1].names
+loutre2=atoms[1].index
+loutre3=atoms[1].positions
+
+loutre4=atom_mod.AtomList()
+loutre4.names=loutre1
+loutre4.index=loutre2
+loutre4.positions=loutre3
+
+contact_matrix.buildMatrix(loutre4,cell)
 
 print("truc\n")
 print( typeof(atoms[1]) , "\n")
 print( atom_mod.AtomList , "\n")
-print( typeof(atoms[1]) <: atom_mod.AtomList , "\n")
+print( typeof(atoms[1]) ==  atom_mod.AtomList , "\n")
 print("truc2\n")
+
+
 
 contact_matrix.ContactMatrix( list, cell )
 

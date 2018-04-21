@@ -5,7 +5,6 @@ module cube_mod
 
 include("conversion.jl");
 
-import atom_mod.AtomList
 importall atom_mod
 importall cell_mod
 importall geom
@@ -89,7 +88,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-------------
     # Reads atoms
     #----------------------------------------------------
-    atom_list=AtomList(nb_atoms);
+    atom_list=atom_mod.AtomList(nb_atoms);
     for i=1:nb_atoms
         atom_list.names[i] = split( lines[6+i] )[1]
         for j=1:3

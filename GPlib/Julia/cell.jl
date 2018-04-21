@@ -4,7 +4,6 @@ module cell_mod
 
 # Import all import module
 #----------------------------
-import atom_mod.AtomList
 importall atom_mod
 #----------------------------
 
@@ -79,7 +78,7 @@ function wrap{ T1 <: Real}( position::T1, length::T1 )
     end
     return position
 end
-function wrap{ T1 <: AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2 )
+function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2 )
     # Computes cell parameters
     #--------------------------------------------
     params=[0.,0.,0.]
@@ -115,14 +114,14 @@ function dist1D{ T1 <: Real, T2 <: Real, T3 <: Real }( x1::T1, x2::T2, a::T3 )
     end
     return dx^2
 end
-function distance{ T1 <: AtomList, T2 <: Cell_param , T3 <: Int }( atoms::T1, cell::T2, index1::T3, index2::T3 )
+function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int }( atoms::T1, cell::T2, index1::T3, index2::T3 )
     distance=0
     for i=1:3
         distance += dist1D( atoms.positions[index1,i],atoms.positions[index2,i], cell.length[i] )
     end
     return sqrt(distance)
 end
-function distance{ T1 <: AtomList, T2 <: Cell_param,  T3 <: Int, T4 <: Bool }( atoms::T1, cell::T2, index1::T3, index2::T3, wrap::T4 )
+function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param,  T3 <: Int, T4 <: Bool }( atoms::T1, cell::T2, index1::T3, index2::T3, wrap::T4 )
     if (  wrap )
         wrap(atoms,cell)
     end
@@ -139,7 +138,7 @@ function compressParams{ T1 <: Cell_param, T2 <: Real }( cell::T1, fracs::Vector
     end
     return cell
 end
-function compressAtoms{ T1 <: AtomList, T2 <: Cell_param, T3 <: Real }( atoms::T1 , cell::T2, fracs::Vector{T3} )
+function compressAtoms{ T1 <: atom_mod.AtomList, T2 <: Cell_param, T3 <: Real }( atoms::T1 , cell::T2, fracs::Vector{T3} )
     for i=1:size(atoms.names)[1]
         for j=1:3
             atoms.positions[i,j] *= fracs[j]

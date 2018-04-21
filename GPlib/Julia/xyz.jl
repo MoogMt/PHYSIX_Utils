@@ -28,7 +28,7 @@ function getNbSteps{ T1 <: AbstractString }( file::T1)
 end
 
 function readStep{ T1 <:IO , T2 <: Int }( file_handle::T1 , nb_atoms::T2 )
-  atoms=AtomList(nb_atoms)
+  atoms = atom_mod.AtomList(nb_atoms)
   nb_atoms_check = Int(split(readline( file_handle ))[1]); readline( file_handle );
   if nb_atoms != nb_atoms_check
     print("Problem reading xyz file ! \n")
@@ -61,18 +61,19 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
   #------------------------------------------
 
   #-----------------------------------------------------------------------------
-  atoms_boxes=Vector{atom_mod.AtomList}(nb_steps)
+  atoms_boxes=Vector{ atom_mod.AtomList }(nb_steps)
   for i=1:nb_steps
-    atoms_boxes[i]=atom_mod.AtomList(nb_atoms)
+    temp=atom_mod.AtomList(nb_atoms)
     for j=1:nb_atoms
       line_number=Int((i-1)*(nb_atoms+2)+j+2)
       line_content=split(lines[line_number])
-      atoms_boxes[i].names[j] = line_content[1]
+      temp.names[j] = line_content[1]
       for k=1:3
-        atoms_boxes[i].positions[j,k] = parse(Float64, line_content[k+1] ) 
+        temp.positions[j,k] = parse(Float64, line_content[k+1] )
       end
-      atoms_boxes[i].index[j] = j
+      temp.index[j] = j
     end
+    atoms_boxes[i] = temp
   end
   #-----------------------------------------------------------------------------
 
