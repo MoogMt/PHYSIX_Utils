@@ -58,7 +58,12 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
 
   atoms_boxes=Vector{atom.modAtomList}(nb_steps)
   for i=1:nb_steps
-    atoms_boxes[i].
+    for j=1:nb_atoms
+      atoms_boxes[i].names[j] = split((i-1)*(nb_atoms+2)+j)[1]
+      for k=1:3
+        atoms_boxes[i].positions[j,k]=parse(Float64,split(lines[(i-1)*(nb_atoms+2)+j])[k+1])
+      end
+    end
   end
 
   return atoms_boxes
