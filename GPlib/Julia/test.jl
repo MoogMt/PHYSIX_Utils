@@ -22,8 +22,6 @@ include("pdb.jl")
 #include("xyz.jl")
 include("contactmatrix.jl")
 
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-
 function readFastFile{ T1 <: AbstractString }( file::T1 )
   #--------------
   # Reading file
@@ -58,12 +56,13 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
   return sim
 end
 
-
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
 atoms = readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
-
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
 
-c=contact_matrix.buildMatrix(atoms[1],cell)
+for i=step:nb_step
+    matrix=contact_matrix.buildMatrix( atoms[step] ,cell)
+end
 
 
 # Reading PDB file
