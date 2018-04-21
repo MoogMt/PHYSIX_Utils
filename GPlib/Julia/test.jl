@@ -21,6 +21,9 @@ include("cell.jl")
 include("pdb.jl")
 include("xyz.jl")
 
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
+atoms=xyz.readFastFile(string(folder,"TRAJEC.xyz"))
+
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Cmca/Conv/"
 atoms, cell=pdb.readStep( string(folder,"Cmca.pdb") )

@@ -53,18 +53,28 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
   close(file);
   #------------------------
 
-  nb_atoms=parse(Float64,split(lines[1])[1])
+  #------------------------
+  # Basic data about files
+  #-----------------------------------------
+  nb_atoms=parse(Int64,split(lines[1])[1])
   nb_steps=Int(size(lines)[1]/(nb_atoms+2))
+  #------------------------------------------
 
-  atoms_boxes=Vector{atom.modAtomList}(nb_steps)
+  #-----------------------------------------------------------------------------
+  atoms_boxes=Vector{atom_mod.AtomList}(nb_steps)
   for i=1:nb_steps
+    atoms_boxes[i]=atom_mod.AtomList(nb_atoms)
     for j=1:nb_atoms
-      atoms_boxes[i].names[j] = split((i-1)*(nb_atoms+2)+j)[1]
+      line_number=Int((i-1)*(nb_atoms+2)+j+2)
+      line_content=split(lines[line_number])
+      atoms_boxes[i].names[j] = line_content[1]
       for k=1:3
-        atoms_boxes[i].positions[j,k]=parse(Float64,split(lines[(i-1)*(nb_atoms+2)+j])[k+1])
+        atoms_boxes[i].positions[j,k] = parse(Float64, line_content[k+1] ) 
       end
+      atoms_boxes[i].index[j] = j
     end
   end
+  #-----------------------------------------------------------------------------
 
   return atoms_boxes
 end
