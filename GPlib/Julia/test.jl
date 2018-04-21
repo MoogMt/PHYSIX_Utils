@@ -19,34 +19,52 @@ da=a2-a1
 include("atoms.jl")
 include("cell.jl")
 include("pdb.jl")
-include("xyz.jl")
+#include("xyz.jl")
 include("contactmatrix.jl")
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-atoms=xyz.readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
+
+function readFastFile{ T1 <: AbstractString }( file::T1 )
+  #--------------
+  # Reading file
+  #----------------------
+  file=open(file);
+  lines=readlines(file);
+  close(file);
+  #------------------------
+
+  #------------------------
+  # Basic data about files
+  #-----------------------------------------
+  nb_atoms=parse(Int64,split(lines[1])[1])
+  nb_steps=Int(size(lines)[1]/(nb_atoms+2))
+  #------------------------------------------
+
+  sim=Vector{atom_mod.AtomList}(nb_steps)
+  for step=1:nb_steps
+      atom_list=atom_mod.AtomList(nb_atoms)
+      for atom=1:nb_atoms
+          line_nb=Int((step-1)*(nb_atoms+2)+atom+2)
+          line_content=split(lines[line_nb])
+          atom_list.names[atom] = line_content[1]
+          atom_list.index[atom] = atom
+          for pos=1:3
+              atom_list.positions[atom,pos] = parse(Float64, line_content[pos+1] )
+          end
+      end
+      sim[step]=atom_list
+  end
+
+  return sim
+end
+
+
+atoms = readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
 
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
 
-loutre1=atoms[1].names
-loutre2=atoms[1].index
-loutre3=atoms[1].positions
+c=contact_matrix.buildMatrix(atoms[1],cell)
 
-loutre4=atom_mod.AtomList()
-loutre4.names=loutre1
-loutre4.index=loutre2
-loutre4.positions=loutre3
-
-contact_matrix.buildMatrix(loutre4,cell)
-
-print("truc\n")
-print( typeof(atoms[1]) , "\n")
-print( atom_mod.AtomList , "\n")
-print( typeof(atoms[1]) ==  atom_mod.AtomList , "\n")
-print("truc2\n")
-
-
-
-contact_matrix.ContactMatrix( list, cell )
 
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Cmca/Conv/"
