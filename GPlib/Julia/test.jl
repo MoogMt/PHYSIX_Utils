@@ -20,9 +20,22 @@ include("atoms.jl")
 include("cell.jl")
 include("pdb.jl")
 include("xyz.jl")
+include("contactmatrix.jl")
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-atoms=xyz.readFastFile(string(folder,"TRAJEC.xyz"))
+atoms=xyz.readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
+
+cell=cell_mod.Cell_param(8.82,8.82,8.82)
+
+contact_matrix.BuildMatrix(atoms[1],cell)
+
+print("truc\n")
+print( typeof(atoms[1]) , "\n")
+print( atom_mod.AtomList , "\n")
+print( typeof(atoms[1]) <: atom_mod.AtomList , "\n")
+print("truc2\n")
+
+contact_matrix.ContactMatrix( list, cell )
 
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Cmca/Conv/"

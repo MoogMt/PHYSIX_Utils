@@ -6,7 +6,6 @@ module cube_mod
 include("conversion.jl");
 
 import atom_mod.AtomList
-import cell_mod.Cell_matrix
 importall atom_mod
 importall cell_mod
 importall geom
