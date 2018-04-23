@@ -4,7 +4,7 @@ module cell_mod
 
 # Import all import module
 #----------------------------
-importall atom_mod
+using atom_mod
 #----------------------------
 
 #-------------

@@ -1,12 +1,10 @@
-include("utils.jl");
-include("atoms.jl");
 include("cell.jl");
 
 module pdb
 
-importall atom_mod
-importall cell_mod
-importall utils
+using atom_mod
+using cell_mod
+using utils
 
 function getNbSteps{ T1 <: AbstractString }( file::T1 )
   count=0

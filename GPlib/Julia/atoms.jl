@@ -1,3 +1,5 @@
+include("utils.jl")
+
 module atom_mod
 
 mutable struct Atom
@@ -13,11 +15,8 @@ mutable struct AtomList
     names::Vector{AbstractString}
     index::Vector{Int}
     positions::Array{Real}
-    function AtomList()
-        new(Vector{Real}(),Vector{Real}(),Array{Real}(0,3))
-    end
     function AtomList{T1 <: Int}( nb_atoms::T1)
-        new( Vector{AbstractString}(nb_atoms) , Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3) )
+        new( Vector{AbstractString}(nb_atoms) , zeros(nb_atoms), zeros(nb_atoms,3) )
     end
 end
 
@@ -27,9 +26,6 @@ mutable struct AtomMolList
     mol_names::Vector{AbstractString}
     mol_index::Vector{Int}
     positions::Array{Real}
-    function AtomMolList()
-        new(Vector{AbstractString}(),Vector{Int}(),Vector{AbstractString}(),Vector{Int}(),Array{Real}(0,3))
-    end
     function AtomMolList{ T1 <: Int }( nb_atoms::T1 )
         new(Vector{AbstractString}( nb_atoms ),Vector{Int}( nb_atoms ) ,Vector{AbstractString}( nb_atoms ), Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3))
     end

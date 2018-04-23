@@ -1,11 +1,9 @@
-include("utils.jl");
-include("atoms.jl");
 include("cell.jl");
 
-module xyz
+module filexyz
 
-importall atom_mod
-importall cell_mod
+using atom_mod
+using cell_mod
 
 function getNbSteps{ T1 <: AbstractString }( file::T1)
   nb_step=0
@@ -27,43 +25,38 @@ function getNbSteps{ T1 <: AbstractString }( file::T1)
   end
 end
 
-# function readStep{ T1 <:IO , T2 <: Int }( file_handle::T1 , nb_atoms::T2 )
-#   atoms = atom_mod.AtomList(nb_atoms)
-#   nb_atoms_check = Int(split(readline( file_handle ))[1]); readline( file_handle );
-#   if nb_atoms != nb_atoms_check
-#     print("Problem reading xyz file ! \n")
-#     return 0
-#   end
-#   for i=1:nb_atoms
-#     line=readline(file_handle)
-#     atoms.names[i]=split(line)[1]
-#     for i=1:3
-#       atoms.positions[i,j]=parse(Float64,split(line)[j])
-#     end
-#   end
-#   return atoms
-# end
+function readFastFile{ T1 <: AbstractString }( file::T1 )
+  #--------------
+  # Reading file
+  #----------------------
+  file=open(file);
+  lines=readlines(file);
+  close(file);
+  #------------------------
 
-# function readFastFile{ T1 <: AbstractString }( file::T1 )
-#   #--------------
-#   # Reading file
-#   #----------------------
-#   file=open(file);
-#   lines=readlines(file);
-#   close(file);
-#   #------------------------
-#
-#   #------------------------
-#   # Basic data about files
-#   #-----------------------------------------
-#   nb_atoms=parse(Int64,split(lines[1])[1])
-#   nb_steps=Int(size(lines)[1]/(nb_atoms+2))
-#   #------------------------------------------
-#
-#   stuff=atom_mod.AtomList(nb_atoms)
-#
-#   return stuff
-# end
+  #------------------------
+  # Basic data about files
+  #-----------------------------------------
+  nb_atoms=parse(Int64,split(lines[1])[1])
+  nb_steps=Int(size(lines)[1]/(nb_atoms+2))
+  #------------------------------------------
+
+  sim=Vector{ atom_mod.AtomList }( nb_steps )
+  for step=1:nb_steps
+      atom_list = atom_mod.AtomList( nb_atoms )
+      for atom=1:nb_atoms
+          line_nb=Int((step-1)*(nb_atoms+2)+atom+2)
+          line_content=split( lines[line_nb] )
+          atom_list.names[atom] = line_content[1]
+          atom_list.index[atom] = atom
+          for pos=1:3
+              atom_list.positions[ atom, pos ] = parse( Float64, line_content[ pos+1 ] )
+          end
+      end
+      sim[step]=atom_list
+  end
+  return sim
+end
 
 function write{ T1 <: IO, T2 <: atom_mod.AtomList }( file_handle::T1, atoms::T2 )
 

@@ -19,51 +19,17 @@ da=a2-a1
 include("atoms.jl")
 include("cell.jl")
 include("pdb.jl")
-#include("xyz.jl")
+include("xyz.jl")
 include("contactmatrix.jl")
 
-function readFastFile{ T1 <: AbstractString }( file::T1 )
-  #--------------
-  # Reading file
-  #----------------------
-  file=open(file);
-  lines=readlines(file);
-  close(file);
-  #------------------------
-
-  #------------------------
-  # Basic data about files
-  #-----------------------------------------
-  nb_atoms=parse(Int64,split(lines[1])[1])
-  nb_steps=Int(size(lines)[1]/(nb_atoms+2))
-  #------------------------------------------
-
-  sim=Vector{atom_mod.AtomList}(nb_steps)
-  for step=1:nb_steps
-      atom_list=atom_mod.AtomList(nb_atoms)
-      for atom=1:nb_atoms
-          line_nb=Int((step-1)*(nb_atoms+2)+atom+2)
-          line_content=split(lines[line_nb])
-          atom_list.names[atom] = line_content[1]
-          atom_list.index[atom] = atom
-          for pos=1:3
-              atom_list.positions[atom,pos] = parse(Float64, line_content[pos+1] )
-          end
-      end
-      sim[step]=atom_list
-  end
-
-  return sim
-end
-
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-atoms = readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
+atoms = filexyz.readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
 
-for i=step:nb_step
-    matrix=contact_matrix.buildMatrix( atoms[step] ,cell)
-end
-
+nb_steps=size(atoms)[1]
+#for i=step:nb_steps
+matrix=contact_matrix.buildMatrix( atoms[1] , cell )
+#end
 
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Cmca/Conv/"
