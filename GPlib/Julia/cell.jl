@@ -107,12 +107,12 @@ end
 function dist1D{ T1 <: Real, T2 <: Real, T3 <: Real }( x1::T1, x2::T2, a::T3 )
     dx=x1-x2
     if dx > a*0.5
-        return (dx-a)^2
+        dx -= a
     end
     if dx < -a*0.5
-        return (dx+a)^2
+        dx += a
     end
-    return dx^2
+    return dx*dx
 end
 function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int }( atoms::T1, cell::T2, index1::T3, index2::T3 )
     distance=0

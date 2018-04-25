@@ -38,5 +38,26 @@ function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param, T3 <:
   return matrix
 end
 
+function readMatrix{ T1 <: IO, T2 <: Int }( input::T1 , nb_atoms::T2)
+  matrix=zeros(nb_atoms,nb_atoms)
+  for i=1:nb_atoms
+    line=split(readline(input))
+    for j=1:nb_atoms
+      matrix[i,j] = parse( Float64, line[j] )
+    end
+  end
+  if split(readline(input))[1] == "END"
+    return matrix
+  else
+    print("Problem while reading file")
+    return 
+  end
+end
+
+function readMatrix{ T1 <: AbstractString }( file::T1 )
+  file=open(file)
+  nb_steps=Int(split(readline(file))[1])
+  return matrix
+end
 
 end

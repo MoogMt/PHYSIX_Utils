@@ -1,4 +1,3 @@
-
 include("contactmatrix.jl")
 
 # Loading file
@@ -85,7 +84,24 @@ close(file_coord)
 using PyPlot
 
 figure(1)
-plot(time,coord[1])
-plot(time,coord[2])
-plot(time,coord[3])
-plot(time,coord[4])
+plot(time,coord[1,:],".-")
+plot(time,coord[2,:],".-")
+plot(time,coord[3,:],".-")
+plot(time,coord[4,:],".-")
+legend(["rc=1.60A","rc=1.70A","rc=1.75A","rc=1.80A"])
+xlabel("time (ps)")
+ylabel("Coordinance")
+
+
+include("contactmatrix.jl")
+
+#==============================================================================#
+file=open(string(folder,"distanceMatrix.dat"))
+line=split(readline(file))
+nb_steps=parse(Int64,line[1])
+nb_atoms=parse(Int64,line[2])
+for i=1:nb_steps
+    matrix=contact_matrix.readMatrix(file,nb_atoms)
+end
+close(file)
+#==============================================================================#
