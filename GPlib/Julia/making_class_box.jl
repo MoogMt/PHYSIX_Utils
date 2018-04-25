@@ -1,36 +1,3 @@
-include("atoms.jl")
-include("cell.jl")
-include("cubefile.jl")
-
-using PyPlot
-
-C1=31
-O1=81
-O2=66
-O3=70
-
-atoms1, cell1, ELF1 = cube_mod.readCube("/home/moogmt/CO2_AIMD/ELF/0_structure/ELF.cube")
-a1=cube_mod.getClosest(atoms1.positions[C1,:],ELF1)
-a2=cube_mod.getClosest(atoms1.positions[O1,:],ELF1)
-
-da=a2-a1
-
-# Loading PBD file
-include("atoms.jl")
-include("cell.jl")
-include("pdb.jl")
-include("xyz.jl")
-include("contactmatrix.jl")
-
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-atoms = filexyz.readFastFile(string(folder,"TRAJEC_wrapped.xyz"))
-cell=cell_mod.Cell_param(8.82,8.82,8.82)
-
-nb_steps=size(atoms)[1]
-#for i=step:nb_steps
-matrix=contact_matrix.buildMatrix( atoms[1] , cell )
-#end
-
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Cmca/Conv/"
 atoms, cell=pdb.readStep( string(folder,"Cmca.pdb") )
