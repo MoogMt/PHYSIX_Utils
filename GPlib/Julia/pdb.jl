@@ -2,9 +2,9 @@ include("cell.jl");
 
 module pdb
 
-using atom_mod
-using cell_mod
-using utils
+importall atom_mod
+importall cell_mod
+importall utils
 
 function getNbSteps{ T1 <: AbstractString }( file::T1 )
   count=0
@@ -28,6 +28,7 @@ function getNbSteps{ T1 <: AbstractString }( file::T1 )
     return 0
   end
 end
+export getNbSteps
 
 function readStep{ T1 <: AbstractString }( file::T1 )
   #--------------
@@ -53,6 +54,7 @@ function readStep{ T1 <: AbstractString }( file::T1 )
       nb_atoms+=1
     end
   end
+
   #----------------------------------------------------
 
   #---------------------------------
@@ -74,8 +76,10 @@ function readStep{ T1 <: AbstractString }( file::T1 )
 
   return atoms, cell
 end
+export readStep
 
-function write{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
+#-------------------------------------------------------------------------------
+function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
 
   out=open(file,"w")
 
@@ -135,5 +139,6 @@ function write{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: Abs
 
   return
 end
+export writeStep
 
 end

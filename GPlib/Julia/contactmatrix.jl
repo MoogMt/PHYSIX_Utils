@@ -1,11 +1,14 @@
 include("cell.jl");
 include("xyz.jl");
 
+print("Loading Contact Matrix")
+
 module contact_matrix
 
 using atom_mod
 using cell_mod
 
+#-------------------------------------------------------------------------------
 function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param }( atoms::T1, cell::T2 )
   nb_atoms=size(atoms.names)[1]
   matrix=zeros(nb_atoms,nb_atoms)
@@ -18,7 +21,6 @@ function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param }( ato
   end
   return matrix
 end
-
 function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param, T3 <: Real }( atoms::T1 , cell::T2, cut_off::T3 )
   nb_atoms=size(atoms.names)[1]
   matrix=zeros(nb_atoms,nb_atoms)
@@ -37,7 +39,10 @@ function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param, T3 <:
   end
   return matrix
 end
+export buildMatrix
+#-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
 function readMatrix{ T1 <: IO, T2 <: Int }( input::T1 , nb_atoms::T2)
   matrix=zeros(nb_atoms,nb_atoms)
   for i=1:nb_atoms
@@ -50,14 +55,15 @@ function readMatrix{ T1 <: IO, T2 <: Int }( input::T1 , nb_atoms::T2)
     return matrix
   else
     print("Problem while reading file")
-    return 
+    return
   end
 end
-
 function readMatrix{ T1 <: AbstractString }( file::T1 )
   file=open(file)
   nb_steps=Int(split(readline(file))[1])
   return matrix
 end
+export readMatrix
+#-------------------------------------------------------------------------------
 
 end

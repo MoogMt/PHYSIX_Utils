@@ -1,5 +1,7 @@
 include("atoms.jl")
 
+print("Loading Cell")
+
 module cell_mod
 
 # Import all import module
@@ -53,7 +55,6 @@ end
 Cell=Union{Cell_param, Cell_vec, Cell_matrix}
 #---------------------------------------------
 
-# Functions
 #---------------------------------------------------------------------------\
 function vec2matrix{ T1 <: Cell_vec}( vectors::T1 )
     matrix=Cell_matrix()
@@ -68,6 +69,10 @@ function vec2matrix{ T1 <: Cell_vec}( vectors::T1 )
     end
     return matrix
 end
+export vec2matrix
+#---------------------------------------------------------------------------\
+
+#-------------------------------------------------------------------------------
 function wrap{ T1 <: Real}( position::T1, length::T1 )
     sign=-1
     if position < 0
@@ -78,6 +83,7 @@ function wrap{ T1 <: Real}( position::T1, length::T1 )
     end
     return position
 end
+export Atom
 function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2 )
     # Computes cell parameters
     #--------------------------------------------
@@ -101,6 +107,7 @@ function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2
 
     return atoms
 end
+export wrap
 
 # Distance related functions
 #-------------------------------------------------------------------------------
@@ -114,19 +121,25 @@ function dist1D{ T1 <: Real, T2 <: Real, T3 <: Real }( x1::T1, x2::T2, a::T3 )
     end
     return dx*dx
 end
+export dist1D
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
 function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int }( atoms::T1, cell::T2, index1::T3, index2::T3 )
-    distance=0
+    dis=0
     for i=1:3
-        distance += dist1D( atoms.positions[index1,i],atoms.positions[index2,i], cell.length[i] )
+        dis += dist1D( atoms.positions[index1,i],atoms.positions[index2,i], cell.length[i] )
     end
-    return sqrt(distance)
+    return sqrt(dis)
 end
+
 function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param,  T3 <: Int, T4 <: Bool }( atoms::T1, cell::T2, index1::T3, index2::T3, wrap::T4 )
     if (  wrap )
         wrap(atoms,cell)
     end
     return distance(atoms,cell,index1,index2)
 end
+export distance
 #---------------------------------------------------------------------------
 
 #----------
@@ -138,6 +151,8 @@ function compressParams{ T1 <: Cell_param, T2 <: Real }( cell::T1, fracs::Vector
     end
     return cell
 end
+export compressParams
+#---------------------------------------------------------------------------
 function compressAtoms{ T1 <: atom_mod.AtomList, T2 <: Cell_param, T3 <: Real }( atoms::T1 , cell::T2, fracs::Vector{T3} )
     for i=1:size(atoms.names)[1]
         for j=1:3
@@ -146,6 +161,7 @@ function compressAtoms{ T1 <: atom_mod.AtomList, T2 <: Cell_param, T3 <: Real }(
     end
     return atoms
 end
+export compressAtoms
 #---------------------------------------------------------------------------
 
 end

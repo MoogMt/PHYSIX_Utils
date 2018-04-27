@@ -13,7 +13,6 @@ unit=0.0005
 # Sensibility to cut-off
 matrix=zeros(nb_atoms,nb_atoms)
 time=Vector{Real}(nb_steps)
-coord=zeros(4,nb_steps)
 #-------------------------------------
 # mat16=zeros(nb_atoms,nb_atoms)
 # mat17=zeros(nb_atoms,nb_atoms)
@@ -26,60 +25,39 @@ Base.write(file_matrix,string(nb_steps," ",nb_atoms,"\n"))
 #---------------------------------------------------------
 for k=1:nb_steps
     matrix=contact_matrix.buildMatrix( atoms[k] , cell)
-    coord16=0; coord17=0; coord175=0; coord18=0;
-    for i=1:nb_atoms
+    print("timestep: ",k,"\n")
+    coord=zeros(4)
+    for i=1:32
+        coordt=zeros(4)
         for j=1:nb_atoms
-            if matrix[i,j] < 1.6
-                # mat16[i,j]=1
-                # mat16[j,i]=1
-                # mat17[i,j]=1
-                # mat17[j,i]=1
-                # mat175[i,j]=1
-                # mat175[j,i]=1
-                # mat18[i,j]=1
-                # mat18[j,i]=1
-                coord16+=1
-                coord17+=1
-                coord175+=1
-                coord18+=1
-            elseif matrix[i,j] < 1.7
-                # mat17[i,j]=1
-                # mat17[j,i]=1
-                # mat175[i,j]=1
-                # mat175[j,i]=1
-                # mat18[i,j]=1
-                # mat18[j,i]=1
-                coord17+=1
-                coord175+=1
-                coord18+=1
-            elseif matrix[i,j] < 1.75
-                # mat175[i,j]=1
-                # mat175[j,i]=1
-                # mat18[i,j]=1
-                # mat18[j,i]=1
-                coord175+=1
-                coord18+=1
-            elseif matrix[i,j] < 1.8
-                # mat18[i,j]=1
-                # mat18[j,i]=1
-                coord18+=1
-            end
             Base.write(file_matrix,string(matrix[i,j]," "))
+            if i != j
+                if matrix[i,j] < 1.8
+                    coordt[1] += 1
+                    if matrix[i,j] < 1.75
+                        coordt[2] += 1
+                        if matrix[i,j] < 1.7
+                            coordt[3] += 1
+                            if matrix[i,j] < 1.6
+                                coordt[4] += 1
+                            end
+                        end
+                    end
+                end
+            end
         end
+        coord += coordt
         Base.write(file_matrix,"\n")
     end
     Base.write(file_matrix,"END\n")
     time[k]=k*stride*unit
-    coord[1,k]=coord16/nb_atoms
-    coord[2,k]=coord17/nb_atoms
-    coord[3,k]=coord175/nb_atoms
-    coord[4,k]=coord18/nb_atoms
-    Base.write(file_coord,string(k*stride*unit," ",coord16/nb_atoms," ",coord17/nb_atoms," ",coord175/nb_atoms," ",coord18/nb_atoms,"\n"))
+    coord /= 32
+    Base.write(file_coord,string(k*stride*unit," ",coord[1]," ",coord[2]," ",coord[3]," ",coord[4],"\n"))
 end
-#---------------------------------------------------------
-
 close(file_matrix)
 close(file_coord)
+#---------------------------------------------------------
+
 
 using PyPlot
 
@@ -88,7 +66,7 @@ plot(time,coord[1,:],".-")
 plot(time,coord[2,:],".-")
 plot(time,coord[3,:],".-")
 plot(time,coord[4,:],".-")
-legend(["rc=1.60A","rc=1.70A","rc=1.75A","rc=1.80A"])
+legend(["rc=1.80A","rc=1.75A","rc=1.70A","rc=1.60A"])
 xlabel("time (ps)")
 ylabel("Coordinance")
 
@@ -96,12 +74,60 @@ ylabel("Coordinance")
 include("contactmatrix.jl")
 
 #==============================================================================#
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
 file=open(string(folder,"distanceMatrix.dat"))
 line=split(readline(file))
 nb_steps=parse(Int64,line[1])
 nb_atoms=parse(Int64,line[2])
 for i=1:nb_steps
+
     matrix=contact_matrix.readMatrix(file,nb_atoms)
 end
 close(file)
 #==============================================================================#
+
+# Loading file
+include("contactmatrix.jl")
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.1/3000K/"
+file=string(folder,"TRAJEC_wrapped.xyz")
+atoms = filexyz.readFastFile(file)
+cell=cell_mod.Cell_param(9.1,9.1,9.1)
+nb_steps=size(atoms)[1]
+nb_atoms=size(atoms[1].names)[1]
+stride=1
+unit=0.0005
+coord=zeros(4,nb_steps)
+for k=1:nb_steps
+    for j=1:32
+        for i=1:96
+            if i != j
+                dist=cell_mod.distance(atoms[k],cell,j,i)
+                if dist < 1.8
+                    coord[1,k] += 1
+                    if dist < 1.75
+                        coord[2,k] += 1
+                        if dist < 1.70
+                            coord[3,k] += 1
+                            if dist < 1.6
+                                coord[4,k] += 1
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    coord[:,k] /= 32
+end
+
+
+using PyPlot
+figure(1)
+t=linspace(0, nb_steps*stride*unit, nb_steps)
+plot(t,coord[4,:],"-")
+plot(t,coord[3,:],"-")
+plot(t,coord[2,:],"-")
+plot(t,coord[1,:],"-")
+legend(["rc=1.6","rc=1.7","rc=1.75","rc=1.8"])
+xlabel("time(ps)")
+ylabel("Average Coordinance")

@@ -1,4 +1,4 @@
-include("cell.jl");
+include("cell.jl")
 
 module filexyz
 
@@ -24,14 +24,15 @@ function getNbSteps{ T1 <: AbstractString }( file::T1)
     return 0
   end
 end
+export getNbSteps
 
 function readFastFile{ T1 <: AbstractString }( file::T1 )
   #--------------
   # Reading file
   #----------------------
-  file=open(file);
-  lines=readlines(file);
-  close(file);
+  file2=open(file);
+  lines=readlines(file2);
+  close(file2);
   #------------------------
 
   #------------------------
@@ -57,9 +58,11 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
   end
   return sim
 end
+export readFastFile
+#--------------------------------------------------------------------------------
 
+#---------------------------------------------------------------------------------
 function write{ T1 <: IO, T2 <: atom_mod.AtomList }( file_handle::T1, atoms::T2 )
-
   for i=1:size( atoms.names )[1]
     Base.write( file_handle, string( atoms.names[i] , " "  ) )
     for j=1:3
@@ -68,11 +71,8 @@ function write{ T1 <: IO, T2 <: atom_mod.AtomList }( file_handle::T1, atoms::T2 
     Base.write( file_handle, "\n" )
   end
 end
-
 function write{ T1 <: AbstractString, T2 <: atom_mod.AtomList }( file::T1, atoms::T2 )
-
   out=open(file,"w")
-
   for i=1:size(atoms.names)[1]
     Base.write(out, string( atoms.names[i]," " ) )
     for j=1:3
@@ -80,10 +80,8 @@ function write{ T1 <: AbstractString, T2 <: atom_mod.AtomList }( file::T1, atoms
     end
     Base.write(out,"\n")
   end
-
   close(out)
 end
-
 function write{ T1 <: AbstractString, T2 <: atom_mod.AtomList }( file::T1, atoms_blocks::Vector{T2} )
   f=open(file,"w")
   for atoms in atoms_blocks
@@ -91,5 +89,7 @@ function write{ T1 <: AbstractString, T2 <: atom_mod.AtomList }( file::T1, atoms
   end
   close(file)
 end
+export write
+#---------------------------------------------------------------------------------
 
 end
