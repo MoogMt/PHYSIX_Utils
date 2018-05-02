@@ -66,134 +66,95 @@ nb_atoms=size(atoms[1].names)[1]
 stride=5
 unit=0.0005
 
-function writeMatrix{ T1 <: IO , T2 <: Real }( file::T1, matrix::Array{T2} )
-    nb_atoms=size(matrix)[1]
-    for i=1:nb_atoms
-        for j=1:nb_atoms
-            write(file, string(matrix[i,j]," ") )
-        end
-        write(file,"\n")
-    end
-    return
-end
-stride2=2
+
+stride2=1
 file_matrix=open(string(folder,"coord18.dat"),"w")
 coord_check=zeros(nb_atoms)
-time_record=[]
-time_current=zeros(nb_atoms)
+time_hist=[]
+timeC_hist=[]
+timeO_hist=[]
+timeCother_hist=[]
+timeC2_hist=[]
+timeC3_hist=[]
+timeC4_hist=[]
+timeO1_hist=[]
+timeO2_hist=[]
+timeOother_hist=[]
+time=zeros(nb_atoms)
 for i=1:stride2:nb_steps
     coord=zeros(nb_atoms)
     write(file_matrix,string(i*stride2*stride*unit," "))
+    # Computing BondMatrix
     matrix18=contact_matrix.computeMatrix(atoms[i],cell,1.8)
-    for i=1:nb_atoms
-        coord[i] = 0
-        for j=1:nb_atoms
-            coord[i] += 1
+    # Computing coordinance
+    #---------------------------
+    for j=1:nb_atoms
+        coord[j] = 0
+        for k=1:nb_atoms
+            if j != k
+                if matrix18[j,k] > 0.0000001
+                    coord[j] += 1
+                end
+            end
         end
-        write(file_matrix,string(coord[i]," "))
+        write(file_matrix,string(coord[j]," "))
     end
+    #---------------------------
+    # Computing averages
+    #----------------------------------------------------------------------------
     avgC=0
     avgO=0
-    for i=1:32
-        avgC += coord[i]
+    for j=1:32
+        avgC += coord[j]
     end
+    avgAll=avgC
     avgC /= 32
-    for i=33:96
-        avgO += coord[i]
+    for j=33:96
+        avgO += coord[j]
     end
+    avgAll += avgO
     avgO /= 64
-    write(file_matrix,string(avgC," ",avgO," "))
-    write(file_matrix,"\n")
+    avgAll /= nb_atoms
+    write(file_matrix,string(avgC," ",avgO," ",avgAll,"\n"))
+    #---------------------------------------------------------------------------
     if i > 1
-
+        for j=1:nb_atoms
+            if abs(coord[j] - coord_check[j]) > 0.0000001
+                time[j] += 1
+                time2=time[j]*stride2*stride*unit
+                if j < 33
+                    push!(timeC_hist,time2)
+                    if coord_check[j] == 2
+                        push!(timeC2_hist,time2)
+                    elseif coord_check[j] == 3
+                        push!(timeC3_hist,time2)
+                    elseif coord_check[j] == 4
+                        push!(timeC4_hist,time2)
+                    else
+                        push!(timeCother_hist,time2)
+                    end
+                else
+                    push!(timeO_hist,time2)
+                    if coord_check[j] == 1
+                        push!(timeO1_hist,time2)
+                    elseif coord_check[j] == 2
+                        push!(timeO2_hist,time2)
+                    else
+                        push!(timeOother_hist,time2)
+                    end
+                end
+                push!(time_hist,time2)
+                time[j] = 0
+            else
+                time[j] += 1
+            end
+        end
     end
     coord_check=coord
+    print("step:",i,"\n")
 end
 close(file_matrix)
 
-
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-coord=zeros(4,4,nb_steps)
-file1=open(string(folder,"007_matrix_18.dat"),"w")
-file2=open(string(folder,"007_matrix_175.dat"),"w")
-file3=open(string(folder,"007_matrix_17.dat"),"w")
-file4=open(string(folder,"007_matrix_16.dat"),"w")
-write(file1,string(nb_steps," ",nb_atoms,"\n"))
-write(file2,string(nb_steps," ",nb_atoms,"\n"))
-write(file3,string(nb_steps," ",nb_atoms,"\n"))
-write(file4,string(nb_steps," ",nb_atoms,"\n"))
-matrix_bonds=zeros(nb_atoms,nb_atoms,4)
-for k=1:nb_steps
-    matrix_bonds=zeros(nb_atoms,nb_atoms,4)
-    for j=1:96
-        #-----------------------------------------------------------------------
-        n_coord=zeros(4)
-        # Loop over all oxygens
-        for i=1:96
-            #========================#
-            # Distance and cut-off
-            #===============================================#
-            if i != j
-                dist=cell_mod.distance(atoms[k],cell,j,i)
-                if dist < 1.8
-                    matrix_bonds[i,j,1]=1
-                    matrix_bonds[j,i,1]=1
-                    n_coord[1] += 1
-                    if dist < 1.75
-                        matrix_bonds[i,j,2]=1
-                        matrix_bonds[j,i,2]=1
-                        n_coord[2] += 1
-                        if dist < 1.70
-                            matrix_bonds[i,j,3]=1
-                            matrix_bonds[j,i,3]=1
-                            n_coord[3] += 1
-                            if dist < 1.6
-                                matrix_bonds[i,j,4]=1
-                                matrix_bonds[j,i,4]=1
-                                n_coord[4] += 1
-                            end
-                        end
-                    end
-                end
-            end
-            #===============================================#
-        end
-        #-----------------------------------------------------------------------
-        # Computing coordinance
-        #-----------------------------------------------------------------------
-        for p=1:4
-            if n_coord[p] == 2
-                coord[p,1,k] += 1
-            elseif n_coord[p] == 3
-                coord[p,2,k] += 1
-            elseif n_coord[p] == 4
-                coord[p,3,k] += 1
-            else
-                coord[p,4,k] += 1
-            end
-        end
-    end
-    #-----------------------------------------------------------------------
-    # Writting matrix to file
-    #----------------------------------------------------------------------
-    for i=1:nb_atoms
-        for j=1:nb_atoms
-            write(file1,string(matrix_bonds[i,j,1]," "))
-            write(file1,string(matrix_bonds[i,j,2]," "))
-            write(file1,string(matrix_bonds[i,j,3]," "))
-            write(file1,string(matrix_bonds[i,j,4]," "))
-        end
-        write(file1,"\n")
-        write(file2,"\n")
-        write(file3,"\n")
-        write(file4,"\n")
-    end
-    #----------------------------------------------------------------------
-end
-close(file1)
-close(file2)
-close(file3)
-close(file4)
 
 using PyPlot
 figure(1)

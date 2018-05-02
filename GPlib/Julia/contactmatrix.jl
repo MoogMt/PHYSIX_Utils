@@ -122,5 +122,18 @@ function computeMatrix{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <
   end
   return matrix
 end
+export computeMatrix
+
+function writeMatrix{ T1 <: IO , T2 <: Real }( file::T1, matrix::Array{T2} )
+    nb_atoms=size(matrix)[1]
+    for i=1:nb_atoms
+        for j=1:nb_atoms
+            write(file, string(matrix[i,j]," ") )
+        end
+        write(file,"\n")
+    end
+    return
+end
+export writeMatrix
 
 end
