@@ -61,9 +61,66 @@ end
 function readMatrix{ T1 <: AbstractString }( file::T1 )
   file=open(file)
   nb_steps=Int(split(readline(file))[1])
-  return matrix
+  close(file)
+  return nb_steps
 end
 export readMatrix
 #-------------------------------------------------------------------------------
+
+# Test purpose only, really bad at doing anything otherwise
+function readMatrix{ T1<: AbstractString, T2<: Int }( file::T1, step::T2 )
+  file=open(file)
+  line=split(readline(file))
+
+  nb_steps=parse(Int,line[1]);
+  nb_atoms=parse(Int,line[2]);
+  if nb_steps < step
+    return false
+  end
+  for i=1:step
+    for j=1:nb_atoms
+      line=readline(file)
+    end
+  end
+  matrix=zeros(nb_atoms,nb_atoms)
+  for i=1:nb_atoms
+    line=split(readline(file))
+    for j=1:nb_atoms
+      matrix[i,j]=parse(Float64,line[j])
+    end
+  end
+  close(file)
+  return matrix
+end
+export readMatrix
+
+function getBonded{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Int , T4 <: Real }( atoms::T1, cell::T2, index::T3 , cut_off::T4 )
+  nb_atoms=size(atoms.names)[1]
+  for i=1:nb_atoms
+    dist=cell_mod.distance(atoms,cell,index,i)
+    if dist < cut_off
+      print("Bond with ", i, "\n");
+    end
+  end
+  return
+end
+export getBonded
+
+function computeMatrix{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Real }( atoms::T1, cell::T2 , cut_off::T3 )
+  nb_atoms=size(atoms.names)[1]
+  matrix=zeros(nb_atoms,nb_atoms)
+  for i=1:nb_atoms
+    for j=1:nb_atoms
+      if i != j
+        dist=cell_mod.distance(atoms,cell,i,j)
+        if dist < cut_off
+          matrix[i,j]=1
+          matrix[j,i]=1
+        end
+      end
+    end
+  end
+  return matrix
+end
 
 end
