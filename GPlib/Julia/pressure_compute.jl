@@ -5,6 +5,10 @@ using PyPlot
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
+N=96
+kb=1.380648*10^-23.
+T=3000
+
 files=["8.82","9.0","9.05","9.1","9.15","9.2","9.25","9.3","9.35","9.375","9.4","9.5","9.8"]
 V=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8]
 # for i=1:size(V)[1]
@@ -15,7 +19,7 @@ dP=Vector{Real}(size(files)[1])
 for i=1:size(files)[1]
     local_file=string(folder,files[i],"/3000K/STRESS")
     p=pressure.readPressureCPMD( local_file , false , 1)
-    P[i]=statistics.simpleAverage(p)
+    P[i]=statistics.simpleAverage(p)+N*kb*T/(V*10^-10.)^3.
     dP[i]=sqrt(statistics.simpleMoment(p,2))
 end
 

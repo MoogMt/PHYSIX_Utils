@@ -4,6 +4,7 @@ include("contactmatrix.jl")
 Volumes=["8.82","9.0","9.05","9.1","9.2","9.3","9.4","9.8"]
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
+folder="/home/moogmt/"
 file=string(folder,"TRAJEC_wrapped.xyz")
 atoms = filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
@@ -11,6 +12,48 @@ nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 stride=5
 unit=0.0005
+
+atoms=atoms[1]
+
+# Creating bond matrix
+matrix_bonds=zeros(nb_atoms,nb_atoms)
+for i=1:nb_atoms
+    for j=i+1:nb_atoms
+        if cell_mod.distance(atoms,cell,i,j) < 1.8
+            matrix_bonds[i,j]=1
+            matrix_bonds[j,i]=1
+        end
+    end
+end
+# Making molecules from bond matrix
+matrix_molecules=zeros(nb_atoms,nb_atoms)
+current_mol=0
+nb_mol=0
+for i=1:nb_atoms
+    current_mol=0
+    # Checking if atom is affected
+    for j=1:nb_atoms
+        if matrix_molecules[i,j] > 0
+            current_mol=matrix_molecules[i,j]
+            break
+        end
+    end
+    # If no molecule, set
+    if abs(current_mol) < 0.001
+        nb_mol += 1
+        current_mol= nb_mol
+    end
+    # Loop over each atoms
+    for j=i+1:nb_atoms
+        if matrix_bonds[i,j] > 0
+            matrix_molecules[i,j] = current_mol
+            matrix_molecules[j,i] = current_mol
+        end
+    end
+end
+
+f#
+
 
 stride2=1
 file_matrix=open(string(folder,"coord18.dat"),"w")
