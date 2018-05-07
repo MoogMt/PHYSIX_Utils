@@ -4,7 +4,7 @@ include("contactmatrix.jl")
 Volumes=["8.82","9.0","9.05","9.1","9.2","9.3","9.4","9.8"]
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-folder="/home/moogmt/"
+#folder="/home/moogmt/"
 file=string(folder,"TRAJEC_wrapped.xyz")
 atoms = filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
@@ -13,10 +13,36 @@ nb_atoms=size(atoms[1].names)[1]
 stride=5
 unit=0.0005
 
-file=open("atoms_mol.dat","w+")
-file2=open("size_mol","w+")
-file_avg_size=open("avg_size_mol","w+")
-for i=step:size(atoms)[1]
+function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( matrix::Array{T1}, list::Vector{T2}, index::T3 )
+    if list[index] > 0
+        return mol_index, false
+    end
+    for i=1:size(matrix)[1]
+
+    end
+    return mol_index, true
+end
+
+function groupNeighbours{ T1 <: Real }( bond_matrix::Array{T1} )
+    nb_atoms=size(bond_matrix)[1]
+    mol_index=zeros(nb_atoms)
+    nb_mol=0
+    for i=1:nb_atoms
+        mol_index, check =searchGroupMember(bond_matrix,mol_index,i)
+        if check
+            nb_mol += 1
+        end
+    end
+    return nb_mol, mol_index
+end
+
+file=open(string(folder,"atoms_mol.dat"),"w")
+file2=open(string(folder,"size_mol"),"w")
+file_avg_size=open(string(folder,"avg_size_mol"),"w")
+# for step=1:nb_steps
+step=1
+    percent=step/nb_steps
+    print(string("Progres: ",percent*100," % \n"))
     # Creating bond matrix
     matrix_bonds=zeros(nb_atoms,nb_atoms)
     for i=1:nb_atoms
@@ -27,69 +53,10 @@ for i=step:size(atoms)[1]
             end
         end
     end
-    # Making molecules from bond matrix
-    matrix_molecules=zeros(nb_atoms,nb_atoms)
-    current_mol=0
-    nb_mol=0
-    for i=1:nb_atoms
-        current_mol=0
-        # Checking if atom is affected
-        for j=1:nb_atoms
-            if matrix_molecules[i,j] > 0
-                current_mol=matrix_molecules[i,j]
-                break
-            end
-        end
-        # If no molecule, set
-        if abs(current_mol) < 0.001
-            nb_mol += 1
-            current_mol= nb_mol
-        end
-        # Loop over each atoms
-        for j=i+1:nb_atoms
-            if matrix_bonds[i,j] > 0
-                matrix_molecules[i,j] = current_mol
-                matrix_molecules[j,i] = current_mol
-            end
-        end
-    end
 
-    # Extracting molecules from matrix
-    index=zeros(nb_atoms)
-    sizes=zeros(nb_mol)
-    avg_size=0
-    for mol=1:nb_mol
-        for i=1:nb_atoms
-            for j=i+1:nb_atoms
-                if abs(matrix_molecules[i,j]-mol) < 0.001
-                    index[i]=mol
-                    index[j]=mol
-                end
-            end
-        end
-        size2 = 0
-        for i=1:nb_atoms
-            if index[i] == mol
-                size2 +=1
-            end
-        end
-        sizes[i] = size2
-        avg_size += size2
-    end
 
-    avg_size /= nb_mol
-    write(file_avg_size,string(step," ",avg_size,"\n"))
 
-    write(file,string(step," ",nb_atoms," ",nb_mol,"\n"))
-    for i=1:nb_atoms
-        write(file,string(i," ",index[i]))
-    end
-
-    write(file2,string(step," ",nb_atoms," ",nb_mol,"\n"))
-    for i=1:nb_mol
-        write(file2,string(step," ",sizes[i],"\n"))
-    end
-end
+# end
 close(file)
 close(file2)
 close(file_avg_size)
