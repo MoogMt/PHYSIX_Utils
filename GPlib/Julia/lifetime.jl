@@ -13,32 +13,21 @@ nb_atoms=size(atoms[1].names)[1]
 stride=5
 unit=0.0005
 
-function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( matrix::Array{T1}, list::Vector{T2}, index::T3 )
-    if list[index] > 0
-        return mol_index, false
-    end
+function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( matrix::Array{T1}, list::Vector{T2}, index::T3 , group_nb::T4 )
     for i=1:size(matrix)[1]
-
-    end
-    return mol_index, true
-end
-
-function groupNeighbours{ T1 <: Real }( bond_matrix::Array{T1} )
-    nb_atoms=size(bond_matrix)[1]
-    mol_index=zeros(nb_atoms)
-    nb_mol=0
-    for i=1:nb_atoms
-        mol_index, check =searchGroupMember(bond_matrix,mol_index,i)
-        if check
-            nb_mol += 1
+        if matrix[index,i] > 0
+            if list[i] == 0
+                list[i]=nb_mol
+                list=searchGroupMember(matrix,list,i,nb_mol)
+            end
         end
     end
-    return nb_mol, mol_index
+    return list
 end
 
-file=open(string(folder,"atoms_mol.dat"),"w")
-file2=open(string(folder,"size_mol"),"w")
-file_avg_size=open(string(folder,"avg_size_mol"),"w")
+# file=open(string(folder,"atoms_mol.dat"),"w")
+# file2=open(string(folder,"size_mol"),"w")
+# file_avg_size=open(string(folder,"avg_size_mol"),"w")
 # for step=1:nb_steps
 step=1
     percent=step/nb_steps
@@ -54,12 +43,19 @@ step=1
         end
     end
 
+    nb_mol=0
+    mol_index=zeros(nb_atoms)
+    for i=1:nb_atoms
+        if mol_index[i] == 0
+            nb_mol += 1
+            mol_index=searchGroupMember(matrix_bonds,mol_index,i,nb_mol)
+        end
+    end
 
-
-# end
-close(file)
-close(file2)
-close(file_avg_size)
+# # end
+# close(file)
+# close(file2)
+# close(file_avg_size)
 
 # stride2=1
 # file_matrix=open(string(folder,"coord18.dat"),"w")
