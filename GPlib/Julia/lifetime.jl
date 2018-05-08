@@ -1,6 +1,5 @@
 include("contactmatrix.jl")
 
-
 Volumes=["8.82","9.0","9.05","9.1","9.2","9.3","9.4","9.8"]
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
@@ -17,8 +16,8 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     for i=1:size(matrix)[1]
         if matrix[index,i] > 0
             if list[i] == 0
-                list[i]=nb_mol
-                list=searchGroupMember(matrix,list,i,nb_mol)
+                list[i]=group_nb
+                list=searchGroupMember(matrix,list,i,group_nb)
             end
         end
     end
@@ -27,6 +26,7 @@ end
 
 file=open(string(folder,"atoms_mol.dat"),"w")
 sizes=[]
+sizemax=[]
 for step=1:nb_steps
     percent=step/nb_steps
     print(string("Progres: ",percent*100," % \n"))
@@ -46,10 +46,10 @@ for step=1:nb_steps
     for i=1:nb_atoms
         if mol_index[i] == 0
             nb_mol += 1
-            mol_index=searchGroupMember(matrix_bonds,mol_index,i,nb_mol)
+            mol_index = searchGroupMember(matrix_bonds,mol_index,i,nb_mol)
         end
     end
-
+    size_check=0
     size_avg=0
     for i=1:nb_mol
         write(file,string(step," ",nb_mol," "))
@@ -63,22 +63,45 @@ for step=1:nb_steps
         end
         write(file,string(size," \n"))
         push!(sizes,size)
+        if size > size_check
+            size_check=size
+        end
         size_avg += size
     end
+    push!(sizemax,size_check)
 end
 close(file)
+
+using PyPlot
+plot(sizemax,"r")
+xlabel("time (step)")
+ylabel("size of largest molecule (atoms)")
 
 file=open(string(folder,"atoms_mol.dat"))
 lines=readlines(file)
 close(file)
 
+# Counting number of apparition of molecule per size
 sizes=unique(sizes)
+sizeVector=zeros(size(sizes)[1])
 
-for i=1:size(sizes)[1]
-    for j=1:size(lines)[1]
-        size_mol=parse(Int,lines[j])
-        if size_mol == sizes[i]
-            
+for index=1:size(sizes)[1]
+    print("size: ", sizes[index], "\n")
+    for i=1:size(lines)[1]
+        line=split(lines[i])
+        size_loc=parse(Int32,line[size(line)[1]])
+        if sizes[index] == size_loc
+            sizeVector[index] += 1
         end
     end
 end
+
+check2=sizeVector
+for i=1:size(sizeVector)[1]
+    sizeVector[i] = sizeVector[i]*sizes[i]
+end
+
+figure(2)
+plot(sizes,check2,"r.")
+xlabel("size (atoms)")
+ylabel("Number")
