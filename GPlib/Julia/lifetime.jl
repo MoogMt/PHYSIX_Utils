@@ -96,12 +96,16 @@ for index=1:size(sizes)[1]
     end
 end
 
-check2=sizeVector
-for i=1:size(sizeVector)[1]
-    sizeVector[i] = sizeVector[i]*sizes[i]
-end
-
 figure(2)
+plot(sizes,sizeVector,"r.")
+xlabel("size (atoms)")
+ylabel("Number")
+
+check2=zeros(size(sizeVector)[1])
+for i=1:size(sizes)[1]
+    check2[i] = sizes[i]*sizeVector[i]
+end
+figure(3)
 plot(sizes,check2,"r.")
 xlabel("size (atoms)")
 ylabel("Number")
