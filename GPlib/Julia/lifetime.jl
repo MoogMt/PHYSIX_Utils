@@ -3,7 +3,7 @@ include("contactmatrix.jl")
 Volumes=["8.82","9.0","9.05","9.1","9.2","9.3","9.4","9.8"]
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-folder="/home/moogmt/"
+#folder="/home/moogmt/"
 file=string(folder,"TRAJEC_wrapped.xyz")
 atoms = filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
@@ -85,15 +85,19 @@ close(file)
 sizes=unique(sizes)
 sizeVector=zeros(size(sizes)[1])
 
+
 for index=1:size(sizes)[1]
     print("size: ", sizes[index], "\n")
+    molecule_data=Array(sizes[i]+1,0)
     for i=1:size(lines)[1]
         line=split(lines[i])
         size_loc=parse(Int32,line[size(line)[1]])
         if sizes[index] == size_loc
+            molecule_local=Vector{}
             sizeVector[index] += 1
         end
     end
+    used=zeros(sizeVector[index])
 end
 
 figure(2)
@@ -102,10 +106,22 @@ xlabel("size (atoms)")
 ylabel("Number")
 
 check2=zeros(size(sizeVector)[1])
+sum=0
 for i=1:size(sizes)[1]
     check2[i] = sizes[i]*sizeVector[i]
+    sum += sizes[i]*sizeVector[i]
 end
+check2 /= sum
+
 figure(3)
 plot(sizes,check2,"r.")
 xlabel("size (atoms)")
-ylabel("Number")
+ylabel("Frequency")
+
+for i=1:size(lines)[1]
+    line=split(lines[i])
+    size_loc=parse(Int32,line[size(line)[1]])
+    if 3 == size_loc
+        sizeVector[index] += 1
+    end
+end
