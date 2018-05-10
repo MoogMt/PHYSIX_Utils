@@ -72,32 +72,39 @@ for step=1:nb_steps
 end
 close(file)
 
+# Clearing memory
+atoms=[]
+
+# Plotting evolution of largest molecule as a function of time
 using PyPlot
 plot(sizemax,"r")
 xlabel("time (step)")
 ylabel("size of largest molecule (atoms)")
 
+# Reading molecule file
 file=open(string(folder,"atoms_mol.dat"))
 lines=readlines(file)
 close(file)
 
-# Counting number of apparition of molecule per size
+# Keeping vectors to do size
 sizes=unique(sizes)
 sizeVector=zeros(size(sizes)[1])
-
-
 for index=1:size(sizes)[1]
-    print("size: ", sizes[index], "\n")
-    molecule_data=Array(sizes[i]+1,0)
+    print(string("progress: ", index/size(sizes)[1]*100, " %\n"))
+    molecule_data=Array(sizes[index]+2,0)
     for i=1:size(lines)[1]
         line=split(lines[i])
         size_loc=parse(Int32,line[size(line)[1]])
         if sizes[index] == size_loc
-            molecule_local=Vector{}
+            molecule_local=Array{Real}(size[index]+1)
+            molecule_local[1]=parse(Int32,line[1])
+            for j=1:size_loc
+                molecule_local[j+1]=parse(Int32,line[j+3])
+            end
+            molecule_data=vcat(molecule_data,molecule_local)
             sizeVector[index] += 1
         end
     end
-    used=zeros(sizeVector[index])
 end
 
 figure(2)
