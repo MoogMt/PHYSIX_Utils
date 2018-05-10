@@ -91,6 +91,7 @@ sizes=unique(sizes)
 sizeVector=zeros(size(sizes)[1])
 for index=1:size(sizes)[1]
     print(string("progress: ", index/size(sizes)[1]*100, " %\n"))
+    # We get the size
     molecule_data=Array(sizes[index]+2,0)
     for i=1:size(lines)[1]
         line=split(lines[i])
@@ -101,9 +102,14 @@ for index=1:size(sizes)[1]
             for j=1:size_loc
                 molecule_local[j+1]=parse(Int32,line[j+3])
             end
+            molecule_local[size(molecule_local)[1]]=0
             molecule_data=vcat(molecule_data,molecule_local)
             sizeVector[index] += 1
         end
+    end
+    lifetimes=[]
+    nb_molecules=size(molecules_data)[2]
+    for i=1:nb_molecules
     end
 end
 
