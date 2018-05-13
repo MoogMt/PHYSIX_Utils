@@ -1,4 +1,6 @@
-include("cell.jl")
+if ! isdefined(:cell_mod)
+  include("cell.jl")
+end
 
 module filexyz
 

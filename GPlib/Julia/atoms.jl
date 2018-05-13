@@ -1,4 +1,6 @@
-include("utils.jl")
+if ! isdefined(:utils)
+    include("utils.jl")
+end
 
 module atom_mod
 

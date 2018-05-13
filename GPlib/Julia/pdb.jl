@@ -1,4 +1,6 @@
-include("cell.jl");
+if ! isdefined(:cell_mod)
+  include("cell.jl")
+end
 
 module pdb
 
@@ -79,6 +81,7 @@ function readStep{ T1 <: AbstractString }( file::T1 )
 end
 
 #-------------------------------------------------------------------------------
+
 function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
 
   out=open(file,"w")
@@ -143,8 +146,8 @@ function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Ab
 
   out=open(file,"w")
 
-  a,b,c = string(cell.a), string(cell.b), string(cell.c)
-  alpha, beta, gamma = string(cell.alpha), string(cell.beta), string(cell.gamma)
+  a,b,c = string(cell.length[1]), string(cell.length[2]), string(cell.length[3])
+  alpha, beta, gamma = string(cell.angles[1]), string(cell.angles[2]), string(cell.angles[3])
 
   cryst1=string("CRYST1 ",a)
   cryst1=utils.spaces(cryst1,16-length(cryst1))
@@ -166,17 +169,17 @@ function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Ab
 
   Base.write(out,string("MODEL X\n"))
 
-  nb_atoms = size(atoms.atom_names)[1]
+  nb_atoms = size(atoms.names)[1]
   for i=1:nb_atoms
     atom="ATOM"
     atom=utils.spaces(atom,7-length(atom))
-    atom=string(atom,atoms.atom_index[i])
+    atom=string(atom,atoms.index[i])
     atom=utils.spaces(atom,13-length(atom))
-    atom=string(atom,atoms.atom_names[i])
+    atom=string(atom,atoms.names[i])
     atom=utils.spaces(atom,23-length(atom))
     atom=string(atom,"XXX")
     atom=utils.spaces(atom,27-length(atom))
-    atom=string(atom,atoms.mol_index[i])
+    atom=string(atom,"XXX")
     atom=utils.spaces(atom,31-length(atom))
     atom=string(atom,round(atoms.positions[i,1],3))
     atom=utils.spaces(atom,39-length(atom))
@@ -188,7 +191,7 @@ function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Ab
     atom=utils.spaces(atom,61-length(atom))
     atom=string(atom,"0.00")
     atom=utils.spaces(atom,77-length(atom))
-    atom=string(atom,atoms.atom_names[i])
+    atom=string(atom,atoms.names[i])
     atom=string(atom,"\n")
     Base.write(out,atom)
   end

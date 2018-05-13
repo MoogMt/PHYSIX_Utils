@@ -1,4 +1,6 @@
-include("atoms.jl")
+if ( ! isdefined(:atom_mod) )
+    include("atoms.jl")
+end
 
 module cell_mod
 
