@@ -2,9 +2,11 @@ include("cell.jl");
 
 module pdb
 
-importall atom_mod
-importall cell_mod
-importall utils
+export getNbSteps, readStep, writeStep
+
+using utils
+using atom_mod
+using cell_mod
 
 function getNbSteps{ T1 <: AbstractString }( file::T1 )
   count=0
@@ -28,7 +30,6 @@ function getNbSteps{ T1 <: AbstractString }( file::T1 )
     return 0
   end
 end
-export getNbSteps
 
 function readStep{ T1 <: AbstractString }( file::T1 )
   #--------------
@@ -76,7 +77,6 @@ function readStep{ T1 <: AbstractString }( file::T1 )
 
   return atoms, cell
 end
-export readStep
 
 #-------------------------------------------------------------------------------
 function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
@@ -139,6 +139,65 @@ function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <:
 
   return
 end
-export writeStep
+function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
+
+  out=open(file,"w")
+
+  a,b,c = string(cell.a), string(cell.b), string(cell.c)
+  alpha, beta, gamma = string(cell.alpha), string(cell.beta), string(cell.gamma)
+
+  cryst1=string("CRYST1 ",a)
+  cryst1=utils.spaces(cryst1,16-length(cryst1))
+  cryst1=string(cryst1,b)
+  cryst1=utils.spaces(cryst1,25-length(cryst1))
+  cryst1=string(cryst1,c)
+  cryst1=utils.spaces(cryst1,34-length(cryst1))
+  cryst1=string(cryst1,alpha)
+  cryst1=utils.spaces(cryst1,41-length(cryst1))
+  cryst1=string(cryst1,beta)
+  cryst1=utils.spaces(cryst1,48-length(cryst1))
+  cryst1=string(cryst1,gamma)
+  cryst1=utils.spaces(cryst1,56-length(cryst1))
+  cryst1=string(cryst1,"P 1")
+  cryst1=utils.spaces(cryst1,67-length(cryst1))
+  cryst1=string(cryst1,"1")
+  cryst1=string(cryst1,"\n")
+  Base.write(out,cryst1)
+
+  Base.write(out,string("MODEL X\n"))
+
+  nb_atoms = size(atoms.atom_names)[1]
+  for i=1:nb_atoms
+    atom="ATOM"
+    atom=utils.spaces(atom,7-length(atom))
+    atom=string(atom,atoms.atom_index[i])
+    atom=utils.spaces(atom,13-length(atom))
+    atom=string(atom,atoms.atom_names[i])
+    atom=utils.spaces(atom,23-length(atom))
+    atom=string(atom,"XXX")
+    atom=utils.spaces(atom,27-length(atom))
+    atom=string(atom,atoms.mol_index[i])
+    atom=utils.spaces(atom,31-length(atom))
+    atom=string(atom,round(atoms.positions[i,1],3))
+    atom=utils.spaces(atom,39-length(atom))
+    atom=string(atom,round(atoms.positions[i,2],3))
+    atom=utils.spaces(atom,47-length(atom))
+    atom=string(atom,round(atoms.positions[i,3],3))
+    atom=utils.spaces(atom,55-length(atom))
+    atom=string(atom,"0.00")
+    atom=utils.spaces(atom,61-length(atom))
+    atom=string(atom,"0.00")
+    atom=utils.spaces(atom,77-length(atom))
+    atom=string(atom,atoms.atom_names[i])
+    atom=string(atom,"\n")
+    Base.write(out,atom)
+  end
+
+  Base.write(out,"END\n")
+
+  close(out)
+
+  return
+end
 
 end

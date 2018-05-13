@@ -5,6 +5,8 @@ print("Loading Contact Matrix")
 
 module contact_matrix
 
+export buildMatrix, readMatrix, getBonded, computeMatrix, writeMatrix
+
 using atom_mod
 using cell_mod
 
@@ -39,7 +41,6 @@ function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param, T3 <:
   end
   return matrix
 end
-export buildMatrix
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
@@ -64,10 +65,6 @@ function readMatrix{ T1 <: AbstractString }( file::T1 )
   close(file)
   return nb_steps
 end
-export readMatrix
-#-------------------------------------------------------------------------------
-
-# Test purpose only, really bad at doing anything otherwise
 function readMatrix{ T1<: AbstractString, T2<: Int }( file::T1, step::T2 )
   file=open(file)
   line=split(readline(file))
@@ -92,7 +89,6 @@ function readMatrix{ T1<: AbstractString, T2<: Int }( file::T1, step::T2 )
   close(file)
   return matrix
 end
-export readMatrix
 
 function getBonded{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Int , T4 <: Real }( atoms::T1, cell::T2, index::T3 , cut_off::T4 )
   nb_atoms=size(atoms.names)[1]
@@ -104,7 +100,6 @@ function getBonded{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: I
   end
   return
 end
-export getBonded
 
 function computeMatrix{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Real }( atoms::T1, cell::T2 , cut_off::T3 )
   nb_atoms=size(atoms.names)[1]
@@ -122,7 +117,6 @@ function computeMatrix{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <
   end
   return matrix
 end
-export computeMatrix
 
 function writeMatrix{ T1 <: IO , T2 <: Real }( file::T1, matrix::Array{T2} )
     nb_atoms=size(matrix)[1]
@@ -134,6 +128,5 @@ function writeMatrix{ T1 <: IO , T2 <: Real }( file::T1, matrix::Array{T2} )
     end
     return
 end
-export writeMatrix
 
 end

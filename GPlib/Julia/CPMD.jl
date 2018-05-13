@@ -1,5 +1,7 @@
 module CPMD
 
+export readEnergy, readPressure, readStress
+
 function readEnergy( file_name:: AbstractString )
     #--------------
     # Reading file

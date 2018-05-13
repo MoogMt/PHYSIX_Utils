@@ -1,8 +1,10 @@
 include("atoms.jl")
 
-print("Loading Cell")
-
 module cell_mod
+
+export Cell_param, Cell_vec, Cell_matrix
+export Cell
+export vec2matrix, wrap, dist1D, distance, compressParams, compressAtoms
 
 # Import all import module
 #----------------------------
@@ -69,7 +71,6 @@ function vec2matrix{ T1 <: Cell_vec}( vectors::T1 )
     end
     return matrix
 end
-export vec2matrix
 #---------------------------------------------------------------------------\
 
 #-------------------------------------------------------------------------------
@@ -83,7 +84,6 @@ function wrap{ T1 <: Real}( position::T1, length::T1 )
     end
     return position
 end
-export Atom
 function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2 )
     # Computes cell parameters
     #--------------------------------------------
@@ -107,7 +107,7 @@ function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2
 
     return atoms
 end
-export wrap
+#-------------------------------------------------------------------------------
 
 # Distance related functions
 #-------------------------------------------------------------------------------
@@ -121,7 +121,6 @@ function dist1D{ T1 <: Real, T2 <: Real, T3 <: Real }( x1::T1, x2::T2, a::T3 )
     end
     return dx*dx
 end
-export dist1D
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
@@ -132,14 +131,12 @@ function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int }( atom
     end
     return sqrt(dis)
 end
-
 function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param,  T3 <: Int, T4 <: Bool }( atoms::T1, cell::T2, index1::T3, index2::T3, wrap::T4 )
     if (  wrap )
         wrap(atoms,cell)
     end
     return distance(atoms,cell,index1,index2)
 end
-export distance
 #---------------------------------------------------------------------------
 
 #----------
@@ -151,7 +148,6 @@ function compressParams{ T1 <: Cell_param, T2 <: Real }( cell::T1, fracs::Vector
     end
     return cell
 end
-export compressParams
 #---------------------------------------------------------------------------
 function compressAtoms{ T1 <: atom_mod.AtomList, T2 <: Cell_param, T3 <: Real }( atoms::T1 , cell::T2, fracs::Vector{T3} )
     for i=1:size(atoms.names)[1]
@@ -161,7 +157,6 @@ function compressAtoms{ T1 <: atom_mod.AtomList, T2 <: Cell_param, T3 <: Real }(
     end
     return atoms
 end
-export compressAtoms
 #---------------------------------------------------------------------------
 
 end

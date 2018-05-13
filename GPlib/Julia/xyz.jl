@@ -2,6 +2,8 @@ include("cell.jl")
 
 module filexyz
 
+export getNbSteps, readFastFile, write
+
 using atom_mod
 using cell_mod
 
@@ -24,7 +26,6 @@ function getNbSteps{ T1 <: AbstractString }( file::T1)
     return 0
   end
 end
-export getNbSteps
 
 function readFastFile{ T1 <: AbstractString }( file::T1 )
   #--------------
@@ -58,7 +59,6 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
   end
   return sim
 end
-export readFastFile
 #--------------------------------------------------------------------------------
 
 #---------------------------------------------------------------------------------
@@ -89,7 +89,6 @@ function write{ T1 <: AbstractString, T2 <: atom_mod.AtomList }( file::T1, atoms
   end
   close(file)
 end
-export write
 #---------------------------------------------------------------------------------
 
 end
