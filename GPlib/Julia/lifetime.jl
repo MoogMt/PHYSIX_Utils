@@ -3,7 +3,7 @@ include("contactmatrix.jl")
 Volumes=["8.82","9.0","9.05","9.1","9.2","9.3","9.4","9.8"]
 
 folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-folder="/home/moogmt/8.82/"
+#folder="/home/moogmt/8.82/"
 file=string(folder,"TRAJEC_wrapped.xyz")
 atoms = filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(8.82,8.82,8.82)
@@ -77,7 +77,7 @@ atoms=[]
 
 # Plotting evolution of largest molecule as a function of time
 using PyPlot
-plot(sizemax,"r.")
+plot(size(sizemax)[1],sizemax,"r.")
 xlabel("time (step)")
 ylabel("size of largest molecule (atoms)")
 
