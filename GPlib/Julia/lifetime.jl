@@ -94,13 +94,14 @@ lifesize=[]
 for index=1:size(sizes)[1]
     print(string("progress: ", index/size(sizes)[1]*100, " %\n"))
     # We get the size
-    molecule_data=Array{Real}(sizes[index]+2,0)
+    molecule_data=zeros(0,sizes[index]+2)
     for i=1:size(lines)[1]
+        print(string("mini-progress: ",i/size(lines)[1]*100,"%\n"))
         line=split(lines[i])
         size_loc=parse(Int32,line[size(line)[1]])
         if sizes[index] == size_loc
             # Creating empty vector
-            molecule_local=zeros(size_loc+2)
+            molecule_local=zeros(1,size_loc+2)
             # Getting step
             molecule_local[1]=parse(Int32,line[1])
             # Getting tom indexes
