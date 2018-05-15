@@ -117,6 +117,7 @@ for index=1:size(sizes)[1]
     end
     # Computing lifetimes for molecule size
     nb_molecules=sizeVector[index]
+    size_loc=sizes[index]
     # Loop over molecule of the same size
     for i=1:nb_molecules
         # if molecule is not used
