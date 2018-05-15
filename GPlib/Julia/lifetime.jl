@@ -77,7 +77,7 @@ atoms=[]
 
 # Plotting evolution of largest molecule as a function of time
 using PyPlot
-plot(size(sizemax)[1],sizemax,"r.")
+plot(1:size(sizemax)[1],sizemax,"r.")
 xlabel("time (step)")
 ylabel("size of largest molecule (atoms)")
 
@@ -88,29 +88,35 @@ close(file)
 
 # Keeping vectors to do size
 sizes=unique(sizes)
+# sorting sizes
+for i=1:size(sizes)[1]
+    for j=1:size(sizes)[1]
+        if sizes[i] < sizes[j]
+            check=sizes[i]
+            sizes[i]=sizes[j]
+            sizes[j]=check
+        end
+    end
+end
+
 sizeVector=zeros(size(sizes)[1])
-lifetimes=[]
-lifesize=[]
+file_add=string(folder,"check_data")
+file_sorted=open(file_add,"w")
 for index=1:size(sizes)[1]
     print(string("progress: ", index/size(sizes)[1]*100, " %\n"))
     # We get the size
     molecule_data=zeros(0,sizes[index]+2)
     for i=1:size(lines)[1]
-        print(string("mini-progress: ",i/size(lines)[1]*100,"%\n"))
         line=split(lines[i])
         size_loc=parse(Int32,line[size(line)[1]])
         if sizes[index] == size_loc
-            # Creating empty vector
-            molecule_local=zeros(1,size_loc+2)
-            # Getting step
-            molecule_local[1]=parse(Int32,line[1])
+            # Writing step and size
+            write(file_sorted,string(parse(Int32,line[1])," ",size_loc))
             # Getting tom indexes
             for j=1:size_loc
-                molecule_local[j+1]=parse(Int32,line[j+3])
+                write(file_sorted, string(" ",parse(Int32,line[j+3])) )
             end
-            # Last index is 0 (unused)
-            # Adding molecule to the vector
-            molecule_data=vcat(molecule_data,molecule_local)
+            write(file_sorted,"\n")
             # Adding size occurence
             sizeVector[index] += 1
         end
@@ -119,58 +125,16 @@ for index=1:size(sizes)[1]
     nb_molecules=sizeVector[index]
     size_loc=sizes[index]
     # Loop over molecule of the same size
-    for i=1:nb_molecules
-        # if molecule is not used
-        if molecule_data[i,size_loc+2] == 0
-            # We mark it used
-            molecule_data[i,size_loc+2]=1
-            # Start life at 1
-            life=1
-            # define starting step
-            start_step=molecule_data[i,1]
-            # Loop over step
-            for active_step=start_step+1:nb_steps
-                check_step=false
-                # Loop over molecules
-                for k=i:nb_molecules
-                    # check tool
-                    check2 = false
-                    # Looking at molecules that have active step
-                    if molecule_data[k,size_loc+2] == active_step
-                        # checking for correspondance
-                        check=true
-                        for l=1:size_loc
-                            if molecule_data[k,l] != molecule_data[i,l]
-                                check=false
-                                break
-                            end
-                        end
-                        if check
-                            life += 1
-                            molecule_data[k,size_loc+2] = 1
-                            check_step=true
-                            check2=true
-                        end
-                    end
-                    if check2 == true
-                        break
-                    end
-                end
-                if ! check_step
-                    break
-                end
-            end
-            push!(lifesize,size_loc)
-            push!(lifetimes,life)
-        end
-    end
 end
+close(file_sorted)
 
+# Number of occurence of each size
 figure(2)
 plot(sizes,sizeVector,"r.")
 xlabel("size (atoms)")
 ylabel("Number")
 
+# Normalization
 check2=zeros(size(sizeVector)[1])
 sum=0
 for i=1:size(sizes)[1]
@@ -179,15 +143,93 @@ for i=1:size(sizes)[1]
 end
 check2 /= sum
 
+# Frequence at which an atom is in molecule of size X
 figure(3)
 plot(sizes,check2,"r.")
 xlabel("size (atoms)")
 ylabel("Frequency")
 
-for i=1:size(lines)[1]
-    line=split(lines[i])
-    size_loc=parse(Int32,line[size(line)[1]])
-    if 3 == size_loc
-        sizeVector[index] += 1
+file=open(file_add)
+lines=readlines(file)
+close(file)
+
+
+lifetimes=[]
+lifesize=[]
+offset=1
+for i=1:size(sizes)[1]
+    # Progress mark
+    print("Progress size: ",i/size(sizes)[1]*100," %\n")
+    # All
+    local_size = Int(sizes[i])
+    nb_molecules = Int(sizeVector[i])
+    molecules=zeros(local_size,nb_molecules)
+    step=zeros(nb_molecules)
+    # Parsing  molecules
+    for j=1:nb_molecules
+        line=split(lines[Int(offset+j)])
+        step[j]=parse(Int64,line[1])
+        for k=1:local_size
+            molecules[k,j]=parse(Float64,line[Int(k+1)])
+        end
     end
+    # Used vector
+    used=zeros(nb_molecules)
+    # Loop over molecules
+    for j=1:nb_molecules
+        print("Progress molecules: ",j/nb_molecules*100," %\n")
+        if used[j] == 0
+            # Mark molecule as used
+            used[j] = 1
+            # A new life is starting
+            life=1
+            # Determine birth step
+            start_step=step[j]+1
+            # Loop over steps
+            for active_step=start_step:nb_steps
+                check_step=false
+                # Loop over molecules
+                for k=1:nb_molecules
+                    check_mol = false
+                    # if check...
+                    if active_step == step[k]
+                        # Loop over atoms, check if identicals
+                        for l=1:local_size
+                            # Check_atoms
+                            check_atoms=true
+                            # Check all atoms index
+                            if molecules[l,k] != molecules[l,j]
+                                # if difference, mark it
+                                check_atoms=false
+                                # Break loop
+                                break
+                            end
+                            # If all atoms are identical
+                            if check_atoms
+                                # We indicate that we found the molecule
+                                check_mol = true
+                                # We indicated that we have found something at that step
+                                check_step = true
+                                # Incrementing life
+                                life += 1
+                                # Indicating that atoms k is used
+                                used[k] = 1
+                            end
+                        end
+                    end
+                    # If molecule is found, break and move on
+                    if check_mol
+                        break
+                    end
+                end
+                # If nothing is found for a step, break
+                if ! check_step
+                    break
+                end
+            end
+            push!(lifesize,local_size)
+            push!(lifetimes,life)
+        end
+    end
+    offset += nb_molecules
 end
