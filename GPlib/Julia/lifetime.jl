@@ -239,7 +239,7 @@ end
 
 lifes=[]
 for i=1:size(lifetimes)[1]
-    if lifesize[i] == 4
+    if lifesize[i] == 9
         push!(lifes,lifetimes[i])
     end
 end
@@ -255,7 +255,7 @@ for i=1:size(lifes)[1]
     end
 end
 
-N=500
+N=100
 dlife=(max-min)/N
 down=min
 high=min+dlife
