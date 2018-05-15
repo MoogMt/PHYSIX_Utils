@@ -239,7 +239,7 @@ end
 
 lifes=[]
 for i=1:size(lifetimes)[1]
-    if lifesize[i] == 9
+    if lifesize[i] == 3
         push!(lifes,lifetimes[i])
     end
 end
@@ -255,7 +255,7 @@ for i=1:size(lifes)[1]
     end
 end
 
-N=100
+N=5000
 dlife=(max-min)/N
 down=min
 high=min+dlife
@@ -284,3 +284,4 @@ center *= unit*stride
 plot(center,freq,"r.")
 xlabel("lifetime (ps)")
 ylabel("frequency")
+xlim([0,1])
