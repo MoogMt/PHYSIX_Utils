@@ -89,27 +89,78 @@ close(file)
 # Keeping vectors to do size
 sizes=unique(sizes)
 sizeVector=zeros(size(sizes)[1])
+lifetimes=[]
+lifesize=[]
 for index=1:size(sizes)[1]
     print(string("progress: ", index/size(sizes)[1]*100, " %\n"))
     # We get the size
-    molecule_data=Array(sizes[index]+2,0)
+    molecule_data=Array{Real}(sizes[index]+2,0)
     for i=1:size(lines)[1]
         line=split(lines[i])
         size_loc=parse(Int32,line[size(line)[1]])
         if sizes[index] == size_loc
-            molecule_local=Array{Real}(size[index]+1)
+            # Creating empty vector
+            molecule_local=zeros(size_loc+2)
+            # Getting step
             molecule_local[1]=parse(Int32,line[1])
+            # Getting tom indexes
             for j=1:size_loc
                 molecule_local[j+1]=parse(Int32,line[j+3])
             end
-            molecule_local[size(molecule_local)[1]]=0
+            # Last index is 0 (unused)
+            # Adding molecule to the vector
             molecule_data=vcat(molecule_data,molecule_local)
+            # Adding size occurence
             sizeVector[index] += 1
         end
     end
-    lifetimes=[]
-    nb_molecules=size(molecules_data)[2]
+    # Computing lifetimes for molecule size
+    nb_molecules=sizeVector[index]
+    # Loop over molecule of the same size
     for i=1:nb_molecules
+        # if molecule is not used
+        if molecule_data[i,size_loc+2] == 0
+            # We mark it used
+            molecule_data[i,size_loc+2]=1
+            # Start life at 1
+            life=1
+            # define starting step
+            start_step=molecule_data[i,1]
+            # Loop over step
+            for active_step=start_step+1:nb_steps
+                check_step=false
+                # Loop over molecules
+                for k=i:nb_molecules
+                    # check tool
+                    check2 = false
+                    # Looking at molecules that have active step
+                    if molecule_data[k,size_loc+2] == active_step
+                        # checking for correspondance
+                        check=true
+                        for l=1:size_loc
+                            if molecule_data[k,l] != molecule_data[i,l]
+                                check=false
+                                break
+                            end
+                        end
+                        if check
+                            life += 1
+                            molecule_data[k,size_loc+2] = 1
+                            check_step=true
+                            check2=true
+                        end
+                    end
+                    if check2 == true
+                        break
+                    end
+                end
+                if ! check_step
+                    break
+                end
+            end
+            push!(lifesize,size_loc)
+            push!(lifetimes,life)
+        end
     end
 end
 
