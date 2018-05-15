@@ -156,7 +156,7 @@ close(file)
 
 lifetimes=[]
 lifesize=[]
-offset=1
+offset=0
 for i=1:size(sizes)[1]
     # Progress mark
     print("Progress size: ",i/size(sizes)[1]*100," %\n")
@@ -191,6 +191,9 @@ for i=1:size(sizes)[1]
                 # Loop over molecules
                 for k=1:nb_molecules
                     check_mol = false
+                    if used[k] == 1
+                        continue
+                    end
                     # if check...
                     if active_step == step[k]
                         # Loop over atoms, check if identicals
@@ -233,3 +236,51 @@ for i=1:size(sizes)[1]
     end
     offset += nb_molecules
 end
+
+lifes=[]
+for i=1:size(lifetimes)[1]
+    if lifesize[i] == 4
+        push!(lifes,lifetimes[i])
+    end
+end
+
+max=lifes[1]
+min=lifes[1]
+for i=1:size(lifes)[1]
+    if lifes[i] > max
+        max = lifes[i]
+    end
+    if lifes[i] < min
+        min = lifes[i]
+    end
+end
+
+N=500
+dlife=(max-min)/N
+down=min
+high=min+dlife
+center=zeros(N)
+freq=zeros(N)
+for i=1:N
+    center[i]=(high+down)
+    for j=1:size(lifes)[1]
+        if lifes[j] < high && lifes[j] > down
+            freq[i] += 1
+        end
+    end
+    down += dlife
+    high += dlife
+end
+
+# Normalization
+sum=0
+for i=1:N
+    sum += freq[i]
+end
+
+freq /= sum
+center *= unit*stride
+
+plot(center,freq,"r.")
+xlabel("lifetime (ps)")
+ylabel("frequency")
