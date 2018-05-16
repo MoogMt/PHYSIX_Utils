@@ -1,12 +1,16 @@
 include("contactmatrix.jl")
 
 Volumes=["8.82","9.0","9.05","9.1","9.2","9.3","9.4","9.8"]
+Temperature=[2000,2250,2500,3000,3500]
 
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
+current_volume=parse(Float64,Volumes[1])
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
+#folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/"
 #folder="/home/moogmt/8.82/"
 file=string(folder,"TRAJEC_wrapped.xyz")
 atoms = filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(8.82,8.82,8.82)
+#nb_steps=filexyz.getNbSteps(file)
+cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 stride=5
@@ -76,10 +80,16 @@ close(file)
 atoms=[]
 
 # Plotting evolution of largest molecule as a function of time
-using PyPlot
-plot(1:size(sizemax)[1],sizemax,"r.")
-xlabel("time (step)")
-ylabel("size of largest molecule (atoms)")
+# using PyPlot
+# plot(1:size(sizemax)[1],sizemax,"r.")
+# xlabel("time (step)")
+# ylabel("size of largest molecule (atoms)")
+
+file=open(string(folder,"largest.dat"),"w")
+for i=1:size(sizemax)[1]
+    write(file,i*unit*stride,"",sizemax[i],"\n")
+end
+close(file)
 
 # Reading molecule file
 file=open(string(folder,"atoms_mol.dat"))
@@ -129,10 +139,10 @@ end
 close(file_sorted)
 
 # Number of occurence of each size
-figure(2)
-plot(sizes,sizeVector,"r.")
-xlabel("size (atoms)")
-ylabel("Number")
+# figure(2)
+# plot(sizes,sizeVector,"r.")
+# xlabel("size (atoms)")
+# ylabel("Number")
 
 # Normalization
 check2=zeros(size(sizeVector)[1])
@@ -144,16 +154,22 @@ end
 check2 /= sum
 
 # Frequence at which an atom is in molecule of size X
-figure(3)
-plot(sizes,check2,"r.")
-xlabel("size (atoms)")
-ylabel("Frequency")
+# figure(3)
+# plot(sizes,check2,"r.")
+# xlabel("size (atoms)")
+# ylabel("Frequency")
+
+file=open(string(folder,"size_proba.dat"),"w")
+for i=1:size(sizes)[1]
+    write(file,string(sizes[i]," ",check2[i],"\n"))
+end
+close(file)
 
 file=open(file_add)
 lines=readlines(file)
 close(file)
 
-
+#==============================#
 lifetimes=[]
 lifesize=[]
 offset=0
@@ -170,7 +186,7 @@ for i=1:size(sizes)[1]
         line=split(lines[Int(offset+j)])
         step[j]=parse(Int64,line[1])
         for k=1:local_size
-            molecules[k,j]=parse(Float64,line[Int(k+1)])
+            molecules[k,j]=parse(Float64,line[Int(k+2)])
         end
     end
     # Used vector
@@ -232,56 +248,103 @@ for i=1:size(sizes)[1]
             end
             push!(lifesize,local_size)
             push!(lifetimes,life)
+            life=1
         end
     end
     offset += nb_molecules
 end
+#==============================#
+# max=lifes[1]
+# min=lifes[1]
+# for i=1:size(lifes)[1]
+#     if lifes[i] > max
+#         max = lifes[i]
+#     end
+#     if lifes[i] < min
+#         min = lifes[i]
+#     end
+# end
 
-lifes=[]
-for i=1:size(lifetimes)[1]
-    if lifesize[i] == 3
-        push!(lifes,lifetimes[i])
-    end
-end
-
-max=lifes[1]
-min=lifes[1]
-for i=1:size(lifes)[1]
-    if lifes[i] > max
-        max = lifes[i]
-    end
-    if lifes[i] < min
-        min = lifes[i]
-    end
-end
-
-N=5000
-dlife=(max-min)/N
-down=min
-high=min+dlife
-center=zeros(N)
-freq=zeros(N)
-for i=1:N
-    center[i]=(high+down)
-    for j=1:size(lifes)[1]
-        if lifes[j] < high && lifes[j] > down
-            freq[i] += 1
+file_life=open(string(folder,"life_all.dat"),"w")
+for index=1:size(sizes)[1]
+    lifes=[]
+    for i=1:size(lifetimes)[1]
+        if lifesize[i] == sizes[index]
+            push!(lifes,lifetimes[i]*unit*stride)
         end
     end
-    down += dlife
-    high += dlife
-end
-
-# Normalization
-sum=0
-for i=1:N
+    min=0
+    max=2
+    N=200
+    dlife=(max-min)/N
+    down=min
+    high=min+dlife
+    center=zeros(N)
+    freq=zeros(N)
+    for i=1:N
+        center[i]=(high+down)/2
+        for j=1:size(lifes)[1]
+            if lifes[j] < high && lifes[j] > down
+                freq[i] += 1
+            end
+        end
+        down += dlife
+        high += dlife
+    end
+    # Normalization
+    sum=0
+    for i=1:N
     sum += freq[i]
+    end
+    freq /= sum
+    file=open(string(folder,sizes[index],"_life.dat"),"w")
+    for index2=1:N
+        write(file,string(center[index2]," ",freq[index2],"\n"))
+        write(file_life,string(sizes[index]," ",center[index2]," ",freq[index2],"\n"))
+    end
+    close(file)
+    write(file_life,"\n")
 end
+close(file_life)
 
-freq /= sum
-center *= unit*stride
-
-plot(center,freq,"r.")
-xlabel("lifetime (ps)")
-ylabel("frequency")
-xlim([0,1])
+# file=open(string(folder,"all_life.dat"),"w")
+# lifetimes20=zeros(size(lifetimes)[1])
+# for i=1:size(lifetimes)[1]
+#         lifetimes20[i]=lifetimes[i]*unit*stride
+# end
+#
+# min=0
+# max=2
+# N=50
+# dlife=(max-min)/N
+# down=min
+# high=min+dlife
+# center=zeros(N)
+# freq=zeros(N)
+#
+# for i=1:N
+#     center[i]=(high+down)/2
+#     for j=1:size(lifes)[1]
+#         if lifes[j] < high && lifes[j] > down
+#             freq[i] += 1
+#         end
+#     end
+#     down += dlife
+#     high += dlife
+# end
+# # Normalization
+# sum=0
+# for i=1:N
+# sum += freq[i]
+# end
+# freq /= sum
+# for index2=1:N
+#     write(file,string(center[index2]," ",freq[index2],"\n"))
+# end
+# close(file)
+#
+#
+# plot(center,freq,"r.")
+# xlabel("lifetime (ps)")
+# ylabel("frequency")
+# xlim([0,1])
