@@ -1,9 +1,9 @@
 include("contactmatrix.jl")
 
-Volumes=["8.82","9.0","9.05","9.1","9.2","9.3","9.4","9.8"]
+Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
 Temperature=[2000,2250,2500,3000,3500]
 
-current_volume=parse(Float64,Volumes[1])
+current_volume=parse(Float64,Volumes[10])
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
 #folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/"
 #folder="/home/moogmt/8.82/"
@@ -198,7 +198,7 @@ for i=1:size(sizes)[1]
             # Mark molecule as used
             used[j] = 1
             # A new life is starting
-            life=1
+            time=1
             # Determine birth step
             start_step=step[j]+1
             # Loop over steps
@@ -213,9 +213,10 @@ for i=1:size(sizes)[1]
                     # if check...
                     if active_step == step[k]
                         # Loop over atoms, check if identicals
+                        # Check_atoms
+                        check_atoms=true
                         for l=1:local_size
-                            # Check_atoms
-                            check_atoms=true
+
                             # Check all atoms index
                             if molecules[l,k] != molecules[l,j]
                                 # if difference, mark it
@@ -223,17 +224,17 @@ for i=1:size(sizes)[1]
                                 # Break loop
                                 break
                             end
-                            # If all atoms are identical
-                            if check_atoms
-                                # We indicate that we found the molecule
-                                check_mol = true
-                                # We indicated that we have found something at that step
-                                check_step = true
-                                # Incrementing life
-                                life += 1
-                                # Indicating that atoms k is used
-                                used[k] = 1
-                            end
+                        end
+                        # If all atoms are identical
+                        if check_atoms
+                            # We indicate that we found the molecule
+                            check_mol = true
+                            # We indicated that we have found something at that step
+                            check_step = true
+                            # Incrementing life
+                            time += 1
+                            # Indicating that atoms k is used
+                            used[k] = 1
                         end
                     end
                     # If molecule is found, break and move on
@@ -247,8 +248,8 @@ for i=1:size(sizes)[1]
                 end
             end
             push!(lifesize,local_size)
-            push!(lifetimes,life)
-            life=1
+            push!(lifetimes,time)
+            time=1
         end
     end
     offset += nb_molecules
@@ -275,7 +276,7 @@ for index=1:size(sizes)[1]
     end
     min=0
     max=2
-    N=200
+    N=400
     dlife=(max-min)/N
     down=min
     high=min+dlife
