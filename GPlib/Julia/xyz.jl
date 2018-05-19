@@ -9,6 +9,7 @@ export getNbSteps, readFastFile, readStep, readEmpty, read, write
 using atom_mod
 using cell_mod
 
+#------------------------------------------------------------------------------
 function getNbSteps{ T1 <: AbstractString }( file::T1)
   nb_step=0
   nb_atoms=0
@@ -65,6 +66,8 @@ function readStep{ T1 <: IO }( file_hand::T1 )
   nb_atoms = parse(Int,split(readline(file_hand))[1])
   # Atoms
   atoms = AtomList(nb_atoms)
+  # Reading comment line
+  readline(file_hand)
   # Loop over atoms
   for i=1:nb_atoms
     line=split(readline(file_hand))
@@ -79,6 +82,8 @@ end
 function readEmpty{ T1 <: IO }( file_hand::T1 )
   # Get number of atoms
   nb_atoms = parse(Int,split(readline(file_hand))[1])
+  # Reading comment line
+  readline(file_hand)
   # Loop over atoms
   for i=1:nb_atoms
     line=split(readline(file_hand))
@@ -90,7 +95,7 @@ function read{ T1 <: AbstractString }( file::T1 )
   file_hand=open(file)
   atoms_sim=Vector{AtomList}(nb_steps)
   for i=1:nb_steps
-    atoms_sim[1] = readStep(file)
+    atoms_sim[1] = readStep(file_hand)
   end
   close(file_hand)
   return atoms_sim
