@@ -103,7 +103,7 @@ end
 function read{ T1 <: AbstractString, T2 <: Int }( file::T1, stride::T2 )
   nb_steps=getNbSteps(file)
   file_hand=open(file)
-  atoms_sim=Vector{AtomList}(parse(Int,nb_steps/stride))
+  atoms_sim=Vector{AtomList}(Int(trunc(nb_steps/stride)))
   j=1
   for i=1:nb_steps
     if i % stride == 0

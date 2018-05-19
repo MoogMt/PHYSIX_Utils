@@ -1,8 +1,6 @@
 include("cell.jl");
 include("xyz.jl");
 
-print("Loading Contact Matrix")
-
 module contact_matrix
 
 export buildMatrix, readMatrix, getBonded, computeMatrix, writeMatrix
