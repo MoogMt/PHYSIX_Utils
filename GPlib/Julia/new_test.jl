@@ -24,7 +24,7 @@ nb_atoms=size(atoms[1].names)[1]
 
 # Loop on steps
 for step=1:nb_steps
-    matrix=buildMatrix( atoms[step] , cell, cut_off[3] )
+    matrix=contact_matrix.buildMatrix( atoms[step] , cell, cut_off[3] )
 end
 
 # Clearing memory
