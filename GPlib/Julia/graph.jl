@@ -14,40 +14,19 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     return list
 end
 
-function writeGraphs{ T1 <: AbstractString, T2 <: AtomList }( file::T1, Atoms_List::Vector{T2} )
-    file_hand=open(file,"w")
-    sizes=[]
-    size_max=[]
-    for step=1:nb_steps
+function groupsFromMatrix{ T1 <: Real, T2 <: Int }( matrix::Array{T1},  nb_vertex::T2 )
+    nb_tree=0
+    vertex_index=zeros(nb_vertex)
+    for i=1:nb_vertex
+        if vertex_index[i] == 0
+            nb_tree += 1
+            vertex_index=searchGroupMember(matrix,vertex_index,i,nb_tree)
+        end
     end
-    return
+    return vertex_index
 end
 
-file=open(string(folder,"atoms_mol.dat"),"w")
-sizes=[]
-sizemax=[]
-for step=1:nb_steps
-    percent=step/nb_steps
-    print(string("Progres: ",percent*100," % \n"))
-    # Creating bond matrix
-    matrix_bonds=zeros(nb_atoms,nb_atoms)
-    for i=1:nb_atoms
-        for j=i+1:nb_atoms
-            if cell_mod.distance(atoms[step],cell,i,j) < 1.8
-                matrix_bonds[i,j]=1
-                matrix_bonds[j,i]=1
-            end
-        end
-    end
 
-    nb_mol=0
-    mol_index=zeros(nb_atoms)
-    for i=1:nb_atoms
-        if mol_index[i] == 0
-            nb_mol += 1
-            mol_index = graph.searchGroupMember(matrix_bonds,mol_index,i,nb_mol)
-        end
-    end
     size_check=0
     size_avg=0
     for i=1:nb_mol

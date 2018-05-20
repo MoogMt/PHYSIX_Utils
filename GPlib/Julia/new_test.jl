@@ -11,9 +11,9 @@ current_temperature=Temperature[4]
 folder=string("/home/moogmt/",current_volume,"/",current_temperature,"K/")
 file=string(folder,"TRAJEC_wrapped.xyz")
 
+# Time values
 stride=20
 unit=0.0005
-cut_off=1.8
 
 # Getting atoms
 atoms = filexyz.read(file,stride)
@@ -25,6 +25,7 @@ nb_atoms=size(atoms[1].names)[1]
 # Loop on steps
 for step=1:nb_steps
     matrix=contact_matrix.buildMatrix( atoms[step] , cell, cut_off[3] )
+    graph.groupsFromMatrix(matrix,nb_atoms)
 end
 
 # Clearing memory
