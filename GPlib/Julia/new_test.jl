@@ -24,8 +24,11 @@ nb_atoms=size(atoms[1].names)[1]
 
 # Loop on steps
 for step=1:nb_steps
-    matrix=contact_matrix.buildMatrix( atoms[step] , cell, cut_off[3] )
-    graph.groupsFromMatrix(matrix,nb_atoms)
+    print("Building molecules: ", step/nb_steps*100,"%\n")
+    matrix = contact_matrix.buildMatrix( atoms[step] , cell, cut_off[3] )
+    nb_mol, mol_index = graph_mod.groupsFromMatrix(matrix,nb_atoms)
+    avg_mol_size=nb_atoms/nb_mol
+    writeGraph
 end
 
 # Clearing memory

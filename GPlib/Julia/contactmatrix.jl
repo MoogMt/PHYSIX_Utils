@@ -1,5 +1,12 @@
-include("cell.jl");
-include("xyz.jl");
+if ( ! isdefined(:cell_mod) )
+    include("cell.jl")
+end
+if ( ! isdefined(:filexyz) )
+    include("xyz.jl")
+end
+if ( ! isdefined(:graph_mod) )
+    include("graph.jl")
+end
 
 module contact_matrix
 
