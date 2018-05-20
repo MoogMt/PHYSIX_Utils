@@ -1,5 +1,8 @@
 module graph_mod
 
+
+export searchGroupMember, groupsFromMatrix, getSizeTree
+
 function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( matrix::Array{T1}, list::Vector{T2}, index::T3 , group_nb::T4 )
     for i=1:size(matrix)[1]
         if matrix[index,i] > 0
@@ -24,33 +27,19 @@ function groupsFromMatrix{ T1 <: Real, T2 <: Int }( matrix::Array{T1},  nb_verte
     return nb_tree, vertex_index
 end
 
-function getSizeTree{ T1 <: Int }( list::Vector{T1} )
-    nb_tree=unique(list)
+function getSizeTrees{ T1 <: Int }( vertex_index::Vector{T1} )
+    sizes=[]
+    tree_index=unique(vertex_index)
+    for tree in tree_index
+        size=0
+        for i=1:size(vertex_index)[1]
+            if tree == vertex_index
+                size+=1
+            end
+        end
+        push!(sizes,size)
+    end
     return sizes
 end
-
-#     size_check=0
-#     size_avg=0
-#     for i=1:nb_mol
-#         write(file,string(step," ",nb_mol," "))
-#         size=0
-#         write(file,string(i," "))
-#         for j=1:nb_atoms
-#             if mol_index[j] == i
-#                 size += 1
-#                 write(file,string(j," "))
-#             end
-#         end
-#         write(file,string(size," \n"))
-#         push!(sizes,size)
-#         if size > size_check
-#             size_check=size
-#         end
-#         size_avg += size
-#     end
-#     push!(sizemax,size_check)
-# end
-# close(file)
-
 
 end
