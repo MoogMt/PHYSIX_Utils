@@ -22,14 +22,33 @@ cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 
-# Loop on steps
+# Loop on steps to get sizes
+file=open(string(folder,"atom_mol_",cut_off[3],".dat"))
 for step=1:nb_steps
     print("Building molecules: ", step/nb_steps*100,"%\n")
     matrix = contact_matrix.buildMatrix( atoms[step] , cell, cut_off[3] )
     nb_mol, mol_index = graph_mod.groupsFromMatrix(matrix,nb_atoms)
     avg_mol_size=nb_atoms/nb_mol
-    writeGraph
+    # Compute sizes
+    sizes=[]
+    size_max=0
+    for i=1:nb_mol
+        size=0
+        write(file,string(step," ",nb_mol," ",i," "))
+        for j=1:nb_atoms
+            if mol_index[j] == i
+                size += 1
+                write(file,string(j," "))
+            end
+        end
+        write(file,string(size,"\n"))
+        if size > max
+            max=size
+        end
+        push!(sizes,size)
+    end
 end
+close(file)
 
 # Clearing memory
 atoms=[]

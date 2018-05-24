@@ -29,6 +29,7 @@ end
 
 function getSizeTrees{ T1 <: Int }( vertex_index::Vector{T1} )
     sizes=[]
+    max=0
     tree_index=unique(vertex_index)
     for tree in tree_index
         size=0
@@ -37,9 +38,12 @@ function getSizeTrees{ T1 <: Int }( vertex_index::Vector{T1} )
                 size+=1
             end
         end
+        if size > max
+            max=size
+        end
         push!(sizes,size)
     end
-    return sizes
+    return sizes, max
 end
 
 end
