@@ -61,7 +61,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     #-----------------------------------------------------
     center=Vector{Real}(3)
     for i=1:3
-        center[i]=parse(Float64,split(lines[3])[1+i])
+        center[i]=parse(Float64,split(lines[3])[1+i])*0.529177
     end
     #-----------------------------------------------------
 
@@ -80,7 +80,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     cell_matrix=Array{Real}(3,3);
     for i=1:3
         for j=1:3
-            cell_matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*Bohr2Ang
+            cell_matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*0.529177
         end
     end
     #-----------------------------------------------------
@@ -152,27 +152,24 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
     params=zeros(3,1)
     for i=1:3
         for j=1:3
-            params[i] += vol.vox_vec[i,j]
+            params[i] += vol.vox_vec[i,j]^2
         end
         params[i]=sqrt(params[i])
     end
     # #--------------------------------------------
     #
     # #----------------------------------------------------
-    fracs=[0.,0.,0.]
-    index=[0,0,0]
+    floats=[0,0,0]
     for i=1:3
-        fracs[i]=( position[i] + vol.origin[i] )/params[i]
-        if fracs[i] - trunc(fracs[i]) > 0.5
-            index[i]=Int(trunc(fracs[i])+1)
-        else
-            index[i]=Int(trunc(fracs[i]))
+        floats[i]=Int(trunc((position[i]-vol.origin[i])/(params[i]/vol.nb_vox[i])))+1
+        if floats[i] == 0
+            floats[i]=vol.nb_vox[i]
         end
     end
     # #----------------------------------------------------
     #
     # # Returns the index
-    return index
+    return floats
 end
 
 function paramVoxVectors{ T1 <: Volume }( volume::T1 )

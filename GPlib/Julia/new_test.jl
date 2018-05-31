@@ -11,7 +11,7 @@ for volume in Volumes
 current_volume=parse(Float64,volume)
 current_temperature=Temperature[4]
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
-file=string(folder,"TRAJEC_wrapped.xyz")
+file_in=string(folder,"TRAJEC_wrapped.xyz")
 
 # Time values
 strides=[1,2,5]
@@ -20,7 +20,7 @@ unit=0.0005*5
 # Getting atoms
 for stride in strides
 
-atoms = filexyz.read(file,stride)
+atoms = filexyz.read(file_in,stride)
 cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 
 nb_steps=size(atoms)[1]
