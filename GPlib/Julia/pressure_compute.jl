@@ -18,7 +18,7 @@ P=Vector{Real}(size(files)[1])
 dP=Vector{Real}(size(files)[1])
 for i=1:size(files)[1]
     local_file=string(folder,files[i],"/3000K/STRESS")
-    p=pressure.readPressureCPMD( local_file , false , 1) c
+    p=pressure.readPressureCPMD( local_file , false , 1) 
     P[i]=statistics.simpleAverage(p)+N*kb*T/(V*10^-10.)^3.
     dP[i]=sqrt(statistics.simpleMoment(p,2))
 end

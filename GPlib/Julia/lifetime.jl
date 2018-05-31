@@ -6,10 +6,11 @@ Temperature=[2000,2250,2500,3000,3500]
 
 cut_off=[1.6,1.7,1.75,1.8]
 
+for volume in Volumes
 
 for in=1:4
 
-current_volume=parse(Float64,Volumes[1])
+current_volume=parse(Float64,volume)
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
 #folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/"
 #folder="/home/moogmt/8.82/"
@@ -34,7 +35,8 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     return list
 end
 
-print("IN=",in)
+print("Volume: ",volume," ")
+print("cutoff",cut_off[in],"\n")
 
 file=open(string(folder,"atoms_mol_",cut_off[in],".dat"),"w")
 sizes=[]
@@ -82,9 +84,6 @@ for step=1:nb_steps
 end
 close(file)
 
-# Clearing memory
-atoms=[]
-
 # Plotting evolution of largest molecule as a function of time
 # using PyPlot
 # plot(1:size(sizemax)[1],sizemax,"r.")
@@ -93,7 +92,7 @@ atoms=[]
 
 file=open(string(folder,"largest_",cut_off[in],".dat"),"w")
 for i=1:size(sizemax)[1]
-    write(file,i*unit*stride,"",sizemax[i],"\n")
+    write(file,string(i*unit*stride," ",sizemax[i],"\n"))
 end
 close(file)
 
@@ -313,9 +312,8 @@ for index=1:size(sizes)[1]
     write(file_life,"\n")
 end
 close(file_life)
-print("IN=",in)
 end
-
+end
 # file=open(string(folder,"all_life.dat"),"w")
 # lifetimes20=zeros(size(lifetimes)[1])
 # for i=1:size(lifetimes)[1]
