@@ -1,17 +1,18 @@
 include("contactmatrix.jl")
 
-Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
+#Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
+#Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
 Temperature=[2000,2250,2500,3000,3500]
 
 
 cut_off=[1.6,1.7,1.75,1.8]
 
+
 for volume in Volumes
-
-for in=1:4
-
 current_volume=parse(Float64,volume)
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
+#folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/2500K/")
+
 #folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/"
 #folder="/home/moogmt/8.82/"
 file=string(folder,"TRAJEC_wrapped.xyz")
@@ -34,6 +35,10 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     end
     return list
 end
+
+
+
+for in=1:4
 
 print("Volume: ",volume," ")
 print("cutoff",cut_off[in],"\n")

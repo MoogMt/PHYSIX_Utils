@@ -1,3 +1,6 @@
+include("CPMD.jl")
+include("statistics.jl")
+
 importall CPMD
 importall statistics
 
@@ -18,10 +21,22 @@ P=Vector{Real}(size(files)[1])
 dP=Vector{Real}(size(files)[1])
 for i=1:size(files)[1]
     local_file=string(folder,files[i],"/3000K/STRESS")
-    p=pressure.readPressureCPMD( local_file , false , 1) 
-    P[i]=statistics.simpleAverage(p)+N*kb*T/(V*10^-10.)^3.
+    p=CPMD.readPressure( local_file , false , 1)
+    secfold=string(folder,files[i],"/3000K/presure_time.dat")
+    file_p=open(secfold,"w")
+    for j=1:size(p)[1]
+        write(file_p,string(i," ",p[i]))
+    end
+    close(secfold)
+    P[i]=statistics.simpleAverage(p)
     dP[i]=sqrt(statistics.simpleMoment(p,2))
 end
+file_out=string(folder,"pv-3000K.dat")
+file_out2=open(file_out,"w")
+for i=1:size(V)[1]
+    write(file_out2,string(V[i]," ",P[i]," ",dP[i],"\n"))
+end
+close(file_out2)
 
 files_2K=["8.82","9.0","9.05","9.1","9.2","9.3","9.8"]
 V_2K=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
@@ -32,10 +47,22 @@ P_2K=Vector{Real}(size(files_2K)[1])
 dP_2K=Vector{Real}(size(files_2K)[1])
 for i=1:size(files_2K)[1]
     local_file=string(folder,files_2K[i],"/2000K/STRESS")
-    p=pressure.readPressureCPMD( local_file , false , 1)
+    p=CPMD.readPressure( local_file , false , 1)
+    secfold=string(folder,files_2K[i],"/2000K/presure_time.dat")
+    file_p = open(string(secfold),"w")
+    for j=1:size(p)[1]
+        write(file_p,string(i," ",p[i]))
+    end
+    close(secfold)
     P_2K[i]=statistics.simpleAverage(p)
     dP_2K[i]=sqrt(statistics.simpleMoment(p,2))
 end
+file_out=string(folder,"pv-2000K.dat")
+file_out2=open(file_out,"w")
+for i=1:size(V_2K)[1]
+    write(file_out2,string(V_2K[i]," ",P_2K[i]," ",dP_2K[i],"\n"))
+end
+close(file_out2)
 
 files_25K=["8.82","9.0","9.05","9.1","9.2","9.3","9.8"]
 V_25K=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
@@ -46,10 +73,34 @@ P_25K=Vector{Real}(size(files_25K)[1])
 dP_25K=Vector{Real}(size(files_25K)[1])
 for i=1:size(files_25K)[1]
     local_file=string(folder,files_25K[i],"/2500K/STRESS")
-    p=pressure.readPressureCPMD( local_file , false , 1)
+    p=CPMD.readPressure( local_file , false , 1)
+    secfold=string(folder,files_25K[i],"/2500K/presure_time.dat")
+    file_p=open(secfold,"w")
+    for j=1:size(p)[1]
+        write(file_p,string(i," ",p[i]))
+    end
+    close(secfold)
     P_25K[i]=statistics.simpleAverage(p)
     dP_25K[i]=sqrt(statistics.simpleMoment(p,2))
 end
+file_out=string(folder,"pv-2500K.dat")
+file_out2=open(file_out,"w")
+for i=1:size(V_25K)[1]
+    write(file_out2,string(V_25K[i]," ",P_25K[i]," ",dP_25K[i],"\n"))
+end
+close(file_out2)
+
+V_Boates= [6.6115368589,6.7677450581,6.9401838199,7.0967427501,7.2691378687,7.426135602,7.5988814922,7.7714956737,7.86572052,7.912789266,7.9756498459,8.007058128,8.0384223944,8.0858859278,8.1013706673,8.1330423667,8.1959466238,8.3060950127,8.4943696581,8.6985238304,8.8710939961,9.0595440273,9.4521042151,9.8605002525]
+P_Boates=[72.6449236765,67.3913035844,64.130432577,60.3260863203,56.8840568965,54.8913013081,52.8985522233,50.3623148819,49.275364383,48.5507242135,48.0072424605,47.6449256276,47.1014503782,48.0072424605,46.9202919617,47.6449256276,47.2826087946,46.9202919617,44.0217377873,41.6666653659,38.9492761116,36.7753621068,32.0652172641,27.7173912054]
+file_out=string(folder,"pv-boates.dat")
+file_out2=open(file_out,"w")
+for i=1:size(V_Boates)[1]
+    write(file_out2,string(V_Boates[i]," ",P_Boates[i],"\n"))
+end
+close(file_out2)
+
+
+
 
 files_03K=["8.82","9.0","9.2"]
 V_03K=[8.82,9.0,9.2]
@@ -62,6 +113,12 @@ dP_03K=Vector{Real}(sizeV)
 for i=1:sizeV
     local_file=string(folder,files_03K[i],"/300K/STRESS")
     p=pressure.readPressureCPMD( local_file , false , 1)
+    secfold=string(folder,files[i],"/300K/presure_time.dat")
+    file_p=open(secfold,"w")
+    for j=1:size(p)
+        write(file_p,string(i," ",p[i]))
+    end
+    close(secfold)
     P_03K[i]=statistics.simpleAverage(p)
     dP_03K[i]=sqrt(statistics.simpleMoment(p,2))
 end

@@ -69,19 +69,3 @@ plot(time,coord[4,:],".-")
 legend(["rc=1.80A","rc=1.75A","rc=1.70A","rc=1.60A"])
 xlabel("time (ps)")
 ylabel("Coordinance")
-
-
-include("contactmatrix.jl")
-
-#==============================================================================#
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-file=open(string(folder,"distanceMatrix.dat"))
-line=split(readline(file))
-nb_steps=parse(Int64,line[1])
-nb_atoms=parse(Int64,line[2])
-for i=1:nb_steps
-
-    matrix=contact_matrix.readMatrix(file,nb_atoms)
-end
-close(file)
-#==============================================================================#
