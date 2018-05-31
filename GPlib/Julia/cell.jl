@@ -76,7 +76,7 @@ end
 #---------------------------------------------------------------------------\
 
 #-------------------------------------------------------------------------------
-function wrap{ T1 <: Real}( position::T1, length::T1 )
+function wrap{ T1 <: Real, T2 <: Real}( position::T1, length::T2 )
     sign=-1
     if position < 0
         sign=1
@@ -108,6 +108,17 @@ function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2
     #----------------------------------
 
     return atoms
+end
+function wrap{ T1 <: Real, T2 <: Cell_param }( positions::Vector{T1}, cell::T2 )
+    #---------------
+    # Compute atoms
+    #---------------------------------
+    for i=1:3
+        positions[i] = wrap( positions[i],cell.length[i] )
+    end
+    #----------------------------------
+
+    return positions
 end
 #-------------------------------------------------------------------------------
 
