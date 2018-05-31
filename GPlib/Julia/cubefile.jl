@@ -92,7 +92,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     for i=1:nb_atoms
         atom_list.names[i] = split( lines[6+i] )[1]
         for j=1:3
-            atom_list.positions[i,j] = parse(Float64, split( lines[6+i])[2+j] )
+            atom_list.positions[i,j] = parse(Float64, split( lines[6+i])[2+j] )*0.529177
         end
     end
     #----------------------------------------------------
@@ -162,7 +162,6 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
     fracs=[0.,0.,0.]
     index=[0,0,0]
     for i=1:3
-        print("check: ",(position[i] + vol.origin[i])/params[i], "\n" )
         fracs[i]=( position[i] + vol.origin[i] )/params[i]
         if fracs[i] - trunc(fracs[i]) > 0.5
             index[i]=Int(trunc(fracs[i])+1)

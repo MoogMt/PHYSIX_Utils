@@ -3,7 +3,13 @@ include("contactmatrix.jl")
 Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
 Temperature=[2000,2250,2500,3000,3500]
 
-current_volume=parse(Float64,Volumes[10])
+
+cut_off=[1.6,1.7,1.75,1.8]
+
+
+for in=1:4
+
+current_volume=parse(Float64,Volumes[1])
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
 #folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.0/3000K/"
 #folder="/home/moogmt/8.82/"
@@ -28,17 +34,17 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     return list
 end
 
-file=open(string(folder,"atoms_mol.dat"),"w")
+print("IN=",in)
+
+file=open(string(folder,"atoms_mol_",cut_off[in],".dat"),"w")
 sizes=[]
 sizemax=[]
 for step=1:nb_steps
-    percent=step/nb_steps
-    print(string("Progres: ",percent*100," % \n"))
     # Creating bond matrix
     matrix_bonds=zeros(nb_atoms,nb_atoms)
     for i=1:nb_atoms
         for j=i+1:nb_atoms
-            if cell_mod.distance(atoms[step],cell,i,j) < 1.8
+            if cell_mod.distance(atoms[step],cell,i,j) < cut_off[in]
                 matrix_bonds[i,j]=1
                 matrix_bonds[j,i]=1
             end
@@ -85,14 +91,14 @@ atoms=[]
 # xlabel("time (step)")
 # ylabel("size of largest molecule (atoms)")
 
-file=open(string(folder,"largest.dat"),"w")
+file=open(string(folder,"largest_",cut_off[in],".dat"),"w")
 for i=1:size(sizemax)[1]
     write(file,i*unit*stride,"",sizemax[i],"\n")
 end
 close(file)
 
 # Reading molecule file
-file=open(string(folder,"atoms_mol.dat"))
+file=open(string(folder,"atoms_mol_",cut_off[in],".dat"))
 lines=readlines(file)
 close(file)
 
@@ -159,7 +165,7 @@ check2 /= sum
 # xlabel("size (atoms)")
 # ylabel("Frequency")
 
-file=open(string(folder,"size_proba.dat"),"w")
+file=open(string(folder,"size_proba_",cut_off[in],".dat"),"w")
 for i=1:size(sizes)[1]
     write(file,string(sizes[i]," ",check2[i],"\n"))
 end
@@ -266,7 +272,7 @@ end
 #     end
 # end
 
-file_life=open(string(folder,"life_all.dat"),"w")
+file_life=open(string(folder,"life_all_",cut_off[in],".dat"),"w")
 for index=1:size(sizes)[1]
     lifes=[]
     for i=1:size(lifetimes)[1]
@@ -307,6 +313,8 @@ for index=1:size(sizes)[1]
     write(file_life,"\n")
 end
 close(file_life)
+print("IN=",in)
+end
 
 # file=open(string(folder,"all_life.dat"),"w")
 # lifetimes20=zeros(size(lifetimes)[1])
