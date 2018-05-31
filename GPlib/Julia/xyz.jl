@@ -4,11 +4,12 @@ end
 
 module filexyz
 
-export getNbSteps, readFastFile, write
+export getNbSteps, readFastFile, readStep, readEmpty, read, write
 
 using atom_mod
 using cell_mod
 
+#------------------------------------------------------------------------------
 function getNbSteps{ T1 <: AbstractString }( file::T1)
   nb_step=0
   nb_atoms=0
@@ -28,7 +29,6 @@ function getNbSteps{ T1 <: AbstractString }( file::T1)
     return 0
   end
 end
-
 function readFastFile{ T1 <: AbstractString }( file::T1 )
   #--------------
   # Reading file
@@ -60,6 +60,60 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
       sim[step]=atom_list
   end
   return sim
+end
+function readStep{ T1 <: IO }( file_hand::T1 )
+  # Get number of atoms
+  nb_atoms = parse(Int,split(readline(file_hand))[1])
+  # Atoms
+  atoms = AtomList(nb_atoms)
+  # Reading comment line
+  readline(file_hand)
+  # Loop over atoms
+  for i=1:nb_atoms
+    line=split(readline(file_hand))
+    atoms.names[i]=line[1]
+    atoms.index[i]=i
+    for j=1:3
+      atoms.positions[i,j] = parse(Float64,line[j+1])
+    end
+  end
+  return atoms
+end
+function readEmpty{ T1 <: IO }( file_hand::T1 )
+  # Get number of atoms
+  nb_atoms = parse(Int,split(readline(file_hand))[1])
+  # Reading comment line
+  readline(file_hand)
+  # Loop over atoms
+  for i=1:nb_atoms
+    line=split(readline(file_hand))
+  end
+  return
+end
+function read{ T1 <: AbstractString }( file::T1 )
+  nb_steps=getNbSteps(file)
+  file_hand=open(file)
+  atoms_sim=Vector{AtomList}(nb_steps)
+  for i=1:nb_steps
+    atoms_sim[1] = readStep(file_hand)
+  end
+  close(file_hand)
+  return atoms_sim
+end
+function read{ T1 <: AbstractString, T2 <: Int }( file::T1, stride::T2 )
+  nb_steps=getNbSteps(file)
+  file_hand=open(file)
+  atoms_sim=Vector{AtomList}(Int(trunc(nb_steps/stride)))
+  j=1
+  for i=1:nb_steps
+    if i % stride == 0
+      atoms_sim[j]=readStep(file_hand)
+      j += 1
+    else
+      readEmpty(file_hand)
+    end
+  end
+  return atoms_sim
 end
 #--------------------------------------------------------------------------------
 

@@ -1,4 +1,5 @@
 include("contactmatrix.jl")
+include("graph.jl")
 
 #Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
 #Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
@@ -24,6 +25,7 @@ nb_atoms=size(atoms[1].names)[1]
 stride=5
 unit=0.0005
 
+<<<<<<< HEAD
 function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( matrix::Array{T1}, list::Vector{T2}, index::T3 , group_nb::T4 )
     for i=1:size(matrix)[1]
         if matrix[index,i] > 0
@@ -44,6 +46,9 @@ print("Volume: ",volume," ")
 print("cutoff",cut_off[in],"\n")
 
 file=open(string(folder,"atoms_mol_",cut_off[in],".dat"),"w")
+=======
+file=open(string(folder,"atoms_mol.dat"),"w")
+>>>>>>> 58b68c8f8e3639d7c2f8dad02ed6bd272333fe79
 sizes=[]
 sizemax=[]
 for step=1:nb_steps
@@ -63,7 +68,7 @@ for step=1:nb_steps
     for i=1:nb_atoms
         if mol_index[i] == 0
             nb_mol += 1
-            mol_index = searchGroupMember(matrix_bonds,mol_index,i,nb_mol)
+            mol_index = graph.searchGroupMember(matrix_bonds,mol_index,i,nb_mol)
         end
     end
     size_check=0
@@ -89,6 +94,7 @@ for step=1:nb_steps
 end
 close(file)
 
+<<<<<<< HEAD
 # Plotting evolution of largest molecule as a function of time
 # using PyPlot
 # plot(1:size(sizemax)[1],sizemax,"r.")
@@ -96,6 +102,12 @@ close(file)
 # ylabel("size of largest molecule (atoms)")
 
 file=open(string(folder,"largest_",cut_off[in],".dat"),"w")
+=======
+# Clearing memory
+atoms=[]
+
+file=open(string(folder,"largest.dat"),"w")
+>>>>>>> 58b68c8f8e3639d7c2f8dad02ed6bd272333fe79
 for i=1:size(sizemax)[1]
     write(file,string(i*unit*stride," ",sizemax[i],"\n"))
 end
