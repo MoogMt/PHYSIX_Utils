@@ -5,8 +5,8 @@ Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
 Temperature=[2000,2250,2500,3000,3500]
 cut_off=[1.6,1.75,1.8]
 
-
-for volume in Volumes
+#for volume in Volumes
+volume="9.0"
 # Current Volume and Temperature
 current_volume=parse(Float64,volume)
 current_temperature=Temperature[4]
@@ -18,8 +18,8 @@ strides=[1,2,5]
 unit=0.0005*5
 
 # Getting atoms
-for stride in strides
-
+# for stride in strides
+stride=1
 atoms = filexyz.read(file_in,stride)
 cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 
@@ -27,19 +27,21 @@ nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 
 
-for co in cut_off
+#for co in cut_off
+
+co=1.8
 
 # Loop on steps to get sizes
 file=open(string(folder,"atom_mol_",co,"stride",stride,".dat"),"w")
 file2=open(string(folder,"largest_",co,"stride",stride,".dat"),"w")
 sizemax=[]
+sizes=[]
 for step=1:nb_steps
     print("Building molecules: ", step/nb_steps*100,"%\n")
     matrix = contact_matrix.buildMatrix( atoms[step] , cell, co )
     nb_mol, mol_index = graph_mod.groupsFromMatrix(matrix,nb_atoms)
     avg_mol_size=nb_atoms/nb_mol
     # Compute sizes
-    sizes=[]
     size_max=0
     for i=1:nb_mol
         size=0
@@ -221,8 +223,8 @@ for index=1:size(sizes)[1]
         end
     end
     min=0
-    max=10
-    N=500
+    max=1
+    N=100
     dlife=(max-min)/N
     down=min
     high=min+dlife
@@ -253,6 +255,6 @@ for index=1:size(sizes)[1]
     write(file_life,"\n")
 end
 close(file_life)
-end
-end
-end
+#end
+#end
+#end
