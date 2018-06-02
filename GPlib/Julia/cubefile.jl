@@ -155,7 +155,7 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
             params[i] += vol.vox_vec[i,j]^2
         end
         params[i]=sqrt(params[i])
-        position[i]=cell_mod.wrap(position[i]-vol.origin[i],params[i])
+        position[i]=cell_mod.wrap(position[i],params[i])
     end
     # # #--------------------------------------------
     # # #----------------------------------------------------

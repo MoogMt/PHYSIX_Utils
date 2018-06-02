@@ -2,12 +2,12 @@ include("atoms.jl")
 include("cell.jl")
 include("cubefile.jl")
 
-atom1=25
-atom2=87
+atom1=24
+atom2=64
 
 file=open(string("/home/moogmt/check",atom1,"_",atom2,".dat"),"w")
 
-nb_pt_line=10
+#nb_pt_line=10
 
 unit=0.005
 stride=5
@@ -15,9 +15,11 @@ stride=5
 current_volume=8.82
 cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 
-file_test=open(string("/home/moogmt/check",atom1,"_",atom2,".xyz"),"w")
- write(file_test,string("150\nCHECK\n"))
-file_atom=open("/home/moogmt/test_line.xyz","w+")
+# file_test=open(string("/home/moogmt/check",atom1,"_",atom2,".xyz"),"w")
+#  write(file_test,string("150\nCHECK\n"))
+# file_atom=open("/home/moogmt/test_line.xyz","w+")
+#  write(file_atom,string("150\nCHECK\n"))
+
 for i=0:49
     print(string(i,"\n"))
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/8.82_dyn/",i,"_structure/")
@@ -34,8 +36,28 @@ for i=0:49
         end
     end
     pos1=cube_mod.getClosest(( atoms1.positions[atom1,:]+atoms1.positions[atom2,:])/2 ,ELF1)
-    write(file_atom,string())
-    write(file,string( cell_mod.distance(atoms1,cell,atom1,atom2), " ", ELF1.matrix[ pos1[1], pos1[2], pos1[3] ] ," ",i*unit*stride, "\n") )
+    #write(file_atom,string(nb_pt_line+2,"\nCHECK\n"))
+    # write(file_atom,"C ")
+    # for j=1:3
+    #     write(file_atom,string(atoms1.positions[atom1,j]," "))
+    # end
+    # write(file_atom,"\n")
+    # write(file_atom,string("O "))
+    # for j=1:3
+    #     write(file_atom,string(atoms1.positions[atom2,j]," "))
+    # end
+    # write(file_atom,"\n")
+    # write(file_atom,string("N "))
+    # for j=1:3
+    #     write(file_atom,string(pos1[j]*cell.length[j]/ELF1.nb_vox[j]," "))
+    # end
+    # write(file_atom,"\n")
+    # write(file_atom,string("H "))
+    # for j=1:3
+    #     write(file_atom,string(pos1[j]*cell.length[j]/ELF1.nb_vox[j]+ELF1.origin[j]," "))
+    # end
+    # write(file_atom,"\n")
+    write(file,string( cell_mod.distance(atoms1,cell,atom1,atom2), " ", ELF1.matrix[ pos1[1], pos1[2], pos1[3] ] ," ",i*unit*stride," ",i,"\n") )
     # file_temp=open(string("/home/moogmt/line_",i,"_",atom1,"-",atom2,".dat"),"w")
     # Vector to trace line
     #========================#
@@ -89,7 +111,7 @@ for i=0:49
     # end
     # write(file_test,"\n")
 end
-close(file_test)
 
+close(file_test)
 close(file)
 close(file_atom)
