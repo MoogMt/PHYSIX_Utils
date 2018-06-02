@@ -155,7 +155,7 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
             params[i] += vol.vox_vec[i,j]^2
         end
         params[i]=sqrt(params[i])
-        position[i]=cell_mod.wrap(position[i],params[i])
+        position[i]=cell_mod.wrap(position[i]-vol.origin[i],params[i])
     end
     # # #--------------------------------------------
     # # #----------------------------------------------------
@@ -171,14 +171,48 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
         end
     end
     # # #----------------------------------------------------
-    distance1=0
-    for i=1:3
-        distance1 += (floats[i]*params[i]/vol.nb_vox[i] - position[i])^2
-    end
+    # distance1=0
+    # for i=1:3
+    #     distance1 += (floats[i]*params[i]/vol.nb_vox[i]+vol.origin[i]- position[i])^2
+    # end
     # Quickfix
-    for i=-1:1
-        for j=-1:1
-            for k=-1:1
+    # for i=-1:2:1
+    #     for j=-1:2:1
+    #         for k=-1:2:1
+    #             new_floats=[0,0,0]
+    #             new_floats[1]=floats[1]+i
+    #             new_floats[2]=floats[2]+j
+    #             new_floats[3]=floats[3]+k
+    #             for l=1:3
+    #                 if new_floats[l] <= 0
+    #                     new_floats[l] = vol.nb_vox[l] - new_floats[l]
+    #                 end
+    #                 if new_floats[l] > vol.nb_vox[l]
+    #                     new_floats[l] = new_floats[l]- vol.nb_vox[l]
+    #                 end
+    #             end
+    #             distance2=0
+    #             for l=1:3
+    #                 distance2 += (new_floats[l]*params[l]/vol.nb_vox[l]+vol.origin[l]- position[l])^2
+    #             end
+    #             if distance1 > distance2
+    #                 for p=1:3
+    #                     floats[p]=new_floats[p]
+    #                 end
+    #                 distance1=distance2
+    #             end
+    #         end
+    #     end
+    # end
+    # Quickfix Fabio
+    ddmax=0
+    for i=1:3
+        ddmax += vol.vox_vec[i,i]
+    end
+    ddmax = (ddmax/3)^2
+    for i=-1:2:1
+        for j=-1:2:1
+            for k=-1:2:1
                 new_floats=[0,0,0]
                 new_floats[1]=floats[1]+i
                 new_floats[2]=floats[2]+j
@@ -193,18 +227,19 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
                 end
                 distance2=0
                 for l=1:3
-                    distance2 += (new_floats[l]*params[l]/vol.nb_vox[l]- position[l])^2
+                    distance2 += (new_floats[l]*params[l]/vol.nb_vox[l]+vol.origin[l]- position[l])^2
                 end
-                if distance1 > distance2
-                    for p=1:3
-                        floats[p]=new_floats[p]
+                if distance2 < ddmax
+                    if vol.matrix[floats[1],floats[2],floats[3]] < vol.matrix[new_floats[1],new_floats[2],new_floats[3]]
+                        for m=1:3
+                            floats[m] = new_floats[m]
+                        end
                     end
-                    distance1=distance2
                 end
             end
         end
     end
-    # # Returns the index
+    # Returns the index
     return floats
 end
 

@@ -5,7 +5,7 @@ awk 'BEGIN{ ix=1; iy=1; iz=1; ddcut=2.*2. }
    for (ic=1;ic<=nc;ic++) { iat[ic]=$ic }
  }else{
    nn++
-   if (nn<=2||nn<=6+nat) print
+   if (nn<=2||nn<=6+nat) 
    if (nn==3) {
      nat=$1
      for (k=1;k<=3;k++) { orig[k]=$(k+1); }
@@ -33,7 +33,10 @@ awk 'BEGIN{ ix=1; iy=1; iz=1; ddcut=2.*2. }
    }
 
    if (nn==6+nat) {
-     for (h=1;h<=3;h++) { v[h]=(pos[iat[2],h]+pos[iat[1],h])/2 }
+     for (h=1;h<=3;h++) 
+     { 
+        v[h]=(pos[iat[2],h]+pos[iat[1],h])/2 
+     }
      ddmax=(delta[1,1]+delta[2,2]+delta[3,3])/3.
      ddmax*=ddmax
     }
@@ -42,27 +45,12 @@ awk 'BEGIN{ ix=1; iy=1; iz=1; ddcut=2.*2. }
      for (k=1;k<=NF;k++) { 
        ivox++
        rho=$k
-       ok=0
-#       for (ic=1;ic<=nc;ic++) {
-#         dd=0.
-#         for (h=1;h<=3;h++) {
-#           # warning: no pbc are used here
-#           dx=pos[iat[ic],h]-posvox[ivox,h]
-#           dd+=dx*dx
-#         }
-#         if (dd<=ddcut) ok=1
-#       }
-#       if (ok==0) rho=0.
-#       printf "%13.5e",rho
-
-         dd=0.
-         for (h=1;h<=3;h++) {
-           dd+=(v[h]-posvox[ivox,h])*(v[h]-posvox[ivox,h])
-         }
-         if (dd<ddmax) print rho > "elf_midpoint"
-
+       dd=0.
+       for (h=1;h<=3;h++) {
+          dd+=(v[h]-posvox[ivox,h])*(v[h]-posvox[ivox,h])
+       }
+       if (dd<ddmax) print rho > "elf_midpoint"
      }
-     #printf "\n"
    }
  }
 }' list $1
