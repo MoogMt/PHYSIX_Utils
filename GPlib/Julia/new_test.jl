@@ -6,7 +6,7 @@ Temperature=[2000,2250,2500,3000,3500]
 cut_off=[1.6,1.75,1.8]
 
 #for volume in Volumes
-volume="9.0"
+volume=Volumes[9]
 # Current Volume and Temperature
 current_volume=parse(Float64,volume)
 current_temperature=Temperature[4]
@@ -26,10 +26,20 @@ cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 
+function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( matrix::Array{T1}, list::Vector{T2}, index::T3 , group_nb::T4 )
+    for i=1:size(matrix)[1]
+        if matrix[index,i] > 0
+            if list[i] == 0
+                list[i]=group_nb
+                list=searchGroupMember(matrix,list,i,group_nb)
+            end
+        end
+    end
+    return list
+end
 
 #for co in cut_off
-
-co=1.8
+co=1.7
 
 # Loop on steps to get sizes
 file=open(string(folder,"atom_mol_",co,"stride",stride,".dat"),"w")
@@ -38,8 +48,25 @@ sizemax=[]
 sizes=[]
 for step=1:nb_steps
     print("Building molecules: ", step/nb_steps*100,"%\n")
-    matrix = contact_matrix.buildMatrix( atoms[step] , cell, co )
-    nb_mol, mol_index = graph_mod.groupsFromMatrix(matrix,nb_atoms)
+    #matrix = contact_matrix.buildMatrix( atoms[step] , cell, co )
+    matrix=zeros(nb_atoms,nb_atoms)
+    for i=1:nb_atoms
+        for j=i+1:nb_atoms
+            if cell_mod.distance(atoms[step],cell,i,j) < co
+                matrix[i,j]=1
+                matrix[j,i]=1
+            end
+        end
+    end
+    #nb_mol, mol_index = graph_mod.groupsFromMatrix(matrix,nb_atoms)
+    nb_mol=0
+    mol_index=zeros(nb_atoms)
+    for i=1:nb_atoms
+        if mol_index[i] == 0
+            nb_mol += 1
+            mol_index = searchGroupMember(matrix,mol_index,i,nb_mol)
+        end
+    end
     avg_mol_size=nb_atoms/nb_mol
     # Compute sizes
     size_max=0
@@ -62,6 +89,7 @@ for step=1:nb_steps
 end
 close(file)
 close(file2)
+
 
 # Reading molecule file
 file=open(string(folder,"atom_mol_",co,"stride",stride,".dat"))
@@ -123,6 +151,9 @@ for i=1:size(sizes)[1]
     write(file,string(sizes[i]," ",check2[i],"\n"))
 end
 close(file)
+
+
+#=============================================================================#
 
 file=open(file_add)
 lines=readlines(file)
