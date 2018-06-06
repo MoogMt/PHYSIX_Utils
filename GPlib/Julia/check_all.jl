@@ -157,12 +157,12 @@ for 1:size(sizes)[1]
     end
 end
 
-time_corr_loc=zeros(steps)
-for t0=1:steps
-    for t=1:nb_steps-1000-t0
-        print("check:",bond_matrix[t,i]*bond_matrix[t+t0,i],"\n")
-        time_corr_loc[t0] += bond_matrix[t,i]*bond_matrix[t+t0,i]
-    end
-    time_corr_loc[t0] /= (steps-t0)
-end
-time_corr_tot += time_corr_loc
+# time_corr_loc=zeros(steps)
+# for t0=1:steps
+#     for t=1:nb_steps-1000-t0
+#         print("check:",bond_matrix[t,i]*bond_matrix[t+t0,i],"\n")
+#         time_corr_loc[t0] += bond_matrix[t,i]*bond_matrix[t+t0,i]
+#     end
+#     time_corr_loc[t0] /= (steps-t0)
+# end
+# time_corr_tot += time_corr_loc

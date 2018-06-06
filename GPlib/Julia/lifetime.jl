@@ -57,6 +57,7 @@ for step=1:nb_steps
     for i=1:nb_atoms
         if mol_index[i] == 0
             nb_mol += 1
+            mol_index[i]=nb_mol
             mol_index = searchGroupMember(matrix_bonds,mol_index,i,nb_mol)
         end
     end

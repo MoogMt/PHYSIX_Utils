@@ -6,11 +6,11 @@ Temperature=[2000,2250,2500,3000,3500]
 cut_off=[1.6,1.75,1.8]
 
 #for volume in Volumes
-volume=Volumes[9]
+volume=Volumes[1]
 # Current Volume and Temperature
 current_volume=parse(Float64,volume)
-current_temperature=Temperature[4]
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
+current_temperature=Temperature[1]
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/2500K/")
 file_in=string(folder,"TRAJEC_wrapped.xyz")
 
 # Time values
@@ -64,6 +64,7 @@ for step=1:nb_steps
     for i=1:nb_atoms
         if mol_index[i] == 0
             nb_mol += 1
+            mol_index[i]=nb_mol
             mol_index = searchGroupMember(matrix,mol_index,i,nb_mol)
         end
     end
@@ -147,11 +148,20 @@ end
 check2 /= sum
 
 file=open(string(folder,"size_proba_",co,"stride",stride,".dat"),"w")
-for i=1:size(sizes)[1]
-    write(file,string(sizes[i]," ",check2[i],"\n"))
+for i=1:sizes[size(sizes)[1]]
+    check_size=false
+    for j=1:size(sizes)[1]
+        if i == sizes[j]
+            write(file,string(sizes[j]," ",check2[j],"\n"))
+            chec_sizek=true
+            break
+        end
+    end
+    if check_size == false
+        write(file,string(i," ",0,"\n"))
+    end
 end
 close(file)
-
 
 #=============================================================================#
 
