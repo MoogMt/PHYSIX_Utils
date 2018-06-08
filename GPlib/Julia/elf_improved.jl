@@ -2,15 +2,21 @@ include("atoms.jl")
 include("cell.jl")
 include("cubefile.jl")
 
+step_max=23
+step_min=0
+d_step=1
 
-unit=0.005
-stride=5
+distance_data=[]
+elf_data=[]
+used=[]
 
+for step=step_min:d_step:step_max
 
-for step=1:10:1001
+#------------------------------------------------------------------------------
+atoms, cell1, ELF1 = cube_mod.readCube(string("/home/moogmt/CO2/CO2_AIMD/9.0_ELF/",step,"_structure/ELF.cube"))
+#------------------------------------------------------------------------------
 
-atoms, cell1, ELF1 = cube_mod.readCube(string("/media/moogmt/Stock/cube_TS14_gly/ELF_shoot1_",step,".cube"))
-
+#---------------
 # Compute cell
 #------------------------------------------------------------
 params=zeros(3)
@@ -23,40 +29,31 @@ end
 cell2=cell_mod.Cell_param(params[1],params[2],params[3])
 #------------------------------------------------------------
 
-atom1s=[]
-atom2s=[]
-file_in=open("/home/moogmt/log_weird.dat")
-lines=readlines(file_in);
-close(file_in)
-for i=1:size(lines)[1]
-    line=split(lines[i])
-    step=parse(Int64,line[1])
-    if step == 1
-        push!(atom1s,parse(Int64,line[2]))
-        push!(atom2s,parse(Int64,line[3]))
-    end
-end
-
-n_dots=10
-
+#----------------
 # Aligning ELF
+#-------------------------------------------------------------------------------
 for atom=1:size(atoms.names)[1]
 	for i=1:3
 		atoms.positions[atom,i]=cell_mod.wrap(atoms.positions[atom,i],params[i])
 	end
 	atoms.positions[atom,:]-=ELF1.origin
 end
+#-------------------------------------------------------------------------------
 
-
-file=open(string("/home/moogmt/test.xyz"),"w")
 file_out=open(string("/home/moogmt/test_dist.dat"),"w")
-write(file,string(2*size(atom1s)[1],"\nCHECK\n"))
-for w=1:size(atom1s)[1]
-atom1=atom1s[w]
-atom2=atom2s[w]
 
+for atom1=1:32
+for atom2=33:96
+
+#------------------------------------------------------------------------------
 distanceatm=cell_mod.distance( atoms, cell2, atom1, atom2 )
+#------------------------------------------------------------------------------
+
+if distanceatm < 3.0
+
+#-----------------
 # Ajusting atom2
+#------------------------------------------------------------------------------
 for j=1:3
     di = atoms.positions[atom1,j]-atoms.positions[atom2,j]
     if di > cell2.length[j]*0.5
@@ -66,18 +63,29 @@ for j=1:3
 	atoms.positions[atom2,j] -= cell2.length[j]
     end
 end
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 temp1=atoms.positions[atom1,:]
 temp2=atoms.positions[atom1,:]
 for i=1:3
 	temp1[i]=cell_mod.wrap(atoms.positions[atom1,i],params[i])
 	temp2[i]=cell_mod.wrap(atoms.positions[atom2,i],params[i])
 end
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 center=(atoms.positions[atom1,:]+atoms.positions[atom2,:])/2.
+#------------------------------------------------------------------------------
+#--------------
 # Wrapping PBC
+#------------------------------------------------------------------------------
 for i=1:3
 	center[i]=cell_mod.wrap(center[i], params[i])
 end
+#------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
 index=[0,0,0]
 for i=1:3
 	check=center[i]*ELF1.nb_vox[i]/params[i]
@@ -89,11 +97,16 @@ for i=1:3
 		index[i]=0
 	end
 end
+#------------------------------------------------------------------------------
 
+#------------------------------------------------------------------------------
 distance1=0
 for i=1:3
     distance1+=cell_mod.dist1D( index[i]*cell2.length[i]/ELF1.nb_vox[i], center[i], cell2.length[i] )^2
 end
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
 for l=-1:1:1
 	for m=-1:1:1
 		for n=-1:1:1
@@ -120,25 +133,69 @@ for l=-1:1:1
 	    	end
 	end
 end
+#------------------------------------------------------------------------------
 
+#------------------
 for i=1:3
 	index[i] += 1
 end
+#------------------
 
-distance3=0
-for i=1:3
-	distance3 += cell_mod.dist1D(temp1[i],index[i]*params[i]/ELF1.nb_vox[i],params[i])^2
+#-------------
+# Adding data
+#---------------------------------------------------
+push!(used,0)
+push!(distance_data,distanceatm)
+push!(elf_data,ELF1.matrix[index[1],index[2],index[3]])
+#---------------------------------------------------
+
+print("step:",step,"\n")
+
+#endif
 end
-distance3 = sqrt(distance3)
-if distance3 > distanceatm
-	print(atom1," ",atom2,"\n")
+# end atom2
+end
+# end atom1
+end
+# end step
 end
 
+min_distance=0.9
+max_distance=3.0
+n_distance=100
+d_distance=(max_distance-min_distance)/n_distance
 
-write(file_out,string(distance3," ",ELF1.matrix[index[1],index[2],index[3]],"\n"))
+min_elf=0
+max_elf=1.0
+n_elf=100
+d_elf=(max_elf-min_elf)/n_elf
 
+hist_2D=zeros(n_elf,n_distance)
+
+count=0
+
+for i=1:n_elf
+    print("progress: ",i/n_elf*100,"%\n")
+    for j=1:n_distance
+        for k=1:size(used)[1]
+            if used[k] == 0
+                if i*d_elf+min_elf < elf_data[k] && (i+1)*d_elf+min_elf > elf_data[k] && j*d_distance+min_distance < distance_data[k] && (j+1)*d_distance+min_distance > distance_data[k]
+                    used[k] += 1
+                    hist_2D[i,j] += 1
+                    count += 1
+                end
+            end
+        end
+    end
 end
-end
 
-close(file)
-close(file_out)
+hist_2D /= count
+
+file_hist=open("/home/moogmt/hist.dat","w")
+for i=1:n_elf
+    for j=1:n_distance
+        write(file_hist,string(i*d_distance+min_distance," ",j*d_elf+min_elf," ",hist_2D[i,j],"\n"))
+    end
+    write(file_hist,"\n")
+end
+close(file_hist)
