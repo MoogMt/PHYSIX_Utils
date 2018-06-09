@@ -194,7 +194,7 @@ hist_2D /= count
 file_hist=open("/home/moogmt/hist.dat","w")
 for i=1:n_elf
     for j=1:n_distance
-        write(file_hist,string(i*d_distance+min_distance," ",j*d_elf+min_elf," ",hist_2D[i,j],"\n"))
+        write(file_hist,string(j*d_distance+min_distance," ",i*d_elf+min_elf," ",hist_2D[i,j],"\n"))
     end
     write(file_hist,"\n")
 end
