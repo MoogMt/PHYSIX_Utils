@@ -1,14 +1,9 @@
 include("contactmatrix.jl")
 
-# Thermodynamical values
-Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]
-Temperature=[2000,2250,2500,3000,3500]
-cut_offs=[1.6,1.75,1.8]
-
 # Current Volume and Temperature
-current_volume=parse(Float64,Volumes[1])
-current_temperature=Temperature[4]
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/3000K/")
+current_volume=parse(Float64,"8.82")
+for T in [2000,2500,3000]
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/",T,"K/")
 file=string(folder,"TRAJEC_wrapped.xyz")
 
 # Time values
@@ -21,39 +16,45 @@ cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 
-cutoff=1.8
+cutoff=1.7
 atom=1
 bond_matrix=zeros(nb_steps,nb_atoms)
 for i=1:nb_steps
-    for j=1:nb_atoms
+    for j=33:nb_atoms
         if j != atom
-            if cell_mod.distance(atoms[i],cell,atom,j) < co
+            if cell_mod.distance(atoms[i],cell,atom,j) < 1.7
+                print("progress: ",i/nb_steps*100,"\n")
                 bond_matrix[i,j] += 1
-                print(bond_matrix[i,j])
             end
         end
     end
 end
 
-
-steps=Int(trunc(nb_steps*0.01))
-time_corr_tot=zeros(steps)
-for i=32:nb_atoms
-    print("atom:",i,"\n")
-    time_corr_loc=zeros(steps)
-    for t0=1:steps
-        for t=1:nb_steps-1000-t0
-            print("check:",bond_matrix[t,i]*bond_matrix[t+t0,i],"\n")
-            time_corr_loc[t0] += bond_matrix[t,i]*bond_matrix[t+t0,i]
+function autocorrelation(x,N,i,M)
+    C=zeros(N)
+    for k=i:i+M
+        for n=1:N-1
+            C[n] += x[k]*x[k-n]
         end
-        time_corr_loc[t0] /= (steps-t0)
     end
-    time_corr_tot += time_corr_loc
+    return C/M
 end
-time_corr_tot /= nb_atoms
 
-file_check=open("/home/moogmt/time_corr.dat","w")
+steps=15000
+nb_steps=30000
+time_corr_tot=zeros(steps)
+for i=33:nb_atoms
+    print("progress:",(i-32)/64*100,"%\n")
+    time_corr_loc=autocorrelation(bond_matrix[:,i-32],steps,steps,nb_steps-steps)
+    for j=1:M
+        time_corr_tot[j] += time_corr_loc[j]
+    end
+end
+time_corr_tot /= 64
+
+file_check=open(string("/home/moogmt/time_corr_",current_volume,"-",T,".dat"),"w")
 for i=1:steps
     write(file_check,string(i*unit*stride," ",time_corr_tot[Int(i)],"\n"))
 end
 close(file_check)
+end
