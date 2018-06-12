@@ -2,7 +2,8 @@ include("contactmatrix.jl")
 
 # Current Volume and Temperature
 current_volume=parse(Float64,"8.82")
-for T in [2000,2500,3000]
+# for T in [2000,2500,3000]
+T=3000
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",current_volume,"/",T,"K/")
 file=string(folder,"TRAJEC_wrapped.xyz")
 
@@ -17,45 +18,65 @@ nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 
 cutoff=1.7
-atom=1
-bond_matrix=zeros(nb_steps,Int(trunc((nb_atoms*(nb_atoms-1)/2))))
+
+steps=8000
+nb_steps=30000
+time_corr_tot=zeros(steps)
+
+for atom=1:32
+
+
+bond_matrix=zeros(nb_steps,Int(trunc(nb_atoms-1)))
 for step=1:nb_steps
-    for i=1:nb_atoms
-        for j=i+1:nb_atoms
-            if cell_mod.distance(atoms[step],cell,i,j) < 1.7
-                bond_matrix[step,i+j] += 1
+    for i=33:nb_atoms-1
+        if i != atom
+            if cell_mod.distance(atoms[step],cell,i,atom) < 1.7
+                bond_matrix[step,i] += 1
             end
         end
     end
 end
 
-function autocorrelation(x,N,i,M)
+function autocorrelation(x,avg,N,i,M)
     C=zeros(N)
     for k=i:i+M
         for n=1:N-1
-            C[n] += x[k]*x[k-n]
+            C[n] += (x[k]-avg)*(x[k-n]-avg)
         end
     end
-    return C/C[1]
+    return C/M
 end
 
-steps=5000
-nb_steps=30000
-time_corr_tot=zeros(steps)
-for i=1:Int(trunc((nb_atoms*(nb_atoms-1)/2)))
-    print("progress:",i/*(nb_atoms*(nb_atoms-1)/2)*100,"%\n")
-    time_corr_loc=autocorrelation(bond_matrix[:,i],steps,steps,nb_steps-steps)
+function average(x)
+    avg=0
+    for i=1:size(x)[1]
+        avg += x
+    end
+    return avg/size(x)[1]
+end
+
+time_corr=zeros(steps)
+for i=33:nb_atoms-1
+    print("progress:",i/nb_atoms*100,"%\n")
+    time_corr_loc=autocorrelation(bond_matrix[:,i],average(bond_matrix[:,i]),steps,0,nb_steps-steps)
     for j=1:steps
-        time_corr_tot[j] += time_corr_loc[j]
+        time_corr[j] += time_corr_loc[j]/63
     end
 end
+
 for i=1:steps
-    time_corr_tot[i] = time_corr_tot[i]/(nb_atoms*(nb_atoms-1)/2)
+    time_corr_tot[i] += time_corr[i]/32
 end
 
-file_check=open(string("/home/moogmt/time_corr_",current_volume,"-",T,".dat"),"w")
+end
+
+# for i=1:steps
+#     time_corr_tot[i] = time_corr_tot[i]/time_corr_tot[1]
+# end
+
+file_check=open(string("/home/moogmt/time_",current_volume,"-",T,".dat"),"w")
 for i=1:steps
     write(file_check,string(i*unit*stride," ",time_corr_tot[Int(i)],"\n"))
 end
 close(file_check)
-end
+# end
