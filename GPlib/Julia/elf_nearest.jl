@@ -2,9 +2,9 @@ include("atoms.jl")
 include("cell.jl")
 include("cubefile.jl")
 
-step_max=1001
-step_min=1
-d_step=10
+step_max=49
+step_min=0
+d_step=1
 
 distance_data=[]
 elf_data=[]
@@ -13,7 +13,7 @@ used=[]
 for step=step_min:d_step:step_max
 
 #------------------------------------------------------------------------------
-atoms, cell1, ELF1 = cube_mod.readCube(string("/home/moogmt/CO2/CO2_AIMD/9.0_ELF/",step,"_structure/ELF.cube"))
+atoms, cell1, ELF1 = cube_mod.readCube(string("/home/moogmt/ELF_check/8.82_dyn/",step,"_structure/ELF.cube"))
 #------------------------------------------------------------------------------
 
 #---------------
@@ -42,14 +42,31 @@ end
 
 file_out=open(string("/home/moogmt/test_dist.dat"),"w")
 
-for atom1=3:83
-for atom2=85:size(atoms.names)[1]
+for atom1=1:32
+
+distances_check=zeros(64)
+indexes=zeros(64)
+
+for atom3=33:96
 
 #------------------------------------------------------------------------------
-distanceatm=cell_mod.distance( atoms, cell2, atom1, atom2 )
+indexes[atom3-32] = atom3-32
+distances_check[atom3-32] = cell_mod.distance( atoms, cell2, atom1, atom3 )
 #------------------------------------------------------------------------------
+# end atom2
+end
 
-if distanceatm < 3.0
+for i=1:64
+    for j=i+1:64
+        if distances_check[j] < distances_check[i]
+            stock=indexes[j]
+            indexes[j] = indexes[i]
+            indexes[i] = stock
+        end
+    end
+end
+
+atom2=Int(trunc(indexes[2]))
 
 #-----------------
 # Ajusting atom2
@@ -144,22 +161,15 @@ end
 #-------------
 # Adding data
 #---------------------------------------------------
-push!(used,0)
-push!(distance_data,distanceatm)
-push!(elf_data,ELF1.matrix[index[1],index[2],index[3]])
+push!( used, 0)
+push!( distance_data,  cell_mod.distance( atoms, cell2, atom1, atom2 ) )
+push!( elf_data, ELF1.matrix[ index[1], index[2], index[3]] )
 #---------------------------------------------------
 
-
-
-#endif
-end
-# end atom2
-end
 # end atom1
 end
 
 print("step:",step,"\n")
-
 # end step
 end
 
@@ -194,7 +204,7 @@ end
 
 hist_2D /= count
 
-file_hist=open("/home/moogmt/histOH_AndreaShoot1.dat","w")
+file_hist=open("/home/moogmt/hist.dat","w")
 for i=1:n_elf
     for j=1:n_distance
         write(file_hist,string(j*d_distance+min_distance," ",i*d_elf+min_elf," ",hist_2D[i,j],"\n"))
