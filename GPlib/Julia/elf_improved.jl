@@ -2,9 +2,9 @@ include("atoms.jl")
 include("cell.jl")
 include("cubefile.jl")
 
-step_max=49
-step_min=0
-d_step=1
+step_max=1001
+step_min=1
+d_step=10
 
 distance_data=[]
 elf_data=[]
@@ -13,7 +13,7 @@ used=[]
 for step=step_min:d_step:step_max
 
 #------------------------------------------------------------------------------
-atoms, cell1, ELF1 = cube_mod.readCube(string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/8.82_dyn/",step,"_structure/ELF.cube"))
+atoms, cell1, ELF1 = cube_mod.readCube(string("/media/moogmt/Stock/cube_TS14_gly/ELF_shoot1_",step,".cube"))
 #------------------------------------------------------------------------------
 
 #---------------
@@ -42,8 +42,8 @@ end
 
 file_out=open(string("/home/moogmt/test_dist.dat"),"w")
 
-for atom1=1:32
-for atom2=33:size(atoms.names)[1]
+for atom1=3:83
+for atom2=85:size(atoms.names)[1]
 
 #------------------------------------------------------------------------------
 distanceatm=cell_mod.distance( atoms, cell2, atom1, atom2 )
