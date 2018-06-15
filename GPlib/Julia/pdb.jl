@@ -86,8 +86,8 @@ function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <:
 
   out=open(file,"w")
 
-  a,b,c = string(cell.a), string(cell.b), string(cell.c)
-  alpha, beta, gamma = string(cell.alpha), string(cell.beta), string(cell.gamma)
+  a,b,c = string(cell.length[1]), string(cell.length[2]), string(cell.length[3])
+  alpha, beta, gamma = string(cell.angles[1]), string(cell.angles[2]), string(cell.angles[3])
 
   cryst1=string("CRYST1 ",a)
   cryst1=utils.spaces(cryst1,16-length(cryst1))

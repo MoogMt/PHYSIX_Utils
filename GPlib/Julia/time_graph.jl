@@ -23,7 +23,7 @@ end
 
 # Current Volume and Temperature
 
-Volumes=[8.82,9.0,9.2,9.8]
+Volumes=[9.4]
 
 for volume in Volumes
 # for T in [2000,2500,3000]
@@ -32,7 +32,7 @@ folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",volume,"/",T,"K/")
 file=string(folder,"TRAJEC_wrapped.xyz")
 
 # Time values
-unit=0.0005
+unit=0.0005*5
 stride=1
 frac=0.8
 cutoff=1.7

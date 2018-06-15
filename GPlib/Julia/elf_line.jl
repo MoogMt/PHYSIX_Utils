@@ -2,12 +2,13 @@ include("atoms.jl")
 include("cell.jl")
 include("cubefile.jl")
 
-step_max=23
-step_min=1
-d_step=1
 
-start_distance=0
-stoping_distance=1.75
+step_min=1
+step_max=1001
+d_step=10
+
+start_distance=1.2
+stoping_distance=2.0
 nb_points=25
 
 distance_data=[]
@@ -17,7 +18,7 @@ used=[]
 for step=step_min:d_step:step_max
 
     #------------------------------------------------------------------------------
-    atoms, cell1, ELF1 = cube_mod.readCube(string("/home/moogmt/CO2/CO2_AIMD/9.0_ELF/",step,"_structure/ELF.cube"))
+    atoms, cell1, ELF1 = cube_mod.readCube(string("/media/moogmt/Stock/cube_TS14_gly/ELF_shoot1_",step,".cube"))
     #------------------------------------------------------------------------------
 
     #---------------
@@ -52,7 +53,7 @@ for step=step_min:d_step:step_max
             distanceatm=cell_mod.distance( atoms, cell2, atom1, atom2 )
             #------------------------------------------------------------------------------
 
-            if distanceatm > start_distance && distanceatm < stop_distance
+            if distanceatm > start_distance && distanceatm < stoping_distance
 
                 #-----------------
                 # Ajusting atom2
@@ -205,7 +206,7 @@ end
 
 hist_2D /= count
 
-file_hist=open(string("/home/moogmt/line_elf_bond_start",start_distance,"_stop_",stoping_distance,".dat"),"w")
+file_hist=open(string("/home/moogmt/lineOH_elf_bond_start",start_distance,"_stop_",stoping_distance,".dat"),"w")
 for i=1:n_elf
     for j=1:nb_points
         write(file_hist,string(j," ",i*d_elf+min_elf," ",hist_2D[i,j],"\n"))

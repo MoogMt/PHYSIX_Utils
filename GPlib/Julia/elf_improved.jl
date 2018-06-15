@@ -13,7 +13,7 @@ used=[]
 for step=step_min:d_step:step_max
 
 #------------------------------------------------------------------------------
-atoms, cell1, ELF1 = cube_mod.readCube(string("/home/moogmt/CO2/CO2_AIMD/9.0_ELF/",step,"_structure/ELF.cube"))
+atoms, cell1, ELF1 = cube_mod.readCube(string("/media/moogmt/Stock/cube_TS14_gly/ELF_shoot2_",step,".cube"))
 #------------------------------------------------------------------------------
 
 #---------------
@@ -194,7 +194,7 @@ end
 
 hist_2D /= count
 
-file_hist=open("/home/moogmt/histOH_AndreaShoot1.dat","w")
+file_hist=open("/home/moogmt/histOH.dat","w")
 for i=1:n_elf
     for j=1:n_distance
         write(file_hist,string(j*d_distance+min_distance," ",i*d_elf+min_elf," ",hist_2D[i,j],"\n"))

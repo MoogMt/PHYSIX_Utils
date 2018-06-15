@@ -1,11 +1,19 @@
-# Reading PDB file
-folder="/media/moogmt/Stock/CO2/Structures/Cmca/Conv/"
-atoms, cell=pdb.readStep( string(folder,"Cmca.pdb") )
+include("xyz.jl")
+include("pdb.jl")
 
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-xyz.getNbSteps(string(folder,"TRAJEC_wrapped.xyz"))
+# Reading PDB file
+folder="/media/moogmt/Stock/CO2/Structures/Pa3/SuperFF/"
+atoms, cell=pdb.readStep( string(folder,"Pa3-super.pdb") )
+
+# folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
+# filexyz.getNbSteps(string(folder,"TRAJEC_wrapped.xyz"))
 #folder2="/home/moogmt/Structures/"
 #atoms, cell=pdb.readStep( string(folder2,"Cmca-super.pdb") )
+
+atom2=atom_mod.AtomList(size(atoms.atom_names)[1])
+atom2.positions=atoms.positions
+atom2.names=atoms.atom_names
+atom2.index=atoms.atom_index
 
 #--------------------
 # Building molecules
@@ -19,7 +27,7 @@ for i=1:nb_atoms
         atoms.mol_names[i]="CO2"
         count_OM=1
         for j=1:nb_atoms
-            if atom_mod.distance(atoms.positions[i,:],atoms.positions[j,:]) < 1.6 && i != j
+            if cell_mod.distance(atom2,cell,i,j) < 1.6 && i != j
                 #Adding oxygen to molecule
                 atoms.atom_names[j]=string("O",count_OM) # Changing name to O1 or O2
                 atoms.mol_names[j]="CO2"                 # Changing molecule name
@@ -109,5 +117,5 @@ end
 #-----------------
 # Writting PDB
 #------------------------------------------------
-pdb.write(atoms,cell,"/home/moogmt/test.pdb")
+pdb.writeStep(atoms,cell,"/home/moogmt/Pa3_ready.pdb")
 #------------------------------------------------
