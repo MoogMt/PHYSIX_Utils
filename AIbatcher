@@ -1,0 +1,962 @@
+#!/bin/bash
+
+#==========================#
+#  Ab Initio Meta Batcher  #
+#==========================#
+
+#----------------------------------------------
+#
+#
+#
+#----------------------------------------------
+
+# Starting message
+echo -e "\n---------------------------------"
+echo -e "  Starting Meta Ab Initio Batch  "
+echo -e "---------------------------------\n"
+
+# Sourcing bashrc
+source $home"/.bashrc"
+
+# Location Location Location!
+pwd=$(pwd)
+
+#-------------------------------------------
+# Checking parameter file
+#--------------------------
+param=$pwd"/Param.conf"
+echo "Checking parameter file"
+if [ -e $param ]
+then
+    echo -e "Parameter file has been found."
+else
+    echo -e "No parameter file was no found."
+    echo -e "Stopping now\n"
+    exit
+fi
+#From that point, parameter file is assumed to exist
+
+#-----------------------------------------------#
+# Accessing general parameters for simulations  #
+#-----------------------------------------------#
+# Simulation Parameters
+absoft=""               # ( Simulation - Required ) Software to use for the simulation (QE/CASTEP/CPMD)
+sim_type=""             # ( Simulation - Required ) Type of calculation
+func_type=""            # ( Simulation - Required )Type of functionnal used (DFT)
+VdW_corr=""             # ( Simulation - Optionnal ) Type of VdW correction to use (if any)
+ecutwfc=""              # ( Simulation - Required ) Cut-off value for the electronic wavefunction
+ecutrho=""              # ( Simulation - Optionnal ) Cut-off value for the electronic density
+input_pos=""            # ( Simulation - Required ) Choice of input parameters for the atomic positions (cf PWscf input)
+kx="";ky="";kz=""       # K-space sampling in x,y,z direction (Optionnal)
+defaultk=""             # Min number of K-Points in one direction
+n_cores=""              # Number of core to use for a single simulation
+n_seconds=""                       # Maximum duration of one simulation
+cell_factor=""                     # Parameter for the cell used in building the pseudopotential
+typeset -i electron_maxstep=0      # Maximum number of scf incrementations
+typeset -i n_step=0                # Number of simulation steps
+typeset -i n_type=0                # Number of different atoms
+typeset -i n_temp=0     # Number of temperature points 
+typeset -i n_pres=0     # Number of pressure points
+pres[0]=""              # Pressure values to explore
+temp[0]=""              # Temperature values to explore
+atom_type[0]=""         # Type of atoms
+mass_atom_type[0]=""    # Mass for each type
+pseudo[0]=""            # Pseudo for each type
+# Paths
+pseudo_path=""          # (Optionnal) Path to the pseudopotential directory, by default: "./pseudos/"
+structure_path=""       # (Optionnal) Path to the directory containing the structures, by default "./Structures/"
+workdir=""              # (Optionnal) Path to the general working directory, by default "./Structures/"
+job_path=""             # (Optionnal) Path to the job writting script to be used, by default "./Scripts/"
+input_path=""           # (Optionnal) Path to the input writting script to be used, by default "./Scripts/"
+listing_path=""         # (Optionnal) Path to the file listing the structures that will be simulated, by default: "./Structures/listing"
+# Dummy variables
+typeset -i i=0        
+typeset -i nb=0
+# Reading parameter file
+echo "Reading Parameter file"
+echo "----------------------"
+while read lparam
+do
+    topic=$(echo $lparam | cut -d ":" -f1)
+    data=$(echo $lparam | cut -d ":" -f2)
+
+    if [[ $topic == "Atomic Species" ]]
+    then
+	i=1
+	nb=0
+	echo "Atomic Species, Mass and Pseudo-Potentials"    
+    elif [[ $topic == "absoft" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	absoft=$data
+	echo "Software to be used: "$absoft
+    elif [[ $topic == "n_cores" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	n_cores=$data
+	echo "Number of core to be used: "$n_cores
+    elif [[ $topic == "input_path" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	input_path=$data
+	echo "Path to the input writting script: "$input_path
+    elif [[ $topic == "electron_maxstep" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	electron_maxstep=$data
+	echo "Maximum number of self-consistent cycles: "$electron_maxstep
+    elif [[ $topic == "cell_factor" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	cell_factor=$data
+	echo "cell factor for pseudopotential construction: "$cell_factor
+    elif [[ $topic == "workdir" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	workdir=$data
+	echo "Path of the root folder where the results will be stored: "$workdir
+    elif [[ $topic == "structure_path" ]]
+    then 
+	if [[ $i != 0 ]]
+	then
+	    i=0
+	fi
+	structure_path=$data
+	echo "Path to the folding containing the structures: "$structure_path
+    elif [[ $topic == "job_path" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	job_path=$data
+	echo "Path to the job writting script: "$job_path
+    elif [[ $topic == "n_seconds" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	n_seconds=$data
+	echo "Maximum number of seconds for the simulation: "$n_seconds
+    elif [[ $topic == "sim_type" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	sim_type=$data 
+	echo "Simulation type: "$sim_type
+    elif [[ $topic == "n_type" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	n_type=$data
+	echo "Number of atomic species: "$n_type
+	
+    elif [[ $topic == "n_temp" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	n_temp=$data
+	echo "Number of temperature points: "$n_temp
+    elif [[ $topic == "ecutwfc" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	ecutwfc=$data
+	echo "Cut-Off for electronic wavefunction: "$ecutwfc" Ry"
+    elif [[ $topic == "input_pos" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	input_pos=$data
+	echo "Convention for atomic positions: "$input_pos
+    elif [[ $topic == "ecutrho" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	ecutrho=$data
+	echo "Cut-Off for electronic density: "$ecutrho" Ry"
+    elif [[ $topic == "n_pres" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+
+	fi
+	n_pres=$data
+	echo "Number of pressure points: "$n_pres
+    elif [[ $topic == "listing_path" ]]
+    then
+	if [ $i != 0 ]
+	then
+	    i=0
+	fi
+	listing_path=$data
+	echo "Path to file listing structure: "$listing_path
+    elif [[ $topic == "n_step" ]]
+    then
+       if [ $i != 0 ]
+       then
+           i=0
+       fi
+       n_step=$data
+       echo "Number of simulation steps: "$n_step
+    elif [[ $topic == "func_type" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	func_type=$data
+	echo "Type of functionnal: "$func_type
+    elif [[ $topic == "VdW_corr" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	VdW_corr=$data
+	func_type=$func_type".VdW_corr"
+	echo "Application of VdW corrections" 
+    elif [[ $topic == "k" ]]
+    then
+	kx=$(echo $data | cut -d " " -f1)
+	ky=$(echo $data | cut -d " " -f2)
+	kz=$(echo $data | cut -d " " -f3)
+    elif [[ $topic == "kx" ]]
+    then
+	kx=$data
+    elif [[ $topic == "pres" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	typeset -i j=1
+	echo "Pressure values:"
+	while [ $j -lt $(($n_pres + 1))  ]
+	do
+	    typeset -i k=$j+1
+	    pres[$j]=$(echo $lparam | cut -d " " -f${k})
+	    echo "P="${pres[$j]}"kbar"
+	    j=$j+1
+	done
+    elif [[ $topic == "temp" ]]
+    then
+	if [ $i != 0 ]
+	then
+            i=0
+	fi
+	j=0
+	echo "Temperature values:"
+	while [ $j -lt $(($n_temp + 1)) ]
+	do
+	    typeset -i k=$j+1
+	    temp[$j]=$(echo $lparam | cut -d " " -f${k})
+	    echo "T="${temp[j]}"K"
+	done
+    elif [ $i==1 ]
+    then
+	atom_type[$nb]=$(echo $lparam | cut -d " " -f1)
+	mass_atom_type[$nb]=$(echo $lparam | cut  -d " " -f2)
+	pseudo[$nb]=$(echo $lparam | cut -d " " -f3)
+	echo ${atom_type[$nb]}" "${mass_atom_type[$nb]}" "${pseudo[$nb]}
+	nb=$nb+1
+    fi
+done < $param
+# End of read
+echo -e "Parameter file read.\n"
+
+# Trimming
+sim_type="$(echo -e "${sim_type}" | tr -d '[[:space:]]')"
+func_type="$(echo -e "${func_type}" | tr -d '[[:space:]]')"
+VdW_corr="$(echo -e "${VdW_corr}" | tr -d '[[:space:]]')"
+absoft="$(echo -e "${absoft}" | tr -d '[[:space:]]')"
+ecutwfc="$(echo -e "${ecutwfc}" | tr -d '[[:space:]]')"
+ecutrho="$(echo -e "${ecutrho}" | tr -d '[[:space:]]')" 
+input_pos="$(echo -e "${input_pos}" | tr -d '[[:space:]]')" 
+structure_path="$(echo -e "${structure_path}" | tr -d '[[:space:]]')" 
+workdir="$(echo -e "${workdir}" | tr -d '[[:space:]]')" 
+job_path="$(echo -e "${job_path}" | tr -d '[[:space:]]')" 
+input_path="$(echo -e "${input_path}" | tr -d '[[:space:]]')" 
+n_seconds="$(echo -e "${n_seconds}" | tr -d '[[:space:]]')"
+n_cores="$(echo -e "${n_cores}" | tr -d '[[:space:]]')"
+cell_factor="$(echo -e "${cell_factor}" | tr -d '[[:space:]]')"
+
+# Checking parameters
+echo -e "Checking Parameters"
+echo -e "-------------------"
+# - Simulation type
+if [[ $sim_type == "" ]]
+then
+    echo -e "No calculation type specified, simulation impossible!"
+    echo -e "------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# - Simulation code 
+if [[ $absoft == "" ]]
+then
+    echo -e "No software has been specificied. Please edit the parameter file and precise one, then restart the simulation."
+    echo -e "------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# - Number of steps of simulation
+#   If no value, then default value chosen depending on simulation type
+if [ $n_step == 0 ]
+then
+    # if relax or vc-relax, then 50
+    if [[ $sim_type == "vc-relax" ]] || [[ $sim_type == "relax" ]]
+    then
+	nstep=50
+    # if simple self consistent cycle, 0 as there is no step needed
+    elif [[ $sim_type == "scf" ]]
+    then
+	nstep=0
+    # otherwise, it's md simulation, and the number of steps is critical. Asking user to precise it
+    else
+	echo -e "No number of step specified for a molecular dynamic simulation."	
+	echo -e "------------------------\n"
+	echo -e "Stopping now...\n"
+	exit
+    fi
+fi
+# Check the max time of simulation
+if [[ $n_seconds == "" ]]
+then
+    echo "No maximum time specified for the simulation. This parameter is required, edit the parameter file and relaunch the script."
+    echo -e "------------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# Check the number of cores
+if [[ $n_cores == "" ]]
+then
+    echo "No maximum time specified for the simulation. This parameter is required, edit the parameter file and relaunch the script."
+    echo -e "------------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# Number of atom type check
+if [[ $n_type == 0 ]]
+then
+    echo -e "No atomic type has been declared, simulation impossible!\n"
+    echo -e "------------------------\n"
+    echo -e "Stopping now...\n"
+fi
+# - Type of functionnal used
+if [[ $func_type == "" ]]
+then
+    echo -e "No functionnal type specified, simulation impossible!"
+    echo -e "------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# Cut-off energies
+if [[ $ecutwfc == "" ]]
+then
+    echo "No cut-off energy specified for wavefunctions. This parameter is required for the simulation. Edit the parameter file and relaunch."
+    echo -e "----------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+if [[ $ecutrho == "" ]]
+then
+    ecutrho=$(echo "scale=1; 4*"$ecutwfc | bc -l)
+fi
+# Input position convention check
+if [[ $input_pos == "" ]]
+then
+    echo "No input convention was defined for the atomic position inside the cell. This parameter is needed. Please edit the parameter file and relaunch."
+    echo -e "-----------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# Check cell_factor
+if [[ $cell_factor == "" ]]
+then
+    # Default value
+    cell_factor="1.2"
+fi
+# Check electron_maxstep
+if [ $electron_maxstep == 0 ]
+then
+    # Default value
+    electron_maxstep=100
+fi
+# Pseudopotential check
+if [ ${#pseudo[@]} -ne $n_type ] 
+then
+    echo -e "The number of pseudo-potential declared is different from the number of atom types declared. Fix the parameter file and relaunch."
+    echo -e "------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+else 
+    # checking pseudo_path
+    if [[ $pseudo_path == "" ]]
+    then
+	echo "No pseudo-path specified, using the default location: "$pwd"/pseudos"
+	pseudo_path=$pwd"/pseudos"
+    fi
+    # checking the existence of all used pseudo-potentials
+    i=0
+    while [ $i -lt ${#pseudo[@]} ]
+    do
+	if [ ! -e $pseudo_path"/"${pseudo[$i]} ]
+	then
+	    echo -e "The pseudo-potential "${pseudo[$i]}" was not found in "$pwd"/pseudos . Fix this by either moving the pseudo-potential there or removing the pseudo-potential from the list in the parameter file."
+	    echo -e "------------------------\n"
+	    echo "Stopping now...\n"
+	    exit
+	fi
+	echo $pseudo_path"/"${pseudo[$i]}
+	i=$i+1
+    done
+fi
+# Atom types check
+if [ ${#atom_type[@]} -ne $n_type ]
+then
+    echo -e "The number of atom types found is different from the number of atom types declared. Fix the parameter file and relaunch."
+    echo -e "------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# Mass of Atom types check
+if [ ${#mass_atom_type[@]} -ne $n_type ]
+then
+    echo -e "The number of mass for the atom types is different from the number of atom types declared. Fix the parameter file and relaunch."
+    echo -e "------------------------\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# Pressure check
+if [ $n_pres = 0 ]
+then
+    # If no pressure is specified, just using ambiant pressure
+    pres[0]="0.001"
+else 
+    # Checking that there is at least as many values in pres[] than specified in n_pres
+    typeset -i i=1
+    while [ $i -lt $(($n_pres + 1)) ]
+    do
+	if [[ ${pres[$i]} == "" ]]
+	then
+	    echo "There are less pressure values written as was declared in n_pres. Edit the parameter file and relaunch this script."
+	    echo -e "------------------------------\n"
+	    echo -e "Stopping now...\n"
+	    exit
+	fi
+	i=$i+1
+    done
+fi
+# Temperature check
+if [ $n_temp = 0 ]
+then
+    # If no temperature is specified, using room temperature
+    temp[0]="300"
+    
+else
+    # Checking that there is at least as many values in temp[]than specified in n_tem
+    typeset -i i=1
+    while [ $i -lt $(($n_temp + 1)) ]
+    do
+	if [[ ${temp[$i]} == "" ]]
+	then
+	    echo "There are less temperature values written as was declared in n_temp. Edit the parameter file and relaunch this script."
+	    echo -e "-----------------------------\n"
+	    exit
+	fi
+	i=$i+1
+    done
+fi
+# Checking for invalid parameters
+# - no pressure and vc_relax
+if ([[ $sim_type == "vc-relax" ]] && [[ $n_pres == 0 ]])
+then
+    echo "For a variable cell relaxation, you need at least one pressure point specified."
+    echo -e "-----------------------------\n"
+    exit
+fi
+# - pressure and not vc_relax or vc_md
+if (([[ $sim_type != "vc-relax" ]] || [[ $sim_type != "vc-md" ]]) && [ $n_pres == 0 ])
+then
+    echo "You specified a pressure value for a simulation that is not variable cell, which is not something that can be done. Putting n_pres to 0, ignoring pres[] and proceeding..."
+    n_pres=0
+fi
+# - temperature while in scf or relax
+if (([[ $sim_type == "scf" ]] || [[ $simtype == "relax" ]] || [[ $simtype == "vc-relax" ]]) &&  [ $_temp -gt 0 ])
+then
+    echo "You specified at least one temperature value for a scf, relax or vc-relax simulation, which operate at 0K. Putting n_temp to 0, ignoring temp[] and proceeding..." 
+    n_temp=0
+fi
+# Check on Structure path
+if [[ $structure_path == "" ]]
+then
+    echo "No Structure path provided, using default: "$pwd"/Structures"
+    structure_path=$pwd"/Structures"
+fi
+# Check on listing path
+if [[ $listing_path == "" ]]
+then
+    echo "No listing path provided, using default: "$pwd"/listing"
+    listing_path=$pwd"/listing"
+fi
+# Check on defaultk
+if [[ $defaultk == "" ]]
+then
+    defaultk="6"
+fi
+if [ $(echo $defaultk">1" | bc -l ) -lt 1 ]
+then
+    echo -e "defaultk is too low.\n"
+    echo -e "Stopping now...\n"
+    exit
+fi
+# Checking the existence of job lauching script at job_path
+if [[ $input_path != "" ]]
+then
+    if [[ ! -e $input_path"/"$absoft"_input_writer" ]]
+    then
+	echo -e "The input writer script for "$absoft" was not found at the indicated path: "$input_path" \nSimulation aborted." 
+	echo -e "Stopping now...\n"
+	exit
+    else
+	echo "Input writer script was found at "$input_path" . Proceeding..."
+    fi
+else
+    input_path=$pwd
+    if [[ ! -e  $pwd"/"$absoft"_input_writer" ]]
+    then
+	echo "The input writter script for "$absoft" was not found at default path: "$input_path" \nSimulation aborted." 
+	echo - "Stopping now...\n"
+	exit
+    else
+	echo "Input writter script was found at "$input_path" . Proceeding..." 
+    fi
+fi
+# Checking the existence of job lauching script at job_path
+if [[ $job_path != "" ]]
+then
+    if [[ ! -e $job_path"/"$absoft"_job_writer" ]]
+    then
+	echo -e "The job writter script for "$absoft" was not found at the indicated path: "$job_path" . Simulation aborted." 
+	echo -e "Stopping now...\n"
+	exit
+    else
+	echo "Job writer script was found at "$input_path" . Proceeding..."
+    fi
+else
+    job_path=$pwd
+    if [[ ! -e  $pwd"/"$absoft"_job_writer" ]]
+    then
+	echo -e "The job writter script for "$absoft" was not found at default path: "$job_path" . Simulation aborted." 
+	echo -e "Stopping now...\n"
+	exit
+    else
+	echo "Job writer script was found at "$input_path" . Proceeding..."
+    fi
+fi
+# If we reach this point, we're ok
+echo -e "Parameters have been checked, proceeding...\n"
+
+#--------------------------
+# Checking Structure files
+#--------------------------
+echo -e "Checking Structure files..."
+# - Checking for existence of folder
+if [ -e $structure_path ]
+then
+    # - If found, then read Structure list
+    if [ -e $listing_path ]
+    then
+        # - If found, checking the existence of 
+        #   all listed structures in form of . res files
+	#   using the list
+        while read line
+        do
+            structure_name=$(echo $line | cut -d " " -f1)
+            if [ -e $pwd"/Structures/"$structure_name".res" ]
+            then
+                echo -e "Structure "$structure_name" has been found."
+            else
+                echo -e "Structure "$structure_name" was not found. Either put the corresponding "$structure_name".res file in the Structure folder or remove "$structure_name" from the structure listing file."
+                echo -e "Stopping now...\n"
+                exit
+            fi  
+        done < $listing_path
+    else
+        echo -e "Structure listing file not found! Refer to README_Structure to fix this."
+        echo -e "Stopping now...\n"
+        exit
+    fi
+else
+    echo -e "Structure folder is missing! Refer to README_Structure to fix this."
+    echo -e "Stopping now...\n"
+    exit
+fi
+# From that point, Structures are assumed to exist
+echo -e "All structure files are accounted for. Proceeding...\n"
+
+#--------------------
+# Loop on structures
+#--------------------
+echo "Starting loop on structures"
+echo "---------------------------"
+while read line
+do
+    # Getting the name of the structure
+    structure_name=$(echo $line | cut -d " " -f1)
+    echo "Now dealing with "$structure_name
+    # Reading the .res file
+    echo "Reading .res file for atomic positions, lattice parameters and space group"
+    # Data
+    #  - Lattice length parameters
+    a="" 
+    b=""
+    c=""
+    #  - Lattice angle parameters
+    alpha=""
+    beta=""
+    gamma=""
+    #  - Space Group
+    Space_Grp=""
+    #  - Temporary stores data
+    temp=$pwd"/Structures/temp"
+    if [ -e $temp ]
+    then
+	rm $temp
+    fi
+    #  - Temporary stores atomic positions
+    temp2=$pwd"/Structures/temp2"
+    if [ -e $temp2 ]
+    then
+	rm $temp2
+    fi
+    # Putting .res data into temp file
+    #  - Clearing lines without data
+    sed "s/sing//g"  $pwd"/Structures/"$structure_name".res" > $temp
+    sed "s/cell//g" -i $temp
+    sed "s/frac//g" -i $temp
+    #  - Removing blank lines
+    sed '/^$/d' -i $temp
+    # mute variable
+    typeset -i j=0
+    # Reading temp file for lattice parameters, atomic positions and space group
+    while read line2
+    do
+        if [ $j -lt 1 ]
+        then
+            # Lattice parameters
+            a=$(echo $line2 | cut -d " " -f1)
+            b=$(echo $line2 | cut -d " " -f2)
+            c=$(echo $line2 | cut -d " " -f3)
+	    # Lattice angles
+            alpha=$(echo $line2 | cut -d " " -f4)
+            beta=$(echo $line2 | cut -d " " -f5)
+            gamma=$(echo $line2 | cut -d " " -f6)
+        else
+            current=$(echo $line2 | cut -d " " -f1)
+            if [[ $current == "Space" ]]
+	    then
+		# Space group
+                Space_Grp=$(echo $line2 | cut -d " " -f2)
+            else
+		# Atomic positions
+                echo $line2 >> $temp2
+	    fi
+        fi
+        j=$j+1
+    done < $temp
+    # Cleaning angles (findsym is nice for that)
+    alpha=$(echo $alpha | cut -d "." -f1)
+    beta=$(echo $beta | cut -d "." -f1)
+    gamma=$(echo $gamma | cut -d "." -f1)
+    # - Keeping positions in temp file
+    mv $temp2 $temp
+    # Determining General Parameters for the phase
+    Lattice_type=$(echo $Space_Grp | head -c 1)
+    echo "Lattice parameters:"
+    echo "a = $a"
+    echo "b = $b"
+    echo "c = $c"
+    echo "Lattice angles:"
+    echo "alpha = $alpha"
+    echo "beta = $beta"
+    echo "gamma = $gamma"
+    echo "Space group: "$Space_Grp
+    echo "Using Space Group to determine the simulation box."
+    # K-space sampling
+    # - first we determine the biggest latice parameter
+    lat_max=""
+    if [[ $(echo "$a>$b" | bc -l ) ]]
+    then
+	if [[ $(echo "$a>$c" | bc -l ) ]]
+	then
+	    lat_max=$a
+	else
+	    lat_max=$c
+	fi
+    elif [[ $(echo "$b>$c" | bc -l ) ]]
+    then
+	lat_max=$b
+    else
+	lat_max=$c
+    fi
+    # We take 4 as the min number of k points in one direction
+    # and we scale linearly with the ratio of the max lattice param
+    # over the lattice param in one direction.
+    if [[ $defaultk = "" ]]
+    then
+	defaultk="6"
+    fi
+    if [[ $kx == "" ]]
+    then
+	kx=$(echo "scale=0;"$defaultk"*"$lat_max"/$a" | bc -l)
+    fi
+    if [[ $ky == "" ]]
+    then 
+	ky=$(echo "scale=0;"$defaultk"*"$lat_max"/$b" | bc -l)
+    fi
+    if [[ $kz == "" ]]
+    then
+	kz=$(echo "scale=0;"$defaultk"*"$lat_max"/$c" | bc -l)
+    fi
+    # Determining the ibrav indice 
+    if [[ $Lattice_type == "R" ]]
+    then
+        # Type R
+        ibrav="5"
+    elif [[ $Lattice_type == "F" ]]
+    then
+        # Type F
+	if ([[ $a == $b ]] && [[ $b == $c ]])
+	then
+	    # - Cubic
+	    ibrav="2"
+	else
+            # - Orthorombic
+	    ibrav="10"
+	fi
+    elif [[ $Lattice_type == "C" ]]
+    then
+	# Type C
+	if ([[ $alpha == $beta ]] && [[ $beta == $gamma ]])
+	then
+       	    # - Orthorombic
+	    ibrav="9"
+	else
+	    # - Monoclinic
+	    ibrav="13"
+	fi
+    elif [[ $Lattice_type == "I" ]]
+    then
+	# Type I
+	if ([[ $a == $b ]] && [[ $b == $c ]])
+	then
+	    # - Cubic
+	    ibrav="3"
+	elif [[ $a == $b ]] || [[ $a == $c ]] || [[ $b == $c ]]
+	then
+	    # - Tetragonal 
+	    ibrav="6"
+	else
+	    # - Orthorombic
+	    ibrav="11"
+	fi
+    else
+	# Type P
+	if ([[ $a == $b ]] && [[ $b == $c ]])
+	then
+	    if [[ $alpha == "90" ]] || [[ $beta == "90" ]] || [[ $gamma == "90" ]]
+	    then
+       	        # - Cubic
+		ibrav="1"
+	    else
+	        # - Trigonal
+		ibrav="4"
+	    fi
+	elif [[ $a == $b ]] || [[ $a == $c ]] || [[ $b == $c ]]
+	then
+	    if [[ $alpha == "120" ]] || [[ $beta == "120" ]] || [[ $gamma == "120" ]]
+	    then	
+       	        # - Hexagonal
+		ibrav="4"
+	    else
+  	        # - Tetragonal
+		ibrav="6"
+	    fi
+	elif ([[ $alpha == $beta ]] && [[ $beta == $gamma ]])
+	then
+   		#  Orthorombic
+	    ibrav="8"
+	elif [[ $alpha == $beta ]] || [[ $alpha == $gamma ]] || [[ $beta == $gamma ]]
+	then
+	        # - Monoclinic
+	    ibrav="12"
+	else
+	        # - Triclinic
+	    ibrav="14"
+	fi
+    fi
+    echo "Box size and shape determined for this structure."
+    echo "All structural parameters have been acquired, proceeding..."
+    # Creating folder structure
+    echo "Structure Folder"
+    structure_folder=$pwd"/Structures/"$structure_name
+    # Checking if structure folder already exists
+    if [ ! -e $structure_folder ]
+    then
+    mkdir $structure_folder
+    fi
+    typeset -i j=0
+    while [ $j -lt $n_pres ] || [ $n_pres == 0 ]
+    do
+	typeset -i k=0
+	while [ $k -lt $n_temp ] || [ $n_temp == 0 ] 
+	do
+	    # Creation of workdking direcoty
+	    localworkdir=$pwd"/Structures/"$structure_name"/"$sim_type"/"$func_type
+	    # - If Van der Walls correction is present, adding it to repertory name
+	    if [[ $VdW_corr != "" ]]
+	    then
+		localworkdir=$localworkdir"/"$VdW_corr
+	    fi
+	    # - If temperatures are present, add them to the repertory name
+	    if [ $n_pres != 0 ]
+	    then
+		localworkdir=$localworkdir"/"${pres[$j+1]}"kbar"
+	    fi
+	    # - If pressures are present add them to the repertory name
+	    if [ $n_temp != 0 ]
+	    then
+		localworkdir=$localworkdir"/"${temp[$k+1]}"K"
+	    fi
+	    # - Checking if simulation has already been tried, if so, deleting folder
+	    if [ -e $localworkdir ]
+	    then
+		rm -r $localworkdir
+	    fi
+	    # - Creating the working directory
+	    mkdir -p $localworkdir
+	    # Moving to working directory
+	    cd $localworkdir
+	    # Writting input file in local folder
+	    echo "Writting input file in "$localworkdir" ..."
+	    # Exporting variables
+	    if [ $n_pres != 0 ]
+	    then
+		pres_value=${pres[$j+1]}
+	    fi
+	    if [ $n_temp != 0 ]
+	    then
+		temp_value=${temp[$j+1]}
+	    fi
+	    atomic_pos_path=$temp
+	    export sim_type structure_name VdW_corr func_type n_type pres_value temp_value  ecutwfc ecutrho ibrav a b c alpha beta gamma kx ky kz input_pos atomic_pos_path pseudo_path localworkdir cell_factor n_step electron_maxstep
+	    # Exporting the atomic species caracterstics (atom types, mass, and associated pseudopotentials) using a buffer file because bash is stupid
+	    # - Checking for file existence 
+	    if [ -e $localworkdir"/atom_species" ]
+	    then
+		rm $localworkdir"/atom_species"
+	    fi
+	    # - Writting data in file
+	    typeset -i l=0
+	    while [ $l -lt $n_type ]
+	    do
+		echo ${atom_type[$l]}" "${mass_atom_type[$l]}" "${pseudo[$l]} >> $localworkdir"/atom_species"
+		l=$l+1
+	    done
+	    # - Executing script
+	    error=$($input_path"/"$absoft"_input_writer")
+	    if [[ $error == "1" ]]
+	    then
+		echo "Input Writting Script has failed because of insufficient data. Simulation aborted. Check "$localworkdir"/error to see which parameter is missing."
+		echo -e "-----------------------------\n"
+		echo "Stopping now...\n"
+		exit
+	    elif [[ $error == "2" ]]
+	    then
+		echo "Input Writting Script has failed because the path given to the atomic species card is not right. Check and relaunch."
+		echo -e "------------------------------\n"
+		echo -e "Stopping now...\n"
+		exit
+	    elif [[ $error == "3" ]]
+	    then
+		echo "Input Writting Script has failed because the path given to the atom position file is not right. Check and relaunch."
+		echo -e "------------------------------\n"
+		echo -e "Stopping now...\n"
+	    else
+		echo "Input Writting Script successful!"
+	    fi
+	    # Writting executing job for the machine
+	    echo "Writting executing bash file..."
+	    # exporting variables
+	    export n_hours n_cores structure_name VdW_corr func_type localworkdir sim_type pres_value temp_value ecutwfc ecutrho n_cores n_seconds
+	    # Executing Writting Script
+	    error=$($job_path"/"$absoft"_job_writer")
+	    if [[ $error == "1" ]]
+	    then
+		echo "Job description writting script has failed because of insufficient data. Simulation aborted. Check "$localworkdir"/error to see which parameter is missing."
+		echo -e "--------------------------------\n"
+		echo "Stopping now...\n"
+	    else 
+		echo "Job Writting successful!"
+	    fi
+	    # Submitting job
+	    echo "Submitting job."
+	    #llsubmit $localworkdir"/run"
+	    # If no loop on temperature, closing the loop here
+	    if [ $n_temp == 0 ]
+	    then
+		break
+	    fi
+	    k=$k+1
+	done
+        # If no loop on pressure, closing the loop here
+	if [ $n_pres == 0 ]
+	then
+	    break
+	fi
+	j=$j+1
+    done
+    # Removing temporary file
+    rm $temp
+    # Moving on to the next structure
+    echo "Structure "$structure_name": all jobs launched, proceeding..."
+    echo "------------------------"
+done < $pwd"/listing"
+
+echo -e "\n--------------------------------------------------"
+echo -e "All simulations have been launched sucessfully."
+echo -e "--------------------------------------------------\n"

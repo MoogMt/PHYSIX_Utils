@@ -1,0 +1,131 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+
+"""
+Fonctions Radiales
+
+#------------------------------------------------
+
+#------------------------------------------------
+"""
+
+#-------------------
+# Bibliotheque plot
+#---------------------------------------------
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+#---------------------------------------------
+
+# Bibliotheques de calcul
+#---------------------------------------------
+import numpy as np
+# Factorielle
+from scipy.special import factorial
+#---------------------------------------------
+
+import sys
+
+#----------------------
+# Polynome de Laguerre
+#---------------------------------------------
+def laguerre(n,p,x) :
+    if n == 0 :
+        return 1.
+    elif n==1 :
+        return 1. + p - x
+    else :
+        lm = 1.;
+        l = 1 + p - x
+        for k in range(2,n+1):
+            lp = ((2*k+1+p-x)*l-(k+p)*lm)/(k+1);
+            lm = l ;
+            l = lp ;
+        return l
+#---------------------------------------------
+
+#--------------
+# Start Message
+#---------------------------------------
+print(" ")
+print("---------------------------------");
+print("| Calcul des fonctions radiales |")
+print("---------------------------------");
+print(" ")
+#---------------------------------------
+
+#--------------------------------------
+# Getting the principal quantum number
+#--------------------------------------
+n = input("Enter n: ");
+#--------------------------------------
+
+#-------------------
+# Physical variables
+#-------------------------------
+a0 = 1 # Bohr Radius
+#-------------------------------
+
+#------
+# Step
+#-------------------------------
+r_step = 100
+r_max = 10.0
+dr = r_max/float(r_step)
+#-------------------------------
+
+#-------------------------------
+print(" ")
+print("Calcul des fonctions radiales...")
+print(" ")
+#-------------------------------
+
+#------------------------------------
+# Boucle sur toutes les valeurs de r
+#------------------------------------------------------------------------------------------
+R = np.zeros(( n , r_step+1 ))
+for i in range( r_step+1) :
+    # Compute r
+    r = i*dr
+    # Boucle qui couvre toutes les valeurs de l (0 < l < n)
+    for l in range( n ):
+        # Calcul du coefficient l        
+        cl = factorial( n-l-1 )/( 2*n* factorial(n+l)**3 )*( 2/(n*a0) )**(l+1.5)
+        # Calcul de la fonction radial pour r
+        R[l,i] = cl * r**l * np.exp( -r/(n*a0) ) * laguerre( n-l-1 , 2*l+1 , 2*r/(n*a0) ) ;
+#------------------------------------------------------------------------------------------
+
+#----------------
+# Normalisation
+#------------------------------
+norm = 0.0000000000
+for l in range( n ):
+    for i in range( r_step+1 ):
+        norm += (i*dr*R[l,i])**2*dr
+    if norm == 0:
+        print("Euuuuh....")
+        sys.exit
+    for i in range( r_step+1 ):
+        R[l,i] = R[l,i]/np.sqrt(norm)
+#------------------------------
+
+print(len(R[l,:]))
+r = np.linspace(0,r_max,r_step+1)
+print(len(r))
+#--------------------------------------------------
+# Plot toutes les fonctions radiales pour n fixe
+#--------------------------------------------------
+
+for l in range(n):
+      graph_lab = "l = {:g}".format(l)
+      print(graph_lab)
+      plt.plot( r , R[l,:]**2 , label=graph_lab )
+      plt.xlabel('r (Bohr)')
+      plt.ylabel('R_n(r)')
+plt.show()
+#---------------------------------------------------
+      
+#-------------------------------
+print(" ")
+print("Travail termine!")
+print(" ")
+#-------------------------------
