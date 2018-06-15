@@ -1,0 +1,243 @@
+#!/bin/bash
+
+#=============================#
+#           AIRSS             #
+#  Analysis Procedure Batcher #
+#=============================#
+
+#---------------------------------------------------#
+# Selects the nbstruct (chosen by the user)         #
+# best structures in terms of enthalpy, calculates  #
+# their symmetry then put all the related file      #
+# into a folder                                     #
+#---------------------------------------------------#
+
+# Checking input
+set -e
+if [ $# -lt 1 ]
+then
+    echo -e "Wrong number of inputs!"
+    echo "usage: analysis <number of structure>"
+    exit
+elif [ $# -gt 1 ]
+then
+    echo -e "Wrong number of inputs!"
+    echo "usage: analysis <number of structure>"
+    exit
+fi
+
+# Start
+echo -e "\n AIRSS Data Analysis Procedure Starting!\n"
+
+# Sourcing .bashrc
+export HOMEDIR
+source $HOMEDIR"/.bashrc"
+
+# Keeping in mind where we are 
+pwd=$(pwd)
+echo -e "Data Analysis Starting in "$pwd"\n"
+
+# Checking if results folder (raw data storing folder) exists,
+# creates it if not and puts all results files in it
+if [ -e "results" ]
+then
+    echo -e "Results folder exists, proceeding assuming that all results structure are in that folder \n"
+else
+    if [ -e "results.tar" ]
+    then
+	echo -e "De-archiving results folder to get access to the results, this can take a while...\n"
+	nohup tar -xvf "results.tar" -C $pwd > /dev/null 2>&1
+    else
+	echo -e "Creating results folder, putting all resulting structure in it \n"
+	mkdir $pwd"/results"
+	mv *.res $pwd"/results/"
+	mv *.conv $pwd"/results/"
+    fi
+fi
+
+# Moving to results folder to proceed
+cd $pwd"/results"
+
+# Counting the total number of structure obtained
+echo -e "Counting the number of structure found, this can take some time...\n"
+cat *.res | cryan -s > temp
+nbstructot=$(awk '{if($3=="structures") print($5)}' temp)
+rm temp
+echo "AIRSS found "$nbstructot" structures!"
+
+# Number of structure to isolate (user input)
+nbstruc=$1
+echo -e "\n The "$nbstruc" best structures will be selected\n"
+
+# Sorting the structures by increasing enthalpy in temp file
+echo "Sorting procedure, this can take a while..."
+rank.pl > temp
+echo -e "Sorting procedure done, moving on\n"
+
+# Creating a special folder for N best results
+if [ -e $pwd"/"$nbstruc"rank_results" ]
+then
+    echo -e "Folder "$nbstruc"rank_results already exists, proceeding...\n "
+# If summary file of best structure(see below) exist, moves it to old.
+    if [ -e $pwd"/"$nbstruc"rank_results/"$nbstruc"_ranking.sum" ]
+    then
+	mv $pwd"/"$nbstruc"rank_results/"$nbstruc"_ranking.sum" $pwd"/"$nbstruc"rank_results/"$nbstruc"_ranking_Old.sum"
+    fi
+else
+    echo -e "Creating folder "$nbstruc"rank_results \n" 
+    mkdir $pwd"/"$nbstruc"rank_results"
+fi
+
+# Reading temp, taking all $nbstruc best structures
+# putting all data about each in a .dat file (res+rank)
+# Putting all resulting .dat file into the special folder
+# with summary file
+# Also recalculates the symetry space group with findsym
+# because Cryan sucks
+echo -e "Starting data cleaning procedure\n"
+typeset -i i=1
+typeset -i Nbtype=0
+typeset -i tabType[1]=0
+echo  "Total number of structure found:"$nbstructot
+
+while read line
+do
+    if [ $i -lt $(( $nbstruc+1 )) ]
+    then
+	# Getting the unique name of the run
+	runname=$(echo $line | cut -d " " -f1)
+	# Part where we calculate the symetry
+	if [ -e "temp.sym" ]
+	then
+	    rm "temp.sym"
+	fi
+	# Finding the real space group of the structure
+	shx2res.py $runname".res" $runname"_realres.res"
+	res2findsym.py $runname"_realres.res" "temp.sym"
+	findsym < "temp.sym" > $runname".sym"
+	# Getting the spacegroup from findsym
+	SpGrp=$(awk '{if ($1=="Space") print($5)}' $runname".sym")
+	# Building visualisation file for GDIS
+	echo "sing" > $runname"_GDIS.res"
+	echo "cell" >> $runname"_GDIS.res"
+	# Getting the number of atoms in the cell
+	typeset -i l=0
+	typeset -i NbAt=0
+	while read line3
+	do
+	    if [ $l -eq 0 ]
+	    then
+		tempvar=$(echo $line3 | cut -d " " -f1)
+		if [[ $tempvar == "Number" ]]
+		then
+		    l=1
+		elif [[ $tempvar == "Type" ]]
+		then
+		    l=2
+		elif [[ $tempvar == "Values" ]]
+		then
+		    l=3
+		elif [[ $tempvar == "Wyckoff" ]]
+		then
+		    l=4
+		fi
+	    else 
+		if [ "$l" -eq 1 ]
+		then
+		# Determining the number of atoms
+		    NbAt=$line3
+		    l=0
+		elif [ "$l" -eq 2 ]
+		then
+		    typeset -i index=1
+		    for ((index=1 ; $NbAt-$index+1 ; index++))
+		    do
+			TabType[$index]=$(echo $line3 | cut -d " " -f"$index") 
+		    done
+		    l=0
+		elif [ "$l" -eq 3 ]
+		then
+		# Putting values of a,b,c,alpha,beta,gamma
+		# into the GDIS file
+		    echo $line3 >> $runname"_GDIS.res"
+		    echo "frac" >> $runname"_GDIS.res"
+		    l=0
+		elif [ "$l" -eq 4 ]
+		then
+		    nb=$(echo $line3 | cut -d " " -f1)
+		    CharAt="C"
+		    typeset -i Pop=${TabType[$nb]}
+		    if [ $Pop -eq 0 ] 
+		    then
+			CharAt="C"
+		    elif [ $Pop -eq 1 ]
+		    then
+			CharAt="O"
+		    elif [ $Pop -eq 2 ] 
+		    then
+			CharAt="N"
+		    elif [ $Pop -eq 3 ]
+			then
+			CharAt="He"
+		    else 
+			CharAt="H"
+		    fi
+		    # Finding the fractionnal positions
+		    x=$(echo $line3 | cut -d " " -f2)
+		    y=$(echo $line3 | cut -d " " -f3)
+		    z=$(echo $line3 | cut -d " " -f4)
+		    # Putting values into the files
+		    echo $CharAt" "$x" "$y" "$z >> $runname"_GDIS.res"
+		    l=0
+		fi
+	    fi
+	done < $runname".sym"
+	echo "Space "$SpGrp >> $runname"_GDIS.res"
+	# Making a VESTA compliant file for visualization
+	shx2cell $runname".res" > $runname".cell"
+	# Printing the results
+	echo -e "Structure "$i" has symmetry: "$SpGrp"\n"
+	# Storing files into folder to be tared
+	mv $runname"_realres.res" $pwd"/"$nbstruc"rank_results"
+	mv $runname".sym" $pwd"/"$nbstruc"rank_results"
+	mv $runname"_GDIS.res" $pwd"/"$nbstruc"rank_results"
+	mv $runname".cell" $pwd"/"$nbstruc"rank_results"
+	# Adding the real space group
+	line=$line+" "$SpGrp
+	# Creating the summary file
+	echo $line >> $pwd"/"$nbstruc"rank_results/"$nbstruc"_ranking.sum"
+	echo $line > $pwd"/"$nbstruc"rank_results/"$runname".dat"
+	while read line2
+	do
+	    echo $line2 >> $pwd"/"$nbstruc"rank_results/"$runname".dat"
+	done < $runname".res"
+    fi
+    i=$i+1
+done < temp
+# removing temp file
+rm temp
+
+# Going back to working directory
+cd $pwd
+
+#-------------------------------------
+# Creating archives of results folder
+#--------------------------------------
+# - Archiving the best results folder
+if [ -e $pwd/$nbstruc"rank_results.tar" ] # To avoid regrets
+then 
+    mv $pwd"/"$nbstruc"rank_results.tar" $pwd"/"$nbstruc"rank_results_Old.tar"
+fi
+nohup tar -cvf $nbstruc"rank_results.tar" $nbstruc"rank_results" > /dev/null 2>&1
+rm -r $pwd"/"$nbstruc"rank_results"
+# - Archiving the general results folder
+if [ -e $pwd"/results.tar" ]
+then
+    mv $pwd"/results.tar" $pwd"/results_old.tar" 
+fi
+nohup tar -cvf results.tar "results" > /dev/null 2>&1 
+rm -r "results"
+
+# End
+echo -e "Everything's shiny, captain!\n"
+echo -e "Data Analysis ended normally, you may now proceed to geometry optimization using the relax script.\n" 

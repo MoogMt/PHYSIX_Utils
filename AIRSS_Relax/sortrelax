@@ -1,0 +1,359 @@
+#!/bin/bash
+
+#=============================#
+#           AIRSS             #
+# Post Calculations Structure #
+#          Analysis           #
+#=============================#
+
+#---------------------------------------------------------------#
+#                                                               #
+# Sorts the relaxed structure files obtained by AIRSS           #
+# From the secondary and finer CASTEP Geometry Optimization     #
+# procedure.                                                    #
+#                                                               #
+# Necessary input:                                              #
+# - $NbStruct: Number of relaxed structure to take care         #
+#   of (hand input)                                             #
+# - $tol: the tolerance factor to be used by findsym to find    #
+#   the space group of the structure                            #
+# -  A _relax folder (eg 10_relax for 10 structures)            #
+#   folder, which contains:                                     #
+#      - the $NbStruct_ranking.sum list of all the structure    #
+#        names                                                  #
+#      - for each structure in the list, the _eq.castep file,   #
+#        to get the data                                        #
+#        necessary to get the symmetry space group of the       #
+#        system                                                 #
+#      - for each structure in the list, the _eq-out.cell file, #
+#        for visualisation purposes                             #
+#                                                               #
+# Output (All in _analyzed folder):                             #
+# - A $NbStruct_analyzed tared folder with                      #
+#   - One global summary file per tolerance used for findsym    #
+#   containing, for each structure the lattice parameters, the  #
+#   space group, the enthalpy of the structure                  #
+# - $NbStruct folder per value of $tol and and relaxed          #
+#   structure containing:                                       #
+#    - The end of the CASTEP relaxation file                    #
+#    - One .res file from CASTEP                                #
+#    - The .sym input for findsym and the .symres that results  #
+#    from it                                                    #
+#    - The .res translated from the .symres                     #
+#                                                               #
+# Other effect:                                                 #
+#  - Archives the _relax folder into a _relax.tar               #
+#    in order to save up space                                  #
+#  - Archives the _analyzed folder into a _analyzed.tar         #
+#    in order to save up space                                  #
+#                                                               #
+#---------------------------------------------------------------#
+
+# Launch
+#------------
+clear
+echo -e "\nAIRSS Post-Calculations Structure Analysis Starting!\n"
+
+# Where we start
+pwd=$(pwd)
+
+# Nb of best struct
+echo -e "\nEnter the number of relaxed structure to be analyzed:"
+read NbStruct
+
+# Input Var
+#   - Number of Formula Unit
+echo -e "\nEnter the number of formula unit:" 
+read nbfu
+#   - Tolerance
+echo -e "\nDonner la tolérance pour findsym: "
+read tol
+
+# Source bashrc in case it isn't
+export HOMEDIR
+source $HOMEDIR"/.bashrc"
+
+#-----------------------------------------
+# Checking the existence of files and data
+#--------------------------------------------------------
+echo -e "\nChecking files\n" 
+# - De-archiving result archive
+if [ -e $NbStruct"_relax/" ] 
+then
+    echo -e $NbStruct"_relax/ folder is present, proceeding...(1/2)\n"
+else
+    echo -e "Folder "$NbStruct"_relax/ is not present, looking for corresponding archive...\n"
+    if [ -e $NbStruct"_relax.tar" ]
+    then
+	echo -e "Folder archive was found, untaring and proceeding...(1/2)\n"
+	nohup tar -xvf $NbStruct"_relax.tar" > /dev/null 2>&1
+    else
+	echo -e "Neither "$NbStruct"_relax/ nor its archive were round in the "$pwd"/ folder. Please launch the relax script again.\n"    
+	echo -e "Script unsucessful! Stopping now.\n"
+	exit
+    fi
+fi
+
+# - Checking the presence of best structures list
+if [ -e $NbStruct"_relax/"$NbStruct"_ranking.sum" ]
+then
+    echo -e "File "$NbStruct"_relax/"$NbStruct"_ranking.sum listing structures is here, proceeding...(2/2)\n"
+else
+    echo -e "File listing structures is not here, either the relax script wasn't run or it has been moved. Please, place the file "$NbStruct"_ranking.sum in the "$NbStruct"_relax folder and relaunch this script.\n"
+    echo -e "Script unsucessful! Stopping now.\n"
+    exit
+fi
+
+# Keeping the working dir path
+Workdir=$NbStruct"_relax"
+
+# Creating a stocking directory
+Stockdir=$NbStruct"_analyzed"
+if [ -e $Stockdir".tar" ]
+then
+    nohup tar -xvf $Stockdir".tar" > /dev/null 2>&1
+elif [ ! -e $Stockdir ]
+then
+    mkdir $Stockdir
+fi
+
+# Creating a summary file
+if [ -e $Stockdir"/"$NbStruct"_T="$tol"_data.sum" ]
+then
+    rm $Stockdir"/"$NbStruct"_T="$tol"data.sum"
+fi
+
+#---------------
+# Analysis part
+#-------------------------
+echo -e "Starting analysis!\n"
+
+# Reading the names of the structures
+typeset -i i=0
+while read line
+do
+    if [ $i -lt 1 ]
+    then
+        # Avoiding first line of file
+	i=$i+1
+    else
+	# Getting name of structure
+	Current=$(echo $line | cut -d " " -f1)
+	echo -e "Now processing "$Current" structure...\n"
+	#----------------------------------------------
+	# Checking the existence of the structure files
+	#--------------------------------------------------
+	cell=""
+	castep=""
+	#  - Checking structure file (.cell)
+	if [ -e $Workdir"/"$Current"_eq-out.cell" ]
+	then
+	    cell=$Current"_eq-out.cell"
+	else
+	    echo -e "File "$Current"-out.cell is not present. Either delete its name from the listing file or (re)run the analysis and relax script.\n"
+	    echo -e "Script unsucessful! Stopping now.\n"
+ 	    exit
+	fi
+	# Checking tolerance folder
+	if [ -e $Stockdir"/T"$tol ]
+	then
+	    echo "loutre" > /dev/null
+	else
+	    mkdir $Stockdir"/T"$tol
+	fi
+	# Creating stucture specific folder
+	Stockstruc=$Stockdir"/T"$tol"/"$i"/"
+      	if [ -e $Stockstruc ]
+	then
+	    mv $Stockstruc $Stockdir"/T"$tol"/"$i"_old"
+	fi
+	mkdir $Stockstruc
+	#-------------------
+	# Findsym analysis 
+	#-------------------
+	# - Creating all other files from out.cell
+	cell2shx $pwd"/"$NbStruct"_relax/"$Current"_eq-out.cell" >  $pwd"/"$Stockstruc"/"$i".shx"
+	shx2res.py $pwd"/"$Stockstruc"/"$i".shx" $pwd"/"$Stockstruc"/"$i"_realres.res"
+	res2findsym.py $pwd"/"$Stockstruc"/"$i"_realres.res" $pwd"/"$Stockstruc"/"$i"_temp.sym"
+	#   - Putting in the tolerance
+	typeset -i temp1=0
+	while read sym
+	do
+	    if [ $temp1 -lt 0 ] 
+	    then
+		echo $sym > $pwd"/"$Stockstruc"/"$i"_"$tol".sym"
+	    elif [ $temp1 -gt 1 ]
+	    then
+	        echo $sym >> $pwd"/"$Stockstruc"/"$i"_"$tol".sym"
+	    elif [ 1 -gt 0 ]
+	    then
+		echo $tol >> $pwd"/"$Stockstruc"/"$i"_"$tol".sym"
+	    fi
+	    temp1=$temp1+1
+	done < $pwd"/"$Stockstruc"/"$i"_temp.sym"
+	rm $pwd"/"$Stockstruc"/"$i"_temp.sym"
+     	#   - Findsym analysis proper
+	findsym < $pwd"/"$Stockstruc"/"$i"_"$tol".sym" > $pwd"/"$Stockstruc"/"$i"_"$tol".symres"	
+        #   - Getting symmetry from sym file
+	SpGrp=$(awk '{if ($1=="Space") print($5)}' $pwd"/"$Stockstruc"/"$i"_"$tol".symres")
+# - Creating a res file from sym file and sending lattice parameter to summary file
+	#   - Variables for the lattice parameter
+	a=""
+	b=""
+	c=""
+	alpha=""
+	beta=""
+	gamma=""
+	#   - Writting first line of.res file
+	echo "sing" > $pwd"/"$Stockstruc"/"$i"_"$tol"_final.res"
+	echo "cell" >> $pwd"/"$Stockstruc"/"$i"_"$tol"_final.res"
+	typeset -i l=0
+	typeset -i NbAt=0
+	typeset -i TabType[1]=0
+	while read sym
+	do
+	    if [ $l -eq 0 ]
+	    then
+		tempvar=$(echo $sym | cut -d " " -f1)
+		if [[ $tempvar == "Number" ]]
+		then
+		    l=1
+		elif [[ $tempvar == "Type" ]]
+		then
+		    l=2
+		elif [[ $tempvar == "Values" ]]
+		then
+		    l=3
+		elif [[ $tempvar == "Wyckoff" ]]
+		then
+		    l=4
+		fi
+	    else 
+		if [ "$l" -eq 1 ]
+		then
+		# Determining the number of atoms
+		    NbAt=$sym
+		    l=0
+		elif [ "$l" -eq 2 ]
+		then
+		    typeset -i index=1
+		    for ((index=1 ; $NbAt-$index+1 ; index++))
+		    do
+			TabType[$index]=$(echo $sym | cut -d " " -f"$index") 
+		    done
+		    l=0
+		elif [ "$l" -eq 3 ]
+		then
+		# Getting values of a,b,c,alpha,beta,gamma
+		    # Saving them for summary files
+		    a=$(echo $sym | cut -d  " " -f1)
+		    b=$(echo $sym | cut -d  " " -f2)
+		    c=$(echo $sym | cut -d  " " -f3)
+		    alpha=$(echo $sym | cut -d  " " -f4)
+		    beta=$(echo $sym | cut -d  " " -f5)
+		    gamma=$(echo $sym | cut -d  " " -f6)
+		    # - Writting values in the file
+		    echo $sym >> $pwd"/"$Stockstruc"/"$i"_"$tol"_final.res"
+		    echo "frac" >> $pwd"/"$Stockstruc"/"$i"_"$tol"_final.res"
+		    l=0
+		elif [ "$l" -eq 4 ]
+		then
+		    # Determining the atom type
+		    nb=$(echo $sym | cut -d " " -f1)
+		    CharAt="C"
+		    typeset -i Pop=${TabType[$nb]}
+		    if [ $Pop -eq 0 ] 
+		    then
+			CharAt="C"
+		    elif [ $Pop -eq 1 ]
+		    then
+			CharAt="O"
+		    elif [ $Pop -eq 2 ] 
+		    then
+			CharAt="N"
+		    elif [ $Pop -eq 3 ]
+			then
+			CharAt="He"
+		    else 
+			CharAt="H"
+		    fi
+		    # Finding the fractionnal positions
+		    x=$(echo $sym | cut -d " " -f2)
+		    y=$(echo $sym | cut -d " " -f3)
+		    z=$(echo $sym | cut -d " " -f4)
+		    # Putting values into the files
+		    echo $CharAt" "$x" "$y" "$z >> $pwd"/"$Stockstruc"/"$i"_"$tol"_final.res"
+		    l=0
+		fi
+	    fi
+	done < $pwd"/"$Stockstruc"/"$i"_"$tol".symres"
+        #      - Writting the space group
+	echo  "Space "$SpGrp >> $pwd"/"$Stockstruc"/"$i"_"$tol"_final.res" 
+	#-----------------------------
+ 	# Castep file data gathering
+	#-----------------------------
+	# - Checking the castep file (.castep)
+	castep=""
+	if [ -e $pwd"/"$Workdir"/"$Current"_eq.castep" ]
+	then
+	    castep=$pwd"/"$Workdir"/"$Current"_eq.castep"
+	else
+	    echo -e "File "$Current"-out.cell is not present. Either delete its name from the listing or (re)run the analysis and relax script.\n"
+	    echo -e "Script unsucessful! Stopping now.\n"
+	    exit
+	fi
+	ent=""
+	# - Reading Castep file
+	typeset -i j=0
+	while read castline
+	do
+	    test=$(echo $castline | cut -d " " -f3 )
+	    if [[ $test == "Final" ]]
+	    then
+		j=$j+1
+		test2=$(echo $castline | cut -d " " -f4 )
+		if [[ $test2 == "Enthalpy" ]]
+		then
+		    ent=$(echo $castline | cut -d " " -f6 )
+		fi
+	    fi
+	    if [ $j -gt 0 ]
+	    then
+		echo $line > $Stockstruc"/"$i"_final.castep"
+	    fi
+	done < $castep
+	# Rewritting the enthalpy for bc
+	ent=`echo ${ent} | sed -e 's/[eE]+*/\\*10\\^/'`
+	# Calculating enthalpy/fu
+	ent=$(echo "scale=3; "$ent"/"$nbfu | bc -l)
+	# - Creating Summary Files
+	echo $i" "$Current" "$SpGrp" "$a" "$b" "$c" "$alpha" "$beta" "$gamma" "$ent >> $Stockdir"/"$NbStruct"_T="$tol"_data.sum"
+	# - Creating visualisation files	
+	echo $i" "$ent" "$SpGrp >> $Stockdir"/"$NbStruct"_visual_T="$tol".sum" 
+     	#--------------------------------------
+	# Moving on to the next structure
+	i=$i+1
+    fi
+done < $pwd"/"$NbStruct"_relax/"$NbStruct"_ranking.sum"
+
+# If first execution, archives the _relax folder
+if ! [ -e $pwd"/"$NbStruct"_relax.tar" ]
+then
+    tar -cvf $NbStruct"_relax.tar" $NbStruct"_relax" > /dev/null 2>&1
+fi
+# Removing de-archived _relax file
+rm -r $NbStruct"_relax"
+
+# Archiving results
+#  - deleting previous archive if exist
+if [ -e $Stockdir".tar" ] 
+then
+    rm $Stockdir".tar"
+fi
+# - archiving the folder                                        
+nohup tar -cvf $Stockdir".tar" $Stockdir  > /dev/null 2>&1
+# removing folder
+rm -r $Stockdir
+
+# End
+echo -e "AIRSS Post Calculations Structure Analysis Completed!\n"
