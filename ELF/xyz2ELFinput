@@ -23,11 +23,10 @@ do
     echo " 32" >> input
     
     typeset -i line_num=0
-    for (( j=1; j<=96; j++ ))
+    for (( j=1; j<=32; j++ ))
     do
-	line_num=$( echo $i"*96+2+"$j | bc -l )
+	line_num=$( echo $i"*96+("$i"+1)*2+"$j | bc -l )
 	x=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f2) 
-	echo "x="$x
 	y=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f3)
 	z=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f4)
 	echo " "$x" "$y" "$z >> input 
@@ -38,11 +37,10 @@ do
     echo "*O_MT_PBE.psp  KLEINMAN-BYLANDER" >> input
     echo " LMAX=P" >> input
     echo " 64" >> input
-    for (( j=1; j<=96; j++ ))
+    for (( j=33; j<=96; j++ ))
     do
 	line_num=$( echo $i"*96+2+"$j | bc -l )
 	x=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f2)
-	echo "x="$x
 	y=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f3)
 	z=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f4)
 	echo " "$x" "$y" "$z >> input 
