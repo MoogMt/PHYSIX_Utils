@@ -1,13 +1,13 @@
 include("contactmatrix.jl")
 
-folder=string("/home/moogmt/CO2/CO2_AIMD/8.82/")
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/")
 file=string(folder,"TRAJEC_wrapped.xyz")
 
 current_volume=8.82
 cell=cell_mod.Cell_param(current_volume,current_volume,current_volume)
 
-stride=5
-unit=0.0005
+stride=1
+unit=0.0005*5
 
 atoms = filexyz.read(file,stride)
 
