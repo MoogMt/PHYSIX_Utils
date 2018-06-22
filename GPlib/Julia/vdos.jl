@@ -2,30 +2,32 @@ folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.8/3000K/"
 
 file="FTRAJECTORY"
 
-nb_step=0
-
-file=string(folder,file)
-
-
+file2=string(folder,file)
 print(nb_step)
 
-file_count=open(file)
-while !eof(file_count)
-    print("check")
+step = 0
+step +=1
+open( file2 ) do f
+    while !eof(f)
+        l=readline(f)
+        step = step + 1
+    end
 end
-close(file_count)
 
-velocities=zeros(nb_steps,3)
-vnorms=zeros(nb_steps,1)
+nb_steps=10000
+velocities=zeros(nb_steps,96,3)
+vnorms=zeros(nb_steps,96)
 
-file_traj=open(file)
+file_traj=open(file2)
 for i=1:nb_steps
     line=split(readline(file_traj))
-    for j=1:3
-        velocities[i,j]=parse(Float64,line[j])
-        vnorms[j] += velocities[i,j]^2
+    for k=1:96
+        for j=1:3
+            velocities[i,k,j]=parse(Float64,line[j])
+            vnorms[j,k] += velocities[i,k,j]^2
+        end
+        vnorms[i,k] = sqrt(vnorms[i,k])
     end
-    vnorms[j] = sqrt(vnorms[j])
 end
 close(file_traj)
 
@@ -44,7 +46,14 @@ end
 
 frac=0.3
 
-data=fft(autocorrelation2(vnorms,frac))
+data=zeros(nb_steps*frac)
+
+for i=1:96
+    data[:] += autocorrelation2(vnorms[:,i],frac)
+end
+data /= 96
+
+dataplot=fft(data)
 
 using PyPlot
 
