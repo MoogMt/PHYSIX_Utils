@@ -35,8 +35,12 @@ end
 
 # Current Volume and Temperature
 
+temperatures=[2000,2500,3000]
+
 volume=9.8
-T=2000
+
+#for T in temperatures
+T=3000
 
 #for volume in Volumes
 # for T in [2000,2500,3000]
@@ -122,7 +126,7 @@ end
 # end
 # close(file_check)
 
-file_check=open(string("/home/moogmt/time",volume,"_",T,"_",cut_off,".dat"),"w")
+file_check=open(string("/home/moogmt/time",volume,"_",T,"_",cutoff,".dat"),"w")
 for i=1:steps-1
     write(file_check,string(i*unit*stride," ",time_corr[Int(i)],"\n"))
 end
@@ -135,6 +139,7 @@ close(file_check)
 #     write(file_dist,string(step*stride*unit," ",cell_mod.distance(atoms[step],cell,8,42),"\n"))
 # end
 # close(file_dist)
+
 
 file_dist=open(string("/home/moogmt/dist.dat"),"w")
 for step=1:nb_steps-1

@@ -124,7 +124,7 @@ function read{ T1 <: AbstractString, T2 <: Int , T3 <: Int }( file::T1, stride::
     readEmpty(file_hand)
   end
   j=1
-  for i=start_step:nb_steps-1
+  for i=start_step:nb_steps-stride
     if i % stride == 0
       atoms_sim[j]=readStep(file_hand)
       j += 1
