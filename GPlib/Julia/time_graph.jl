@@ -1,4 +1,4 @@
- include("contactmatrix.jl")
+include("contactmatrix.jl")
 
 function autocorrelation(x,N,i,M)
     C=zeros(N)
@@ -35,20 +35,20 @@ end
 
 # Current Volume and Temperature
 
-Volumes=[9.8]
-volume=Volumes[1]
+volume=9.8
+T=2000
 
 #for volume in Volumes
 # for T in [2000,2500,3000]
 #T=3000
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",volume,"/3000K/")
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",volume,"/",T,"K/")
 file=string(folder,"TRAJEC_wrapped.xyz")
 
 # Time values
 unit=0.0005*5
 stride=1
 frac=0.8
-cutoff=1.45
+cutoff=1.8
 
 
 atoms = filexyz.read(file,stride)
@@ -59,6 +59,9 @@ nb_steps=size(atoms)[1]
 steps=Int(trunc(nb_steps*frac))
 
 time_corr=zeros(steps-1)
+only_bond=false
+
+if only_bond
 
 atoms1=[]
 atoms2=[]
@@ -71,13 +74,27 @@ for i=1:32
     end
 end
 
-# for atom1=1:32
-#     print("progress:",atom1/32*100,"%\n")
-#     for atom2=33:nb_atoms
-for i=1:size(atoms1)[1]
+for atom2=33:nb_atoms
+    bond_matrix=zeros(nb_steps)
+    for step=1:nb_steps
+        if cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i]) < cutoff
+            bond_matrix[step] = 1
+        end
+    end
+    corr=autocorrelation2(bond_matrix,frac)
+    for i=1:steps-1
+        time_corr[i] = time_corr[i] + corr[i]
+    end
+end
+
+else
+
+for atom1=1:32
+    print("progress:",atom1/32*100,"%\n")
+    for atom2=33:nb_atoms
         bond_matrix=zeros(nb_steps)
         for step=1:nb_steps
-            if cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i]) < cutoff
+            if cell_mod.distance(atoms[step],cell,atom1,atom2) < cutoff
                 bond_matrix[step] = 1
             end
         end
@@ -86,8 +103,9 @@ for i=1:size(atoms1)[1]
             time_corr[i] = time_corr[i] + corr[i]
         end
     end
-#     end
-# end
+end
+
+end
 
 # Normalization
 # value=time_corr[1]
@@ -104,7 +122,7 @@ for i=1:size(atoms1)[1]
 # end
 # close(file_check)
 
-file_check=open(string("/home/moogmt/time",volume,".dat"),"w")
+file_check=open(string("/home/moogmt/time",volume,"_",T,"_",cut_off,".dat"),"w")
 for i=1:steps-1
     write(file_check,string(i*unit*stride," ",time_corr[Int(i)],"\n"))
 end

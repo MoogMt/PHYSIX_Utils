@@ -1,18 +1,21 @@
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.8/3000K/"
+include("contactmatrix.jl")
 
-file="FTRAJECTORY"
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.8/2500K/"
+file_name="FTRAJECTORY"
+file=string(folder,file_name)
 
-file2=string(folder,file)
-print(nb_step)
-
-step = 0
-step +=1
-open( file2 ) do f
-    while !eof(f)
-        l=readline(f)
-        step = step + 1
+function getNbLineFTRAJ{ T1 <: AbstractString }( file::T1 )
+    nb=0
+    open( file ) do f
+        while ! eof(f)
+            readline(f)
+            nb += 1
+        end
     end
+    return nb
 end
+
+lines=getNbLineFTRAJ( file )
 
 nb_steps=10000
 velocities=zeros(nb_steps,96,3)

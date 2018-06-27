@@ -63,7 +63,8 @@ function readFastFile{ T1 <: AbstractString }( file::T1 )
 end
 function readStep{ T1 <: IO }( file_hand::T1 )
   # Get number of atoms
-  nb_atoms = parse(Int,split(readline(file_hand))[1])
+  line_temp=readline(file_hand)
+  nb_atoms = parse(Int,split(line_temp)[1])
   # Atoms
   atoms = AtomList(nb_atoms)
   # Reading comment line
@@ -106,6 +107,24 @@ function read{ T1 <: AbstractString, T2 <: Int }( file::T1, stride::T2 )
   atoms_sim=Vector{AtomList}(Int(trunc(nb_steps/stride)))
   j=1
   for i=1:nb_steps
+    if i % stride == 0
+      atoms_sim[j]=readStep(file_hand)
+      j += 1
+    else
+      readEmpty(file_hand)
+    end
+  end
+  return atoms_sim
+end
+function read{ T1 <: AbstractString, T2 <: Int , T3 <: Int }( file::T1, stride::T2 , start_step::T3 )
+  nb_steps=getNbSteps(file)
+  file_hand=open(file)
+  atoms_sim=Vector{AtomList}(Int(trunc((nb_steps-start_step)/stride)))
+  for i=1:start_step
+    readEmpty(file_hand)
+  end
+  j=1
+  for i=start_step:nb_steps-1
     if i % stride == 0
       atoms_sim[j]=readStep(file_hand)
       j += 1
