@@ -97,6 +97,9 @@ for step=1:nb_steps-1
     write(file_dist,string(step*stride*unit," "))
     for i=1:size(atoms1)[1]
         write(file_dist,string(cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i])-cell_mod.distance(atoms[1],cell,atoms1[i],atoms2[i])," "))
+        if cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i])-cell_mod.distance(atoms[1],cell,atoms1[i],atoms2[i]) > 1
+            print("check: ",step," ",atoms1[i]," ",atoms2[i],"\n")
+        end
     end
     write(file_dist,"\n")
 end

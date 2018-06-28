@@ -6,8 +6,10 @@ volumes=[9.1,9.2,9.3,9.4]
 temperatures=[3000]
 
 # for V in volumes
-for V in volumes
-for T in temperatures
+# for V in volumes
+# for T in temperatures
+V=8.6
+T=3000
 
 unit=0.0005
 stride=5
@@ -86,6 +88,6 @@ for step=1:nb_steps
 end
 close(file)
 
-end
-end
+# end
+# end
 # end
