@@ -1,13 +1,13 @@
 include("contactmatrix.jl")
 include("xyz.jl")
 
-volumes=[9.8,9.2,9.0,8.82]
+volumes=[9.1,9.2,9.3,9.4]
 #temperatures=[2000,2500,3000]
-temperatures=[2500,3000]
+temperatures=[3000]
 
 # for V in volumes
+for V in volumes
 for T in temperatures
-V=volumes[2]
 
 unit=0.0005
 stride=5
@@ -86,5 +86,6 @@ for step=1:nb_steps
 end
 close(file)
 
+end
 end
 # end

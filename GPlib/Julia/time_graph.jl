@@ -63,7 +63,7 @@ nb_steps=size(atoms)[1]
 steps=Int(trunc(nb_steps*frac))
 
 time_corr=zeros(steps-1)
-only_bond=false
+only_bond=true
 
 if only_bond
 
@@ -78,7 +78,8 @@ for i=1:32
     end
 end
 
-for atom2=33:nb_atoms
+
+for i=1:size(atoms1)[1]
     bond_matrix=zeros(nb_steps)
     for step=1:nb_steps
         if cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i]) < cutoff
@@ -87,9 +88,19 @@ for atom2=33:nb_atoms
     end
     corr=autocorrelation2(bond_matrix,frac)
     for i=1:steps-1
-        time_corr[i] = time_corr[i] + corr[i]
+        time_corr[i] += corr[i]
     end
 end
+
+file_dist=open(string("/home/moogmt/dist.dat"),"w")
+for step=1:nb_steps-1
+    write(file_dist,string(step*stride*unit," "))
+    for i=1:size(atoms1)[1]
+        write(file_dist,string(cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i])-cell_mod.distance(atoms[1],cell,atoms1[i],atoms2[i])," "))
+    end
+    write(file_dist,"\n")
+end
+close(file_dist)
 
 else
 
@@ -104,7 +115,7 @@ for atom1=1:32
         end
         corr=autocorrelation2(bond_matrix,frac)
         for i=1:steps-1
-            time_corr[i] = time_corr[i] + corr[i]
+            time_corr[i] += corr[i]
         end
     end
 end
@@ -139,14 +150,3 @@ close(file_check)
 #     write(file_dist,string(step*stride*unit," ",cell_mod.distance(atoms[step],cell,8,42),"\n"))
 # end
 # close(file_dist)
-
-
-file_dist=open(string("/home/moogmt/dist.dat"),"w")
-for step=1:nb_steps-1
-    write(file_dist,string(step*stride*unit," "))
-    for i=1:size(atoms1)[1]
-        write(file_dist,string(cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i])-cell_mod.distance(atoms[1],cell,atoms1[i],atoms2[i])," "))
-    end
-    write(file_dist,"\n")
-end
-close(file_dist)
