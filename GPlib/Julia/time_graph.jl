@@ -92,18 +92,31 @@ for i=1:size(atoms1)[1]
     end
 end
 
+movingOs=[]
+targetCs=[]
 file_dist=open(string("/home/moogmt/dist.dat"),"w")
 for step=1:nb_steps-1
     write(file_dist,string(step*stride*unit," "))
     for i=1:size(atoms1)[1]
         write(file_dist,string(cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i])-cell_mod.distance(atoms[1],cell,atoms1[i],atoms2[i])," "))
         if cell_mod.distance(atoms[step],cell,atoms1[i],atoms2[i])-cell_mod.distance(atoms[1],cell,atoms1[i],atoms2[i]) > 1
-            print("check: ",step," ",atoms1[i]," ",atoms2[i],"\n")
+            for k=1:size(movingOs)[1]
+                if movingOs[k] == atoms2[i] && targetCs[k] == atoms1[i]
+                    push!( movingOs, atoms2[i] )
+                    push!( targetCs, atoms1[i] )
+                end
+            end
         end
     end
     write(file_dist,"\n")
 end
 close(file_dist)
+
+file_atoms=open(string("/home/moogmt/check_atoms.dat"),"w")
+for w=1:size(movingOs)[1]
+    write(file_atoms,string(movingOs[w]," ",targetCs[w]))
+end
+close(file_atoms)
 
 else
 

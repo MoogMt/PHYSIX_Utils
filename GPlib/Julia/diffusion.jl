@@ -8,11 +8,11 @@ temperatures=[3000]
 # for V in volumes
 # for V in volumes
 # for T in temperatures
-V=8.6
+V=8.82
 T=3000
 
-unit=0.0005
-stride=5
+unit=0.0005*5
+stride=1
 start_time=5
 start_step=Int(start_time/unit)
 
@@ -87,6 +87,15 @@ for step=1:nb_steps
     #---------------------------------------
 end
 close(file)
+
+file_check=open(string("/home/moogmt/varMSD_",V,"_",T,".dat"),"w")
+for i=2:nb_steps
+    dC=abs((C_MSD[i]-C_MSD[i-1])/(unit*stride))
+    dO=abs((O_MSD[i]-O_MSD[i-1])/(unit*stride))
+    write(file_check,string(i*unit*stride," ",dO-dC,"\n"))
+end
+close(file_check)
+
 
 # end
 # end
