@@ -63,7 +63,7 @@ nb_steps=size(atoms)[1]
 steps=Int(trunc(nb_steps*frac))
 
 time_corr=zeros(steps-1)
-only_bond=true
+only_bond=false
 
 if only_bond
 

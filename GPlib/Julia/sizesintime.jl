@@ -31,7 +31,7 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     return list
 end
 
-cut_off = 1.8
+cut_off = 1.7
 
 sizes=[]
 times=[]
@@ -113,7 +113,7 @@ for j=1:nb_window
 end
 
 # Creating hsitory
-hist_file=open(string("/home/moogmt/hist2d_size_time",volume,"_",temperature,"_",cut_off,".dat"),"w")
+hist_file=open(string("/home/moogmt/hist2d_size_time_",volume,"_",temperature,"_",cut_off,".dat"),"w")
 for j=0:nb_window-1
     for k=1:nb_atoms
         write(hist_file,string(j*time_window+time_window/2," ",k," ",hist2d[j+1,k],"\n"))
