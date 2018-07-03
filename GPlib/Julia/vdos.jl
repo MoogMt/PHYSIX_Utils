@@ -63,7 +63,7 @@ for i=1:nb_steps
     for k=1:96
         line=split(readline(file_traj))
         for j=1:3
-            velocities[i,k,j]=parse(Float64,line[j+3])
+            velocities[i,k,j]=parse(Float64,line[j+4])
             vnorms[i,k] += velocities[i,k,j]^2
         end
         vnorms[i,k] = sqrt(vnorms[i,k])
@@ -71,22 +71,18 @@ for i=1:nb_steps
 end
 close(file_traj)
 
-size2=5000
-data=zeros(size2)
+using StatsBase
 
-for k=1:nb_atoms
-    print("progress: ",k/nb_atoms*100," %\n")
-    for i=1:size2
-        for j=1:nb_steps-i
-            data[i] += vnorms[i,k]*vnorms[i+j,k]
-        end
-    end
+lags=[0]
+for i=1:5000
+    push!(lags,i)
 end
-value=data[1]
-data /=value
 
-plot(data,"b.")
-
-dataplot=dct(data)
-
-plot(dataplot,"r-")
+data=StatsBase.autocor( vnorms[:,1], lags)
+for k=2:nb_atoms
+    data += StatsBase.autocor( vnorms[:,k], lags)
+end
+value = data[1]
+data /= value
+datafft=dct(data)
+plot( data)

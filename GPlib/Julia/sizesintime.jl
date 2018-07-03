@@ -1,7 +1,7 @@
 include("contactmatrix.jl")
 
 temperature=3000
-volume=9.0
+volume=8.82
 
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",volume,"/",temperature,"K/")
 file_in=string(folder,"TRAJEC_wrapped.xyz")
@@ -113,7 +113,7 @@ for j=1:nb_window
 end
 
 # Creating hsitory
-hist_file=open(string("/home/moogmt/hist2d_size_time_",volume,"_",temperature,"_",cut_off,".dat"),"w")
+hist_file=open(string("/home/moogmt/hist2d_size_time_",volume,"_",temperature,"_",cut_off,"_tw-",time_window,".dat"),"w")
 for j=0:nb_window-1
     for k=1:nb_atoms
         write(hist_file,string(j*time_window+time_window/2," ",k," ",hist2d[j+1,k],"\n"))

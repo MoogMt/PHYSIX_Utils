@@ -37,7 +37,7 @@ end
 
 temperatures=[2000,2500,3000]
 
-volume=9.8
+volume=9.0
 
 #for T in temperatures
 T=3000
