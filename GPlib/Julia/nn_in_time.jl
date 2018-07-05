@@ -1,8 +1,7 @@
 include("contactmatrix.jl")
 
-temperature=3000
-volume=9.0
-
+temperature=2000
+volume=9.05
 V=volume
 T=temperature
 
@@ -83,7 +82,10 @@ for k=1:4
 end
 
 total_sim=nb_steps*unit
-timewindow=5
+time_windows=[0.5,1,2,5,10]
+
+for timewindow in time_windows
+
 nb_window=Int(trunc(total_sim/timewindow)+1)
 
 # Temporal
@@ -110,4 +112,6 @@ for k=1:4
         write(check,"\n")
     end
     close(check)
+end
+
 end

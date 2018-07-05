@@ -1,12 +1,13 @@
 include("contactmatrix.jl")
 
 temperature=3000
-volume=9.05
+volume=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.375,9.4,9.8]
 
-V=volume
 T=temperature
 
-folder=string("/home/moogmt/CO2/CO2_AIMD/",volume,"/",temperature,"K/")
+for V in volume
+
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
 file_in=string(folder,"TRAJEC_wrapped.xyz")
 
 stride_sim=5
@@ -19,7 +20,7 @@ start_time=5
 start_step=Int(start_time/(unit*stride_sim))
 
 atoms = filexyz.read( file_in, stride_analysis, start_step )
-cell=cell_mod.Cell_param( volume, volume, volume )
+cell=cell_mod.Cell_param( V, V, V )
 
 cut_off = [1.6,1.7,1.8]
 
@@ -41,8 +42,34 @@ for step=1:nb_steps
             end
         end
     end
+    nb_bonds[step]=count
     write(out,string(step*unit," ",count,"\n"))
 end
 close(out)
 
+total_sim=nb_steps*unit
+time_windows=[0.5,1,2,5,10]
+
+for timewindow in time_windows
+
+    nb_window=Int(trunc(total_sim/timewindow)+1)
+
+    hist1D=zeros(nb_window)
+
+    for step=1:nb_steps
+        for i=1:nb_window
+            if step*unit > (i-0.5)*timewindow && step*unit < (i+0.5)*timewindow
+                hist1D[i]+= nb_bonds[step]
+            end
+        end
+    end
+
+    out_box=open(string("/home/moogmt/bonds_count_",V,"_",T,"_",co,"A_box-",timewindow,".dat"),"w")
+    for i=1:nb_window
+        write(out_box,string(i*timewindow," ",hist1D[i]*unit/timewindow,"\n"))
+    end
+    close(out_box)
+
+end
+end
 end
