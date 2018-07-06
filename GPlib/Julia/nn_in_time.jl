@@ -1,8 +1,9 @@
 include("contactmatrix.jl")
 
-temperature=3000
-volume=[9.0,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.8]
+temperature=2000
+volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.5,9.8]
 
+T=temperature
 for V in volume
 
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
