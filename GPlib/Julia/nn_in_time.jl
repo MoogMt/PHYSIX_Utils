@@ -1,11 +1,11 @@
 include("contactmatrix.jl")
 
-temperature=2000
-volume=9.05
-V=volume
-T=temperature
+temperature=3000
+volume=[9.0,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.8]
 
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",volume,"/",temperature,"K/")
+for V in volume
+
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
 file_in=string(folder,"TRAJEC_wrapped.xyz")
 
 stride_sim=5
@@ -18,7 +18,7 @@ start_time=5
 start_step=Int(start_time/(unit*stride_sim))
 
 atoms = filexyz.read( file_in, stride_analysis, start_step )
-cell=cell_mod.Cell_param( volume, volume, volume )
+cell=cell_mod.Cell_param( V, V, V )
 
 nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
@@ -46,9 +46,9 @@ for step=1:nb_steps
             distances[oxygen-32] = cell_mod.distance(atoms[step],cell,carbon,oxygen)
         end
         distances=sortmatrix(distances)
-        nn[step,1]=step
+        nn[(step-1)*32+carbon,1]=step
         for i=2:5
-            nn[step*(carbon-1)+carbon,i]=distances[i-1]
+            nn[(step-1)*32+carbon,i]=distances[i-1]
         end
     end
 end
@@ -112,6 +112,8 @@ for k=1:4
         write(check,"\n")
     end
     close(check)
+end
+
 end
 
 end

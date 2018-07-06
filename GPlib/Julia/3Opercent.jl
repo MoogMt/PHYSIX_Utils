@@ -14,15 +14,15 @@ function sortmatrix( x )
     return x
 end
 
-temperature=3000
-volume=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.375,9.4,9.8]
+temperature=2000
+volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
 
 T=temperature
 
-cut_off=1.7
+cut_off=[1.6,1.7,1.8]
 
+for cutoff in cut_off
 for V in volume
-V=8.82
 
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
 file_in=string(folder,"TRAJEC_wrapped.xyz")
@@ -42,7 +42,7 @@ cell  = cell_mod.Cell_param( V, V, V )
 nb_steps=size(atoms)[1]
 nb_atoms=size(atoms[1].names)[1]
 
-out=open(string("/home/moogmt/3CO_count_",V,"_",T,"_",cut_off,".dat"),"w")
+out=open(string("/home/moogmt/3CO_count_",V,"_",T,"_",cutoff,".dat"),"w")
 for step=1:nb_steps
     print("progress:",step/nb_steps*100,"%\n")
     count = 0
@@ -51,7 +51,7 @@ for step=1:nb_steps
         for oxygen=33:nb_atoms
             distances[oxygen-32]=cell_mod.distance(atoms[step],cell,carbon,oxygen)
         end
-        if sortmatrix(distances)[3] < cut_off
+        if sortmatrix(distances)[3] < cutoff
             count+=1
         end
     end
@@ -59,4 +59,5 @@ for step=1:nb_steps
 end
 close(out)
 
+end
 end
