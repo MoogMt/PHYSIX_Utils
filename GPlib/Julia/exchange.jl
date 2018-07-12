@@ -70,14 +70,11 @@ for oxygen=1:nbO
         indexs[step,:]=[indexes[1], indexes[2]]
     end
     count=0
-    point=1
+    lifes=[]
     # Merge
-    for i=1:nb_steps
-        for j=1:nb_steps
-            for k=1
-                if neighbours[i,k] > 0.
-                    
-                end
+    for neigh=1:2
+        for i=step:nb_steps
+            for j=1:nb_steps
             end
         end
     end
