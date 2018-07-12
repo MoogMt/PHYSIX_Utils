@@ -1,12 +1,11 @@
 include("xyz.jl")
 
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/IRENE/Pa3/333/3000K/"
+folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/9.8/3000K/"
+atoms = filexyz.read(string(folder,"first.xyz"),1)[1]
 
-atoms = filexyz.read(string(folder,"last.xyz"),1)[1]
+vol=9.8
 
-vol=13.9875
-
-targetVol=13.23
+targetVol=9.7
 
 cell=cell_mod.Cell_param(targetVol,targetVol,targetVol)
 
@@ -19,8 +18,8 @@ for atom1=1:size(atoms.names)[1]
     end
 end
 
-Cfile=open("/home/moogmt/LargeC.cpmd","w")
-Ofile=open("/home/moogmt/LargeO.cpmd","w")
+Cfile=open(string("/home/moogmt/smallC_",targetVol,".cpmd"),"w")
+Ofile=open(string("/home/moogmt/smallO_",targetVol,".cpmd"),"w")
 for atom=1:size(atoms.names)[1]
     if atoms.names[atom] == "C"
         for i=1:3

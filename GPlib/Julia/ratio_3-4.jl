@@ -4,8 +4,8 @@ temperature=[3000]
 volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.375,9.4,9.5,9.8]
 
 # Volume loop
-for V in volume
-
+#for V in volume
+    V=9.1
     # Temp
     T=temperature[1]
 
@@ -64,11 +64,10 @@ for V in volume
         end
     end
 
-    # Computing Bonded vs NonBonded
     dfrac=0.05
     folder="/home/moogmt/"
     time_window=0.5 # in ps
-    for k=1:4
+    for k=3:4
 
         hist_bond=zeros(Int(trunc(nb_steps/(time_window/unit))))
         hist_unbond=zeros(Int(trunc(nb_steps/(time_window/unit))))
@@ -83,23 +82,19 @@ for V in volume
         for step=1:nb_steps
             count_bond=0
             count_unbond=0
-            count_trans=0
             for carbon=1:32
-                if nn[Int((step-1)*32+carbon),k+1] < 1.6
+                if nn[Int((step-1)*32+carbon),k+1] < 1.5 && nn[Int((step-1)*32+carbon),k+1]  > 1.3
                     count_bond += 1
-                elseif nn[Int((step-1)*32+carbon),k+1] > 1.8
+                elseif nn[Int((step-1)*32+carbon),k+1] > 1.9 && nn[Int((step-1)*32+carbon),k+1] < 2.3
                     count_unbond += 1
-                else
-                    count_trans +=1
                 end
             end
             if count_step == Int(time_window/unit)
-                norm=(count_bond+count_unbond+count_trans)
-                string2=string(count*unit," ",count_bond/norm," ",count_unbond/norm," ",count_trans/norm,"\n")
+                norm=(count_bond+count_unbond)
+                string2=string(count*(time_window/unit)*unit," ",count_bond/norm," ",count_unbond/norm,"\n")
                 write(file_out,string2)
                 hist_bond[count] = count_bond/norm
                 hist_unbond[count] = count_unbond/norm
-                hist_trans[count] = count_trans/norm
                 count += 1
                 count_step = 0
             else
@@ -131,7 +126,7 @@ for V in volume
             end
 
             # Writting data
-            file_out2=open(string(folder,"HistSign-",k,"_V-",V,"_T-",T,".dat"),"w")
+            file_out2=open(string(folder,"HistSign-V-",V,"_T-",T,".dat"),"w")
             for i=1:1/dfrac
                 for j=1:1/dfrac
                     string2=string(i*dfrac," ",j*dfrac," ",hist2D[Int(i),Int(j)],"\n")
@@ -146,5 +141,5 @@ for V in volume
 
     end
     # End of k
-end
+#end
 # End of V
