@@ -42,23 +42,46 @@ function sortmatrixwithindex( x )
             end
         end
     end
-    return x,index
+    return x,indexes
 end
 
 nbC=32
+nbO=64
+cut_off=1.6
 
-index12=zeros(64,2)
-distances12=zeros(64,2)
-life12=zeros(64,2)
-for step=1:nb_steps
-    step_distances=zeros(64,2)
-    for oxygen=1:64
-        oxy_step_distances=zeros(32)
+for oxygen=1:nbO
+    print("Progress - Oxygen: ",oxygen/nbO*100,"%\n")
+    neighbours=zeros(nb_steps,2)
+    indexs=zeros(nb_steps,2)
+    used=zeros(nb_steps)
+    for step=1:nb_steps
+        distances=zeros(32)
         for carbon=1:32
-            oxy_step_distances[carbon]=cell_mod.distance(atoms[step],cell,oxygen+nbC,carbon)
+            distances[carbon] = cell_mod.distance(atoms[step],cell,carbon,oxygen+nbC)
         end
-        oxy_step_distances, indexes=sortmatrixwithindex(oxy_step_distances)
-        step_distances[oxygen,:]=[oxy_step_distances[3],oxy_step_distances[4]]
+        distances, indexes = sortmatrixwithindex(distances)
+        for i=1:2
+            if distances[i] < cut_off
+                neighbours[step,i] = 1
+            else
+                used[i] = 1
+            end
+        end
+        indexs[step,:]=[indexes[1], indexes[2]]
     end
-    
+    count=0
+    point=1
+    # Merge
+    for i=1:nb_steps
+        for j=1:nb_steps
+            for k=1
+                if neighbours[i,k] > 0.
+                    
+                end
+            end
+        end
+    end
+    # Stat
 end
+
+# Stat
