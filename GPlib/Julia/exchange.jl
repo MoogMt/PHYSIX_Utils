@@ -1,7 +1,7 @@
 include("contactmatrix.jl")
 
 temperature=3000
-volume=[8.82]
+volume=[9.8]
 
 T=temperature
 #for V in volume
@@ -50,6 +50,9 @@ nbO=64
 cut_off=1.9
 
 lifes=[]
+oxygens2=[]
+carbons2=[]
+
 count=0
 
 for oxygen=1:nbO
@@ -100,12 +103,21 @@ for oxygen=1:nbO
     end
 
     used=zeros(size(list_index)[1])
-    for i=1:size(list_index)
-        
-    end
-
     for i=1:size(list_index)[1]
+        if used[i] == 0
+            used[i] = 1
+            for j=i+1:size(list_index)[1]
+                if used[j] == 0
+                    if list_index[i] == list_index[j]
+                        list_end[i]=list_end[j]
+                        used[j]=1
+                    end
+                end
+            end
+        end
         push!(lifes,list_end[i]-list_start[i])
+        push!(oxygens2,oxygen)
+        push!(carbons2,list_index[i])
     end
 
 end
