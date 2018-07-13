@@ -3,11 +3,11 @@ include("contactmatrix.jl")
 
 func="PBE-MT"
 temperature=3000
-volume=[8.82]
+volume=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.4,9.5,9.8]
 
 T=temperature
-#for V in volume
-V=volume[1]
+for V in volume
+
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
 file_in=string(folder,"TRAJEC_wrapped.xyz")
 
@@ -55,6 +55,7 @@ lifes=[]
 oxygens2=[]
 carbons2=[]
 starts=[]
+ends=[]
 end_at_endsim=[]
 
 count=0
@@ -121,8 +122,9 @@ for oxygen=1:nbO
             push!(oxygens2,oxygen)
             push!(carbons2,list_index[i])
             push!(starts,list_start[i])
+            push!(ends,list_end[i])
             x=0
-            if list_end[i] == nb_steps
+            if list_end[i] == nb_steps+1
                 x=1
             end
             push!(end_at_endsim,x)
@@ -130,9 +132,11 @@ for oxygen=1:nbO
     end
 end
 
-file=open(string("/home/moogmt/",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
 for i=1:size(oxygens2)[1]
-    print(string("O:",oxygens2[i]," C:",carbons2[i]," Life:",lifes[i]," or ",lifes[i]*unit," ps Start at step: ",starts[i]+start_step," Last Till End:",end_at_endsim[i],"\n"))
-    write(file,string(oxygens2[i]," ",carbons2[i]," ",lifes[i]," ",lifes[i]*unit," ",starts[i]+start_step," ",end_at_endsim[i],"\n"))
+    print(string("O:",oxygens2[i]," C:",carbons2[i]," Life:",lifes[i]," or ",lifes[i]*unit," ps Start at step: ",starts[i]+start_step," Ends at: ",ends[i]," Last Till End:",end_at_endsim[i],"\n"))
+    write(file,string(oxygens2[i]," ",carbons2[i]," ",lifes[i]," ",lifes[i]*unit," ",starts[i]+start_step," ",ends[i]," ",end_at_endsim[i],"\n"))
 end
 close(file)
+
+end
