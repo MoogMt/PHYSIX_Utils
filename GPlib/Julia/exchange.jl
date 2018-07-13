@@ -88,24 +88,41 @@ for oxygen=1:nbO
             push!(list_end,j)
         end
     end
-    # Wrap
-    used = zeros( size(list_index)[1] )
+
     for i=1:size(list_index)[1]
-        if used[i] == 0
-            used[i] = 1
-            for j=i+1:size(list_index)[1]
-                if list_index[i] == list_index[j] && used[j] == 0
-                    if list_end[i] - list_start[j] < 10
-                        used[j]=1
-                        list_end[i]=list_end[j]
-                    end
-                end
-            end
-            count+=1
-            push!(lifes, list_end[i]-list_start[i] )
-        end
+        push!(lifes,list_end[i]-list_start[i])
     end
+    # Wrap
+    # used = zeros( size(list_index)[1] )
+    # for i=1:size(list_index)[1]
+    #     if used[i] == 0
+    #         used[i] = 1
+    #         for j=i+1:size(list_index)[1]
+    #             if list_index[i] == list_index[j] && used[j] == 0
+    #                 if list_end[i] - list_start[j] < 10
+    #                     used[j]=1
+    #                     list_end[i]=list_end[j]
+    #                 end
+    #             end
+    #         end
+    #         count+=1
+    #         push!(lifes, list_end[i]-list_start[i] )
+    #     end
+    # end
     # Stat
 end
 
 # Stat
+function getMax( x )
+    max=x[1]
+    for i=2:size(x)
+        if x[i] > max
+            max=x[i]
+        end
+    end
+    return max
+end
+
+function getMin( x )
+    return getMax( -x )
+end
