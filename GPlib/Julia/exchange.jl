@@ -47,11 +47,13 @@ end
 
 nbC=32
 nbO=64
-cut_off=1.9
+cut_off=1.6
 
 lifes=[]
 oxygens2=[]
 carbons2=[]
+starts=[]
+end_at_endsim=[]
 
 count=0
 
@@ -101,7 +103,6 @@ for oxygen=1:nbO
             end
         end
     end
-
     used=zeros(size(list_index)[1])
     for i=1:size(list_index)[1]
         if used[i] == 0
@@ -114,25 +115,22 @@ for oxygen=1:nbO
                     end
                 end
             end
-        end
-        push!(lifes,list_end[i]-list_start[i])
-        push!(oxygens2,oxygen)
-        push!(carbons2,list_index[i])
-    end
-
-end
-
-# Stat
-function getMax( x )
-    max=x[1]
-    for i=2:size(x)
-        if x[i] > max
-            max=x[i]
+            push!(lifes,list_end[i]-list_start[i])
+            push!(oxygens2,oxygen)
+            push!(carbons2,list_index[i])
+            push!(starts,list_start[i])
         end
     end
-    return max
 end
 
-function getMin( x )
-    return getMax( -x )
+file=open(string(),"w")
+for i=1:size(oxygens2)[1]
+    write(file,string("O:",oxygens2[i]," C:",carbons2[i]," life:",lifes[i]," or ",lifes[i]*unit,"ps, start at step:",starts[i]+start_step))
+    if end_at_endsim[i] == 0
+        write(file,string())
+    else
+        write(file,string())
+    end
+    write(file,"\n")
 end
+close(file)
