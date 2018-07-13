@@ -53,7 +53,6 @@ for oxygen=1:nbO
     print("Progress - Oxygen: ",oxygen/nbO*100,"%\n")
     neighbours=zeros(nb_steps,2)
     indexs=zeros(nb_steps,2)
-    used=zeros(nb_steps)
     for step=1:nb_steps
         distances=zeros(32)
         for carbon=1:32
@@ -63,19 +62,30 @@ for oxygen=1:nbO
         for i=1:2
             if distances[i] < cut_off
                 neighbours[step,i] = 1
-            else
-                used[i] = 1
-            end
         end
         indexs[step,:]=[indexes[1], indexes[2]]
     end
     count=0
-    lifes=[]
-    # Merge
+    list_index=[]
+    list_start=[]
+    list_end=[]
+    # Aggregate
     for neigh=1:2
-        for i=step:nb_steps
-            for j=1:nb_steps
+        for i=1:nb_steps
+            index_check=indexs[i,neigh]
+            j=i+1
+            push!(list_index,index_check)
+            push!(list_start,i)
+            while ( indexs[step,1] == index_check || indexs[step,2] == index_check ) && j <= nb_steps
+                j+=1
             end
+            push!(list_start,j)
+        end
+    end
+    # Wrap
+    for i=1:size(list_index)[1]
+        for j=1:size(list_index)[1]
+            
         end
     end
     # Stat
