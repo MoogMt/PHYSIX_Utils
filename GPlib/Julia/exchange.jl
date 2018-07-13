@@ -1,7 +1,7 @@
 include("contactmatrix.jl")
 
 temperature=3000
-volume=[8.82]
+volume=[9.8]
 
 T=temperature
 #for V in volume
@@ -49,6 +49,9 @@ nbC=32
 nbO=64
 cut_off=1.6
 
+lifes=[]
+count=0
+
 for oxygen=1:nbO
     print("Progress - Oxygen: ",oxygen/nbO*100,"%\n")
     neighbours=zeros(nb_steps,2)
@@ -62,6 +65,7 @@ for oxygen=1:nbO
         for i=1:2
             if distances[i] < cut_off
                 neighbours[step,i] = 1
+            end
         end
         indexs[step,:]=[indexes[1], indexes[2]]
     end
@@ -72,20 +76,33 @@ for oxygen=1:nbO
     # Aggregate
     for neigh=1:2
         for i=1:nb_steps
+            print("Progress - Oxygen: ",oxygen/nbO*100," ")
+            print("Counting Life:",i/nb_steps*100,"%\n")
             index_check=indexs[i,neigh]
             j=i+1
             push!(list_index,index_check)
             push!(list_start,i)
-            while ( indexs[step,1] == index_check || indexs[step,2] == index_check ) && j <= nb_steps
+            while ( indexs[i,1] == index_check || indexs[i,2] == index_check ) && j <= nb_steps
                 j+=1
             end
-            push!(list_start,j)
+            push!(list_end,j)
         end
     end
     # Wrap
+    used = zeros( size(list_index)[1] )
     for i=1:size(list_index)[1]
-        for j=1:size(list_index)[1]
-            
+        if used[i] == 0
+            used[i] = 1
+            for j=i+1:size(list_index)[1]
+                if list_index[i] == list_index[j] && used[j] == 0
+                    if list_end[i] - list_start[j] < 10
+                        used[j]=1
+                        list_end[i]=list_end[j]
+                    end
+                end
+            end
+            count+=1
+            push!(lifes, list_end[i]-list_start[i] )
         end
     end
     # Stat
