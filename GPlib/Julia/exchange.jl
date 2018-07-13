@@ -1,7 +1,7 @@
 include("contactmatrix.jl")
 
 temperature=3000
-volume=[9.8]
+volume=[8.82]
 
 T=temperature
 #for V in volume
@@ -47,7 +47,7 @@ end
 
 nbC=32
 nbO=64
-cut_off=1.6
+cut_off=1.9
 
 lifes=[]
 count=0
@@ -76,40 +76,38 @@ for oxygen=1:nbO
     # Aggregate
     for neigh=1:2
         for i=1:nb_steps
-            print("Progress - Oxygen: ",oxygen/nbO*100," ")
-            print("Counting Life:",i/nb_steps*100,"%\n")
-            index_check=indexs[i,neigh]
-            j=i+1
-            push!(list_index,index_check)
-            push!(list_start,i)
-            while ( indexs[i,1] == index_check || indexs[i,2] == index_check ) && j <= nb_steps
-                j+=1
+            if neighbours[i,1] > 0
+                neighbours[i,1] = 0
+                print("Progress - Oxygen: ",oxygen/nbO*100," ")
+                print("Counting Life:",i/nb_steps*100,"%\n")
+                j=i+1
+                push!(list_index,indexs[i,neigh])
+                push!(list_start,i)
+                while j <= nb_steps
+                    if indexs[j,1] == indexs[i,neigh] && neighbours[j,1] > 0
+                        neighbours[j,1] = 0
+                        j+=1
+                    elseif indexs[j,2] == indexs[i,neigh] && neighbours[j,1] > 0
+                        neighbours[j,2] = 0
+                        j+=1
+                    else
+                        break
+                    end
+                end
+                push!(list_end,j)
             end
-            push!(list_end,j)
         end
+    end
+
+    used=zeros(size(list_index)[1])
+    for i=1:size(list_index)
+        
     end
 
     for i=1:size(list_index)[1]
         push!(lifes,list_end[i]-list_start[i])
     end
-    # Wrap
-    # used = zeros( size(list_index)[1] )
-    # for i=1:size(list_index)[1]
-    #     if used[i] == 0
-    #         used[i] = 1
-    #         for j=i+1:size(list_index)[1]
-    #             if list_index[i] == list_index[j] && used[j] == 0
-    #                 if list_end[i] - list_start[j] < 10
-    #                     used[j]=1
-    #                     list_end[i]=list_end[j]
-    #                 end
-    #             end
-    #         end
-    #         count+=1
-    #         push!(lifes, list_end[i]-list_start[i] )
-    #     end
-    # end
-    # Stat
+
 end
 
 # Stat
