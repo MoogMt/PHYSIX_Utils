@@ -194,7 +194,7 @@ for V in volume
     end
     hist1d_2 /= count
 
-    file=open(string("/home/moogmt/ExchangeLife-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    file=open(string("/home/moogmt/ExchangeLife-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     for i=1:size(hist1d_2)[1]
         write(file,string(i*unit," ",hist1d_2[i],"\n"))
     end
