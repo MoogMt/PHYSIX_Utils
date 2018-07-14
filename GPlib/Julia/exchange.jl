@@ -152,27 +152,23 @@ for V in volume
     time_window=[0.5,1,2] # Time window in picosecondes
 
     for tw in time_window
-
-        nb_window=Int(trunc(total_sim/timewindow)+1)
-
+        nb_window=Int(trunc(total_sim_time/tw)+1)
         hist1d=zeros(nb_window)
         count=0
-        for end_time in list_end
+        for end_time in ends
             for win=1:nb_window
-                if end_time*unit > (i-0.5)*timewindow && end_time*unit < (i+0.5)*timewindow
+                if end_time*unit > (i-0.5)*tw && end_time*unit < (i+0.5)*tw
                     hist1d[win] += 1
                     count=0
                 end
             end
         end
         hist1d/=count
-
-        file=open(string("/home/moogmt/ExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat")),"w")
+        file=open(string("/home/moogmt/ExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window
             write(file,string(i*unit," ",hist1D[i],"\n"))
         end
         close(file)
-
     end
 
     file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
