@@ -147,7 +147,7 @@ for V in volume
         end
     end
 
-    total_sim_time = nb_step*unit
+    total_sim_time = nb_steps*unit
 
     time_window=[0.5,1,2] # Time window in picosecondes
 
@@ -167,7 +167,7 @@ for V in volume
         end
         hist1d/=count
 
-        file=open(string("/home/moogmt/ExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        file=open(string("/home/moogmt/ExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat")),"w")
         for i=1:nb_window
             write(file,string(i*unit," ",hist1D[i],"\n"))
         end
