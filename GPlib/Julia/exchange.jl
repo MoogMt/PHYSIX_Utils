@@ -7,7 +7,6 @@ volume=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.4,9.5,9.8]
 
 T=temperature
 for V in volume
-    V=9.8
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
