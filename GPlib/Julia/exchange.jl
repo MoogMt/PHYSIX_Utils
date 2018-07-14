@@ -7,8 +7,9 @@ volume=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.4,9.5,9.8]
 
 T=temperature
 for V in volume
-
+    V=9.8
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
+    #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
 
     stride_sim=5
@@ -38,7 +39,14 @@ for V in volume
     end
 
     function getMin(x)
-        return getMax(-x)
+        min=x[1]
+        size_x=size(x)[1]
+        for i=2:size_x
+            if min > x[i]
+                min=x[i]
+            end
+        end
+        return min
     end
 
     function sortmatrixwithindex( x )
@@ -154,19 +162,16 @@ for V in volume
     for tw in time_window
         nb_window=Int(trunc(total_sim_time/tw)+1)
         hist1d=zeros(nb_window)
-        count=0
         for end_time in ends
             for win=1:nb_window
                 if end_time*unit > (win-0.5)*tw && end_time*unit < (win+0.5)*tw
                     hist1d[win] += 1
-                    count += 1
                 end
             end
         end
-        hist1d/=count
         file=open(string("/home/moogmt/ExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window
-            write(file,string(i*unit," ",hist1d[i],"\n"))
+            write(file,string(unit+i*tw," ",hist1d[i],"\n"))
         end
         close(file)
     end
@@ -183,20 +188,20 @@ for V in volume
     nb_lifes=100
     count=0
     delta_life=(max-min)/nb_lifes
-    hist1d_2=zeros(nb_lifes)
+    hist1D2=zeros(nb_lifes)
     for j=1:size(lifes)[1]
         for i=1:nb_lifes
-            if lifes[j] < min+delta_life*i && life[j] > min+delta_life*(i+1)
-                hist1d_2[i] += 1
+            if lifes[j] > min+delta_life*i && lifes[j] < min+delta_life*(i+1)
+                hist1D2[i] += 1
                 count += 1
             end
         end
     end
-    hist1d_2 /= count
+    hist1D2 /= count
 
     file=open(string("/home/moogmt/ExchangeLife-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    for i=1:size(hist1d_2)[1]
-        write(file,string(i*unit," ",hist1d_2[i],"\n"))
+    for i=1:size(hist1D2)[1]
+        write(file,string(i*delta_life*unit," ",hist1D2[i],"\n"))
     end
     close(file)
 
