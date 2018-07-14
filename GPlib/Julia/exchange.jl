@@ -166,7 +166,7 @@ for V in volume
         hist1d/=count
         file=open(string("/home/moogmt/ExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window
-            write(file,string(i*unit," ",hist1D[i],"\n"))
+            write(file,string(i*unit," ",hist1d[i],"\n"))
         end
         close(file)
     end
