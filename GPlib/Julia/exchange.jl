@@ -159,7 +159,7 @@ for V in volume
             for win=1:nb_window
                 if end_time*unit > (win-0.5)*tw && end_time*unit < (win+0.5)*tw
                     hist1d[win] += 1
-                    count=0
+                    count += 1
                 end
             end
         end
