@@ -184,9 +184,9 @@ for V in volume
     count=0
     delta_life=(max-min)/nb_lifes
     hist1d_2=zeros(nb_lifes)
-    for life in lifes
+    for j=1:size(lifes)[1]
         for i=1:nb_lifes
-            if life < min+delta_life*i && life < min+delta_life*(i+1)
+            if lifes[j] < min+delta_life*i && life[j] > min+delta_life*(i+1)
                 hist1d_2[i] += 1
                 count += 1
             end
