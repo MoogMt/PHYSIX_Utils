@@ -201,7 +201,7 @@ for V in volume
             if oxygens2[i] == oxygens2[j] && carbons2[i] != carbons2[j]
                 if ends[i]-starts[j] < 10
                     count += 1
-                    push!(exchange,ends[j])
+                    push!(exchanges,ends[j])
                 end
             end
         end
