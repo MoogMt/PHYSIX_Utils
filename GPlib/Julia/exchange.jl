@@ -1,5 +1,47 @@
 include("contactmatrix.jl")
 
+function getMax(x)
+    size_x=size(x)[1]
+    max=x[1]
+    for i=2:size_x
+        if x[i] > max
+            max=x[i]
+        end
+    end
+    return max
+end
+
+function getMin(x)
+    min=x[1]
+    size_x=size(x)[1]
+    for i=2:size_x
+        if min > x[i]
+            min=x[i]
+        end
+    end
+    return min
+end
+
+function sortmatrixwithindex( x )
+    sizex=size(x)[1]
+    indexes=zeros(sizex)
+    for i=1:sizex
+        indexes[i]=i
+    end
+    for i=1:sizex
+        for j=i:sizex
+            if x[i] > x[j]
+                stock=x[i]
+                stock2=indexes[i]
+                x[i]=x[j]
+                indexes[i]=indexes[j]
+                x[j]=stock
+                indexes[j]=stock2
+            end
+        end
+    end
+    return x,indexes
+end
 
 func="PBE-MT"
 temperature=2000
@@ -7,81 +49,47 @@ volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
 
 T=temperature
 for V in volume
+
+    #==========================================================================#
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
+    #==========================================================================#
 
+    # Sim parameters
+    #==========================================================================#
     stride_sim=5
     fs2ps=0.001
     time_sim=0.5 # in fs
     unit=time_sim*fs2ps*stride_sim# in ps
-
     stride_analysis=1
     start_time=5
     start_step=Int(start_time/(unit*stride_sim))
+    nbC=32
+    nbO=64
+    cut_off=1.6
+    #==========================================================================#
 
+    # Reading trajectory
+    #==========================================================================#
     atoms = filexyz.read( file_in, stride_analysis, start_step )
     cell=cell_mod.Cell_param( V, V, V )
+    #==========================================================================#
 
     nb_steps=size(atoms)[1]
     nb_atoms=size(atoms[1].names)[1]
 
-    function getMax(x)
-        size_x=size(x)[1]
-        max=x[1]
-        for i=2:size_x
-            if x[i] > max
-                max=x[i]
-            end
-        end
-        return max
-    end
 
-    function getMin(x)
-        min=x[1]
-        size_x=size(x)[1]
-        for i=2:size_x
-            if min > x[i]
-                min=x[i]
-            end
-        end
-        return min
-    end
 
-    function sortmatrixwithindex( x )
-        sizex=size(x)[1]
-        indexes=zeros(sizex)
-        for i=1:sizex
-            indexes[i]=i
-        end
-        for i=1:sizex
-            for j=i:sizex
-                if x[i] > x[j]
-                    stock=x[i]
-                    stock2=indexes[i]
-                    x[i]=x[j]
-                    indexes[i]=indexes[j]
-                    x[j]=stock
-                    indexes[j]=stock2
-                end
-            end
-        end
-        return x,indexes
-    end
-
-    nbC=32
-    nbO=64
-    cut_off=1.6
-
+    # Aggregating Data
+    #==========================================================================#
     lifes=[]
     oxygens2=[]
     carbons2=[]
     starts=[]
     ends=[]
     end_at_endsim=[]
-
     count=0
-
     for oxygen=1:nbO
         print("Progress - Oxygen: ",oxygen/nbO*100,"%\n")
         neighbours=zeros(nb_steps,2)
@@ -153,35 +161,53 @@ for V in volume
             end
         end
     end
+    #==========================================================================#
 
+    # Looking at creation and destructions of bonds
+    #==========================================================================#
     total_sim_time = nb_steps*unit
-
     time_window=[0.5,1,2] # Time window in picosecondes
-
     for tw in time_window
         nb_window=Int(trunc(total_sim_time/tw)+1)
-        hist1d=zeros(nb_window)
+        hist1d_loss=zeros(nb_window)
         for end_time in ends
             for win=1:nb_window
                 if end_time*unit > (win-0.5)*tw && end_time*unit < (win+0.5)*tw
-                    hist1d[win] += 1
+                    hist1d_loss[win] += 1
                 end
             end
         end
-        file=open(string("/home/moogmt/ExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window
-            write(file,string(unit+i*tw," ",hist1d[i],"\n"))
+            write(file,string(unit+i*tw," ",hist1d_loss[i],"\n"))
+        end
+        hist1d_gain=zeros(nb_window)
+        for gain_time in starts
+            for win=1:nb_window
+                if gain_time*unit > (win-0.5)*tw && gain_time*unit < (win+0.5)*tw
+                    hist1d_gain[win] += 1
+                end
+            end
+        end
+        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        for i=1:nb_window
+            write(file,string(unit+i*tw," ",hist1d_gain[i],"\n"))
         end
         close(file)
     end
+    #==========================================================================#
 
+    # Priting summary of all data
+    #==========================================================================#
     file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     for i=1:size(oxygens2)[1]
         print(string("O:",oxygens2[i]," C:",carbons2[i]," Life:",lifes[i]," or ",lifes[i]*unit," ps Start at step: ",starts[i]+start_step," Ends at: ",ends[i]," Last Till End:",end_at_endsim[i],"\n"))
         write(file,string(oxygens2[i]," ",carbons2[i]," ",lifes[i]," ",lifes[i]*unit," ",starts[i]+start_step," ",ends[i]," ",end_at_endsim[i],"\n"))
     end
     close(file)
+    #==========================================================================#
 
+    #==========================================================================#
     max=getMax(lifes)
     min=getMin(lifes)
     nb_lifes=100
@@ -197,11 +223,16 @@ for V in volume
         end
     end
     hist1D2 /= count
-
     file=open(string("/home/moogmt/ExchangeLife-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     for i=1:size(hist1D2)[1]
         write(file,string(i*delta_life*unit," ",hist1D2[i],"\n"))
     end
     close(file)
+    #==========================================================================#
+
+    # Counting remaining
+    #==========================================================================#
+    
+    #==========================================================================#
 
 end
