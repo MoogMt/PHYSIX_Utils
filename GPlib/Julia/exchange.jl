@@ -208,7 +208,7 @@ for V in volume
     end
     file=open(string("/home/moogmt/ExchangeCounterTime",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     for i=1:size(exchanges)[1]
-        write(file,string(exchange[i],"\n"))
+        write(file,string(exchanges[i],"\n"))
     end
     close(file)
     file=open(string("/home/moogmt/ExchangeCounterTotal",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
