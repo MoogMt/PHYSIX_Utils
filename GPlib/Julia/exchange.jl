@@ -1,5 +1,6 @@
 include("contactmatrix.jl")
 
+#==============================================================================#
 function getMax(x)
     size_x=size(x)[1]
     max=x[1]
@@ -10,7 +11,6 @@ function getMax(x)
     end
     return max
 end
-
 function getMin(x)
     min=x[1]
     size_x=size(x)[1]
@@ -21,7 +21,6 @@ function getMin(x)
     end
     return min
 end
-
 function sortmatrixwithindex( x )
     sizex=size(x)[1]
     indexes=zeros(sizex)
@@ -42,10 +41,13 @@ function sortmatrixwithindex( x )
     end
     return x,indexes
 end
+#==============================================================================#
 
+#==============================================#
 func="PBE-MT"
 temperature=2000
 volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
+#==============================================#
 
 T=temperature
 for V in volume
@@ -56,6 +58,7 @@ for V in volume
     file_in=string(folder,"TRAJEC_wrapped.xyz")
     #==========================================================================#
 
+    #================#
     # Sim parameters
     #==========================================================================#
     stride_sim=5
@@ -70,17 +73,19 @@ for V in volume
     cut_off=1.6
     #==========================================================================#
 
+    #=====================#
     # Reading trajectory
     #==========================================================================#
     atoms = filexyz.read( file_in, stride_analysis, start_step )
     cell=cell_mod.Cell_param( V, V, V )
     #==========================================================================#
 
+    #==============================================#
     nb_steps=size(atoms)[1]
     nb_atoms=size(atoms[1].names)[1]
+    #==============================================#
 
-
-
+    #==================#
     # Aggregating Data
     #==========================================================================#
     lifes=[]
@@ -163,6 +168,7 @@ for V in volume
     end
     #==========================================================================#
 
+    #==============================================#
     # Looking at creation and destructions of bonds
     #==========================================================================#
     total_sim_time = nb_steps*unit
@@ -197,6 +203,35 @@ for V in volume
     end
     #==========================================================================#
 
+    #============================#
+    # Counting actual exchange
+    #==========================================================================#
+    count=0
+    exchanges=[]
+    nb_bonds=size(ends)[1]
+    for i=1:nb_bonds
+        for j=i:nb_bonds
+            if oxygens2[i] == oxygens2[j] && carbons2[i] != carbons2[j]
+                if ends[i]-starts[j] < 10
+                    count += 1
+                    push!(exchange,ends[j])
+                end
+            end
+        end
+    end
+    file=open(string("/home/moogmt/ExchangeCounterTime",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    for i=1:size(exchanges)[1]
+        write(file,string(exchange[i],"\n"))
+    end
+    close(file)
+    file=open(string("/home/moogmt/ExchangeCounter",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    for i=1:size(exchanges)[1]
+        write(file,string(count,"\n"))
+    end
+    close(file)
+    #==========================================================================#
+
+    #=============================#
     # Priting summary of all data
     #==========================================================================#
     file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
@@ -207,6 +242,8 @@ for V in volume
     close(file)
     #==========================================================================#
 
+    #==========================
+    # Computing lifes of bonds
     #==========================================================================#
     max=getMax(lifes)
     min=getMin(lifes)
@@ -230,9 +267,18 @@ for V in volume
     close(file)
     #==========================================================================#
 
+    #====================#
     # Counting remaining
     #==========================================================================#
-    
+    count=0
+    for i=1:size(ends)[1]
+        if ends[i]-starts[i] == nb_steps
+            count += 1
+        end
+    end
+    file=open(string("/home/moogmt/Remaining-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    write(file,string(V," ",T," ",count,"\n"))
+    close(file)
     #==========================================================================#
 
 end
