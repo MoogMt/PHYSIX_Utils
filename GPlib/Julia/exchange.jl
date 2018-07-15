@@ -197,7 +197,7 @@ for V in volume
         end
         file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window
-            write(file,string(unit+i*tw," ",hist1d_gain[i],"\n"))
+            write(file,string(i*tw," ",hist1d_gain[i],"\n"))
         end
         close(file)
     end
@@ -224,10 +224,29 @@ for V in volume
         write(file,string(exchange[i],"\n"))
     end
     close(file)
-    file=open(string("/home/moogmt/ExchangeCounter",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    for i=1:size(exchanges)[1]
-        write(file,string(count,"\n"))
+    file=open(string("/home/moogmt/ExchangeCounterTotal",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    write(file,string(count,"\n"))
+    close(file)
+    total_sim_time = nb_steps*unit
+    time_window=[0.5,1,2] # Time window in picosecondes
+    for tw in time_window
+        nb_window=Int(trunc(total_sim_time/tw)+1)
+        hist=zeros(nb_window)
+        for i=1:nb_window
+            for j=1:size(exchanges)[1]
+                if end_time*unit > (i-0.5)*tw && end_time*unit < (i+0.5)*tw
+                    hist[i] += 1
+                end
+            end
+        end
     end
+    file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    for i=1:size(hist)[1]
+        write(file,string(i*tw," ",hist[i],"\n"))
+    end
+    close(file)
+    file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    write(file,string(size(ends)[1]-count,"\n"))
     close(file)
     #==========================================================================#
 
