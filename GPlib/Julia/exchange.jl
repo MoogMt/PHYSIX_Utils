@@ -226,10 +226,10 @@ for V in volume
                 end
             end
         end
-    end
-    file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    for i=1:size(hist)[1]
-        write(file,string(i*tw," ",hist[i],"\n"))
+        file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        for i=1:size(hist)[1]
+            write(file,string(i*tw," ",hist[i],"\n"))
+        end
     end
     close(file)
     file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
