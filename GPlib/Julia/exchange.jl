@@ -221,7 +221,7 @@ for V in volume
         hist=zeros(nb_window)
         for i=1:nb_window
             for j=1:size(exchanges)[1]
-                if end_time*unit > (i-0.5)*tw && end_time*unit < (i+0.5)*tw
+                if exchanges[j]*unit > (i-0.5)*tw && exchanges[j]*unit < (i+0.5)*tw
                     hist[i] += 1
                 end
             end
