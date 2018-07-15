@@ -55,11 +55,8 @@ for V in volume
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
-    #==========================================================================#
 
-    #================#
     # Sim parameters
-    #==========================================================================#
     stride_sim=5
     fs2ps=0.001
     time_sim=0.5 # in fs
@@ -70,23 +67,15 @@ for V in volume
     nbC=32
     nbO=64
     cut_off=1.6
-    #==========================================================================#
 
-    #=====================#
     # Reading trajectory
-    #==========================================================================#
     atoms = filexyz.read( file_in, stride_analysis, start_step )
     cell=cell_mod.Cell_param( V, V, V )
-    #==========================================================================#
 
-    #==============================================#
     nb_steps=size(atoms)[1]
     nb_atoms=size(atoms[1].names)[1]
-    #==============================================#
 
-    #==================#
     # Aggregating Data
-    #==========================================================================#
     lifes=[]
     oxygens2=[]
     carbons2=[]
@@ -165,11 +154,11 @@ for V in volume
             end
         end
     end
-    #==========================================================================#
 
-    #==============================================#
+
+
     # Looking at creation and destructions of bonds
-    #==========================================================================#
+
     total_sim_time = nb_steps*unit
     time_window=[0.5,1,2] # Time window in picosecondes
     for tw in time_window
@@ -200,11 +189,10 @@ for V in volume
         end
         close(file)
     end
-    #==========================================================================#
 
-    #============================#
+
+
     # Counting actual exchange
-    #==========================================================================#
     count=0
     exchanges=[]
     nb_bonds=size(ends)[1]
@@ -247,22 +235,16 @@ for V in volume
     file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     write(file,string(size(ends)[1]-count,"\n"))
     close(file)
-    #==========================================================================#
 
-    #=============================#
     # Priting summary of all data
-    #==========================================================================#
     file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     for i=1:size(oxygens2)[1]
         print(string("O:",oxygens2[i]," C:",carbons2[i]," Life:",lifes[i]," or ",lifes[i]*unit," ps Start at step: ",starts[i]+start_step," Ends at: ",ends[i]," Last Till End:",end_at_endsim[i],"\n"))
         write(file,string(oxygens2[i]," ",carbons2[i]," ",lifes[i]," ",lifes[i]*unit," ",starts[i]+start_step," ",ends[i]," ",end_at_endsim[i],"\n"))
     end
     close(file)
-    #==========================================================================#
 
-    #==========================
     # Computing lifes of bonds
-    #==========================================================================#
     max=getMax(lifes)
     min=getMin(lifes)
     nb_lifes=100
@@ -283,11 +265,8 @@ for V in volume
         write(file,string(i*delta_life*unit," ",hist1D2[i],"\n"))
     end
     close(file)
-    #==========================================================================#
 
-    #====================#
     # Counting remaining
-    #==========================================================================#
     count=0
     for i=1:size(ends)[1]
         if ends[i]-starts[i] == nb_steps
@@ -297,6 +276,4 @@ for V in volume
     file=open(string("/home/moogmt/Remaining-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     write(file,string(V," ",T," ",count,"\n"))
     close(file)
-    #==========================================================================#
-
 end
