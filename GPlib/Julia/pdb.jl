@@ -202,5 +202,61 @@ function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Ab
 
   return
 end
+function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: IO }(atoms::T1, cell::T2, fileio::T3 )
+
+  a,b,c = string(cell.length[1]), string(cell.length[2]), string(cell.length[3])
+  alpha, beta, gamma = string(cell.angles[1]), string(cell.angles[2]), string(cell.angles[3])
+
+  cryst1=string("CRYST1 ",a)
+  cryst1=utils.spaces(cryst1,16-length(cryst1))
+  cryst1=string(cryst1,b)
+  cryst1=utils.spaces(cryst1,25-length(cryst1))
+  cryst1=string(cryst1,c)
+  cryst1=utils.spaces(cryst1,34-length(cryst1))
+  cryst1=string(cryst1,alpha)
+  cryst1=utils.spaces(cryst1,41-length(cryst1))
+  cryst1=string(cryst1,beta)
+  cryst1=utils.spaces(cryst1,48-length(cryst1))
+  cryst1=string(cryst1,gamma)
+  cryst1=utils.spaces(cryst1,56-length(cryst1))
+  cryst1=string(cryst1,"P 1")
+  cryst1=utils.spaces(cryst1,67-length(cryst1))
+  cryst1=string(cryst1,"1")
+  cryst1=string(cryst1,"\n")
+  Base.write(fileio,cryst1)
+
+  Base.write(fileio,string("MODEL X\n"))
+
+  nb_atoms = size(atoms.names)[1]
+  for i=1:nb_atoms
+    atom="ATOM"
+    atom=utils.spaces(atom,7-length(atom))
+    atom=string(atom,atoms.index[i])
+    atom=utils.spaces(atom,13-length(atom))
+    atom=string(atom,atoms.names[i])
+    atom=utils.spaces(atom,23-length(atom))
+    atom=string(atom,"XXX")
+    atom=utils.spaces(atom,27-length(atom))
+    atom=string(atom,"XXX")
+    atom=utils.spaces(atom,31-length(atom))
+    atom=string(atom,round(atoms.positions[i,1],3))
+    atom=utils.spaces(atom,39-length(atom))
+    atom=string(atom,round(atoms.positions[i,2],3))
+    atom=utils.spaces(atom,47-length(atom))
+    atom=string(atom,round(atoms.positions[i,3],3))
+    atom=utils.spaces(atom,55-length(atom))
+    atom=string(atom,"0.00")
+    atom=utils.spaces(atom,61-length(atom))
+    atom=string(atom,"0.00")
+    atom=utils.spaces(atom,77-length(atom))
+    atom=string(atom,atoms.names[i])
+    atom=string(atom,"\n")
+    Base.write(fileio,atom)
+  end
+
+  Base.write(fileio,"END\n")
+
+  return
+end
 
 end
