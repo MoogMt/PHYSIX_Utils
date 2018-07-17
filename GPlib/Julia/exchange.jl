@@ -155,51 +155,13 @@ for V in volume
         end
     end
 
-
-
-    # Looking at creation and destructions of bonds
-
-    total_sim_time = nb_steps*unit
-    time_window=[0.5,1,2] # Time window in picosecondes
-    for tw in time_window
-        nb_window=Int(trunc(total_sim_time/tw)+1)
-        hist1d_loss=zeros(nb_window)
-        for end_time in ends
-            for win=1:nb_window
-                if end_time*unit > (win-0.5)*tw && end_time*unit < (win+0.5)*tw
-                    hist1d_loss[win] += 1
-                end
-            end
-        end
-        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-        for i=1:nb_window
-            write(file,string(unit+i*tw," ",hist1d_loss[i],"\n"))
-        end
-        hist1d_gain=zeros(nb_window)
-        for gain_time in starts
-            for win=1:nb_window
-                if gain_time*unit > (win-0.5)*tw && gain_time*unit < (win+0.5)*tw
-                    hist1d_gain[win] += 1
-                end
-            end
-        end
-        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-        for i=1:nb_window
-            write(file,string(i*tw," ",hist1d_gain[i],"\n"))
-        end
-        close(file)
-    end
-
-
-
-    # Counting actual exchange
     count=0
     exchanges=[]
     nb_bonds=size(ends)[1]
     for i=1:nb_bonds
         for j=i:nb_bonds
             if oxygens2[i] == oxygens2[j] && carbons2[i] != carbons2[j]
-                if ends[i]-starts[j] < 10
+                if starts[j]-ends[i] < 20
                     count += 1
                     push!(exchanges,ends[j])
                 end
@@ -214,10 +176,42 @@ for V in volume
     file=open(string("/home/moogmt/ExchangeCounterTotal",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     write(file,string(count,"\n"))
     close(file)
+    file=open(string("/home/moogmt/GainCounterTotal",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    write(file,string(size(starts)[1]-count,"\n"))
+    close(file)
+
+    # Looking at creation and destructions of bonds
     total_sim_time = nb_steps*unit
     time_window=[0.5,1,2] # Time window in picosecondes
     for tw in time_window
         nb_window=Int(trunc(total_sim_time/tw)+1)
+        # Loss of a carbon
+        hist1d_loss=zeros(nb_window)
+        for end_time in ends
+            for win=1:nb_window
+                if end_time*unit > (win-0.5)*tw && end_time*unit < (win+0.5)*tw
+                    hist1d_loss[win] += 1
+                end
+            end
+        end
+        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        for i=1:nb_window
+            write(file,string(unit+i*tw," ",hist1d_loss[i],"\n"))
+        end
+        # Gain of a carbon
+        hist1d_gain=zeros(nb_window)
+        for gain_time in starts
+            for win=1:nb_window
+                if gain_time*unit > (win-0.5)*tw && gain_time*unit < (win+0.5)*tw
+                    hist1d_gain[win] += 1
+                end
+            end
+        end
+        file=open(string("/home/moogmt/GainTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        for i=1:nb_window
+            write(file,string(i*tw," ",hist1d_gain[i],"\n"))
+        end
+        close(file)
         hist=zeros(nb_window)
         for i=1:nb_window
             for j=1:size(exchanges)[1]
@@ -230,10 +224,40 @@ for V in volume
         for i=1:size(hist)[1]
             write(file,string(i*tw," ",hist[i],"\n"))
         end
+        close(file)
+    end
+
+    # Computing lifes of bonds
+    max=200 # in ps
+    min=0 # in ps
+    nb_lifes=100
+    count=0
+    delta_life=(max-min)/nb_lifes
+    hist1D2=zeros(nb_lifes)
+    for j=1:size(lifes)[1]
+        for i=1:nb_lifes
+            if lifes[j]*unit > min+delta_life*i
+                hist1D2[i] += 1
+                count += 1
+            end
+        end
+    end
+    hist1D2 /= count
+    file=open(string("/home/moogmt/ExchangeSurvivalProba-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    for i=1:size(hist1D2)[1]
+        write(file,string(i*delta_life*unit," ",hist1D2[i],"\n"))
     end
     close(file)
-    file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    write(file,string(size(ends)[1]-count,"\n"))
+
+    # Counting atoms that stay together until the very end
+    count=0
+    for i=1:size(ends)[1]
+        if ends[i]-starts[i] == nb_steps
+            count += 1
+        end
+    end
+    file=open(string("/home/moogmt/Remaining-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    write(file,string(V," ",T," ",count,"\n"))
     close(file)
 
     # Priting summary of all data
@@ -244,36 +268,4 @@ for V in volume
     end
     close(file)
 
-    # Computing lifes of bonds
-    max=getMax(lifes)
-    min=getMin(lifes)
-    nb_lifes=100
-    count=0
-    delta_life=(max-min)/nb_lifes
-    hist1D2=zeros(nb_lifes)
-    for j=1:size(lifes)[1]
-        for i=1:nb_lifes
-            if lifes[j] > min+delta_life*i && lifes[j] < min+delta_life*(i+1)
-                hist1D2[i] += 1
-                count += 1
-            end
-        end
-    end
-    hist1D2 /= count
-    file=open(string("/home/moogmt/ExchangeLife-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    for i=1:size(hist1D2)[1]
-        write(file,string(i*delta_life*unit," ",hist1D2[i],"\n"))
-    end
-    close(file)
-
-    # Counting remaining
-    count=0
-    for i=1:size(ends)[1]
-        if ends[i]-starts[i] == nb_steps
-            count += 1
-        end
-    end
-    file=open(string("/home/moogmt/Remaining-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    write(file,string(V," ",T," ",count,"\n"))
-    close(file)
 end
