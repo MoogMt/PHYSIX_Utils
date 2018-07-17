@@ -161,7 +161,7 @@ for V in volume
     exchanges=[]
     nb_bonds=size(ends)[1]
     for i=1:nb_bonds
-        for j=i:nb_bonds
+        for j=1:nb_bonds
             if oxygens2[i] == oxygens2[j] && carbons2[i] != carbons2[j]
                 if starts[j]-ends[i] < 20
                     count += 1
@@ -188,56 +188,60 @@ for V in volume
     total_sim_time = nb_steps*unit
     time_window=[0.5,1,2] # Time window in picosecondes
     for tw in time_window
+
         # Collective Vars
+        #------------------------------------------------------------------------
         nb_window=Int(trunc(total_sim_time/tw)+1)
-        hist=zeros(nb_window)
+        hist1=zeros(nb_window-1)
+        hist2=zeros(nb_window-1)
+        hist3=zeros(nb_window-1)
+        #------------------------------------------------------------------------
 
-        # Loss of a carbon
-        for end_time in ends
-            for win=1:nb_window
-                if end_time*unit > (win-0.5)*tw && end_time*unit < (win+0.5)*tw
-                    hist[win] += 1
+        # Gain, Loss, Exchange of bonds
+        #------------------------------------------------------------------------
+        for i=1:nb_window-1
+            for j=1:size(starts)[1]
+                if starts[j]*unit > (i-0.5)*tw && starts[j]*unit < (i+0.5)*tw
+                    hist3[i] += 1
                 end
             end
-        end
-        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-        for i=1:nb_window
-            write(file,string(unit+i*tw," ",hist[i],"\n"))
-        end
-
-        # Gain of a carbon
-        hist1d_gain=zeros(nb_window)
-        for gain_time in starts
-            for win=1:nb_window
-                if gain_time*unit > (win-0.5)*tw && gain_time*unit < (win+0.5)*tw
-                    hist[win] += 1
+            for j=1:size(ends)[1]
+                if ends[j]*unit > (i-0.5)*tw && ends[j]*unit < (i+0.5)*tw
+                    hist2[i] += 1
                 end
             end
-        end
-        file=open(string("/home/moogmt/GainTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-        for i=1:nb_window
-            write(file,string(i*tw," ",hist[i],"\n"))
-        end
-        close(file)
-
-        # Exchanges
-        for i=1:nb_window
             for j=1:size(exchanges)[1]
                 if exchanges[j]*unit > (i-0.5)*tw && exchanges[j]*unit < (i+0.5)*tw
-                    hist[i] += 1
+                    hist1[i] += 1
                 end
             end
         end
+        #------------------------------------------------------------------------
+
+        # Writting data in files
+        #------------------------------------------------------------------------
         file=open(string("/home/moogmt/ExchangeTime",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:size(hist)[1]
-            write(file,string(i*tw," ",hist[i],"\n"))
+            write(file,string(i*tw," ",hist1[i],"\n"))
         end
         close(file)
+        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        for i=1:nb_window-1
+            write(file,string(unit+i*tw," ",hist2[i],"\n"))
+        end
+        close(file)
+        file=open(string("/home/moogmt/GainTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        for i=1:nb_window-1
+            write(file,string(i*tw," ",hist3[i],"\n"))
+        end
+        close(file)
+        #------------------------------------------------------------------------
     end
     #---------------------------------------------------------------------------
 
     # Computing lifes of bonds
     #---------------------------------------------------------------------------
+    # Definitely something to fix here...
     max=200 # in ps
     min=0 # in ps
     nb_lifes=100
@@ -262,7 +266,7 @@ for V in volume
     hist1D2 /= count2
     file=open(string("/home/moogmt/ExchangeSurvival-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     for i=1:nb_lifes
-        write(file,string(i*delta_life*unit," ",hist1D1[i]," ",hist1D2[i],"\n"))
+        write(file,string(i*delta_life," ",hist1D1[i]," ",hist1D2[i],"\n"))
     end
     close(file)
     #---------------------------------------------------------------------------
