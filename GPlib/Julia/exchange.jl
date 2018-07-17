@@ -44,8 +44,11 @@ end
 func="PBE-MT"
 temperature=3000
 volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.35,9.375,9.4,9.5,9.8]
+damp_param_list=[5,10,20]
 
 T=temperature
+
+for damp_param in damp_param_list
 for V in volume
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
@@ -62,7 +65,7 @@ for V in volume
     nbC=32
     nbO=64
     cut_off=1.6
-    damp_param=1
+    #damp_param=1
     exchange_param=10
 
     # Reading trajectory
@@ -113,10 +116,10 @@ for V in volume
                     push!(list_index,indexs[i,neigh])
                     push!(list_start,i)
                     while j <= nb_steps
-                        if  j-i < damp_param && neighbours[j,1] > 0 && indexs[j,1] == indexs[i,neigh]
+                        if neighbours[j,1] > 0 && indexs[j,1] == indexs[i,neigh]
                             neighbours[j,1] = 0
                             j+=1
-                        elseif j-i < damp_param && neighbours[j,2] > 0 && indexs[j,2] == indexs[i,neigh]
+                        elseif neighbours[j,2] > 0 && indexs[j,2] == indexs[i,neigh]
                             neighbours[j,2] = 0
                             j+=1
                         else
@@ -134,7 +137,7 @@ for V in volume
                 used[i] = 1
                 for j=i+1:size(list_index)[1]
                     if used[j] == 0
-                        if list_index[i] == list_index[j]
+                        if list_index[i] == list_index[j] &&  j-i < damp_param
                             list_end[i]=list_end[j]
                             used[j]=1
                         end
@@ -169,15 +172,15 @@ for V in volume
             end
         end
     end
-    file=open(string("/home/moogmt/ExchangeCounterTime",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    file=open(string("/home/moogmt/ExchangeCounterTime",V,"-",T,"-",cut_off,"-",func," ",damp_param,".dat"),"w")
     for i=1:size(exchanges)[1]
         write(file,string(exchanges[i],"\n"))
     end
     close(file)
-    file=open(string("/home/moogmt/ExchangeCounterTotal",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    file=open(string("/home/moogmt/ExchangeCounterTotal",V,"-",T,"-",cut_off,"-",func," ",damp_param,".dat"),"w")
     write(file,string(count,"\n"))
     close(file)
-    file=open(string("/home/moogmt/GainCounterTotal",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    file=open(string("/home/moogmt/GainCounterTotal",V,"-",T,"-",cut_off,"-",func," ",damp_param,".dat"),"w")
     write(file,string(size(starts)[1]-count,"\n"))
     close(file)
     #---------------------------------------------------------------------------
@@ -219,7 +222,7 @@ for V in volume
 
         # Writting data in files
         #------------------------------------------------------------------------
-        file=open(string("/home/moogmt/GainLossExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        file=open(string("/home/moogmt/GainLossExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func," ",damp_param,".dat"),"w")
         for i=1:nb_window-1
             write(file,string(unit+i*tw," ",hist1[i]," ",hist2[i]," ",hist3[i],"\n"))
         end
@@ -252,7 +255,7 @@ for V in volume
     value=hist1D1[1]
     hist1D1 /= value
     hist1D2 /= count2
-    file=open(string("/home/moogmt/ExchangeSurvival-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    file=open(string("/home/moogmt/ExchangeSurvival-",V,"-",T,"-",cut_off,"-",func," ",damp_param,".dat"),"w")
     for i=1:nb_lifes
         write(file,string(i*delta_life," ",hist1D1[i]," ",hist1D2[i],"\n"))
     end
@@ -267,14 +270,14 @@ for V in volume
             count += 1
         end
     end
-    file=open(string("/home/moogmt/Remaining-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    file=open(string("/home/moogmt/Remaining-",V,"-",T,"-",cut_off,"-",func," ",damp_param,".dat"),"w")
     write(file,string(count,"\n"))
     close(file)
     #--------------------------------------------------------------------------
 
     # Priting summary of all data
     #---------------------------------------------------------------------------
-    file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func," ",damp_param,".dat"),"w")
     for i=1:size(oxygens2)[1]
         print(string("O:",oxygens2[i]," C:",carbons2[i]," Life:",lifes[i]," or ",lifes[i]*unit," ps Start at step: ",starts[i]+start_step," Ends at: ",ends[i]," Last Till End:",end_at_endsim[i],"\n"))
         write(file,string(oxygens2[i]," ",carbons2[i]," ",lifes[i]," ",lifes[i]*unit," ",starts[i]+start_step," ",ends[i]," ",end_at_endsim[i],"\n"))
@@ -282,4 +285,5 @@ for V in volume
     close(file)
     #---------------------------------------------------------------------------
 
+end
 end
