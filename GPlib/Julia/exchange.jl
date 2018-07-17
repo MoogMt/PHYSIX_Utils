@@ -45,13 +45,13 @@ end
 
 
 func="PBE-MT"
-temperature=3000
-volume=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8]
+temperature=2000
+volume=[9.4,9.5,9.8]
 
 
 T=temperature
-for V in volume
-
+#for V in volume
+    V=volume[3]
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
@@ -232,33 +232,42 @@ for V in volume
     min=0 # in ps
     nb_lifes=100
     count=0
+    count2=0
     delta_life=(max-min)/nb_lifes
+    hist1D1=zeros(nb_lifes)
     hist1D2=zeros(nb_lifes)
     for j=1:size(lifes)[1]
         for i=1:nb_lifes
             if lifes[j]*unit > min+delta_life*i
-                hist1D2[i] += 1
+                hist1D1[i] += 1
                 count += 1
+                if lifes[j]*unit < min+delta_life*(i+0.5)
+                    hist1D2[i] += 1
+                    count2 += 1
+                end
             end
         end
     end
-    hist1D2 /= count
-    file=open(string("/home/moogmt/ExchangeSurvivalProba-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    for i=1:size(hist1D2)[1]
-        write(file,string(i*delta_life*unit," ",hist1D2[i],"\n"))
+    hist1D1 /= count
+    hist1D2 /= count2
+    file=open(string("/home/moogmt/ExchangeSurvival-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+    for i=1:nb_lifes
+        write(file,string(i*delta_life*unit," ",hist1D1[i]," ",hist1D2[i],"\n"))
     end
     close(file)
 
     # Counting atoms that stay together until the very end
+    #---------------------------------------------------------------------------
     count=0
     for i=1:size(ends)[1]
-        if ends[i]-starts[i] == nb_steps
+        if lifes[i] == nb_steps
             count += 1
         end
     end
     file=open(string("/home/moogmt/Remaining-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-    write(file,string(V," ",T," ",count,"\n"))
+    write(file,string(count,"\n"))
     close(file)
+    #--------------------------------------------------------------------------
 
     # Priting summary of all data
     file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
@@ -268,4 +277,4 @@ for V in volume
     end
     close(file)
 
-end
+#end
