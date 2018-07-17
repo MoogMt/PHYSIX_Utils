@@ -1,6 +1,5 @@
 include("contactmatrix.jl")
 
-
 function getMax(x)
     size_x=size(x)[1]
     max=x[1]
@@ -45,13 +44,13 @@ end
 
 
 func="PBE-MT"
-temperature=2000
-volume=[9.4,9.5,9.8]
+temperature=3000
+volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.35,9.375,9.4,9.5,9.8]
 
 
 T=temperature
-#for V in volume
-    V=volume[3]
+for V in volume
+    #V=volume[3]
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
@@ -76,6 +75,7 @@ T=temperature
     nb_atoms=size(atoms[1].names)[1]
 
     # Aggregating Data
+    #---------------------------------------------------------------------------
     lifes=[]
     oxygens2=[]
     carbons2=[]
@@ -154,7 +154,9 @@ T=temperature
             end
         end
     end
+    #---------------------------------------------------------------------------
 
+    #---------------------------------------------------------------------------
     count=0
     exchanges=[]
     nb_bonds=size(ends)[1]
@@ -179,40 +181,46 @@ T=temperature
     file=open(string("/home/moogmt/GainCounterTotal",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     write(file,string(size(starts)[1]-count,"\n"))
     close(file)
+    #---------------------------------------------------------------------------
 
-    # Looking at creation and destructions of bonds
+    # Looking at creation and destructions of bonds in time windows
+    #---------------------------------------------------------------------------
     total_sim_time = nb_steps*unit
     time_window=[0.5,1,2] # Time window in picosecondes
     for tw in time_window
+        # Collective Vars
         nb_window=Int(trunc(total_sim_time/tw)+1)
+        hist=zeros(nb_window)
+
         # Loss of a carbon
-        hist1d_loss=zeros(nb_window)
         for end_time in ends
             for win=1:nb_window
                 if end_time*unit > (win-0.5)*tw && end_time*unit < (win+0.5)*tw
-                    hist1d_loss[win] += 1
+                    hist[win] += 1
                 end
             end
         end
         file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window
-            write(file,string(unit+i*tw," ",hist1d_loss[i],"\n"))
+            write(file,string(unit+i*tw," ",hist[i],"\n"))
         end
+
         # Gain of a carbon
         hist1d_gain=zeros(nb_window)
         for gain_time in starts
             for win=1:nb_window
                 if gain_time*unit > (win-0.5)*tw && gain_time*unit < (win+0.5)*tw
-                    hist1d_gain[win] += 1
+                    hist[win] += 1
                 end
             end
         end
         file=open(string("/home/moogmt/GainTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window
-            write(file,string(i*tw," ",hist1d_gain[i],"\n"))
+            write(file,string(i*tw," ",hist[i],"\n"))
         end
         close(file)
-        hist=zeros(nb_window)
+
+        # Exchanges
         for i=1:nb_window
             for j=1:size(exchanges)[1]
                 if exchanges[j]*unit > (i-0.5)*tw && exchanges[j]*unit < (i+0.5)*tw
@@ -220,14 +228,16 @@ T=temperature
                 end
             end
         end
-        file=open(string("/home/moogmt/ExchangeHist",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        file=open(string("/home/moogmt/ExchangeTime",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:size(hist)[1]
             write(file,string(i*tw," ",hist[i],"\n"))
         end
         close(file)
     end
+    #---------------------------------------------------------------------------
 
     # Computing lifes of bonds
+    #---------------------------------------------------------------------------
     max=200 # in ps
     min=0 # in ps
     nb_lifes=100
@@ -255,6 +265,7 @@ T=temperature
         write(file,string(i*delta_life*unit," ",hist1D1[i]," ",hist1D2[i],"\n"))
     end
     close(file)
+    #---------------------------------------------------------------------------
 
     # Counting atoms that stay together until the very end
     #---------------------------------------------------------------------------
@@ -270,11 +281,13 @@ T=temperature
     #--------------------------------------------------------------------------
 
     # Priting summary of all data
+    #---------------------------------------------------------------------------
     file=open(string("/home/moogmt/ExchangeGen",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
     for i=1:size(oxygens2)[1]
         print(string("O:",oxygens2[i]," C:",carbons2[i]," Life:",lifes[i]," or ",lifes[i]*unit," ps Start at step: ",starts[i]+start_step," Ends at: ",ends[i]," Last Till End:",end_at_endsim[i],"\n"))
         write(file,string(oxygens2[i]," ",carbons2[i]," ",lifes[i]," ",lifes[i]*unit," ",starts[i]+start_step," ",ends[i]," ",end_at_endsim[i],"\n"))
     end
     close(file)
+    #---------------------------------------------------------------------------
 
-#end
+end
