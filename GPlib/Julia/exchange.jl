@@ -50,7 +50,7 @@ volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.35,9.375,9.4,9.5,9.8]
 
 T=temperature
 for V in volume
-    #V=volume[3]
+    #V=volume[11]
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
@@ -115,10 +115,10 @@ for V in volume
                     push!(list_index,indexs[i,neigh])
                     push!(list_start,i)
                     while j <= nb_steps
-                        if indexs[j,1] == indexs[i,neigh] && neighbours[j,1] > 0
+                        if  j-i < 50 && neighbours[j,1] > 0 && indexs[j,1] == indexs[i,neigh]
                             neighbours[j,1] = 0
                             j+=1
-                        elseif indexs[j,2] == indexs[i,neigh] && neighbours[j,1] > 0
+                        elseif j-i < 50 && neighbours[j,2] > 0 && indexs[j,2] == indexs[i,neigh]
                             neighbours[j,2] = 0
                             j+=1
                         else
@@ -129,32 +129,34 @@ for V in volume
                 end
             end
         end
-        used=zeros(size(list_index)[1])
-        for i=1:size(list_index)[1]
-            if used[i] == 0
-                used[i] = 1
-                for j=i+1:size(list_index)[1]
-                    if used[j] == 0
-                        if list_index[i] == list_index[j]
-                            list_end[i]=list_end[j]
-                            used[j]=1
-                        end
-                    end
+    end
+end
+used=zeros(size(list_index)[1])
+for i=1:size(list_index)[1]
+    if used[i] == 0
+        used[i] = 1
+        for j=i+1:size(list_index)[1]
+            if used[j] == 0
+                if list_index[i] == list_index[j]
+                    list_end[i]=list_end[j]
+                    used[j]=1
                 end
-                push!(lifes,list_end[i]-list_start[i])
-                push!(oxygens2,oxygen)
-                push!(carbons2,list_index[i])
-                push!(starts,list_start[i])
-                push!(ends,list_end[i])
-                x=0
-                if list_end[i] == nb_steps+1
-                    x=1
-                end
-                push!(end_at_endsim,x)
             end
         end
+        push!(lifes,list_end[i]-list_start[i])
+        push!(oxygens2,oxygen)
+        push!(carbons2,list_index[i])
+        push!(starts,list_start[i])
+        push!(ends,list_end[i])
+        x=0
+        if list_end[i] == nb_steps+1
+            x=1
+        end
+        push!(end_at_endsim,x)
     end
-    #---------------------------------------------------------------------------
+end
+end
+#---------------------------------------------------------------------------
 
     #---------------------------------------------------------------------------
     count=0
@@ -202,7 +204,7 @@ for V in volume
         for i=1:nb_window-1
             for j=1:size(starts)[1]
                 if starts[j]*unit > (i-0.5)*tw && starts[j]*unit < (i+0.5)*tw
-                    hist3[i] += 1
+                    hist1[i] += 1
                 end
             end
             for j=1:size(ends)[1]
@@ -212,7 +214,7 @@ for V in volume
             end
             for j=1:size(exchanges)[1]
                 if exchanges[j]*unit > (i-0.5)*tw && exchanges[j]*unit < (i+0.5)*tw
-                    hist1[i] += 1
+                    hist3[i] += 1
                 end
             end
         end
@@ -220,19 +222,9 @@ for V in volume
 
         # Writting data in files
         #------------------------------------------------------------------------
-        file=open(string("/home/moogmt/ExchangeTime",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-        for i=1:size(hist)[1]
-            write(file,string(i*tw," ",hist1[i],"\n"))
-        end
-        close(file)
-        file=open(string("/home/moogmt/LossTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
+        file=open(string("/home/moogmt/GainLossExchangeTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
         for i=1:nb_window-1
-            write(file,string(unit+i*tw," ",hist2[i],"\n"))
-        end
-        close(file)
-        file=open(string("/home/moogmt/GainTime-",tw,"-",V,"-",T,"-",cut_off,"-",func,".dat"),"w")
-        for i=1:nb_window-1
-            write(file,string(i*tw," ",hist3[i],"\n"))
+            write(file,string(unit+i*tw," ",hist1[i]," ",hist2[i]," ",hist3[i],"\n"))
         end
         close(file)
         #------------------------------------------------------------------------
