@@ -49,8 +49,7 @@ volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.35,9.375,9.4,9.5,9.8]
 
 
 T=temperature
-#for V in volume
-V=volume[11]
+for V in volume
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
 #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
 file_in=string(folder,"TRAJEC_wrapped.xyz")
@@ -233,7 +232,7 @@ end
 # Computing lifes of bonds
 #---------------------------------------------------------------------------
 # Definitely something to fix here...
-max=nb_steps*unit# in ps
+max=nb_steps*unit-1# in ps the -1 is a trick
 min=0 # in ps
 nb_lifes=100
 count2=0
@@ -242,10 +241,10 @@ hist1D1=zeros(nb_lifes)
 hist1D2=zeros(nb_lifes)
 for j=1:size(lifes)[1]
     for i=1:nb_lifes
-        if lifes[j]*unit > min+delta_life*i && i < nb_lifes-1 # the last one is just a trick
+        if lifes[j]*unit > min+delta_life*i
             hist1D1[i] += 1
         end
-        if lifes[j]*unit > min+delta_life*i && lifes[j]*unit < min+delta_life*(i+1)  
+        if lifes[j]*unit > min+delta_life*i && lifes[j]*unit < min+delta_life*(i+1)
             hist1D2[i] += 1
             count2 += 1
         end
@@ -284,4 +283,4 @@ end
 close(file)
 #---------------------------------------------------------------------------
 
-#end
+end
