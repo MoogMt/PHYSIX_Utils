@@ -101,7 +101,7 @@ for V in volume
         end
     end
 
-    file=open(string("/home/moogmt/AngleHistCO3"),"w")
+    file=open(string("/home/moogmt/AngleHistCO3-",V,"-",T,".dat"),"w")
     for i=1:90
         for j=1:90
             write(file,string(i+90," ",j+90," ",hist2D[]," "))
@@ -109,5 +109,6 @@ for V in volume
         write(file,string("\n"))
     end
     close(file)
+
 
 end
