@@ -90,6 +90,7 @@ for V in volume
 
     hist2D=zeros(91,91)
     for carbon=1:nb_step_mod*nbC
+        print(string("Progress: ",carbon/(nb_step_mod*nbC)*100,"%\n"))
         for angle1=90:180
             for angle2=90:180
                 if angles1[carbon] > angle1-0.5 && angles1[carbon] < angle1+0.5
@@ -100,5 +101,14 @@ for V in volume
             end
         end
     end
+
+    file=open(string("/home/moogmt/AnglesCO3-",V,"-",T,".dat"),"w")
+    for i=1:91
+        for i=1:91
+            write(file,string(i-1," ",j-1," ",hist2D[i,j],"\n"))
+        end
+        write(file,"\n")
+    end
+    close(file)
 
 end
