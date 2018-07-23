@@ -3,12 +3,10 @@ include("contactmatrix.jl")
 func="PBE-MT"
 temperature=3000
 volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.35,9.375,9.4,9.5,9.8]
-damp_param_list=[20]
 
 T=temperature
 
 for V in volume
-    #V=volume[2]
 
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
     #folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
@@ -55,7 +53,7 @@ for V in volume
     nb_steps=size(atoms)[1]
     nb_atoms=size(atoms[1].names)[1]
 
-    nb_step_mod=5000
+    nb_step_mod=2000
     distance3=zeros(nb_step_mod*nbC)
     angles1=zeros(nb_step_mod*nbC)
     angles2=zeros(nb_step_mod*nbC)
@@ -81,30 +79,31 @@ for V in volume
             a=cell_mod.distance(atoms[step],cell,carbon,Int(index[2]+nbC))
             b=cell_mod.distance(atoms[step],cell,carbon,Int(index[3]+nbC))
             c=cell_mod.distance(atoms[step],cell,Int(index[2]+nbC),Int(index[3]+nbC))
+            angles2[(step-1)*nbC+carbon] = acosd((a*a+b*b-c*c)/(2*a*b))
             write(file,string( acosd((a*a+b*b-c*c)/(2*a*b))," ") )
             write(file,"\n")
-            angles2[(step-1)*nbC+carbon] = acosd((a*a+b*b-c*c)/(2*a*b))
+
         end
     end
     close(file)
 
-    hist2D=zeros(91,91)
+    hist2D=zeros(181,181)
     for carbon=1:nb_step_mod*nbC
         print(string("Progress: ",carbon/(nb_step_mod*nbC)*100,"%\n"))
-        for angle1=90:180
-            for angle2=90:180
+        for angle1=0:180
+            for angle2=0:180
                 if angles1[carbon] > angle1-0.5 && angles1[carbon] < angle1+0.5
-                    if angles2[carbon] > angle1-0.5 && angles2[carbon] < angle1+0.5
-                        hist2D[angle1-90+1,angle2-90+1]+=1
+                    if angles2[carbon] > angle2-0.5 && angles2[carbon] < angle2+0.5
+                        hist2D[angle1+1,angle2+1]+=1
                     end
                 end
             end
         end
     end
 
-    file=open(string("/home/moogmt/AnglesCO3-",V,"-",T,".dat"),"w")
-    for i=1:91
-        for i=1:91
+    file=open(string("/home/moogmt/AnglesCO3-",V,"-",T,"-",func,".dat"),"w")
+    for i=1:181
+        for j=1:181
             write(file,string(i-1," ",j-1," ",hist2D[i,j],"\n"))
         end
         write(file,"\n")
