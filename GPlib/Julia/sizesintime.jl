@@ -31,7 +31,7 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     return list
 end
 
-cut_off = 1.7
+cut_off = 1.6
 
 sizes=[]
 times=[]
