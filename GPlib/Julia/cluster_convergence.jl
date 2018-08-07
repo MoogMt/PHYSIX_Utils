@@ -1,15 +1,7 @@
     # Loading file
 include("contactmatrix.jl")
 
-points=zeros(100,3)
-
-for i=1:50
-    points[i,:]=rand(3)
-end
-for i=51:100
-    points[i,:]=rand(3)+10
-end
-
+# TESTED AND FUNCTIONNALS
 function compute_distance( data )
     size_data=size(data)[1]
     matrix=zeros(size_data,size_data)
@@ -20,16 +12,12 @@ function compute_distance( data )
     end
     return matrix
 end
-
-distance_matrix=compute_distance(points)
-
 function swap(table, index1, index2 )
     stock=table[index1]
     table[index1]=table[index2]
     table[index2]=stock
     return
 end
-
 function initialize_medoid( distance_matrix , n_structures , n_clusters  )
     # Bookkeep
     available=ones(Int,n_structures)
@@ -73,11 +61,6 @@ function initialize_medoid( distance_matrix , n_structures , n_clusters  )
 
     return cluster_centers
 end
-
-nb_clusters=2
-nb_structures=size(points)[1]
-cluster_centers=initialize_medoid(distance_matrix, nb_structures, nb_clusters )
-
 function voronoiAssignSingle{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}( distance_matrix::Array{T1,2}, nb_clusters::T2, cluster_centers::Vector{T3}, index::T4 )
     min_dist=distance_matrix[ index ,cluster_centers[1] ]
     index_cluster=1
@@ -90,24 +73,57 @@ function voronoiAssignSingle{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}( dist
     end
     return index_cluster
 end
-
 function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int}( nb_structures::T1 , distance_matrix::Array{T2,2}, nb_clusters::T3, cluster_centers::Vector{T4} )
     # Index of the cluster for each structure
     cluster_indexs = zeros(Int, nb_structures )
-    assignements = zeros(Int, nb_clusters, nb_structures )
+    assignments = zeros(Int, nb_clusters, nb_structures )
     # Contains sizer of clusters
     cluster_sizes = zeros(Int, nb_clusters)
     for structure=1:nb_structures
         cluster_indexs[ structure ] = voronoiAssignSingle( distance_matrix, nb_clusters, cluster_centers, structure )
         cluster_sizes[ cluster_indexs[structure] ] += 1
-        assignements[ cluster_indexs[structure], cluster_sizes[ cluster_indexs[structure] ] ] = cluster_indexs[ structure ]
+        assignments[ cluster_indexs[structure], cluster_sizes[ cluster_indexs[structure] ] ] = cluster_indexs[ structure ]
     end
-    return cluster_indexs, cluster_sizes, assignements
+    return cluster_indexs, cluster_sizes, assignments
+end
+function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Int, T7 <: Int }( nb_structures::T1 , distance_matrix::Array{T2,2}, nb_clusters::T3, cluster_centers::Vector{T4}, cluster_indexs::Vector{T5}, cluster_sizes::Vector{T6}, assignments::Array{T7,2} )
+    for structure=1:nb_structures
+        cluster_indexs[ structure ] = voronoiAssignSingle( distance_matrix, nb_clusters, cluster_centers, structure )
+        cluster_sizes[ cluster_indexs[structure] ] += 1
+        assignemnts[ cluster_indexs[structure], cluster_sizes[ cluster_indexs[structure] ] ] = cluster_indexs[ structure ]
+    end
+    return
+end
+function computeCost{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int }( n_structures::T1, distance_matrix::Array{T2,2}, cluster_centers::Vector{T3} , cluster_indexs::Vector{T4} )
+    cost=0
+    for i=1:n_structures
+        cost += distance_matrix[ i, cluster_centers[ cluster_indexs[i] ] ]
+    end
+    return cost
+end
+# Definition of the points
+points=zeros(100,3)
+for i=1:50
+    points[i,:]=rand(3)
+end
+for i=51:100
+    points[i,:]=rand(3)+10
 end
 
-voronoiAssignAll( nb_structures, distance_matrix, nb_clusters, cluster_centers )
+# Compute the distance between all points
+distance_matrix=compute_distance(points)
 
-function compute_cost
+# Cluster parameters
+nb_clusters=2
+nb_structures=size(points)[1]
+
+# Initialization of centers
+cluster_centers=initialize_medoid(distance_matrix, nb_structures, nb_clusters )
+# Assign all clusters
+cluster_indexs, cluster_sizes, assignments =voronoiAssignAll( nb_structures, distance_matrix, nb_clusters, cluster_centers )
+# Compute original cost
+cost=computeCost(nb_structures,distance_matrix,cluster_centers,cluster_indexs)
+
 
 function kmenoid_clustering{ T1 <: Int, T2 <: Int, T3 <: Real }( n_clusters::T1 , n_structures::T2, distance_matrix::Vector{Real} )
 
