@@ -82,7 +82,7 @@ function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int}( nb_stru
     for structure=1:nb_structures
         cluster_indexs[ structure ] = voronoiAssignSingle( distance_matrix, nb_clusters, cluster_centers, structure )
         cluster_sizes[ cluster_indexs[structure] ] += 1
-        assignments[ cluster_indexs[structure], cluster_sizes[ cluster_indexs[structure] ] ] = cluster_indexs[ structure ]
+        assignments[ cluster_indexs[structure], cluster_sizes[ cluster_indexs[structure] ] ] = structure
     end
     return cluster_indexs, cluster_sizes, assignments
 end
@@ -91,7 +91,7 @@ function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int, T5 <: In
     for structure=1:n_structures
         cluster_indexs[ structure ] = voronoiAssignSingle( distance_matrix, nb_clusters, cluster_centers, structure )
         cluster_sizes[ cluster_indexs[structure] ] += 1
-        assignments[ cluster_indexs[ structure ], cluster_sizes[ cluster_indexs[ structure ] ] ] = cluster_indexs[ structure ]
+        assignments[ cluster_indexs[ structure ], cluster_sizes[ cluster_indexs[ structure ] ] ] = structure 
     end
     return
 end
@@ -102,7 +102,6 @@ function computeCost{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int }( n_structure
     end
     return cost
 end
-
 
 # TESTED
 function updateCenters( distance_matrix, n_clusters, cluster_centers, cluster_sizes, assignments )
@@ -127,7 +126,7 @@ for i=1:50
     points[i,:]=rand(2)
 end
 for i=51:100
-    points[i,:]=rand(2)+10
+    points[i,:]=rand(2)+0.8
 end
 
 # Compute the distance between all points
@@ -157,5 +156,23 @@ end
 
 using PyPlot
 
-plot(points[1:50,:],"r.")
-plot(points[1:50,:],"b.")
+figure()
+plot(points[:,1],points[:,2],"r.")
+for i=1:n_clusters
+    xlabel("x")
+    ylabel("y")
+    plot( points[cluster_centers[i],1] , points[cluster_centers[i],2] , ".", color=[ rand(),rand(),rand() ] )
+end
+
+figure()
+
+plot( points[cluster_centers[ 1 ] ,1 ] , points[cluster_centers[ 1 ],2] , "rd"  )
+for j=1:cluster_sizes[ 1 ]
+    plot( points[ assignments[ 1, j ] , 1 ] , points[ assignments[ 1, j ] ,2 ] , "r."  )
+end
+plot( points[cluster_centers[ 2 ] ,1 ] , points[cluster_centers[ 2 ],2] , "bd"  )
+for j=1:cluster_sizes[ 2 ]
+    print( points[ assignments[ 2, j ] , 1 ], " " , points[ assignments[ 2, j ] ,2 ],"\n"  )
+    plot( points[ assignments[ 2, j ] , 1 ] , points[ assignments[ 2, j ] ,2 ] , "b."  )
+end
+show()
