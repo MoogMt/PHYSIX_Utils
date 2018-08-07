@@ -116,7 +116,7 @@ function updateCenters{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Int 
         cluster_centers[ cluster ] = new_center
     end
 end
-function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 )
+function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 )
     # Initialization of centers
     cluster_centers=initializeCenters(nb_structures, distance_matrix, nb_clusters )
     # Assign all clusters
@@ -128,7 +128,7 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int }( n_structures::T1
     while true
         voronoiAssignAll( nb_structures, distance_matrix, nb_clusters, cluster_centers,cluster_indexs, cluster_sizes, assignments  )
         cost=computeCost(nb_structures,distance_matrix,cluster_centers,cluster_indexs)
-        if abs(cost-old_cost) < 0.0000001
+        if abs(cost-old_cost) < precision
             break
         end
         old_cost=cost
@@ -136,7 +136,6 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int }( n_structures::T1
     end
     return cluster_indexs, cluster_centers, assignments
 end
-
 
 # Definition of the points
 points=zeros(150,2)
@@ -156,9 +155,19 @@ distance_matrix=compute_distance(points)
 
 # Cluster parameters
 n_clusters=3
+precision=0.00000000000001
 n_structures=size(points)[1]
-cluster_index, cluster_centers, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters )
 
+cluster_index, cluster_centers, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters )
+old_cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs)
+
+while true
+    cluster_index, cluster_centers, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters )
+    cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs)
+    if abs(cost-old_cost) < precision
+        break
+    end
+end
 
 using PyPlot
 
@@ -173,16 +182,15 @@ end
 figure()
 
 plot( points[cluster_centers[ 1 ] ,1 ] , points[cluster_centers[ 1 ],2] , "rd"  )
+plot( points[cluster_centers[ 2 ] ,1 ] , points[cluster_centers[ 2 ],2] , "bd"  )
+plot( points[cluster_centers[ 3 ] ,1 ] , points[cluster_centers[ 3 ],2] , "gd"  )
+
 for j=1:cluster_sizes[ 1 ]
     plot( points[ assignments[ 1, j ] , 1 ] , points[ assignments[ 1, j ] ,2 ] , "r."  )
 end
-plot( points[cluster_centers[ 2 ] ,1 ] , points[cluster_centers[ 2 ],2] , "bd"  )
 for j=1:cluster_sizes[ 2 ]
-    print( points[ assignments[ 2, j ] , 1 ], " " , points[ assignments[ 2, j ] ,2 ],"\n"  )
     plot( points[ assignments[ 2, j ] , 1 ] , points[ assignments[ 2, j ] ,2 ] , "b."  )
 end
-plot( points[cluster_centers[ 3 ] ,1 ] , points[cluster_centers[ 3 ],2] , "gd"  )
 for j=1:cluster_sizes[ 3 ]
-    print( points[ assignments[ 3, j ] , 1 ], " " , points[ assignments[ 3, j ] ,2 ],"\n"  )
     plot( points[ assignments[ 3, j ] , 1 ] , points[ assignments[ 3, j ] ,2 ] , "g."  )
 end
