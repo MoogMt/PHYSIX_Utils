@@ -1,84 +1,119 @@
-# Loading file
+    # Loading file
 include("contactmatrix.jl")
 
-functionnals=["PBE-MT","BLYP","PBE-Godecker"]
-volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.3,9.325,9.35,9.375,9.4,9.5,9.8]
-temperatures=[2000,2500,3000,3500]
-cut_off=[1.6,1.7,1.8]
+points=zeros(100,3)
 
-V=volumes[1]
-T=temperatures[3]
-func=functionnals[1]
-stride=10
-co=cut_off[1]
-
-nbC=32
-nbO=2*nbC
-
-function voronoiAssign( n_clusters, n_structures, distance_matrix, cluster_sizes, cluster2i, i2cluster )
-    cluster_sizes=zeros(n_clusters)
-    for i=1:n_structures
-        dmin=1.0
-
-    end
-    return
+for i=1:50
+    points[i,:]=rand(3)
 end
+for i=51:100
+    points[i,:]=rand(3)+10
+end
+
+function compute_distance( data )
+    size_data=size(data)[1]
+    matrix=zeros(size_data,size_data)
+    for i=1:size_data
+        for j=1:size_data
+            matrix[i,j] = sqrt(sum( (points[i,:]-points[j,:]).*(points[i,:]-points[j,:]) ))
+        end
+    end
+    return matrix
+end
+
+distance_matrix=compute_distance(points)
 
 function swap(table, index1, index2 )
     stock=table[index1]
     table[index1]=table[index2]
-    table[index2]=table[stock]
+    table[index2]=stock
     return
 end
 
-function kmenoid_clustering{ T1 <: Int, T2 <: Int, T3 <: Real }( n_clusters::T1 , n_structures::T2, distance_matrix::Vector{Real} )
+function initialize_medoid( distance_matrix , n_structures , n_clusters  )
+    # Bookkeep
+    available=ones(Int,n_structures)
 
-    cluster_centers=zeros(n_clusters)
-    prob=ones(n_structures)
-    available=ones(n_structures)
+    cluster_centers=zeros(Int,n_clusters)
+    prob=zeros(n_structures)
 
-    # Initial Choice
-
-    # initial random choice
-    cluster_centers[1]=Int(trunc(rand()*n_structure))+1
-    available[cluster_centers[1]] = 0
+    cluster_centers[1]= trunc( rand()*n_structures )   + 1
+    available[ cluster_centers[1] ] = 0
     for i=2:n_clusters
-        # Compute normalized distances to the other cluster centers
         for k=1:n_structures
-            dmin=1.0
+            min_distance=1
             for j=1:i-1
-                dtmp=distance_matrix[k,cluster_centers[j]]
-                if dtmp < dmin
-                    dtmp=dmin
+                dist_temp=distance_matrix[ k, Int(cluster_centers[j]) ]
+                if dist_temp < min_distance
+                    min_distance = dist_temp
                 end
             end
-            proba[k] = dmin^2
+            prob[k] = min_distance^2
         end
-        dtmp=sum(proba)
-        proba/=dtmp
-        for k=2:nb_steps
-            proba[k] += proba[k-1]
-        end
-        # Look for new cluster center
+        prob=cumsum(prob/sum(prob))
         found=false
         while ! found
             r=rand()
-            if r < proba[1] && available[1] != 0
-                cluster_center[i]=1
-                good[1]=0
+            if r < prob[1] && available[1] == 1
+                cluster_centers[i] = 1
+                available[1] = 0
                 found = true
             else
                 for k=2:n_structures
-                    if available[k] != 0 &&  r > proba[k-1] && r < proba[k]
-                        cluster_centers[i]=k
-                        good[k]=0
-                        found=true
+                    if r > prob[k-1] && r < prob[k] && available[k] == 1
+                        cluster_centers[i] = k
+                        available[k] = 0
+                        found = true
                         break
                     end
                 end
             end
         end
     end
+
+    return cluster_centers
+end
+
+nb_clusters=2
+nb_structures=size(points)[1]
+cluster_centers=initialize_medoid(distance_matrix, nb_structures, nb_clusters )
+
+function voronoiAssignSingle{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}( distance_matrix::Array{T1,2}, nb_clusters::T2, cluster_centers::Vector{T3}, index::T4 )
+    min_dist=distance_matrix[ index ,cluster_centers[1] ]
+    index_cluster=1
+    for i=2:nb_clusters
+        dist=distance_matrix[ index ,cluster_centers[i] ]
+        if dist < min_dist
+            min_dist = dist
+            index_cluster = i
+        end
+    end
+    return index_cluster
+end
+
+function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int}( nb_structures::T1 , distance_matrix::Array{T2,2}, nb_clusters::T3, cluster_centers::Vector{T4} )
+    # Index of the cluster for each structure
+    cluster_indexs = zeros(Int, nb_structures )
+    assignements = zeros(Int, nb_clusters, nb_structures )
+    # Contains sizer of clusters
+    cluster_sizes = zeros(Int, nb_clusters)
+    for structure=1:nb_structures
+        cluster_indexs[ structure ] = voronoiAssignSingle( distance_matrix, nb_clusters, cluster_centers, structure )
+        cluster_sizes[ cluster_indexs[structure] ] += 1
+        assignements[ cluster_indexs[structure], cluster_sizes[ cluster_indexs[structure] ] ] = cluster_indexs[ structure ]
+    end
+    return cluster_indexs, cluster_sizes, assignements
+end
+
+voronoiAssignAll( nb_structures, distance_matrix, nb_clusters, cluster_centers )
+
+function compute_cost
+
+function kmenoid_clustering{ T1 <: Int, T2 <: Int, T3 <: Real }( n_clusters::T1 , n_structures::T2, distance_matrix::Vector{Real} )
+
+    cluster_centers=zeros(n_clusters)
+
+    initialize_medoid( distance_matrix, n_structures, n_ clusters, cluster_centers
 
     old_cost=1
 
@@ -146,9 +181,21 @@ function kmenoid_clustering{ T1 <: Int, T2 <: Int, T3 <: Real }( n_clusters::T1 
     assigned=zeros(n_structures)
     for i=1:n_clusters
         for j=1:cluster_size[i]
-            ass[]
+            assigned[cluster_member[i,j]] = assigned[cluster_member[i,j]]+1
         end
     end
+
+    for i=1:n_structure
+        if assigned[i] != 1
+            print("Oups")
+        end
+    end
+
+    file=open(string(pwd(),"/log-clusters.dat"),"w")
+    for i=1:n_clusters
+        write(file,string(i," ",cluster[ i,cluster_sizes(i) ] ) )
+    end
+    close(file)
 
     return cluster_centers
 end
