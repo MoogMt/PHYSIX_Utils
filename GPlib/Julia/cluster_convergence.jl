@@ -139,6 +139,7 @@ function updateCenters{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Int 
         cluster_centers[ cluster ] = new_center
     end
 end
+# To be improved to check that we find the global minimum and not a local one...
 function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 )
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
@@ -228,3 +229,17 @@ for j=1:cluster_sizes[ 4 ]
 end
 
 #==============================================================================#
+
+include("contactmatrix.jl")
+
+V=8.82
+T=3000
+
+folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K")
+file="TRAJEC_wrapped.xyz"
+
+traj = filexyz.read( file_in, stride_analysis, start_step )
+cell=cell_mod.Cell_param( V, V, V )
+
+nb_steps=size(traj)[1]
+nb_atoms=size(traj[1].names)[1]
