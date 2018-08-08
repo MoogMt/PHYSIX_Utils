@@ -1,5 +1,5 @@
 # TESTED AND FUNCTIONNALS
-function computeDistance{ T1 <: Real, T2 <: Real, T3 <: Int }( data::Array{T1}, data_point::Vector{}, index )
+function computeDistance{ T1 <: Real, T2 <: Real, T3 <: Int }( data::Array{T1}, data_point::Vector{T2}, index::T3 )
 	return sum( ( data[ index, :  ] - data_point[:] ).*( data[ index, :  ] - data_point[:] ) )
 end
 function computeDistance{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Array{T1}, index1::T2, index2::T3 )
@@ -64,9 +64,10 @@ function initializeCenters{ T1 <: Int, T2 <: Real , T3 <: Int}( n_structures::T1
 
     return cluster_centers
 end
-function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Array{T1}, nb_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} )
+function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} )
+	index_cluster=1
 	min_dist=sum( ( data[ cluster_centers[1], :  ] - data_point[:] ).*( data[ cluster_centers[1], :  ] - data_point[:] ) )
-	for i=2:nb_clusters
+	for i=2:n_clusters
 		dist=sum( ( data[ cluster_centers[i], :  ] - data_point[:] ).*( data[ cluster_centers[i], :  ] - data_point[:] ) )
 		if dist < min_dist
 			min_dist=dist
@@ -74,6 +75,14 @@ function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Ar
 		end
 	end
 	return index_cluster
+end
+function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_points::Array{T4} )
+	n_points=size(data_points)[1]
+	point_clusters=zeros(Int,n_points)
+	for i=1:n_points
+		point_clusters[i] = voronoiAssign( data, n_clusters, cluster_centers, data_points[i,:] )
+	end
+	return point_clusters
 end
 function voronoiAssignSingle{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}( distance_matrix::Array{T1,2}, nb_clusters::T2, cluster_centers::Vector{T3}, index::T4 )
     min_dist=distance_matrix[ index ,cluster_centers[1] ]
@@ -151,7 +160,6 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_st
     return cluster_indexs, cluster_centers, cluster_sizes, assignments
 end
 
-
 # Definition of the points
 points=zeros(200,2)
 for i=1:50
@@ -175,22 +183,34 @@ points[151:200,2] += 0.8
 distance_matrix=computeDistanceMatrix( points )
 
 # Cluster parameters
-n_clusters=5
+n_clusters=4
 precision=0.00000000000001
 n_structures=size(points)[1]
 
 cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
 old_cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
 
+points2=rand(2000,2)+0.4
+points2_assignment=voronoiAssign( points, n_clusters, cluster_centers, points2 )
+
 using PyPlot
 
-figure()
-
+figure(1)
 plot( points[cluster_centers[ 1 ] ,1 ] , points[cluster_centers[ 1 ],2] , "rd"  )
 plot( points[cluster_centers[ 2 ] ,1 ] , points[cluster_centers[ 2 ],2] , "bd"  )
 plot( points[cluster_centers[ 3 ] ,1 ] , points[cluster_centers[ 3 ],2] , "gd"  )
 plot( points[cluster_centers[ 4 ] ,1 ] , points[cluster_centers[ 4 ],2] , "kd"  )
-
+for i=1:size(points2)[1]
+	if points2_assignment[i] == 1
+		plot( points2[i,1] , points2[i,2] , "r."  )
+	elseif points2_assignment[i] == 2
+		plot( points2[i,1] , points2[i,2] , "b."  )
+	elseif points2_assignment[i] == 3
+		plot( points2[i,1] , points2[i,2] , "g."  )
+	elseif points2_assignment[i] == 4
+		plot( points2[i,1] , points2[i,2] , "k."  )
+	end
+end
 for j=1:cluster_sizes[ 1 ]
     plot( points[ assignments[ 1, j ] , 1 ] , points[ assignments[ 1, j ] ,2 ] , "r."  )
 end
