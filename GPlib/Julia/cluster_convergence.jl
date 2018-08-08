@@ -309,13 +309,15 @@ nb_atoms=size(traj[1].names)[1]
 
 
 # Training set
-nb_dim=4
-train_set=zeros(trunc(nb_steps/10),nb_dim)
+nb_dim=10
+
+data_set=zeros(nb_steps*nbC,nb_dim)
 max=zeros(nb_dim)
 min=ones(nb_dim)*100000
+
 fileC=open(string(folder,"distancesNN.dat"),"w")
-for step=1:Int(trunc(nb_steps/10))
-    print("Progress:", step/Int(trunc(nb_steps/10))*100,"%\n")
+for step=1:nb_steps
+    print("Progress:", step/nb_steps*100,"%\n")
 	for carbon=1:nbC
 		distances = zeros(nbO)
 		for oxygen=1:nbO
@@ -324,12 +326,12 @@ for step=1:Int(trunc(nb_steps/10))
 		index=sortmatrix( distances )
         maxN=4
 		for i=1:maxN
-			train_set[ step, i ] = distances[ i ]
-            if train_set[ step, i ] > max[ i ]
-                max[ i ] = train_set[ step, i ]
+			data_set[ carbon+nbC*(step-1), i ] = distances[ i ]
+            if data_set[ carbon+nbC*(step-1), i ] > max[ i ]
+                max[ i ] = data_set[carbon+nbC*(step-1), i ]
             end
-            if train_set[ step, i ] < min[ i ]
-                min[ i ] = train_set[ step, i ]
+            if data_set[ carbon+nbC*(step-1), i ] < min[ i ]
+                min[ i ] = data_set[ carbon+nbC*(step-1), i ]
             end
             write(fileC, string(distances[i]," ") )
 		end
@@ -337,45 +339,44 @@ for step=1:Int(trunc(nb_steps/10))
         b=cell_mod.distance(traj[step],cell,carbon,Int(index[2]+nbC))
         c=cell_mod.distance(traj[step],cell,Int(index[1]+nbC),Int(index[2]+nbC))
         angle=acosd((a*a+b*b-c*c)/(2*a*b))
-        #train_set[ step, maxN+1 ] = angle
-        #write(fileC,string(train_set[step, maxN+1]," "))
-        # count=maxN+1
-        # for i=1:maxN-1
-        #     for j=i+1:maxN
-        #         a=cell_mod.distance(traj[step],cell,carbon,Int(index[i]+nbC))
-        #         b=cell_mod.distance(traj[step],cell,carbon,Int(index[j]+nbC))
-        #         c=cell_mod.distance(traj[step],cell,Int(index[i]+nbC),Int(index[j]+nbC))
-        #         angle=acosd((a*a+b*b-c*c)/(2*a*b))
-        #         write(fileC,string(angle," "))
-        #         train_set[step,count]=angle
-        #         if train_set[ step, count ] > max[ count ]
-        #             max[ count ] = train_set[ step, count ]
-        #         end
-        #         if train_set[ step, count ] < min[ count ]
-        #             min[ count ] = train_set[ step, count ]
-        #         end
-        #         count += 1
-        #     end
-        # end
+        count=maxN+1
+        for i=1:maxN-1
+            for j=i+1:maxN
+                a=cell_mod.distance(traj[step],cell,carbon,Int(index[i]+nbC))
+                b=cell_mod.distance(traj[step],cell,carbon,Int(index[j]+nbC))
+                c=cell_mod.distance(traj[step],cell,Int(index[i]+nbC),Int(index[j]+nbC))
+                angle=acosd((a*a+b*b-c*c)/(2*a*b))
+                write(fileC,string(angle," "))
+                data_set[ carbon+nbC*(step-1), count ] = angle
+                if data_set[ carbon+nbC*(step-1), count ] > max[ count ]
+                    max[ count ] = data_set[ carbon+nbC*(step-1), count ]
+                end
+                if data_set[ carbon+nbC*(step-1), count ] < min[ count ]
+                    min[ count ] = data_set[ carbon+nbC*(step-1), count ]
+                end
+                count += 1
+            end
+        end
         write(fileC,string("\n"))
 	end
 end
 close(fileC)
 
-distance_matrix=computeDistanceMatrix( train_set, nb_dim, max, min )
+n_train=4000
+n_dim_analysis=5
+distance_matrix=computeDistanceMatrix( data_set[1:n_train,1:n_dim_analysis], n_dim_analysis, max[1:n_dim_analysis], min[1:n_dim_analysis] )
 
 # Cluster parameters
 n_clusters=3
 precision=0.00000000000001
-n_structures=Int(trunc(nb_steps/10))
+n_repeat=10
 
-cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
-old_cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
+cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_train, distance_matrix, n_clusters, precision , n_repeat)
 
 file = open( string( folder, "center_cluster.dat" ), "w" )
 for i=1:n_clusters
     for j=1:nb_dim
-        write( file, string(train_set[ cluster_centers[i] , j ]," " ) )
+        write( file, string(data_set[ cluster_centers[i] , j ]," " ) )
     end
     write( file, "\n" )
 end
@@ -386,7 +387,7 @@ for i=1:size(assignments)[1]
     for j=1:size(assignments)[2]
         for k=1:nb_dim
             if assignments[ i, j ] != 0
-                write(file,string( train_set[ assignments[ i, j ], k ] ," ") )
+                write(file,string( data_set[ assignments[ i, j ], k ] ," ") )
             end
         end
         write(file,string("\n"))
