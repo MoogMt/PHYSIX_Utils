@@ -160,6 +160,9 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_st
     return cluster_indexs, cluster_centers, cluster_sizes, assignments
 end
 
+# TEST
+#==============================================================================#
+
 # Definition of the points
 points=zeros(200,2)
 for i=1:50
@@ -223,3 +226,5 @@ end
 for j=1:cluster_sizes[ 4 ]
     plot( points[ assignments[ 4, j ] , 1 ] , points[ assignments[ 4, j ] ,2 ] , "k."  )
 end
+
+#==============================================================================#
