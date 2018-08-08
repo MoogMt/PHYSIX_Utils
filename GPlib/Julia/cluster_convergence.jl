@@ -1,4 +1,5 @@
 # TESTED AND FUNCTIONNALS
+#==============================================================================#
 function computeDistance{ T1 <: Real, T2 <: Real, T3 <: Int }( data::Array{T1}, data_point::Vector{T2}, index::T3 )
 	return sum( ( data[ index, :  ] - data_point[:] ).*( data[ index, :  ] - data_point[:] ) )
 end
@@ -139,7 +140,30 @@ function updateCenters{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Int 
         cluster_centers[ cluster ] = new_center
     end
 end
-# To be improved to check that we find the global minimum and not a local one...
+function sortmatrix( x )
+    sizex=size(x)[1]
+    index_x=zeros(sizex)
+    for i=1:sizex
+        index_x[i]=i
+    end
+    for i=1:sizex
+        for j=i:sizex
+            if x[i] > x[j]
+                stock=x[i]
+                stocki=index_x[i]
+                x[i]=x[j]
+                index_x[i]=index_x[j]
+                x[j]=stock
+                index_x[j]=stocki
+            end
+        end
+    end
+    return index_x
+end
+#==============================================================================#
+
+# TO BE IMPROVED
+#==============================================================================#
 function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 )
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
@@ -160,10 +184,11 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_st
     end
     return cluster_indexs, cluster_centers, cluster_sizes, assignments
 end
+#==============================================================================#
+
 
 # TEST
 #==============================================================================#
-
 # Definition of the points
 points=zeros(200,2)
 for i=1:50
@@ -235,11 +260,58 @@ include("contactmatrix.jl")
 V=8.82
 T=3000
 
-folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K")
+ps2fs=0.001
+timestep=0.5
+stride = 1
+unit=ps2fs*timestep*stride
+start_time=5
+start_step=Int(start_time/unit)
+nbC=32
+nbO=2*nbC
+
+folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
 file="TRAJEC_wrapped.xyz"
 
-traj = filexyz.read( file_in, stride_analysis, start_step )
+traj = filexyz.read( string(folder,file), stride, start_step )
 cell=cell_mod.Cell_param( V, V, V )
 
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
+
+# Training set
+train_set=zeros(trunc(nb_steps/10),4)
+fileC=open(string(folder,"distancesNN.dat"),"w")
+for step=1:Int(trunc(nb_steps/10))
+	for carbon=1:nbC
+		distances = zeros(nbO)
+		for oxygen=1:nbO
+			distances[oxygen] = cell_mod.distance(traj[step],cell,carbon,oxygen+nbC)
+		end
+		index=sortmatrix( distances )
+		for i=1:4
+			train_set[step,i] = distances[i]
+            write(fileC, string(distances[i]," ") )
+		end
+        write(fileC,string("\n"))
+	end
+end
+close(fileC)
+
+distance_matrix=computeDistanceMatrix( train_set )
+
+# Cluster parameters
+n_clusters=3
+precision=0.00000000000001
+n_structures=Int(trunc(nb_steps/10))
+
+cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
+old_cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
+
+file = open( string( folder, "center_cluster.dat" ), "w" )
+for i=1:n_clusters
+    for j=1:4
+        write( file, string(train_set[ cluster_centers[i] , j ]," " ) )
+    end
+    write( file, "\n" )
+end
+close( file )
