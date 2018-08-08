@@ -1,10 +1,16 @@
 # TESTED AND FUNCTIONNALS
-function compute_distance( data )
+function computeDistance{ T1 <: Real, T2 <: Real, T3 <: Int }( data::Array{T1}, data_point::Vector{}, index )
+	return sum( ( data[ index, :  ] - data_point[:] ).*( data[ index, :  ] - data_point[:] ) )
+end
+function computeDistance{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Array{T1}, index1::T2, index2::T3 )
+	return sum( ( data[ index1, : ]-data[ index2 , : ] ).*( data[ index1, : ]-data[ index2 , : ] ) )
+end
+function computeDistanceMatrix{ T1 <: Real }( data::Array{T1} )
     size_data=size(data)[1]
     matrix=zeros(size_data,size_data)
     for i=1:size_data
         for j=1:size_data
-            matrix[i,j] = sqrt(sum( (data[i,:]-data[j,:]).*(data[i,:]-data[j,:]) ))
+            matrix[i,j] = computeDistance( data, i, j )
         end
     end
     return matrix
@@ -58,11 +64,22 @@ function initializeCenters{ T1 <: Int, T2 <: Real , T3 <: Int}( n_structures::T1
 
     return cluster_centers
 end
+function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Array{T1}, nb_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} )
+	min_dist=sum( ( data[ cluster_centers[1], :  ] - data_point[:] ).*( data[ cluster_centers[1], :  ] - data_point[:] ) )
+	for i=2:nb_clusters
+		dist=sum( ( data[ cluster_centers[i], :  ] - data_point[:] ).*( data[ cluster_centers[i], :  ] - data_point[:] ) )
+		if dist < min_dist
+			min_dist=dist
+			index_cluster=i
+		end
+	end
+	return index_cluster
+end
 function voronoiAssignSingle{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}( distance_matrix::Array{T1,2}, nb_clusters::T2, cluster_centers::Vector{T3}, index::T4 )
     min_dist=distance_matrix[ index ,cluster_centers[1] ]
     index_cluster=1
     for i=2:nb_clusters
-        dist=distance_matrix[ index ,cluster_centers[i] ]
+    dist=distance_matrix[ index ,cluster_centers[i] ]
         if dist < min_dist
             min_dist = dist
             index_cluster = i
@@ -134,6 +151,7 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_st
     return cluster_indexs, cluster_centers, cluster_sizes, assignments
 end
 
+
 # Definition of the points
 points=zeros(200,2)
 for i=1:50
@@ -152,8 +170,9 @@ for i=151:200
 end
 points[151:200,1] += 0.8
 points[151:200,2] += 0.8
+
 # Compute the distance between all points
-distance_matrix=compute_distance(points)
+distance_matrix=computeDistanceMatrix( points )
 
 # Cluster parameters
 n_clusters=5
