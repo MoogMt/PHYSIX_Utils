@@ -6,12 +6,29 @@ end
 function computeDistance{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Array{T1}, index1::T2, index2::T3 )
 	return sum( ( data[ index1, : ]-data[ index2 , : ] ).*( data[ index1, : ]-data[ index2 , : ] ) )
 end
+function computeDistance{ T1 <: Real,T2 <: Int,  T3 <: Real, T4 <: Real, T5 <: Int, T6 <: Int }( data::Array{T1}, n_dim::T2 , max::Vector{T3}, min::Vector{T4}, index1::T5, index2::T6 )
+    dist=0
+    for i=1:n_dim
+        dist += ( ((data[index1,i]-min[i])/(max[i]-min[i])) - ((data[index2,i]-min[i])/(max[i]-min[i])) )^2
+    end
+	return dist
+end
 function computeDistanceMatrix{ T1 <: Real }( data::Array{T1} )
     size_data=size(data)[1]
     matrix=zeros(size_data,size_data)
     for i=1:size_data
         for j=1:size_data
             matrix[i,j] = computeDistance( data, i, j )
+        end
+    end
+    return matrix
+end
+function computeDistanceMatrix{ T1 <: Real, T2 <: Int, T3 <: Real, T4 <: Real }( data::Array{T1}, n_dim::T2, max::Vector{T3}, min::Vector{T4} )
+    size_data=size(data)[1]
+    matrix=zeros(size_data,size_data)
+    for i=1:size_data
+        for j=1:size_data
+            matrix[i,j] = computeDistance( data, n_dim, max, min, i, j )
         end
     end
     return matrix
@@ -186,7 +203,6 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_st
 end
 #==============================================================================#
 
-
 # TEST
 #==============================================================================#
 # Definition of the points
@@ -278,26 +294,61 @@ cell=cell_mod.Cell_param( V, V, V )
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 
+
 # Training set
-train_set=zeros(trunc(nb_steps/10),4)
+nb_dim=5
+train_set=zeros(trunc(nb_steps/10),nb_dim)
+max=zeros(nb_dim)
+min=ones(nb_dim)*100000
 fileC=open(string(folder,"distancesNN.dat"),"w")
 for step=1:Int(trunc(nb_steps/10))
+    print("Progress:", step/Int(trunc(nb_steps/10))*100,"%\n")
 	for carbon=1:nbC
 		distances = zeros(nbO)
 		for oxygen=1:nbO
 			distances[oxygen] = cell_mod.distance(traj[step],cell,carbon,oxygen+nbC)
 		end
 		index=sortmatrix( distances )
-		for i=1:4
-			train_set[step,i] = distances[i]
+        maxN=4
+		for i=1:maxN
+			train_set[ step, i ] = distances[ i ]
+            if train_set[ step, i ] > max[ i ]
+                max[ i ] = train_set[ step, i ]
+            end
+            if train_set[ step, i ] < min[ i ]
+                min[ i ] = train_set[ step, i ]
+            end
             write(fileC, string(distances[i]," ") )
 		end
+        a=cell_mod.distance(traj[step],cell,carbon,Int(index[1]+nbC))
+        b=cell_mod.distance(traj[step],cell,carbon,Int(index[2]+nbC))
+        c=cell_mod.distance(traj[step],cell,Int(index[1]+nbC),Int(index[2]+nbC))
+        angle=acosd((a*a+b*b-c*c)/(2*a*b))
+        train_set[ step, maxN ] = angle
+        # count=maxN+1
+        # for i=1:maxN-1
+        #     for j=i+1:maxN
+        #         a=cell_mod.distance(traj[step],cell,carbon,Int(index[i]+nbC))
+        #         b=cell_mod.distance(traj[step],cell,carbon,Int(index[j]+nbC))
+        #         c=cell_mod.distance(traj[step],cell,Int(index[i]+nbC),Int(index[j]+nbC))
+        #         angle=acosd((a*a+b*b-c*c)/(2*a*b))
+        #         write(fileC,string(angle," "))
+        #         train_set[step,count]=angle
+        #         if train_set[ step, count ] > max[ count ]
+        #             max[ count ] = train_set[ step, count ]
+        #         end
+        #         if train_set[ step, count ] < min[ count ]
+        #             min[ count ] = train_set[ step, count ]
+        #         end
+        #         count += 1
+        #     end
+        # end
         write(fileC,string("\n"))
 	end
 end
 close(fileC)
 
-distance_matrix=computeDistanceMatrix( train_set )
+distance_matrix=computeDistanceMatrix( train_set, nb_dim, max, min )
 
 # Cluster parameters
 n_clusters=3
@@ -309,7 +360,7 @@ old_cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_in
 
 file = open( string( folder, "center_cluster.dat" ), "w" )
 for i=1:n_clusters
-    for j=1:4
+    for j=1:nb_dim
         write( file, string(train_set[ cluster_centers[i] , j ]," " ) )
     end
     write( file, "\n" )
