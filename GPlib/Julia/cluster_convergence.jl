@@ -177,10 +177,6 @@ function sortmatrix( x )
     end
     return index_x
 end
-#==============================================================================#
-
-# TO BE IMPROVED
-#==============================================================================#
 function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 )
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
@@ -201,7 +197,24 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_st
     end
     return cluster_indexs, cluster_centers, cluster_sizes, assignments
 end
+function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: Int }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4, n_repeat::T5 )
+    # First Kmenoid
+    cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
+    old_cost=computeCost( n_structures, distance_matrix, cluster_centers_best, cluster_indexs_best )
+    for i=2:n_repeat
+        cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
+        cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
+        if old_cost > cost
+            cluster_indexs_best = cluster_indexs
+            cluster_centers_best = cluster_centers
+            cluster_sizes_best = cluster_sizes
+            assignments_best = assignments
+        end
+    end
+    return cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best
+end
 #==============================================================================#
+
 
 # TEST
 #==============================================================================#
@@ -296,7 +309,7 @@ nb_atoms=size(traj[1].names)[1]
 
 
 # Training set
-nb_dim=5
+nb_dim=4
 train_set=zeros(trunc(nb_steps/10),nb_dim)
 max=zeros(nb_dim)
 min=ones(nb_dim)*100000
@@ -324,7 +337,8 @@ for step=1:Int(trunc(nb_steps/10))
         b=cell_mod.distance(traj[step],cell,carbon,Int(index[2]+nbC))
         c=cell_mod.distance(traj[step],cell,Int(index[1]+nbC),Int(index[2]+nbC))
         angle=acosd((a*a+b*b-c*c)/(2*a*b))
-        train_set[ step, maxN ] = angle
+        #train_set[ step, maxN+1 ] = angle
+        #write(fileC,string(train_set[step, maxN+1]," "))
         # count=maxN+1
         # for i=1:maxN-1
         #     for j=i+1:maxN
@@ -366,3 +380,16 @@ for i=1:n_clusters
     write( file, "\n" )
 end
 close( file )
+
+for i=1:size(assignments)[1]
+    file=open( string( folder, string("cluster",i,".dat") ), "w" )
+    for j=1:size(assignments)[2]
+        for k=1:nb_dim
+            if assignments[ i, j ] != 0
+                write(file,string( train_set[ assignments[ i, j ], k ] ," ") )
+            end
+        end
+        write(file,string("\n"))
+    end
+    close(file)
+end
