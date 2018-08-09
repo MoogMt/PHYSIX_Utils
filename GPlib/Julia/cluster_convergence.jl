@@ -84,9 +84,9 @@ function initializeCenters{ T1 <: Int, T2 <: Real , T3 <: Int}( n_structures::T1
 end
 function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} )
 	index_cluster=1
-	min_dist=sum( ( data[ cluster_centers[1], :  ] - data_point[:] ).*( data[ cluster_centers[1], :  ] - data_point[:] ) )
+	min_dist=sum( ( data[ cluster_centers[1], :  ] - data_point ).*( data[ cluster_centers[1], :  ] - data_point ) )
 	for i=2:n_clusters
-		dist=sum( ( data[ cluster_centers[i], :  ] - data_point[:] ).*( data[ cluster_centers[i], :  ] - data_point[:] ) )
+		dist=sum( ( data[ cluster_centers[i], :  ] - data_point ).*( data[ cluster_centers[i], :  ] - data_point ) )
 		if dist < min_dist
 			min_dist=dist
 			index_cluster=i
@@ -307,7 +307,6 @@ cell=cell_mod.Cell_param( V, V, V )
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 
-
 # Training set
 nb_dim=10
 data_set=zeros(nb_steps*nbC,nb_dim)
@@ -361,7 +360,7 @@ end
 close(fileC)
 
 n_train=4000
-n_dim_analysis=5
+n_dim_analysis=4
 data_train=data_set[1:n_train,1:n_dim_analysis]
 data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis]
 data_set=[]
@@ -377,8 +376,8 @@ cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering(
 
 file = open( string( folder, "center_cluster.dat" ), "w" )
 for i=1:n_clusters
-    for j=1:nb_dim
-        write( file, string(data_set[ cluster_centers[i] , j ]," " ) )
+    for j=1:n_dim_analysis
+        write( file, string(data_train[ cluster_centers[i] , j ]," " ) )
     end
     write( file, "\n" )
 end
@@ -387,7 +386,7 @@ close( file )
 for i=1:size(assignments)[1]
     file=open( string( folder, string("cluster",i,".dat") ), "w" )
     for j=1:size(assignments)[2]
-        for k=1:nb_dim
+        for k=1:n_dim_analysis
             if assignments[ i, j ] != 0
                 write(file,string( data_train[ assignments[ i, j ], k ] ," ") )
             end
