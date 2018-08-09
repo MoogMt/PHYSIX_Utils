@@ -360,11 +360,12 @@ end
 close(fileC)
 
 n_train=4000
-n_dim_analysis=4
+n_dim_analysis=5
 data_train=data_set[1:n_train,1:n_dim_analysis]
 data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis]
 data_set=[]
 
+print("Computing distance matrix\n")
 distance_matrix=computeDistanceMatrix( data_train , n_dim_analysis, max[1:n_dim_analysis], min[1:n_dim_analysis] )
 
 # Cluster parameters
@@ -372,9 +373,11 @@ n_clusters=3
 precision=0.00000000000001
 n_repeat=10
 
+print("Clustering\n")
 cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_train, distance_matrix, n_clusters, precision , n_repeat)
 
-file = open( string( folder, "center_cluster.dat" ), "w" )
+print("Printing cluster centers\n")
+file = open( string( folder, "center_cluster.dat2" ), "w" )
 for i=1:n_clusters
     for j=1:n_dim_analysis
         write( file, string(data_train[ cluster_centers[i] , j ]," " ) )
@@ -383,8 +386,9 @@ for i=1:n_clusters
 end
 close( file )
 
+print("Printing Training Clusters\n")
 for i=1:size(assignments)[1]
-    file=open( string( folder, string("cluster",i,".dat") ), "w" )
+    file=open( string( folder, string("cluster",i,"2.dat") ), "w" )
     for j=1:size(assignments)[2]
         for k=1:n_dim_analysis
             if assignments[ i, j ] != 0
@@ -397,10 +401,12 @@ for i=1:size(assignments)[1]
 end
 
 # Voronoi assignment
+print("Predicting assignments\n")
 predict_assignment = voronoiAssign( data_train, n_clusters, cluster_centers,  data_predict )
 
+print("Printing Assignments\n")
 for cluster=1:n_clusters
-    file=open( string( folder, string("cluster",cluster,".dat") ), false,true,false,false,true )
+    file=open( string( folder, string("cluster",cluster,"2.dat") ), false,true,false,false,true )
     for elements=1:nb_steps-n_train
         if predict_assignment[ elements] == cluster
             for data=1:n_dim_analysis
