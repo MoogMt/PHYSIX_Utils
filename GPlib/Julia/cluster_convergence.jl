@@ -310,11 +310,9 @@ nb_atoms=size(traj[1].names)[1]
 
 # Training set
 nb_dim=10
-
 data_set=zeros(nb_steps*nbC,nb_dim)
 max=zeros(nb_dim)
 min=ones(nb_dim)*100000
-
 fileC=open(string(folder,"distancesNN.dat"),"w")
 for step=1:nb_steps
     print("Progress:", step/nb_steps*100,"%\n")
@@ -364,7 +362,11 @@ close(fileC)
 
 n_train=4000
 n_dim_analysis=5
-distance_matrix=computeDistanceMatrix( data_set[1:n_train,1:n_dim_analysis], n_dim_analysis, max[1:n_dim_analysis], min[1:n_dim_analysis] )
+data_train=data_set[1:n_train,1:n_dim_analysis]
+data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis]
+data_set=[]
+
+distance_matrix=computeDistanceMatrix( data_train , n_dim_analysis, max[1:n_dim_analysis], min[1:n_dim_analysis] )
 
 # Cluster parameters
 n_clusters=3
@@ -387,10 +389,26 @@ for i=1:size(assignments)[1]
     for j=1:size(assignments)[2]
         for k=1:nb_dim
             if assignments[ i, j ] != 0
-                write(file,string( data_set[ assignments[ i, j ], k ] ," ") )
+                write(file,string( data_train[ assignments[ i, j ], k ] ," ") )
             end
         end
         write(file,string("\n"))
+    end
+    close(file)
+end
+
+# Voronoi assignment
+predict_assignment = voronoiAssign( data_train, n_clusters, cluster_centers,  data_predict )
+
+for cluster=1:n_clusters
+    file=open( string( folder, string("cluster",cluster,".dat") ), false,true,false,false,true )
+    for elements=1:nb_steps-n_train
+        if predict_assignment[ elements] == cluster
+            for data=1:n_dim_analysis
+                write(file,string( data_predict[ elements , data ]," "))
+            end
+            write(file,string("\n"))
+        end
     end
     close(file)
 end
