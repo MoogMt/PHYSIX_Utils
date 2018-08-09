@@ -85,7 +85,6 @@ end
 function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} , max::Vector{T5}, min::Vector{T6})
 	index_cluster=1
 	min_dist=sum( ( (data[ cluster_centers[1], :  ]-min)./(max-min) - (data_point-min)./(max-min) ).*( (data[ cluster_centers[1], :  ]-min)./(max-min) - (data_point-min)./(max-min) ) )
-    min_dist=0
 	for i=2:n_clusters
 		dist=sum( ( (data[ cluster_centers[i], :  ]-min)./(max-min) - (data_point-min)./(max-min) ).*( (data[ cluster_centers[i], :  ]-min)./(max-min) - (data_point-min)./(max-min) ) )
 		if dist < min_dist
@@ -347,13 +346,13 @@ end
 close(fileC)
 
 n_train=4000
-n_dim_analysis=5
+n_dim_analysis=6
 data_train=data_set[1:n_train,1:n_dim_analysis ]
 data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis ]
 data_set=[]
 
-max=zeros(data_train[1,:])
-min=zeros(data_train[1,:])
+max=data_train[1,:]
+min=data_train[1,:]
 for i=1:n_train
     for j=1:n_dim_analysis
         if max[j] < data_train[i,j]
