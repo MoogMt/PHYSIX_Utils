@@ -82,11 +82,12 @@ function initializeCenters{ T1 <: Int, T2 <: Real , T3 <: Int}( n_structures::T1
 
     return cluster_centers
 end
-function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} )
+function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} , max::Vector{T5}, min::Vector{T6})
 	index_cluster=1
-	min_dist=sum( ( data[ cluster_centers[1], :  ] - data_point ).*( data[ cluster_centers[1], :  ] - data_point ) )
+	min_dist=sum( ( (data[ cluster_centers[1], :  ]-min)./(max-min) - (data_point-min)./(max-min) ).*( (data[ cluster_centers[1], :  ]-min)./(max-min) - (data_point-min)./(max-min) ) )
+    min_dist=0
 	for i=2:n_clusters
-		dist=sum( ( data[ cluster_centers[i], :  ] - data_point ).*( data[ cluster_centers[i], :  ] - data_point ) )
+		dist=sum( ( (data[ cluster_centers[i], :  ]-min)./(max-min) - (data_point-min)./(max-min) ).*( (data[ cluster_centers[i], :  ]-min)./(max-min) - (data_point-min)./(max-min) ) )
 		if dist < min_dist
 			min_dist=dist
 			index_cluster=i
@@ -94,11 +95,11 @@ function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Ar
 	end
 	return index_cluster
 end
-function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_points::Array{T4} )
+function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_points::Array{T4} , max::Vector{T5}, min::Vector{T6} )
 	n_points=size(data_points)[1]
 	point_clusters=zeros(Int,n_points)
 	for i=1:n_points
-		point_clusters[i] = voronoiAssign( data, n_clusters, cluster_centers, data_points[i,:] )
+		point_clusters[i] = voronoiAssign( data, n_clusters, cluster_centers, data_points[i,:], max, min )
 	end
 	return point_clusters
 end
@@ -310,8 +311,6 @@ nb_atoms=size(traj[1].names)[1]
 # Training set
 nb_dim=10
 data_set=zeros(nb_steps*nbC,nb_dim)
-max=zeros(nb_dim)
-min=ones(nb_dim)*100000
 fileC=open(string(folder,"distancesNN.dat"),"w")
 for step=1:nb_steps
     print("Progress:", step/nb_steps*100,"%\n")
@@ -324,12 +323,6 @@ for step=1:nb_steps
         maxN=4
 		for i=1:maxN
 			data_set[ carbon+nbC*(step-1), i ] = distances[ i ]
-            if data_set[ carbon+nbC*(step-1), i ] > max[ i ]
-                max[ i ] = data_set[carbon+nbC*(step-1), i ]
-            end
-            if data_set[ carbon+nbC*(step-1), i ] < min[ i ]
-                min[ i ] = data_set[ carbon+nbC*(step-1), i ]
-            end
             write(fileC, string(distances[i]," ") )
 		end
         a=cell_mod.distance(traj[step],cell,carbon,Int(index[1]+nbC))
@@ -345,12 +338,6 @@ for step=1:nb_steps
                 angle=acosd((a*a+b*b-c*c)/(2*a*b))
                 write(fileC,string(angle," "))
                 data_set[ carbon+nbC*(step-1), count ] = angle
-                if data_set[ carbon+nbC*(step-1), count ] > max[ count ]
-                    max[ count ] = data_set[ carbon+nbC*(step-1), count ]
-                end
-                if data_set[ carbon+nbC*(step-1), count ] < min[ count ]
-                    min[ count ] = data_set[ carbon+nbC*(step-1), count ]
-                end
                 count += 1
             end
         end
@@ -361,12 +348,25 @@ close(fileC)
 
 n_train=4000
 n_dim_analysis=5
-data_train=data_set[1:n_train,1:n_dim_analysis]
-data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis]
+data_train=data_set[1:n_train,1:n_dim_analysis ]
+data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis ]
 data_set=[]
 
+max=zeros(data_train[1,:])
+min=zeros(data_train[1,:])
+for i=1:n_train
+    for j=1:n_dim_analysis
+        if max[j] < data_train[i,j]
+            max[j] = data_train[i,j]
+        end
+        if min[j] > data_train[i,j]
+            min[j] = data_train[i,j]
+        end
+    end
+end
+
 print("Computing distance matrix\n")
-distance_matrix=computeDistanceMatrix( data_train , n_dim_analysis, max[1:n_dim_analysis], min[1:n_dim_analysis] )
+distance_matrix=computeDistanceMatrix( data_train , n_dim_analysis, max, min )
 
 # Cluster parameters
 n_clusters=3
@@ -377,7 +377,7 @@ print("Clustering\n")
 cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_train, distance_matrix, n_clusters, precision , n_repeat)
 
 print("Printing cluster centers\n")
-file = open( string( folder, "center_cluster.dat2" ), "w" )
+file = open( string( folder, "center_cluster-",n_dim_analysis,".dat" ), "w" )
 for i=1:n_clusters
     for j=1:n_dim_analysis
         write( file, string(data_train[ cluster_centers[i] , j ]," " ) )
@@ -388,7 +388,7 @@ close( file )
 
 print("Printing Training Clusters\n")
 for i=1:size(assignments)[1]
-    file=open( string( folder, string("cluster",i,"2.dat") ), "w" )
+    file=open( string( folder, string("cluster",i,"-",n_dim_analysis,".dat") ), "w" )
     for j=1:size(assignments)[2]
         for k=1:n_dim_analysis
             if assignments[ i, j ] != 0
@@ -402,11 +402,11 @@ end
 
 # Voronoi assignment
 print("Predicting assignments\n")
-predict_assignment = voronoiAssign( data_train, n_clusters, cluster_centers,  data_predict )
+predict_assignment = voronoiAssign( data_train, n_clusters, cluster_centers,  data_predict, max, min )
 
 print("Printing Assignments\n")
 for cluster=1:n_clusters
-    file=open( string( folder, string("cluster",cluster,"2.dat") ), false,true,false,false,true )
+    file=open( string( folder, string("cluster",cluster,"-",n_dim_analysis,".dat") ), false,true,false,false,true )
     for elements=1:nb_steps-n_train
         if predict_assignment[ elements] == cluster
             for data=1:n_dim_analysis
