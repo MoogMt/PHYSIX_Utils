@@ -213,6 +213,28 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: 
     end
     return cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best
 end
+function computeClusteringCoefficients{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int }( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes <: Vector{T3} , assignments::Array{T4,2} )
+    clustering_coefficients=zeros(n_clusters)
+    if cut_off <= 0.0
+        return
+    end
+    for cluster=1:n_clusters
+        if cluster_sizes[ cluster ] == 1
+            clustering_coefficients[ cluster ] = 1.0
+        else
+            for i=2:cluster_sizes[ cluster ] - 1
+                for j=i+1:cluster_sizes[cluster]
+                    dist=distance_matrix[ assignments[ cluster, i], assignments[cluster,j] ]
+                    if  dist > 0 && dist < cut_off
+                        clustering_coefficients += 1
+                    end
+                end
+            end
+        end
+        clustering_coefficients[ cluster ] /= cluster_sizes[i]*(cluster_sizes[i]-1)/2
+    end
+    return clustering_coefficients
+end
 #==============================================================================#
 
 
@@ -346,7 +368,7 @@ end
 close(fileC)
 
 n_train=4000
-n_dim_analysis=6
+n_dim_analysis=4
 data_train=data_set[1:n_train,1:n_dim_analysis ]
 data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis ]
 data_set=[]
