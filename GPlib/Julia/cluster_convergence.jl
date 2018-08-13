@@ -267,7 +267,7 @@ function dauraClustering{ T1 <: Int, T2 <: Real, T3 <: Real }( n_elements::T1, d
             n_element_left -= 1
             used[ index_center ] = 1
             cluster_centers[ n_clusters ] = index_center
-            cluster_sizes[ n_clusters ] = n_neighbours
+            cluster_sizes[ n_clusters ] = n_neighbours+1 # +1 because the center counts...
             # Removing the neighborhood of the chosen cluster
             for n=1:n_elements
                 if used[n] != 1 && distance_matrix[ index_center, n ] < cut_off
@@ -280,7 +280,7 @@ function dauraClustering{ T1 <: Int, T2 <: Real, T3 <: Real }( n_elements::T1, d
             n_clusters += 1
             n_element_left -= 1
             used[ n_clusters ] = index_center
-            cluster_sizes[ n_clusters ] = n_neighbours
+            cluster_sizes[ n_clusters ] = 1
         end
     end
     # Removing useless memory slots
@@ -289,18 +289,18 @@ function dauraClustering{ T1 <: Int, T2 <: Real, T3 <: Real }( n_elements::T1, d
     used=[]
     # Voronoi assignements
     index_data = zeros(n_elements)
-    # for element=1:n_elements
-    #     min_dist=100000000
-    #     for i=1:n_clusters
-    #         if cluster_centers[i] != element
-    #             dist = distance_matrix[ cluster_centers[i], element ]
-    #             if dist < min_dist
-    #                 index_data[ element ] = i
-    #                 min_dist=dist
-    #             end
-    #         end
-    #     end
-    # end
+    for element=1:n_elements
+        min_dist=100000000
+        for i=1:n_clusters
+            if cluster_centers[i] != element
+                dist = distance_matrix[ cluster_centers[i], element ]
+                if dist < min_dist
+                    index_data[ element ] = i
+                    min_dist=dist
+                end
+            end
+        end
+    end
     # Voronoi assignement of the points
     return cluster_centers, cluster_sizes, index_data
 end
@@ -376,11 +376,13 @@ end
 #==============================================================================#
 # Definition of the points
 ndim=2
-points=zeros(400,ndim)
-for i=1:400
+offset=1.2
+n_points=2000
+points=zeros(n_points,ndim)
+for i=1:n_points
     points[i,:]=rand(ndim)
 end
-points[201:400,:] += 2
+points[Int(trunc(n_points/2))+1:n_points,:] += offset
 
 max=points[1,:]
 min=points[1,:]
@@ -396,9 +398,9 @@ for i=1:size(points)[1]
 end
 
 # Compute the distance between all points
-distance_matrix=computeDistanceMatrix( points, ndim, max, min )
+distance_matrix=computeDistanceMatrix( points)
 
-cut_off = 0.4
+cut_off = 0.8
 
 # Cluster parameters
 n_structures=size(points)[1]
@@ -406,21 +408,26 @@ cluster_centers, cluster_sizes, index_cluster = dauraClustering( size(points)[1]
 
 n_clusters=size(cluster_centers)[1]
 
-n_test=1000
-points2=vcat(rand(n_test,2), rand(n_test,2)+2 )
+n_test=200
+points2=vcat(rand(n_test,2), rand(n_test,2)+offset )
 points2_assignment=voronoiAssign( points, n_clusters, cluster_centers, points2 , max, min )
 
 using PyPlot
 
-figure(1)
-plot( points[cluster_centers[ 1 ] ,1 ] , points[cluster_centers[ 1 ],2] , "rd"  )
-plot( points[cluster_centers[ 2 ] ,1 ] , points[cluster_centers[ 2 ],2] , "bd"  )
+figure()
 for i=1:size(points2)[1]
 	if points2_assignment[i] == 1
 		plot( points2[i,1] , points2[i,2] , "r."  )
 	elseif points2_assignment[i] == 2
 		plot( points2[i,1] , points2[i,2] , "b."  )
+    elseif points2_assignment[i] == 3
+        plot( points2[i,1] , points2[i,2] , "g."  )
+    elseif points2_assignment[i] == 4
+        plot( points2[i,1] , points2[i,2] , "c."  )
 	end
+end
+for i=1:n_clusters
+    plot( points[cluster_centers[ i ] , 1] , points[cluster_centers[ i ], 2] , "kd"  )
 end
 
 #==========#
