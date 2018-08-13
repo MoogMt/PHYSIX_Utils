@@ -277,11 +277,39 @@ function dauraClustering{ T1 <: Int, T2 <: Real, T3 <: Real }( n_elements::T1, d
         end
     end
     # Removing useless memory slots
-    cluster_index = cluster_index[1:n_cluster]
+    cluster_centers = cluster_centers[1:n_cluster]
     cluster_sizes = cluster_sizes[1:n_cluster]
     used=[]
+    # Voronoi assignements
+    assignements=zeros(n_elements)
+    for element=1:n_elements
+        min_dist=0
+        if cluster_centers[1] != element
+            min_dist = distance_matrix[ cluster_center[1], element ]
+            assignement[ element ] = cluster_center[1]
+            for i=2:size(cluster_centers)[1]
+                if cluster_center[i] != element
+                    dist = distance_matrix[ cluster_center[i], element ]
+                    if dist < min dist
+                        assignement[ element ] = i
+                    end
+                end
+            end
+        else
+            min_dist = distance_matrix[ cluster_center[2], element  ]
+            assignement[ element ] = cluster_centers[2]
+            for i=3:size(cluster_centers)[1]
+                if cluster_center[i] != element
+                    dist = distance_matrix[ cluster_center[i], element ]
+                    if dist < min dist
+                        assignement[ element ] = i
+                    end
+                end
+            end
+        end
+    end
     # Voronoi assignement of the points
-    return cluster_index, cluster_sizes
+    return cluster_centers, cluster_sizes, assignements
 end
 #==============================================================================#
 
@@ -485,3 +513,6 @@ for cluster=1:n_clusters
     end
     close(file)
 end
+
+# Test of Daura
+dauraClustering( nb_steps , distance_matrix , 0.3 )
