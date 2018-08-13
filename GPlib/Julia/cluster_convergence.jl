@@ -213,7 +213,7 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: 
     end
     return cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best
 end
-function computeClusteringCoefficients{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int }( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes <: Vector{T3} , assignments::Array{T4,2} )
+function computeClusteringCoefficients{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Real }( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes::Vector{T3} , assignments::Array{T4,2} , cut_off::T5 )
     clustering_coefficients=zeros(n_clusters)
     if cut_off <= 0.0
         return
@@ -234,6 +234,54 @@ function computeClusteringCoefficients{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: 
         clustering_coefficients[ cluster ] /= cluster_sizes[i]*(cluster_sizes[i]-1)/2
     end
     return clustering_coefficients
+end
+function dauraClustering{ T1 <: Int, T2 <: Real, T3 <: Real }( n_elements::T1, distance_matrix::Array{T2,2} , cut_off::T3 )
+    cluster_sizes=zeros(Int,n_elements)
+    cluster_centers=zeros(Int,n_elements)
+    used=zeros(Int,n_elements)
+    n_element_left = n_elements
+    n_clusters = 0
+    while n_element_left != 0
+        # We have a new cluster
+        n_cluster += 1
+        n_element_left -= 1
+        n_neighbours = 0
+        index_center = 0
+        # Choosing most connected unused point as cluster center
+        for i=1:n_elements
+            n_local_neighbours
+            if used[i] == 1
+                for j=i+1:n_elements
+                    if used[j] == 1
+                        if distance_matrix[i,j] < cut_off
+                            n_local_neighbours += 1
+                        end
+                    end
+                end
+            end
+            if n_neighbours < n_local_neighbours
+                n_neighbours = n_local_neighbours
+                index_center = i
+            end
+        end
+        # Recording data
+        used[ index_cluster ] = 1
+        cluster_centers[ n_cluster ] = index_center
+        cluster_sizes[ n_cluster ] = n_neighbours
+        # Removing the neighborhood of the chosen cluster
+        for n=1:n_elements
+            if distance_matrix[ index_cluster, n ] < cut_off
+                n_element_left -= 1
+                used[ n ] = 1
+            end
+        end
+    end
+    # Removing useless memory slots
+    cluster_index = cluster_index[1:n_cluster]
+    cluster_sizes = cluster_sizes[1:n_cluster]
+    used=[]
+    # Voronoi assignement of the points
+    return cluster_index, cluster_sizes
 end
 #==============================================================================#
 
@@ -266,7 +314,6 @@ distance_matrix=computeDistanceMatrix( points )
 n_clusters=4
 precision=0.00000000000001
 n_structures=size(points)[1]
-
 cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
 old_cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
 
@@ -308,7 +355,7 @@ end
 
 include("contactmatrix.jl")
 
-V=8.82
+V=9.2
 T=3000
 
 ps2fs=0.001
@@ -368,7 +415,7 @@ end
 close(fileC)
 
 n_train=4000
-n_dim_analysis=4
+n_dim_analysis=5
 data_train=data_set[1:n_train,1:n_dim_analysis ]
 data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis ]
 data_set=[]
