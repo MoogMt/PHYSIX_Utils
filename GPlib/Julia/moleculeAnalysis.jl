@@ -17,10 +17,12 @@ function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( m
     return list
 end
 
-for i=9:size(Volumes)[1]
+#for i=9:size(Volumes)[1]
+for volume in Volumes
+    for temperature in Temperatures
 #volume=Volumes[1]
-volume=Volumes[i]
-temperature=Temperature[4]
+#volume=Volumes[i]
+#temperature=Temperature[4]
 co=cut_off[1]
 # Current Volume and Temperature
 current_volume=parse(Float64,volume)
