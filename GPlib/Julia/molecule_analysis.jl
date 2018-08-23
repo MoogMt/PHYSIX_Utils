@@ -148,7 +148,6 @@ for i=1:size(sizes)[1]
 end
 check2 /= sum
 
-file=open(string(folder,"size_proba_",co,"stride",stride,".dat"),"w")
 for i=1:sizes[size(sizes)[1]]
     check_size=false
     for j=1:size(sizes)[1]
