@@ -54,7 +54,10 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
             for j=1:3
                 if split(lines[1+4*(i-1)*stride+j])[j] == "TOTAL"
                     print("Target is line ", 1+4*(i-1)*stride+j)
-                    break
+                    quit()
+                end
+                if split(lines[1+4*(i-1)*stride+j])[j] == "STRESS"
+                    print(string(i, " " ,1+4*(i-1)*stride+j,"\n"))
                 end
                 pressure[i] += parse(Float64,split(lines[1+4*(i-1)*stride+j])[j])
             end

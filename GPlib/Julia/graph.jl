@@ -1,6 +1,5 @@
 module graph_mod
 
-
 export searchGroupMember, groupsFromMatrix, getSizeTree
 
 function searchGroupMember{ T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }( matrix::Array{T1}, list::Vector{T2}, index::T3 , group_nb::T4 )
