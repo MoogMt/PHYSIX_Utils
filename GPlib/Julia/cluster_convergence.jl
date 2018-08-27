@@ -9,7 +9,7 @@ end
 function computeDistance{ T1 <: Real,T2 <: Int,  T3 <: Real, T4 <: Real, T5 <: Int, T6 <: Int }( data::Array{T1}, n_dim::T2 , max::Vector{T3}, min::Vector{T4}, index1::T5, index2::T6 )
     dist=0
     for i=1:n_dim
-        dist += ( ((data[index1,i]-min[i])/(max[i]-min[i])) - ((data[index2,i]-min[i])/(max[i]-min[i])) )^2
+        dist += ( ((data[index1,i]-min[i])/(max[i]-min[i])) - ((data[index2,i]-min[i])/(max[i]-min[i])) )*( ((data[index1,i]-min[i])/(max[i]-min[i])) - ((data[index2,i]-min[i])/(max[i]-min[i])) )
     end
 	return dist
 end
@@ -436,7 +436,7 @@ end
 
 include("contactmatrix.jl")
 
-V=9.2
+V=8.82
 T=3000
 
 ps2fs=0.001
@@ -448,7 +448,7 @@ start_step=Int(start_time/unit)
 nbC=32
 nbO=2*nbC
 
-folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
 file="TRAJEC_wrapped.xyz"
 
 traj = filexyz.read( string(folder,file), stride, start_step )
@@ -458,7 +458,8 @@ nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 
 # Training set
-nb_dim=10
+maxN=4
+nb_dim=9
 data_set=zeros(nb_steps*nbC,nb_dim)
 fileC=open(string(folder,"distancesNN.dat"),"w")
 for step=1:nb_steps
@@ -469,37 +470,35 @@ for step=1:nb_steps
 			distances[oxygen] = cell_mod.distance(traj[step],cell,carbon,oxygen+nbC)
 		end
 		index=sortmatrix( distances )
-        maxN=4
 		for i=1:maxN
 			data_set[ carbon+nbC*(step-1), i ] = distances[ i ]
             write(fileC, string(distances[i]," ") )
 		end
-        a=cell_mod.distance(traj[step],cell,carbon,Int(index[1]+nbC))
-        b=cell_mod.distance(traj[step],cell,carbon,Int(index[2]+nbC))
-        c=cell_mod.distance(traj[step],cell,Int(index[1]+nbC),Int(index[2]+nbC))
+        a=cell_mod.distance(traj[step],cell,carbon,nbC+Int(index[1]))
+        b=cell_mod.distance(traj[step],cell,carbon,nbC+Int(index[2]))
+        c=cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[2]))
         angle=acosd((a*a+b*b-c*c)/(2*a*b))
-        count=maxN+1
-        for i=1:maxN-1
-            for j=i+1:maxN
-                a=cell_mod.distance(traj[step],cell,carbon,Int(index[i]+nbC))
-                b=cell_mod.distance(traj[step],cell,carbon,Int(index[j]+nbC))
-                c=cell_mod.distance(traj[step],cell,Int(index[i]+nbC),Int(index[j]+nbC))
-                angle=acosd((a*a+b*b-c*c)/(2*a*b))
-                write(fileC,string(angle," "))
-                data_set[ carbon+nbC*(step-1), count ] = angle
-                count += 1
-            end
-        end
+        data_set[ carbon+nbC*(step-1), maxN+1 ] = angle
+        write(fileC, string(angle," ") )
+        # O-O distances
+        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[3]))," ") )
+        data_set[ carbon+nbC*(step-1), maxN+2 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[3]))
+        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[4]))," ") )
+        data_set[ carbon+nbC*(step-1), maxN+3 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[4]))
+        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[3]))," ") )
+        data_set[ carbon+nbC*(step-1), maxN+4 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[3]))
+        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[4]))," ") )
+        data_set[ carbon+nbC*(step-1), maxN+5 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[4]))
+        #
         write(fileC,string("\n"))
 	end
 end
 close(fileC)
 
 n_train=4000
-n_dim_analysis=5
+n_dim_analysis=9
 data_train=data_set[1:n_train,1:n_dim_analysis ]
 data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis ]
-data_set=[]
 
 max=data_train[1,:]
 min=data_train[1,:]
@@ -556,6 +555,138 @@ predict_assignment = voronoiAssign( data_train, n_clusters, cluster_centers,  da
 print("Printing Assignments\n")
 for cluster=1:n_clusters
     file=open( string( folder, string("cluster",cluster,"-",n_dim_analysis,".dat") ), false,true,false,false,true )
+    for elements=1:nb_steps-n_train
+        if predict_assignment[ elements] == cluster
+            for data=1:n_dim_analysis
+                write(file,string( data_predict[ elements , data ]," "))
+            end
+            write(file,string("\n"))
+        end
+    end
+    close(file)
+end
+
+#Oxygen
+#===#
+
+include("contactmatrix.jl")
+
+V=8.82
+T=3000
+
+ps2fs=0.001
+timestep=0.5
+stride = 1
+unit=ps2fs*timestep*stride
+start_time=5
+start_step=Int(start_time/unit)
+nbC=32
+nbO=2*nbC
+
+folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
+file="TRAJEC_wrapped.xyz"
+
+traj = filexyz.read( string(folder,file), stride, start_step )
+cell=cell_mod.Cell_param( V, V, V )
+
+nb_steps=size(traj)[1]
+nb_atoms=size(traj[1].names)[1]
+
+# Training set
+nb_dim=3
+data_set=zeros(nb_steps*nbO,nb_dim)
+fileO=open(string(folder,"distancesNN_O.dat"),"w")
+for step=1:nb_steps
+    print("Progress:", step/nb_steps*100,"%\n")
+	for oxygen=1:nbO
+		distances = zeros(nbC)
+		for carbon=1:nbC
+			distances[carbon] = cell_mod.distance(traj[step],cell,carbon,oxygen+nbC)
+		end
+		index=sortmatrix( distances )
+        maxN=2
+		for i=1:maxN
+			data_set[ oxygen+nbO*(step-1), i ] = distances[ i ]
+            write(fileO, string(distances[i]," ") )
+		end
+        count=maxN+1
+        for i=1:maxN-1
+            for j=i+1:maxN
+                a=cell_mod.distance(traj[step],cell,Int(index[i]),oxygen)
+                b=cell_mod.distance(traj[step],cell,Int(index[j]),oxygen)
+                c=cell_mod.distance(traj[step],cell,Int(index[i]),Int(index[j]))
+                angle=acosd((a*a+b*b-c*c)/(2*a*b))
+                write(fileO,string(angle," "))
+                data_set[ oxygen+nbO*(step-1), count ] = angle
+                count += 1
+            end
+        end
+        write(fileO,string("\n"))
+	end
+end
+close(fileO)
+
+n_train=100
+n_dim_analysis=3
+data_train=data_set[1:n_train,1:n_dim_analysis ]
+data_predict=data_set[n_train+1:nb_steps,1:n_dim_analysis ]
+data_set=[]
+
+max=data_train[1,:]
+min=data_train[1,:]
+for i=1:n_train
+    for j=1:n_dim_analysis
+        if max[j] < data_train[i,j]
+            max[j] = data_train[i,j]
+        end
+        if min[j] > data_train[i,j]
+            min[j] = data_train[i,j]
+        end
+    end
+end
+
+print("Computing distance matrix\n")
+distance_matrix=computeDistanceMatrix( data_train , n_dim_analysis, max, min )
+
+# Cluster parameters
+n_clusters=2
+precision=0.00000000000001
+n_repeat=1
+
+print("Clustering\n")
+cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_train, distance_matrix, n_clusters, precision , n_repeat)
+
+print("Printing cluster centers\n")
+file = open( string( folder, "center_clusterO-",n_dim_analysis,".dat" ), "w" )
+for i=1:n_clusters
+    for j=1:n_dim_analysis
+        write( file, string(data_train[ cluster_centers[i] , j ]," " ) )
+    end
+    write( file, "\n" )
+end
+close( file )
+
+print("Printing Training Clusters\n")
+for i=1:size(assignments)[1]
+    file=open( string( folder, string("clusterO",i,"-",n_dim_analysis,".dat") ), "w" )
+    for j=1:size(assignments)[2]
+        for k=1:n_dim_analysis
+            if assignments[ i, j ] != 0
+                write(file,string( data_train[ assignments[ i, j ], k ] ," ") )
+            end
+        end
+        write(file,string("\n"))
+    end
+    close(file)
+end
+
+# Voronoi assignment
+print("Predicting assignments\n")
+predict_assignment = voronoiAssign( data_train, n_clusters, cluster_centers,  data_predict, max, min )
+
+print("Printing Assignments\n")
+for cluster=1:n_clusters
+    file=open( string( folder, string("clusterO-",cluster,"-",n_dim_analysis,".dat") ), false,true,false,false,true )
     for elements=1:nb_steps-n_train
         if predict_assignment[ elements] == cluster
             for data=1:n_dim_analysis
