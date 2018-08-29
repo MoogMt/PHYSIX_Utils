@@ -9,16 +9,17 @@ cut_off=[1.6,1.7,1.8]
 V=volumes[1]
 T=temperatures[3]
 func=functionnals[1]
-stride=10
+stride=5
 co=cut_off[1]
 
 nbC=32
 nbO=2*nbC
 
-for V in volumes
 
+    V=9.375
+    T=3000
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
-    file="TRAJEC_wrapped.xyz"
+    file="TRAJEC_wrapped_nostride.xyz"
 
     if isfile( string(folder,file) )
         traj = filexyz.read(string(folder,file),stride)
@@ -41,5 +42,3 @@ for V in volumes
     else
         print("file: ",string(folder,file)," does not exists!\n")
     end
-
-end

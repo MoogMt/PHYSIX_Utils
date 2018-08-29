@@ -459,7 +459,7 @@ nb_atoms=size(traj[1].names)[1]
 
 # Training set
 maxN=4
-nb_dim=9
+nb_dim=maxN+1
 data_set=zeros(nb_steps*nbC,nb_dim)
 fileC=open(string(folder,"distancesNN.dat"),"w")
 for step=1:nb_steps
@@ -480,16 +480,6 @@ for step=1:nb_steps
         angle=acosd((a*a+b*b-c*c)/(2*a*b))
         data_set[ carbon+nbC*(step-1), maxN+1 ] = angle
         write(fileC, string(angle," ") )
-        # O-O distances
-        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[3]))," ") )
-        data_set[ carbon+nbC*(step-1), maxN+2 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[3]))
-        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[4]))," ") )
-        data_set[ carbon+nbC*(step-1), maxN+3 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[1]),nbC+Int(index[4]))
-        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[3]))," ") )
-        data_set[ carbon+nbC*(step-1), maxN+4 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[3]))
-        write(fileC, string(cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[4]))," ") )
-        data_set[ carbon+nbC*(step-1), maxN+5 ] = cell_mod.distance(traj[step],cell,nbC+Int(index[2]),nbC+Int(index[4]))
-        #
         write(fileC,string("\n"))
 	end
 end
