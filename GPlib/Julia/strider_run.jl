@@ -41,4 +41,4 @@ nbO=2*nbC
         close(file)
     else
         print("file: ",string(folder,file)," does not exists!\n")
-    end
+end
