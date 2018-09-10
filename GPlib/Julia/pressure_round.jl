@@ -6,6 +6,7 @@ importall statistics
 
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
+#
 volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8]
 temperatures=[2000,2250,2500,3000]
 
@@ -31,7 +32,7 @@ for T in temperatures
             close(file_pressure)
 
             # Writting results for safe keeping
-            write(file,string(statistics.simpleAverage(p)," ",sqrt(statistics.simpleMoment(p,2)),"\n"))
+            write(file,string(statistics.simpleAverage(p)/10," ",T," ",sqrt(statistics.simpleMoment(p,2)),"\n"))
             print(string(statistics.simpleAverage(p)," ",sqrt(statistics.simpleMoment(p,2)),"\n"))
         end
 
