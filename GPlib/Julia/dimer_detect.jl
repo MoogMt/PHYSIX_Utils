@@ -19,7 +19,7 @@ function sortIndex( indexes, x )
 end
 
 
-Volumes=[8.82,9.0,9.05,9.1,9.2,9.3,9.35,9.375,9.4,9.5,9.8]
+Volumes=[9.4]
 Temperatures=[3000]
 
 for V in Volumes
@@ -60,7 +60,10 @@ for V in Volumes
                         index1[i]=i
                     end
                     sortIndex(index1, distances_C1)
-                    for carbon2 = carbon1+1:nbC
+                    for carbon2 = 1:nbC
+                        if carbon1 == carbon2
+                            continue
+                        end
                         for oxygen = 1:nbO
                             distances_C2[oxygen] = cell_mod.distance(traj[step],cell,carbon2,oxygen)
                         end
@@ -71,32 +74,29 @@ for V in Volumes
                         count = 0
                         for neighbor1=2:5
                             for neighbor2=neighbor1+1:5
-                                if index1[neighbor1] == index2[neighbor2] && distances_C1[ neighbor1 ] < cut_off && distances_C2[ neighbor2 ] < cut_off
-                                    count += 1
-                                    common_neighbor[count] = index1[neighbor1]+nbC
+                                if index1[neighbor1] == index2[neighbor2]
+                                    if cell_mod.distance(traj[step],cell,carbon1,index1[neighbor1]) < cut_off
+                                        if  cell_mod.distance(traj[step],cell,carbon2,index1[neighbor1]) < cut_off
+                                            count += 1
+                                            common_neighbor[count] = index1[neighbor1]
+                                        end
+                                    end
                                 end
                             end
                         end
                         if count > 1
                             count_dimer += 1
                             write(out_file,string(step," "))
-                            # print("Found at step :",step," with count of : ",count, " \n")
-                            for i=1:count
-                                # print("carbons: ",carbon1," ",carbon2,"\n")
-                                write(out_file,string(carbon1," ",carbon2," ",common_neighbor[1]," ",common_neighbor[2]," "))
-                            end
+                            write(out_file,string(carbon1," ",carbon2," ",common_neighbor[1]," ",common_neighbor[2]," ")    )
                             write(out_file,string("\n"))
                         end
                     end
                 end
-                # if count_dimer > 1
-                #     print("At step ",step," counted: ",count_dimer,"\n")
-                # end
+                if count_dimer > 1
+                    print("At step ",step," counted: ",count_dimer,"\n")
+                end
             end
-
             close(out_file)
-
         end
-
     end
 end
