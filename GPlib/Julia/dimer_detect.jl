@@ -19,7 +19,19 @@ function sortIndex( indexes, x )
 end
 
 
-Volumes=[9.4]
+nbC=32
+nbO=64
+
+cut_off = 1.8
+
+distances_C1=zeros(nbO)
+distances_C2=zeros(nbO)
+index1=zeros(Int,nbO)
+index2=zeros(Int,nbO)
+
+common_neighbor=zeros(Int,2)
+
+Volumes=[9.4,9.8,10.0]
 Temperatures=[3000]
 
 for V in Volumes
@@ -36,23 +48,13 @@ for V in Volumes
             nb_steps=size(traj)[1]
             nb_atoms=size(traj[1].names)[1]
 
-            nbC=32
-            nbO=64
-
-            cut_off = 1.8
-
-            distances_C1=zeros(nbO)
-            distances_C2=zeros(nbO)
-            index1=zeros(Int,nbO)
-            index2=zeros(Int,nbO)
-            common_neighbor=zeros(Int,2)
-
             out_file=open(string(folder,"dimer_detect.dat"),"w")
 
             for step=1:nb_steps
                 print("V: ",V," T: ",T," Progress: ",step/nb_steps*100,"%\n")
                 count_dimer = 0
                 for carbon1 = 1:nbC
+
                     for oxygen = 1:nbO
                         distances_C1[oxygen] = cell_mod.distance(traj[step],cell,carbon1,oxygen)
                     end
@@ -60,10 +62,7 @@ for V in Volumes
                         index1[i]=i
                     end
                     sortIndex(index1, distances_C1)
-                    for carbon2 = 1:nbC
-                        if carbon1 == carbon2
-                            continue
-                        end
+                    for carbon2 = carbon1+1:nbC
                         for oxygen = 1:nbO
                             distances_C2[oxygen] = cell_mod.distance(traj[step],cell,carbon2,oxygen)
                         end
@@ -73,10 +72,10 @@ for V in Volumes
                         sortIndex(index2, distances_C2)
                         count = 0
                         for neighbor1=2:5
-                            for neighbor2=neighbor1+1:5
+                            for neighbor2=2:5
                                 if index1[neighbor1] == index2[neighbor2]
                                     if cell_mod.distance(traj[step],cell,carbon1,index1[neighbor1]) < cut_off
-                                        if  cell_mod.distance(traj[step],cell,carbon2,index1[neighbor1]) < cut_off
+                                        if  cell_mod.distance(traj[step],cell,carbon2,index2[neighbor2]) < cut_off
                                             count += 1
                                             common_neighbor[count] = index1[neighbor1]
                                         end
