@@ -32,7 +32,7 @@ index2=zeros(Int,nbO)
 common_neighbor=zeros(Int,2)
 
 Volumes=[9.4,9.8,10.0]
-Temperatures=[3000]
+Temperatures=[2000,2500]
 
 for V in Volumes
     for T in Temperatures
