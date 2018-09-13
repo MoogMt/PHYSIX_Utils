@@ -31,8 +31,8 @@ index2=zeros(Int,nbO)
 
 common_neighbor=zeros(Int,2)
 
-Volumes=[9.4,9.8,10.0]
-Temperatures=[2000,2500]
+Volumes=[9.4,9.5]
+Temperatures=[2000,2250,2500,2750,3000]
 
 for V in Volumes
     for T in Temperatures
@@ -40,7 +40,7 @@ for V in Volumes
         folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
         file=string(folder,"TRAJEC_wrapped.xyz")
 
-        if isfile( file )
+        if isfile( string(folder,"TRAJEC_wrapped.xyz") )
 
             traj = filexyz.readFastFile(file)
             cell=cell_mod.Cell_param(V,V,V)
@@ -49,8 +49,12 @@ for V in Volumes
             nb_atoms=size(traj[1].names)[1]
 
             out_file=open(string(folder,"dimer_detect.dat"),"w")
+            stop_100=20000
 
-            for step=1:nb_steps
+            for step=1:stop_100
+                if step > nb_steps
+                    break
+                end
                 print("V: ",V," T: ",T," Progress: ",step/nb_steps*100,"%\n")
                 count_dimer = 0
                 for carbon1 = 1:nbC
