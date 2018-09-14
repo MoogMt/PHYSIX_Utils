@@ -31,7 +31,7 @@ index2=zeros(Int,nbO)
 
 common_neighbor=zeros(Int,2)
 
-Volumes=[9.4,9.5]
+Volumes=[9.3,9.35,9.375]
 Temperatures=[2000,2250,2500,2750,3000]
 
 for V in Volumes
