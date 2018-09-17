@@ -32,7 +32,7 @@ stop_100=20000
 common_neighbor=zeros(Int,2)
 
 Cut_Off=[1.6,1.7,1.75,1.8]
-Volumes=[10.0,9.8,9.5,9.4]
+Volumes=[9.3,9.35,9.375]
 Temperatures=[2000,2250,2500,2750,3000]
 
 for cut_off in Cut_Off
@@ -50,13 +50,13 @@ for cut_off in Cut_Off
                 nb_steps=size(traj)[1]
                 nb_atoms=size(traj[1].names)[1]
 
-                out_file=open(string(folder,"dimer_detect.dat"),"w")
+                out_file=open(string(folder,"dimer_detect-",cut_off,".dat"),"w")
 
                 for step=1:stop_100
                     if step > nb_steps
                         break
                     end
-                    print("V: ",V," T: ",T," Progress: ",step/nb_steps*100,"%\n")
+                    print("V: ",V," T: ",T," Progress: ",step/stop_100*100,"%\n")
                     count_dimer = 0
                     for carbon1 = 1:nbC
 
