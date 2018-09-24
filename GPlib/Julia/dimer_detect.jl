@@ -32,8 +32,8 @@ stop_100=20000
 common_neighbor=zeros(Int,2)
 
 Cut_Off=[1.6,1.7,1.75,1.8]
-Volumes=[9.3,9.35,9.375]
-Temperatures=[2000,2250,2500,2750,3000]
+Volumes=[8.6,9.5]#[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+Temperatures=[3000]#[2000,2250,2500,2750,3000]
 
 for cut_off in Cut_Off
     for V in Volumes
