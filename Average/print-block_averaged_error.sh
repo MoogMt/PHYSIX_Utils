@@ -46,7 +46,7 @@ awk '{
       sigma2b += ( aveb - ave )*( aveb - ave )
     } 
     sigma2b /= nb
-    print lb,nb,sigma2,sigma2b,sigma2b*lb/sigma2,sqrt(sigma2b/nb)
+    print lb,nb,sigma2,sigma2b,sigma2b*lb/sigma2,sqrt(sigma2b/nb),ave
   }
 
 }' $1
