@@ -64,6 +64,10 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
                     print("Target is line ", 1+4*(i-1)*stride+j)
                     quit()
                 end
+                if split(lines[1+4*(i-1)*stride+j])[j] == "TENSOR"
+                    print("Target is line ", 1+4*(i-1)*stride+j)
+                    quit()
+                end
                 pressure[i] += parse(Float64,split(lines[1+4*(i-1)*stride+j])[j])
             end
             pressure[i] = pressure[i]/3.
