@@ -1,22 +1,42 @@
 include("contactmatrix.jl")
 
-temperature=[3000]
-volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.375,9.4,9.5,9.8]
+function sortmatrix( x )
+    sizex=size(x)[1]
+    for i=1:sizex
+        for j=i:sizex
+            if x[i] > x[j]
+                stock=x[i]
+                x[i]=x[j]
+                x[j]=stock
+            end
+        end
+    end
+    return x
+end
+
+temperature=[2000,2250,25000,3000]
+volume=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8]
 
 # Volume loop
-#for V in volume
-    V=9.1
+for T in temperatures
+for V in volume
+    #V=9.1
     # Temp
-    T=temperature[1]
+    #T=temperature[1]
 
     # Trajectory file
     folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
     file_in=string(folder,"TRAJEC_wrapped.xyz")
 
+    if ! isfile(file_in)
+        print("\n")
+        break
+    end
+
     # Time units
     stride_sim=5
     fs2ps=0.001
-    time_sim=0.5 # in fs
+    time_sim=1 # in fs
     unit=time_sim*fs2ps*stride_sim# in ps
 
     # Stride and step
@@ -31,21 +51,6 @@ volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.375,9.4,9.5,9.8]
     # Number of aotms and steps
     nb_steps=size(atoms)[1]
     nb_atoms=size(atoms[1].names)[1]
-
-    # Useful function
-    function sortmatrix( x )
-        sizex=size(x)[1]
-        for i=1:sizex
-            for j=i:sizex
-                if x[i] > x[j]
-                    stock=x[i]
-                    x[i]=x[j]
-                    x[j]=stock
-                end
-            end
-        end
-        return x
-    end
 
     # Computing NN
     nn=zeros(nb_steps*32,5)
@@ -141,5 +146,7 @@ volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.375,9.4,9.5,9.8]
 
     end
     # End of k
-#end
+end
 # End of V
+end
+# End of T

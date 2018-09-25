@@ -8,9 +8,7 @@ Cut_Off=[1.6,1.7,1.75,1.8]
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
 stride=5
-unit=0.0005
-save_traj = true
-
+unit=0.005
 
 for cut_off in Cut_Off
     for volume in Volumes
