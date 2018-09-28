@@ -35,6 +35,10 @@ for cutoff in cut_off
 
             start_step=Int(start_time/(unit*stride_sim))
 
+            if ! isfile( file_in )
+                break
+            end
+
             atoms = filexyz.read( file_in, stride_analysis, start_step )
             cell  = cell_mod.Cell_param( V, V, V )
 
