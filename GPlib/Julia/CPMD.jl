@@ -18,6 +18,7 @@ function readEnergy( file_name:: AbstractString )
     e_class=Vector{Real}(nb_steps)
     e_ks=Vector{Real}(nb_steps)
     msd=Vector{Real}(nb_steps)
+    time=Vector{Real}(nb_steps)
     #----------------------------------------
 
     # Getting data from lines
@@ -28,10 +29,11 @@ function readEnergy( file_name:: AbstractString )
         e_ks[i]=parse(Float64,line[4])
         e_class[i]=parse(Float64,line[5])
         msd[i]=parse(Float64,line[7])
+        time[i]=parse(Float64,line[8])
     end
     #----------------------------------------------
 
-    return  temperature, e_ks, e_class, msd
+    return  temperature, e_ks, e_class, msd, time
 end
 
 function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
@@ -54,18 +56,30 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
             for j=1:3
                 if split(lines[1+4*(i-1)*stride+j])[j] == "TOTAL"
                     print("Target is line ", 1+4*(i-1)*stride+j)
+                    print(" CHECK TOTAL\n")
+                    print("element=",j,"\n")
+                    print(lines[1+4*(i-1)*stride+j],"\n")
                     quit()
                 end
                 if split(lines[1+4*(i-1)*stride+j])[j] == "STRESS"
                     print("Target is line ", 1+4*(i-1)*stride+j)
+                    print(" CHECK STRESS\n")
+                    print("element=",j,"\n")
+                    print(lines[1+4*(i-1)*stride+j],"\n")
                     quit()
                 end
                 if split(lines[1+4*(i-1)*stride+j])[j] == "STEP:"
                     print("Target is line ", 1+4*(i-1)*stride+j)
+                    print(" CHECK STEP\n")
+                    print("element=",j,"\n")
+                    print(lines[1+4*(i-1)*stride+j],"\n")
                     quit()
                 end
                 if split(lines[1+4*(i-1)*stride+j])[j] == "TENSOR"
                     print("Target is line ", 1+4*(i-1)*stride+j)
+                    print(" CHECK TENSOR\n")
+                    print("element=",j,"\n")
+                    print(lines[1+4*(i-1)*stride+j],"\n")
                     quit()
                 end
                 pressure[i] += parse(Float64,split(lines[1+4*(i-1)*stride+j])[j])
