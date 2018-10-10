@@ -9,10 +9,10 @@ folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 N=96
 kb=1.380648*10^-23.
 
-V=
+V=9.05
 T=2500
 
-run_number=1
+run_number=3
 
 fs2ps=0.001
 stride=1

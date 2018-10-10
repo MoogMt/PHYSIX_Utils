@@ -6,10 +6,10 @@ importall CPMD
 
 func="PBE-MT"
 
-V=10.0
-T=3000
+V=9.05
+T=2500
 
-run_nb=2
+run_nb=3
 timestep=1
 
 fs2ps=0.001
