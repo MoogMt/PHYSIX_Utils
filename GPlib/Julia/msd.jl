@@ -85,7 +85,7 @@ for V in Volumes
                     msd_local_std = 0
                     for atom=1:nb_atoms
                         for i=1:3
-                            msd_local_std+=((traj[step].positions[atom,i]-traj[1].positions[atom,i])-(bary_step[i]-bary_origin[i]))*((traj[step].positions[atom,i]-traj[1].positions[atom,i])-(bary_step[i]-bary_origin[i]))
+                            msd_local_std+=((traj[step].positions[atom,i]-traj[start_step].positions[atom,i])-(bary_step[i]-bary_origin[i]))*((traj[step].positions[atom,i]-traj[start_step].positions[atom,i])-(bary_step[i]-bary_origin[i]))
                         end
                     end
                     #==========================================================#

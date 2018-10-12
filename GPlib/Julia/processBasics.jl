@@ -6,8 +6,8 @@ importall CPMD
 
 func="PBE-MT"
 
-Volumes=[9.05]
-Temperatures=[2500]
+Volumes=[9.8]
+Temperatures=[1750]
 
 for V in Volumes
 for T in Temperatures
@@ -71,7 +71,7 @@ min=40
 
 nb_box=50
 d_pressure=(max-min)/nb_box
-hist_p=zeros(n_box)
+hist_p=zeros(nb_box)
 total=0
 for i=1:nb_box
 for pressure in pressure_inst
@@ -82,7 +82,7 @@ for pressure in pressure_inst
 end
 end
 hist_p /= total
-file_hist_out=open(string(folder_output,"Hist_Pressure_nbox-",n_box,".dat"),"w")
+file_hist_out=open(string(folder_output,"Hist_Pressure_nbox-",nb_box,".dat"),"w")
 for i=1:nb_box
 write(file_hist_out,string(min+(i+0.5)*d_pressure," ",hist_p[i],"\n"))
 end
@@ -160,7 +160,7 @@ end
 
 nb_box=50
 d_eclass=(max-min)/nb_box
-hist_eclass=zeros(n_box)
+hist_eclass=zeros(nb_box)
 total=0
 for i=1:nb_box
 for eclass in eclass_inst
@@ -171,7 +171,7 @@ for eclass in eclass_inst
 end
 end
 hist_eclass /= total
-file_hist_out=open(string(folder_output,"Hist_Eclass_nbox-",n_box,".dat"),"w")
+file_hist_out=open(string(folder_output,"Hist_Eclass_nbox-",nb_box,".dat"),"w")
 for i=1:nb_box
 write(file_hist_out,string(min+(i+0.5)*d_eclass," ",hist_eclass[i],"\n"))
 end
@@ -251,7 +251,7 @@ end
 
 nb_box=50
 d_temp=(max-min)/nb_box
-hist_temp=zeros(n_box)
+hist_temp=zeros(nb_box)
 total=0
 for i=1:nb_box
 for temp in temp_inst
@@ -262,7 +262,7 @@ for temp in temp_inst
 end
 end
 hist_temp /= total
-file_hist_out=open(string(folder_output,"Hist_Temp_nbox-",n_box,".dat"),"w")
+file_hist_out=open(string(folder_output,"Hist_Temp_nbox-",nb_box,".dat"),"w")
 for i=1:nb_box
 write(file_hist_out,string(min+(i+0.5)*d_temp," ",hist_temp[i],"\n"))
 end
@@ -341,7 +341,7 @@ end
 
 nb_box=50
 d_eks=(max-min)/nb_box
-hist_eks=zeros(n_box)
+hist_eks=zeros(nb_box)
 total=0
 for i=1:nb_box
 for eks in eks_inst
@@ -352,7 +352,7 @@ for eks in eks_inst
 end
 end
 hist_eks /= total
-file_hist_out=open(string(folder_output,"Hist_EKS_nbox-",n_box,".dat"),"w")
+file_hist_out=open(string(folder_output,"Hist_EKS_nbox-",nb_box,".dat"),"w")
 for i=1:nb_box
 write(file_hist_out,string(min+(i+0.5)*d_eks," ",hist_eks[i],"\n"))
 end
@@ -430,7 +430,7 @@ end
 
 nb_box=50
 d_time=(max-min)/nb_box
-hist_time=zeros(n_box)
+hist_time=zeros(nb_box)
 total=0
 for i=1:nb_box
 for time in time_inst
@@ -441,7 +441,7 @@ for time in time_inst
 end
 end
 hist_time /= total
-file_hist_out=open(string(folder_output,"Hist_Time_nbox-",n_box,".dat"),"w")
+file_hist_out=open(string(folder_output,"Hist_Time_nbox-",nb_box,".dat"),"w")
 for i=1:nb_box
 write(file_hist_out,string(min+(i+0.5)*d_time," ",hist_time[i],"\n"))
 end

@@ -6,12 +6,10 @@ nbO=64
 
 cut_off=1.75
 
-Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+#Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+#Temperatures=[1750,2000,2250,2500,2750,3000]
+Volumes=[9.325]
 Temperatures=[1750,2000,2250,2500,2750,3000]
-
-Volumes=[9.3]
-Temperatures=[3000]
-
 for T in Temperatures
     for V in Volumes
         folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")

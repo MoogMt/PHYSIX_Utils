@@ -6,8 +6,8 @@ nbO=64
 
 cut_off=1.75
 
-Volumes=[9.4]
-Temperatures=[1750]
+Volumes=[9.325]
+Temperatures=[2000,2500,3000]
 
 for T in Temperatures
     for V in Volumes
