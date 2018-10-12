@@ -96,6 +96,86 @@ if debug
     close(sorted)
 end
 
+# Building PIV-like vector for each cluster
+nb_atoms=size(clusters[1].names)[1]
+n_mo=Int(nb_atoms/3)
+size_mo=Int(n_mo*(n_mo-1)/2)
+n_s=Int(nb_atoms/3*2)
+size_s=Int(n_s*(n_s-1)/2)
+size_mos=n_s*n_mo
+size_total=Int(nb_atoms*(nb_atoms-1)/2)
+matrix=zeros(nb_structure, size_total )
+for cluster=1:nb_structure
+    #================================================#
+    # compute Mo-Mo part
+    for i=1:n_mo-1
+        for j=i+1:n_mo
+            dist=0
+            for k=1:3
+                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
+            end
+            matrix[cluster,(i-1)*n_mo+j-1]=sqrt(dist)
+        end
+    end
+    for i=1:size_mo-1
+        for j=i+1:size_mo
+            if matrix[cluster,i] < matrix[cluster,j]
+                dist=matrix[cluster,i]
+                matrix[cluster,i]=matrix[cluster,j]
+                matrix[cluster,j]=dist
+            end
+        end
+    end
+    #===============================================#
+    # Compute Mo-S part
+    for i=1:n_mo
+        for j=1:n_s
+            dist=0
+            for k=1:3
+                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
+            end
+            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]=sqrt(dist)
+        end
+    end
+    for i=size_mo+1:size_mo+size_mos
+        for j=i+1:size_mo+size_mos+1
+            if matrix[cluster,i] < matrix[cluster,j]
+                dist=matrix[cluster,i]
+                matrix[cluster,i]=matrix[cluster,j]
+                matrix[cluster,j]=dist
+            end
+        end
+    end
+    #===============================================#
+    #Compute S-S part
+    test=1
+    for i=1:n_s-1
+        for j=i+1:n_s
+            dist=0
+            for k=1:3
+                dist=(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
+            end
+            matrix[cluster,size_mo+size_mos+test]=sqrt(dist)
+            test+=1
+        end
+    end
+    for i=size_mo+size_mos+1:size_total-1
+        for j=i+1:size_total
+            if matrix[cluster,i] < matrix[cluster,j]
+                dist=matrix[cluster,i]
+                matrix[cluster,i]=matrix[cluster,j]
+                matrix[cluster,j]=dist
+            end
+        end
+    end
+    #===============================================#
+end
+
+# Striking structure too close to those already existant
+strike=zeros(nb_structure)
+for i=1:nb_structure
+
+end
 
 #=================================================================================#
 
