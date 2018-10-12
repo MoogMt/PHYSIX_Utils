@@ -86,6 +86,17 @@ for i=1:nb_structure
     end
 end
 
+# Counting the number of structure below a threshold of energy (eV)
+energy_threshold=2
+count=0
+for i=1:nb_structure
+    if abs(energy[i]-min_energy) < 2
+        count += 1
+    end
+end
+# From that point we care only about the structures below the threshold
+nb_structure = count
+
 # Check
 debug=false
 if debug
@@ -173,9 +184,18 @@ end
 
 # Striking structure too close to those already existant
 strike=zeros(nb_structure)
-for i=1:nb_structure
-
+for i=1:nb_structure-1
+    for j=i+1:nb_structure
+        dist=0
+        for k=1:size_total
+            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])
+        end
+        if dist < 1.0
+            strike[j]=1
+        end
+    end
 end
+
 
 #=================================================================================#
 
