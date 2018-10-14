@@ -147,7 +147,7 @@ end
 #---------------------------------------------------------------------------------
 function write{ T1 <: IO, T2 <: atom_mod.AtomList }( file_handle::T1, atoms::T2 )
   Base.write(file_handle,string(size(atoms.names)[1],"\n"))
-  Base.write(file_handle,string("STEP: X"))
+  Base.write(file_handle,string("STEP: X\n"))
   for i=1:size( atoms.names )[1]
     Base.write( file_handle, string( atoms.names[i] , " "  ) )
     for j=1:3
@@ -159,7 +159,7 @@ end
 function write{ T1 <: AbstractString, T2 <: atom_mod.AtomList }( file::T1, atoms::T2 )
   out=open(file,"w")
   Base.write(out,string(size(atoms.names)[1],"\n"))
-  Base.write(out,string("STEP: X"))
+  Base.write(out,string("STEP: X\n"))
   for i=1:size(atoms.names)[1]
     Base.write(out, string( atoms.names[i]," " ) )
     for j=1:3

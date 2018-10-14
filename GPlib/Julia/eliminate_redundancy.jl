@@ -217,6 +217,7 @@ for cl=1:4
         folder_local=string(folder,"CL",cl,"/",i,"_center/")
         file=string("cluster_candidate.xyz")
         if isfile( string(folder_local,file) )
+            print("check\n")
             # ( QE prints another structure as final step for some reason )
 
             # Getting the last step of the relax
