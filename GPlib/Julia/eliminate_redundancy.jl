@@ -273,8 +273,6 @@ for i=1:nb_structure
     energy[i]= parse(Float64,split(lines[i])[3])
 end
 
-print(energy,"\n")
-
 # Sorting by increasing energy
 for i=1:nb_structure
     for j=1:nb_structure
@@ -299,6 +297,7 @@ for i=1:nb_structure
 end
 # From that point we care only about the structures below the threshold
 nb_structure = count
+print("COUNT: ",count,"\n")
 
 # Building PIV-like vector for each cluster
 nb_atoms=size(clusters[1].names)[1]
