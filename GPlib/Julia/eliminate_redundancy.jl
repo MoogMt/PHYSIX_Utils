@@ -15,7 +15,6 @@ for i=1:max_cluster
     if isfile( string(folder_local,file) ) && (! isfile(string(folder_local,"CRASH")))
         # ( QE prints another structure as final step for some reason )
 
-        print("Dealing with ",i," cluster\n")
         # Getting the last step of the relax
         traj = filexyz.readFastFile(string(folder_local,file))
         if size(traj)[1] == 0
@@ -204,6 +203,10 @@ end
 close(energy_final)
 close(xyz_final)
 
+file_nb_structure=open(string(folder,"nb_structure.dat"),"w")
+write(file_nb_structure,string(Int(nb_structure-sum(strike)),"\n"))
+close(file_nb_structure)
+
 #=================================================================================#
 
 folder=string("/media/moogmt/Stock/MoS2/Relax/PBE/Mo3S6/")
@@ -219,7 +222,6 @@ for cl=1:4
         file=string("cluster_candidate.xyz")
         if isfile( string(folder_local,file) )
             # ( QE prints another structure as final step for some reason )
-            print("Dealing with CL:",cl,", ",i," cluster\n")
             # Getting the last step of the relax
             traj = filexyz.readFastFile(string(folder_local,file))
             cluster_candidate=traj[size(traj)[1]-1]
@@ -404,6 +406,10 @@ for i=1:nb_structure
 end
 close(energy_final)
 close(xyz_final)
+
+file_nb_structure=open(string(folder,"nb_structure.dat"),"w")
+write(file_nb_structure,string(Int(nb_structure-sum(strike)),"\n"))
+close(file_nb_structure)
 
 #=================================================================================#
 
@@ -411,8 +417,8 @@ folder=string("/media/moogmt/Stock/MoS2/Relax/PBE/Mo4S8/")
 min_energy=0
 max_cluster=1000
 
-file_candidates_3=open(string(folder,"candidates.xyz"),"w")
-file_energy_candidates_3=open(string(folder,"candidates_energy.dat"),"w")
+file_candidates=open(string(folder,"candidates.xyz"),"w")
+file_energy_candidates=open(string(folder,"candidates_energy.dat"),"w")
 
 for cl=1:5
     for i=1:max_cluster
@@ -420,40 +426,52 @@ for cl=1:5
         file=string("cluster_candidate.xyz")
         if isfile( string(folder_local,file) )
             # ( QE prints another structure as final step for some reason )
-            print("Dealing with CL:",cl,", ",i," cluster\n")
             # Getting the last step of the relax
             traj = filexyz.readFastFile(string(folder_local,file))
-            cluster_candidate=traj[size(traj)[1]-1]
 
-            # Energy
+	    # Error_proofing
+	    if size(traj)[1] == 1
+	       cluster_candidate=traj[size(traj)[1]]
+	    else
+		cluster_candidate=traj[size(traj)[1]-1]
+	    end
+            
+
+     	    # Energy
             # Reading file
             file_energy=open(string(folder_local,"energy"))
             lines=readlines(file_energy);
             close(file_energy)
             # Getting next to last step
-            energy=parse(Float64,lines[size(lines)[1]-1])
+	    if size(lines)[1] == 1
+	       energy=parse(Float64,lines[size(lines)[1]])
+	    else
+	       energy=parse(Float64,lines[size(lines)[1]-1])
+	    end
 
             # Keeping in mind what is the min energy
             if min_energy > energy
                 min_energy = energy
             end
+	 
             # Writting structure to file
-            write(file_candidates_3,string(size(cluster_candidate.names)[1],"\n"))
-            write(file_candidates_3,string("CL: ",cl," cluster: ",i,"\n"))
+            write(file_candidates,string(size(cluster_candidate.names)[1],"\n"))
+            write(file_candidates,string("CL: ",cl," cluster: ",i,"\n"))
             for atom=1:size(cluster_candidate.names)[1]
-                write(file_candidates_3,string(cluster_candidate.names[atom]," "))
+                write(file_candidates,string(cluster_candidate.names[atom]," "))
                 for j=1:3
-                    write(file_candidates_3,string(cluster_candidate.positions[atom,j]," "))
+                    write(file_candidates,string(cluster_candidate.positions[atom,j]," "))
                 end
-                write(file_candidates_3,string("\n"))
+                write(file_candidates,string("\n"))
             end
             # Writting energy to file
-            write(file_energy_candidates_3,string(cl," ",i," ",energy*Ry2eV,"\n"))
+            write(file_energy_candidates,string(cl," ",i," ",energy*Ry2eV,"\n"))
         end
     end
 end
-close(file_candidates_3)
-close(file_energy_candidates_3)
+close(file_candidates)
+close(file_energy_candidates)
+
 
 file_min_energy=open(string(folder,"min_energy.dat"),"w")
 write(file_min_energy,string(min_energy*Ry2eV,"\n"))
@@ -508,6 +526,7 @@ size_s=Int(n_s*(n_s-1)/2)
 size_mos=n_s*n_mo
 size_total=Int(nb_atoms*(nb_atoms-1)/2)
 matrix=zeros(nb_structure, size_total )
+
 for cluster=1:nb_structure
     #================================================#
     # compute Mo-Mo part
@@ -605,6 +624,10 @@ for i=1:nb_structure
 end
 close(energy_final)
 close(xyz_final)
+
+file_nb_structure=open(string(folder,"nb_structure.dat"),"w")
+write(file_nb_structure,string(Int(nb_structure-sum(strike)),"\n"))
+close(file_nb_structure)
 
 #==============================================================================#
 
@@ -623,7 +646,6 @@ for i=1:max_cluster
     if isfile( string(folder_local,file) ) && (! isfile(string(folder_local,"CRASH")))
         # ( QE prints another structure as final step for some reason )
 
-        print("Dealing with ",i," cluster\n")
         # Getting the last step of the relax
         traj = filexyz.readFastFile(string(folder_local,file))
         if size(traj)[1] == 0
@@ -795,6 +817,10 @@ for i=1:nb_structure-1
         end
     end
 end
+
+file_nb_structure=open(string(folder,"nb_structure.dat"),"w")
+write(file_nb_structure,string(Int(nb_structure-sum(strike)),"\n"))
+close(file_nb_structure)
 
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
