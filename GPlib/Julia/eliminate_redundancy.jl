@@ -188,7 +188,7 @@ end
 
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
-xyz_final=open(string(),"w")
+xyz_final=open(string("all_relax_cluster.xyz"),"w")
 count=1
 for i=1:nb_structure
     if strike[i] == 0
