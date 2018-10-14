@@ -273,6 +273,7 @@ for i=1:nb_structure
     energy[i]= parse(Float64,split(lines[i])[3])
 end
 
+print(energy,"\n")
 
 # Sorting by increasing energy
 for i=1:nb_structure
