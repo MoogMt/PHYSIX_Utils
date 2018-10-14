@@ -173,7 +173,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.2 # Cut_off for topological distance, in Angstrom
+cut_off_distance=0.1 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -375,7 +375,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.2 # Cut_off for topological distance, in Angstrom
+cut_off_distance=0.1 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -584,7 +584,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.2 # Cut_off for topological distance, in Angstrom
+cut_off_distance=0.1 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
