@@ -87,7 +87,7 @@ for i=1:nb_structure
 end
 
 # Counting the number of structure below a threshold of energy (eV)
-energy_threshold=2
+energy_threshold=3
 count=0
 for i=1:nb_structure
     if abs(energy[i]-min_energy) < 2
@@ -173,7 +173,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
+cut_off_distance=2 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -288,7 +288,7 @@ for i=1:nb_structure
 end
 
 # Counting the number of structure below a threshold of energy (eV)
-energy_threshold=2
+energy_threshold=3
 count=0
 for i=1:nb_structure
     if abs(energy[i]-min_energy) < 2
@@ -375,7 +375,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
+cut_off_distance=2 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -388,6 +388,8 @@ for i=1:nb_structure-1
         end
     end
 end
+
+print("STRIKE: ",sum(strike),"\n")
 
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
@@ -496,7 +498,7 @@ for i=1:nb_structure
 end
 
 # Counting the number of structure below a threshold of energy (eV)
-energy_threshold=2
+energy_threshold=3
 count=0
 for i=1:nb_structure
     if abs(energy[i]-min_energy) < 2
@@ -582,7 +584,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
+cut_off_distance=2 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
