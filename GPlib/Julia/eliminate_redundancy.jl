@@ -173,15 +173,14 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.0 # Cut_off for topological distance, in Angstrom
+cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2
+            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2)
         end
-
         if dist/size_total < cut_off_distance
             strike[j]=1
         end
@@ -219,7 +218,6 @@ for cl=1:4
         folder_local=string(folder,"CL",cl,"/",i,"_center/")
         file=string("cluster_candidate.xyz")
         if isfile( string(folder_local,file) )
-            print("check\n")
             # ( QE prints another structure as final step for some reason )
 
             # Getting the last step of the relax
@@ -377,22 +375,19 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.0 # Cut_off for topological distance, in Angstrom
+cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2
+            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2)
         end
-
         if dist/size_total < cut_off_distance
             strike[j]=1
         end
     end
 end
-
-
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
 xyz_final=open(string(folder,"all_relax_cluster.xyz"),"w")
@@ -586,21 +581,19 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.0 # Cut_off for topological distance, in Angstrom
+cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2
+            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2)
         end
-
         if dist/size_total < cut_off_distance
             strike[j]=1
         end
     end
 end
-
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
 xyz_final=open(string(folder,"all_relax_cluster.xyz"),"w")
