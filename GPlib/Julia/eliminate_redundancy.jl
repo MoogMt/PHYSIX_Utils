@@ -179,7 +179,7 @@ for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2)
+            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k]))
         end
         if dist/size_total < cut_off_distance
             strike[j]=1
@@ -382,13 +382,14 @@ for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2)
+            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k]))
         end
         if dist/size_total < cut_off_distance
             strike[j]=1
         end
     end
 end
+
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
 xyz_final=open(string(folder,"all_relax_cluster.xyz"),"w")
@@ -588,13 +589,14 @@ for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])**2)
+            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k]))
         end
         if dist/size_total < cut_off_distance
             strike[j]=1
         end
     end
 end
+
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
 xyz_final=open(string(folder,"all_relax_cluster.xyz"),"w")
