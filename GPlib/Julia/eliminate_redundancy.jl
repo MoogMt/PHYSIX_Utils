@@ -192,11 +192,11 @@ xyz_final=open(string(folder,"all_relax_cluster.xyz"),"w")
 count=1
 for i=1:nb_structure
     if strike[i] == 0
-        write(energy_final,string(energy[i],"\n"))
+        BaseIO.write(energy_final,string(energy[i],"\n"))
         filexyz.write(xyz_final,clusters[i])
         file_xyz_loc=open(string(folder,count,"_cluster_relax.xyz"),"w")
         filexyz.write(file_xyz_loc,clusters[i])
-        close(file_xyz_loc)
+        BaseIO.close(file_xyz_loc)
         count += 1
     end
 end
