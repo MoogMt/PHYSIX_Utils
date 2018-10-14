@@ -219,7 +219,7 @@ for cl=1:4
         file=string("cluster_candidate.xyz")
         if isfile( string(folder_local,file) )
             # ( QE prints another structure as final step for some reason )
-
+            print("Dealing with CL:",cl,", ",i," cluster\n")
             # Getting the last step of the relax
             traj = filexyz.readFastFile(string(folder_local,file))
             cluster_candidate=traj[size(traj)[1]-1]
@@ -297,7 +297,6 @@ for i=1:nb_structure
 end
 # From that point we care only about the structures below the threshold
 nb_structure = count
-print("COUNT: ",count,"\n")
 
 # Building PIV-like vector for each cluster
 nb_atoms=size(clusters[1].names)[1]
@@ -388,8 +387,6 @@ for i=1:nb_structure-1
         end
     end
 end
-
-print("STRIKE: ",sum(strike),"\n")
 
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
