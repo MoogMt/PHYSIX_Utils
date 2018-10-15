@@ -108,13 +108,15 @@ matrix=zeros(nb_structure, size_total )
 for cluster=1:nb_structure
     #================================================#
     # compute Mo-Mo part
+    count = 1
     for i=1:n_mo-1
         for j=i+1:n_mo
             dist=0
             for k=1:3
                 dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
             end
-            matrix[cluster,(i-1)*n_mo+j-1]=sqrt(dist)
+            matrix[cluster,count]=sqrt(dist)
+            count += 1
         end
     end
     for i=1:size_mo-1
@@ -172,15 +174,15 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.05 # Cut_off for topological distance, in Angstrom
+cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k]))
+            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])
         end
-        if dist/size_total < cut_off_distance
+        if sqrt(dist) < cut_off_distance
             strike[j]=1
         end
     end
@@ -197,7 +199,7 @@ for i=1:nb_structure
         file_xyz_loc=open(string(folder,count,"_cluster_relax.xyz"),"w")
         filexyz.write(file_xyz_loc,clusters[i])
         close(file_xyz_loc)
-        count += 1
+        count +=1
     end
 end
 close(energy_final)
@@ -313,13 +315,15 @@ matrix=zeros(nb_structure, size_total )
 for cluster=1:nb_structure
     #================================================#
     # compute Mo-Mo part
+    count=1
     for i=1:n_mo-1
         for j=i+1:n_mo
             dist=0
             for k=1:3
                 dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
             end
-            matrix[cluster,(i-1)*n_mo+j-1]=sqrt(dist)
+            matrix[cluster,count]=sqrt(dist)
+            count += 1
         end
     end
     for i=1:size_mo-1
@@ -377,15 +381,15 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.05 # Cut_off for topological distance, in Angstrom
+cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k]))
+            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])
         end
-        if dist/size_total < cut_off_distance
+        if sqrt(dist) < cut_off_distance
             strike[j]=1
         end
     end
@@ -530,13 +534,15 @@ matrix=zeros(nb_structure, size_total )
 for cluster=1:nb_structure
     #================================================#
     # compute Mo-Mo part
+    count = 1
     for i=1:n_mo-1
         for j=i+1:n_mo
             dist=0
             for k=1:3
                 dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
             end
-            matrix[cluster,(i-1)*n_mo+j-1]=sqrt(dist)
+            matrix[cluster,count]=sqrt(dist)
+            count += 1
         end
     end
     for i=1:size_mo-1
@@ -594,15 +600,15 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.01 # Cut_off for topological distance, in Angstrom
+cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k]))
+            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])
         end
-        if dist/size_total < cut_off_distance
+        if sqrt(dist) < cut_off_distance
             strike[j]=1
         end
     end
@@ -662,6 +668,93 @@ close(BE_file)
 file_nb_structure=open(string(folder,"nb_structure.dat"),"w")
 write(file_nb_structure,string(Int(nb_structure-sum(strike)),"\n"))
 close(file_nb_structure)
+
+relax_structure= filexyz.readFastFile(string("/media/moogmt/Stock/MoS2/Relax/PBE/Mo4S8/Models/model_1/","cluster_candidate.xyz"))
+structure=relax_structure[size(relax_structure)[1]-1]
+
+nb_atoms=size(clusters[1].names)[1]
+n_mo=Int(nb_atoms/3)
+size_mo=Int(n_mo*(n_mo-1)/2)
+n_s=Int(nb_atoms/3*2)
+size_s=Int(n_s*(n_s-1)/2)
+size_mos=n_s*n_mo
+size_total=Int(nb_atoms*(nb_atoms-1)/2)
+vector=zeros(size_total )
+#================================================#
+# compute Mo-Mo part
+count=1
+for i=1:n_mo-1
+    for j=i+1:n_mo
+        dist=0
+        for k=1:3
+            dist += (structure.positions[i,k]-structure.positions[j,k])*(structure.positions[i,k]-structure.positions[j,k])
+        end
+        vector[count]=sqrt(dist)
+        count += 1
+    end
+end
+for i=1:size_mo-1
+    for j=i+1:size_mo
+        if vector[i] < vector[j]
+            dist=vector[i]
+            vector[i]=vector[j]
+            vector[j]=dist
+        end
+    end
+end
+#===============================================#
+# Compute Mo-S part
+for i=1:n_mo
+    for j=1:n_s
+        dist=0
+        for k=1:3
+            dist += (structure.positions[i,k]-structure.positions[n_mo+j,k])*(structure.positions[i,k]-structure.positions[n_mo+j,k])
+        end
+        vector[size_mo+1+(i-1)*n_s+(j-1)]=sqrt(dist)
+    end
+end
+for i=size_mo+1:size_mo+size_mos
+    for j=i+1:size_mo+size_mos+1
+        if vector[i] < vector[j]
+            dist=vector[i]
+            vector[i]=vector[j]
+            vector[j]=dist
+        end
+    end
+end
+#===============================================#
+#Compute S-S part
+test=1
+for i=1:n_s-1
+    for j=i+1:n_s
+        dist=0
+        for k=1:3
+            dist=(structure.positions[i,k]-structure.positions[n_mo+j,k])*(structure.positions[i,k]-structure.positions[n_mo+j,k])
+        end
+        vector[size_mo+size_mos+test]=sqrt(dist)
+        test+=1
+    end
+end
+for i=size_mo+size_mos+1:size_total-1
+    for j=i+1:size_total
+        if matrix[i] < matrix[j]
+            dist=matrix[i]
+            vector[i]=vector[j]
+            vector[j]=dist
+        end
+    end
+end
+#===============================================#
+
+distance_from_prp=open(string(folder,"distanceFromProp.dat"),"w")
+for i=1:nb_structure
+    dist=0
+    for j=1:size_total
+        dist += (matrix[i,j]-vector[j])*(matrix[i,j]-vector[j])
+    end
+    write(distance_from_prp,string(i," ",sqrt(dist),"\n"))
+end
+close(distance_from_prp)
 
 #==============================================================================#
 
@@ -775,13 +868,15 @@ matrix=zeros(nb_structure, size_total )
 for cluster=1:nb_structure
     #================================================#
     # compute Mo-Mo part
+    count = 1
     for i=1:n_mo-1
         for j=i+1:n_mo
             dist=0
             for k=1:3
                 dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
             end
-            matrix[cluster,(i-1)*n_mo+j-1]=sqrt(dist)
+            matrix[cluster,count]=sqrt(dist)
+            count += 1
         end
     end
     for i=1:size_mo-1
@@ -839,15 +934,15 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.05 # Cut_off for topological distance, in Angstrom
+cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
         dist=0
         for k=1:size_total
-            dist += sqrt((matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k]))
+            dist += (matrix[i,k]-matrix[j,k])*(matrix[i,k]-matrix[j,k])
         end
-        if dist/size_total < cut_off_distance
+        if sqrt(dist) < cut_off_distance
             strike[j]=1
         end
     end
