@@ -67,7 +67,7 @@ close(file_cluster)
 nb_structure=size(lines)[1]
 energy=zeros(nb_structure)
 for i=1:nb_structure
-    energy[i]= parse(Float64,split(lines[i])[2])
+    energy[i]= abs( min_energy - parse(Float64,split(lines[i])[2]))
 end
 
 
@@ -89,7 +89,7 @@ end
 energy_threshold=3
 count=0
 for i=1:nb_structure
-    if abs(energy[i]-min_energy) < 2
+    if energy[i] < energy_threshold
         count += 1
     end
 end
@@ -172,7 +172,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.01 # Cut_off for topological distance, in Angstrom
+cut_off_distance=0.05 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -213,8 +213,8 @@ folder=string("/media/moogmt/Stock/MoS2/Relax/PBE/Mo3S6/")
 min_energy=0
 max_cluster=1000
 
-file_candidates_3=open(string(folder,"candidates.xyz"),"w")
-file_energy_candidates_3=open(string(folder,"candidates_energy.dat"),"w")
+file_candidates=open(string(folder,"candidates.xyz"),"w")
+file_energy_candidates=open(string(folder,"candidates_energy.dat"),"w")
 
 for cl=1:4
     for i=1:max_cluster
@@ -239,22 +239,22 @@ for cl=1:4
                 min_energy = energy
             end
             # Writting structure to file
-            write(file_candidates_3,string(size(cluster_candidate.names)[1],"\n"))
-            write(file_candidates_3,string("CL: ",cl," cluster: ",i,"\n"))
+            write(file_candidates,string(size(cluster_candidate.names)[1],"\n"))
+            write(file_candidates,string("CL: ",cl," cluster: ",i,"\n"))
             for atom=1:size(cluster_candidate.names)[1]
-                write(file_candidates_3,string(cluster_candidate.names[atom]," "))
+                write(file_candidates,string(cluster_candidate.names[atom]," "))
                 for j=1:3
-                    write(file_candidates_3,string(cluster_candidate.positions[atom,j]," "))
+                    write(file_candidates,string(cluster_candidate.positions[atom,j]," "))
                 end
-                write(file_candidates_3,string("\n"))
+                write(file_candidates,string("\n"))
             end
             # Writting energy to file
-            write(file_energy_candidates_3,string(cl," ",i," ",energy*Ry2eV,"\n"))
+            write(file_energy_candidates,string(cl," ",i," ",energy*Ry2eV,"\n"))
         end
     end
 end
-close(file_candidates_3)
-close(file_energy_candidates_3)
+close(file_candidates)
+close(file_energy_candidates)
 
 file_min_energy=open(string(folder,"min_energy.dat"),"w")
 write(file_min_energy,string(min_energy*Ry2eV,"\n"))
@@ -272,7 +272,7 @@ close(file_cluster)
 nb_structure=size(lines)[1]
 energy=zeros(nb_structure)
 for i=1:nb_structure
-    energy[i]= parse(Float64,split(lines[i])[3])
+    energy[i]= abs( parse(Float64,split(lines[i])[3]) - min_energy )
 end
 
 # Sorting by increasing energy
@@ -290,10 +290,11 @@ for i=1:nb_structure
 end
 
 # Counting the number of structure below a threshold of energy (eV)
+# Counting the number of structure below a threshold of energy (eV)
 energy_threshold=3
 count=0
 for i=1:nb_structure
-    if abs(energy[i]-min_energy) < 2
+    if energy[i] < energy_threshold
         count += 1
     end
 end
@@ -376,7 +377,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.01 # Cut_off for topological distance, in Angstrom
+cut_off_distance=0.05 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -429,31 +430,30 @@ for cl=1:5
             # Getting the last step of the relax
             traj = filexyz.readFastFile(string(folder_local,file))
 
-	    # Error_proofing
-	    if size(traj)[1] == 1
-	       cluster_candidate=traj[size(traj)[1]]
-	    else
-		cluster_candidate=traj[size(traj)[1]-1]
-	    end
-            
+            # Error_proofing
+            if size(traj)[1] == 1
+                cluster_candidate=traj[size(traj)[1]]
+            else
+                cluster_candidate=traj[size(traj)[1]-1]
+            end
 
-     	    # Energy
+            # Energy
             # Reading file
             file_energy=open(string(folder_local,"energy"))
             lines=readlines(file_energy);
             close(file_energy)
             # Getting next to last step
-	    if size(lines)[1] == 1
-	       energy=parse(Float64,lines[size(lines)[1]])
-	    else
-	       energy=parse(Float64,lines[size(lines)[1]-1])
-	    end
+            if size(lines)[1] == 1
+                energy=parse(Float64,lines[size(lines)[1]])
+            else
+                energy=parse(Float64,lines[size(lines)[1]-1])
+            end
 
             # Keeping in mind what is the min energy
             if min_energy > energy
                 min_energy = energy
             end
-	 
+
             # Writting structure to file
             write(file_candidates,string(size(cluster_candidate.names)[1],"\n"))
             write(file_candidates,string("CL: ",cl," cluster: ",i,"\n"))
@@ -485,12 +485,12 @@ file_cluster=open(string(folder,"candidates_energy.dat"))
 lines=readlines(file_cluster);
 close(file_cluster)
 
-# Reconstructing structures
 nb_structure=size(lines)[1]
 energy=zeros(nb_structure)
 for i=1:nb_structure
-    energy[i]= parse(Float64,split(lines[i])[3])
+    energy[i]= abs( min_energy - parse(Float64,split(lines[i])[3]))
 end
+
 
 # Sorting by increasing energy
 for i=1:nb_structure
@@ -510,7 +510,7 @@ end
 energy_threshold=3
 count=0
 for i=1:nb_structure
-    if abs(energy[i]-min_energy) < 2
+    if energy[i] < energy_threshold
         count += 1
     end
 end
@@ -624,6 +624,40 @@ for i=1:nb_structure
 end
 close(energy_final)
 close(xyz_final)
+
+proposed_energy=open("/media/moogmt/Stock/MoS2/Relax/PBE/Mo4S8/Models/model_1/energy")
+lines=readlines(proposed_energy)
+close(proposed_energy)
+energy_best=parse(Float64,split(lines[1])[1])*Ry2eV
+
+energy_Mo=open("/media/moogmt/Stock/MoS2/Relax/PBE/Mo/30B/energy")
+lines=readlines(energy_Mo)
+close(energy_Mo)
+energy_mo=parse(Float64,split(lines[1])[1])*Ry2eV
+
+energy_S=open("/media/moogmt/Stock/MoS2/Relax/PBE/S/30B/energy")
+lines=readlines(energy_S)
+close(energy_S)
+energy_s=parse(Float64,split(lines[1])[1])*Ry2eV
+
+BE_MoS4=(4*energy_mo+8*energy_s-energy_best)/12
+fileBE_best=open(string(folder,"proposed_binding_energy.dat"),"w")
+write(fileBE_best,string(BE_MoS4,"\n"))
+close(fileBE_best)
+
+energy_final=open(string(folder,"energy_compare.dat"),"w")
+BE_final=open(string(folder,"BE_compare.dat"),"w")
+BE_file=open(string(folder,"BE_clusters.dat"),"w")
+for i=1:nb_structure
+    if strike[i] == 0
+        write(energy_final,string(-energy[i]+min_energy-energy_best,"\n"))
+        write(BE_file,string( (4*energy_mo+8*energy_s-(energy[i]+min_energy))/12 ,"\n"))
+        write(BE_final,string( (-energy[i]+min_energy-energy_best)/12,"\n"))
+    end
+end
+close(energy_final)
+close(BE_final)
+close(BE_file)
 
 file_nb_structure=open(string(folder,"nb_structure.dat"),"w")
 write(file_nb_structure,string(Int(nb_structure-sum(strike)),"\n"))
@@ -699,8 +733,9 @@ close(file_cluster)
 nb_structure=size(lines)[1]
 energy=zeros(nb_structure)
 for i=1:nb_structure
-    energy[i]= parse(Float64,split(lines[i])[2])
+    energy[i]= abs( min_energy - parse(Float64,split(lines[i])[2]))
 end
+
 
 
 # Sorting by increasing energy
@@ -804,7 +839,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=0.01 # Cut_off for topological distance, in Angstrom
+cut_off_distance=0.05 # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure

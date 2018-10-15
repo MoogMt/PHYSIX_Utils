@@ -13,7 +13,8 @@ Temperatures=[1750,2000,2250,2500,2750,3000]
 folder_out=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/")
 
 file_map_3=open(string(folder_out,"3-Coordinances_map.dat"),"w")
-file_map_4=open(string(folder_out,"4-Coordinances_map.dat"),"w")
+file_map_3=open(string(folder_out,"3-Coordinances_map.dat"),"w")
+
 
 for T in Temperatures
     for V in Volumes
@@ -42,7 +43,7 @@ for T in Temperatures
         C4=parse(Float64, split(lines[1])[3] )
 
         write(file_map_3,string(P," ",T," ",C3,"\n"))
-        write(file_map_4,string(P," ",T," ",C4,"\n"))
+        write(file_map_3,string(P," ",T," ",C4,"\n"))
 
     end
 
