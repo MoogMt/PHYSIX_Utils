@@ -58,10 +58,10 @@ for T in Temperatures
         lines=readlines(file_read2);
         close(file_read2);
 
-        O1=parse(Float64, split(lines[1])[2] )
+        O1=parse(Float64, split(lines[1])[1] )
 
         write(file_map_1O,string(P," ",T," ",O1,"\n"))
-        write(file_map_2O,string(P," ",T," ",1-O2,"\n"))
+        write(file_map_2O,string(P," ",T," ",1-O1,"\n"))
 
     end
 
