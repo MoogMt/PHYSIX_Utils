@@ -1,6 +1,13 @@
 include("contactmatrix.jl")
 
 folder=string("/media/moogmt/Stock/MoS2/Relax/PBE/Mo2S4/")
+Bohr2Ang=0.529177
+V=30.0
+
+universal_cut_off=1.0
+
+cell=cell_mod.Cell_param( V*Bohr2Ang,V*Bohr2Ang,V*Bohr2Ang )
+
 min_energy=0
 max_cluster=1000
 
@@ -111,11 +118,7 @@ for cluster=1:nb_structure
     count = 1
     for i=1:n_mo-1
         for j=i+1:n_mo
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
-            end
-            matrix[cluster,count]=sqrt(dist)
+            matrix[cluster,count] =  cell_mod.distance( clusters[cluster],cell,i,j)
             count += 1
         end
     end
@@ -132,11 +135,7 @@ for cluster=1:nb_structure
     # Compute Mo-S part
     for i=1:n_mo
         for j=1:n_s
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]=sqrt(dist)
+            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]= cell_mod.distance( clusters[cluster],cell,i,n_mo+j)
         end
     end
     for i=size_mo+1:size_mo+size_mos
@@ -153,11 +152,7 @@ for cluster=1:nb_structure
     test=1
     for i=1:n_s-1
         for j=i+1:n_s
-            dist=0
-            for k=1:3
-                dist=(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+size_mos+test]=sqrt(dist)
+            matrix[cluster,size_mo+size_mos+test]= cell_mod.distance( clusters[cluster],cell,n_mo+i,n_mo+j)
             test+=1
         end
     end
@@ -174,7 +169,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
+cut_off_distance=universal_cut_off # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -292,7 +287,6 @@ for i=1:nb_structure
 end
 
 # Counting the number of structure below a threshold of energy (eV)
-# Counting the number of structure below a threshold of energy (eV)
 energy_threshold=3
 count=0
 for i=1:nb_structure
@@ -318,11 +312,7 @@ for cluster=1:nb_structure
     count=1
     for i=1:n_mo-1
         for j=i+1:n_mo
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
-            end
-            matrix[cluster,count]=sqrt(dist)
+            matrix[cluster,count]= cell_mod.distance(clusters[cluster],cell,i,j)
             count += 1
         end
     end
@@ -339,11 +329,7 @@ for cluster=1:nb_structure
     # Compute Mo-S part
     for i=1:n_mo
         for j=1:n_s
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]=sqrt(dist)
+            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]=cell_mod.distance(clusters[cluster],cell,i,n_mo+j)
         end
     end
     for i=size_mo+1:size_mo+size_mos
@@ -360,11 +346,7 @@ for cluster=1:nb_structure
     test=1
     for i=1:n_s-1
         for j=i+1:n_s
-            dist=0
-            for k=1:3
-                dist=(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+size_mos+test]=sqrt(dist)
+            matrix[cluster,size_mo+size_mos+test]=cell_mod.distance(clusters[cluster],cell,n_mo+i,n_mo+j)
             test+=1
         end
     end
@@ -381,7 +363,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
+cut_off_distance=universal_cut_off # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -420,7 +402,7 @@ close(file_nb_structure)
 
 folder=string("/media/moogmt/Stock/MoS2/Relax/PBE/Mo4S8/")
 min_energy=0
-max_cluster=1000
+max_cluster=2000
 
 file_candidates=open(string(folder,"candidates.xyz"),"w")
 file_energy_candidates=open(string(folder,"candidates_energy.dat"),"w")
@@ -537,11 +519,7 @@ for cluster=1:nb_structure
     count = 1
     for i=1:n_mo-1
         for j=i+1:n_mo
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
-            end
-            matrix[cluster,count]=sqrt(dist)
+            matrix[cluster,count]=cell_mod.distance(clusters[cluster],cell,i,j)
             count += 1
         end
     end
@@ -558,11 +536,7 @@ for cluster=1:nb_structure
     # Compute Mo-S part
     for i=1:n_mo
         for j=1:n_s
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]=sqrt(dist)
+            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]=cell_mod.distance(clusters[cluster],cell,i,n_mo+j)
         end
     end
     for i=size_mo+1:size_mo+size_mos
@@ -579,11 +553,7 @@ for cluster=1:nb_structure
     test=1
     for i=1:n_s-1
         for j=i+1:n_s
-            dist=0
-            for k=1:3
-                dist=(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+size_mos+test]=sqrt(dist)
+            matrix[cluster,size_mo+size_mos+test]=cell_mod.distance(clusters[cluster],cell,n_mo+i,n_mo+j)
             test+=1
         end
     end
@@ -600,7 +570,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
+cut_off_distance=universal_cut_off # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure
@@ -613,6 +583,7 @@ for i=1:nb_structure-1
         end
     end
 end
+
 
 # Writting remaining structures
 energy_final=open(string(folder,"energy_final.dat"),"w")
@@ -685,11 +656,7 @@ vector=zeros(size_total )
 count=1
 for i=1:n_mo-1
     for j=i+1:n_mo
-        dist=0
-        for k=1:3
-            dist += (structure.positions[i,k]-structure.positions[j,k])*(structure.positions[i,k]-structure.positions[j,k])
-        end
-        vector[count]=sqrt(dist)
+        vector[count] = cell_mod.distance(structure,cell,i,j)
         count += 1
     end
 end
@@ -706,11 +673,7 @@ end
 # Compute Mo-S part
 for i=1:n_mo
     for j=1:n_s
-        dist=0
-        for k=1:3
-            dist += (structure.positions[i,k]-structure.positions[n_mo+j,k])*(structure.positions[i,k]-structure.positions[n_mo+j,k])
-        end
-        vector[size_mo+1+(i-1)*n_s+(j-1)]=sqrt(dist)
+        vector[size_mo+1+(i-1)*n_s+(j-1)] = cell_mod.distance(structure,cell,i,j)
     end
 end
 for i=size_mo+1:size_mo+size_mos
@@ -727,11 +690,7 @@ end
 test=1
 for i=1:n_s-1
     for j=i+1:n_s
-        dist=0
-        for k=1:3
-            dist=(structure.positions[i,k]-structure.positions[n_mo+j,k])*(structure.positions[i,k]-structure.positions[n_mo+j,k])
-        end
-        vector[size_mo+size_mos+test]=sqrt(dist)
+        vector[size_mo+size_mos+test] = cell_mod.distance(structure,cell,i,j)
         test+=1
     end
 end
@@ -755,6 +714,7 @@ for i=1:nb_structure
     write(distance_from_prp,string(i," ",sqrt(dist),"\n"))
 end
 close(distance_from_prp)
+
 
 #==============================================================================#
 
@@ -813,7 +773,6 @@ file_min_energy=open(string(folder,"min_energy.dat"),"w")
 write(file_min_energy,string(min_energy*Ry2eV,"\n"))
 close(file_min_energy)
 
-
 min_energy=min_energy*Ry2eV
 
 # Reading the files
@@ -828,8 +787,6 @@ energy=zeros(nb_structure)
 for i=1:nb_structure
     energy[i]= abs( min_energy - parse(Float64,split(lines[i])[2]))
 end
-
-
 
 # Sorting by increasing energy
 for i=1:nb_structure
@@ -849,7 +806,7 @@ end
 energy_threshold=3
 count=0
 for i=1:nb_structure
-    if abs(energy[i]-min_energy) < 2
+    if abs(energy[i]) < energy_threshold
         count += 1
     end
 end
@@ -871,11 +828,7 @@ for cluster=1:nb_structure
     count = 1
     for i=1:n_mo-1
         for j=i+1:n_mo
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[j,k])
-            end
-            matrix[cluster,count]=sqrt(dist)
+            matrix[cluster,count] = cell_mod.distance( clusters[cluster],cell,i,j)
             count += 1
         end
     end
@@ -892,11 +845,7 @@ for cluster=1:nb_structure
     # Compute Mo-S part
     for i=1:n_mo
         for j=1:n_s
-            dist=0
-            for k=1:3
-                dist += (clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)]=sqrt(dist)
+            matrix[cluster,size_mo+1+(i-1)*n_s+(j-1)] = cell_mod.distance( clusters[cluster],cell,i,n_mo+j)
         end
     end
     for i=size_mo+1:size_mo+size_mos
@@ -913,11 +862,7 @@ for cluster=1:nb_structure
     test=1
     for i=1:n_s-1
         for j=i+1:n_s
-            dist=0
-            for k=1:3
-                dist=(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])*(clusters[cluster].positions[i,k]-clusters[cluster].positions[n_mo+j,k])
-            end
-            matrix[cluster,size_mo+size_mos+test]=sqrt(dist)
+            matrix[cluster,size_mo+size_mos+test] = cell_mod.distance( clusters[cluster],cell, n_mo+i, n_mo+j)
             test+=1
         end
     end
@@ -934,7 +879,7 @@ for cluster=1:nb_structure
 end
 
 # Striking structure too close to those already existant
-cut_off_distance=1.5 # Cut_off for topological distance, in Angstrom
+cut_off_distance=universal_cut_off # Cut_off for topological distance, in Angstrom
 strike=zeros(nb_structure)
 for i=1:nb_structure-1
     for j=i+1:nb_structure

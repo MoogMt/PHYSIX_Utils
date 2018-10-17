@@ -2,12 +2,12 @@ include("contactmatrix.jl")
 
 # Thermodynamical values
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8]
-Temperatures=[2000,2250,2500,3000,3500]
-Cut_Off=[1.6,1.7,1.75,1.8]
+Temperatures=[20002500,3000]
+Cut_Off=[1.75]
 
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
-stride=5
+stride=1
 unit=0.005
 
 for cut_off in Cut_Off
@@ -19,8 +19,8 @@ for cut_off in Cut_Off
             folder=string(folder_base,volume,"/",temperature,"K/")
 
             file_traj = string(folder,"TRAJEC_wrapped.xyz")
-            molecule_file_name = string(folder,"molecules_allinfo_cutoff-",cut_off,".dat")
-            molecule_size_file_name = string(folder,"molecules_sizes_cutoff-",cut_off,".dat")
+            molecule_file_name = string(folder,"Data/molecules_allinfo_cutoff-",cut_off,".dat")
+            molecule_size_file_name = string(folder,"Data/molecules_sizes_cutoff-",cut_off,".dat")
 
             if isfile( file_traj )
 

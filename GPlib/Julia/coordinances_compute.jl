@@ -4,6 +4,9 @@ include("contactmatrix.jl")
 unit=0.005
 cut_off=1.75
 
+nbC=32
+nbO=64
+
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8,10.0]
 Temperatures=[1750,2000,2250,2500,2750,3000]
 
@@ -23,11 +26,17 @@ for T in Temperatures
             C2=0
             C3=0
             C4=0
-            file_coord_local=open(string(folder_out,"Coordinances_time.dat"),"w")
-            C2p=0
-            C3p=0
-            C4p=0
+            O1=0
+            O2=0
+            file_coord_localC=open(string(folder_out,"CoordinancesC_time.dat"),"w")
+            file_coord_localO=open(string(folder_out,"CoordinancesO_time.dat"),"w")
+
             for step=1:nb_steps
+                C2p=0
+                C3p=0
+                C4p=0
+                O1p=0
+                O2p=0
                 matrix=zeros(nb_atoms,nb_atoms)
                 print("V=",V," T=",T,"K Progress: ",step/nb_steps*100,"%\n")
                 for i=1:nb_atoms-1
@@ -38,7 +47,7 @@ for T in Temperatures
                         end
                     end
                 end
-                for i=1:nb_atoms
+                for i=1:nbC
                     sum_i=sum(matrix[i,:])
                     if sum_i == 2
                         C2 += 1
@@ -51,16 +60,33 @@ for T in Temperatures
                         C4p += 1
                     end
                 end
-                sum_local=C2p+C3p+C4p
-                write(file_coord_local,string(step*unit," ",C2p/sum_local," ",C3p/sum_local," ",C4p/sum_local,"\n"))
+                sum_localC=C2p+C3p+C4p
+                for i=1:nbO
+                    sum_i=sum(matrix[nbC+i,:])
+                    if sum_i == 1
+                        O1 += 1
+                        O1p += 1
+                    elseif sum_i == 2
+                        O2 += 1
+                        O2p += 1
+                    end
+                end
+                sum_localO=O1p+O2p
+                write(file_coord_localC,string(step*unit," ",C2p/sum_localC," ",C3p/sum_localC," ",C4p/sum_localO,"\n"))
+                write(file_coord_localC,string(step*unit," ",O1p/sum_localO," ",O2p/sum_localO,"\n"))
             end
-            close(file_coord_local)
+            close(file_coord_localC)
+            close(file_coord_localO)
 
-            sum_all=C2+C3+C4
-            file_coord=open(string(folder_out,"Avg_Coordinances.dat"),"w")
-            write(file_coord,string(C2/sum_all," ",C3/sum_all," ",C4/sum_all,"\n"))
-            close(file_coord)
+            sum_allC=C2+C3+C4
+            file_coordC=open(string(folder_out,"Avg_CoordinancesC.dat"),"w")
+            write(file_coordC,string(C2/sum_allC," ",C3/sum_allC," ",C4/sum_allC,"\n"))
+            close(file_coordC)
 
+            sum_allO=O1+O2
+            file_coordO=open(string(folder_out,"Avg_CoordinancesO.dat"),"w")
+            write(file_coordO,string(O1/sum_allO," ",O2/sum_allO,"\n"))
+            close(file_coordO)
         end
     end
 end
