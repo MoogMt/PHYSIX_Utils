@@ -24,7 +24,7 @@ for T in Temperatures
         close(file_p)
         P=parse(Float64,split(lines[1])[2])
 
-        write(file_pv,string(V," ",P,"\n"))
+        write(file_pv,string(V," ",V*V*V/96," ",P,"\n"))
     end
 
     close(file_pv)

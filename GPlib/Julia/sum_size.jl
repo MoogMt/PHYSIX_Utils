@@ -22,9 +22,13 @@ for cut_off in Cut_Off
                 end
                 file_out=open(string(folder_local,"size_molecules-",cut_off,"-norm.dat"),"w")
                 for i=1:size(lines)[1]
-                    write(file_out,string(i," ", parse(Float64,split(lines[i])[3])/max,"\n"))
+                    write(file_out,string(i," ", parse(Float64,split(lines[i])[3])/max*100,"\n"))
                 end
                 close(file_out)
+
+                file_out_co2=open(string(folder_local,"co2_ratio.dat"),"w")
+                write(file_out_co2,string( parse(Float64,split(lines[3])[3])/max, "\n" ) ) 
+                close(file_out_co2)
             end
         end
     end
