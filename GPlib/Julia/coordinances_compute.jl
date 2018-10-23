@@ -73,7 +73,7 @@ for T in Temperatures
                 end
                 sum_localO=O1p+O2p
                 write(file_coord_localC,string(step*unit," ",C2p/sum_localC," ",C3p/sum_localC," ",C4p/sum_localO,"\n"))
-                write(file_coord_localC,string(step*unit," ",O1p/sum_localO," ",O2p/sum_localO,"\n"))
+                write(file_coord_localO,string(step*unit," ",O1p/sum_localO," ",O2p/sum_localO,"\n"))
             end
             close(file_coord_localC)
             close(file_coord_localO)
