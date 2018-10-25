@@ -45,7 +45,7 @@ Cut_Off=[1.75]
 
 # Time values
 unit=0.005
-frac=0.5
+frac=0.2
 
 # Number of atoms
 nbC=32
@@ -77,29 +77,69 @@ nb_atoms=size(atoms[1].names)[1]
 nb_steps=size(atoms)[1]
 steps=Int(trunc(nb_steps*frac))
 
-time_corr_gen=zeros(steps-1)
-time_corr_bonds=zeros(nbC,nbO,steps-1)
+time_corr_gen=zeros(steps)
+time_corr_bonds=zeros(nbC,nbO,steps)
 
-for carbon=1:nbC
-    for oxygen=1:nbO
-        bond_matrix=zeros(nb_steps)
+for carbon=1:2
+    for oxygen=1:4
+        bond_vector=zeros(nb_steps)
+        mean=0
         for step=1:nb_steps
-            print("C=",carbon," O=",oxygen," Progress:",carbon/nbC*100,"%\n")
+            print("C=",carbon," O=",oxygen,"\n")
             if cell_mod.distance(atoms[step],cell,carbon,nbC+oxygen) < cut_off
-                bond_matrix[step] = 1
+                bond_vector[step] = 1
+                mean += 1
             end
         end
-        corr=autocorrelation2(bond_matrix,frac)
-        for i=1:steps-1
-            time_corr_gen += corr[i]
-            time_corr_bonds[carbon,oxygen,i] += corr[i]
+        mean /= nb_steps
+        for t=1:steps
+            n=0
+            d=0
+            for i=1:nb_steps
+                stock=bond_vector[i]-mean
+                n += stock*(bond_vector[ (i+t)%nb_steps ]-mean)
+                d += stock*stock
+            end
+            time_corr_bonds[t]=n/d
+            time_corr_gen[t] += n/d
         end
     end
 end
+time_corr_gen /= 2*4
 
-file_check=open(string("/home/moogmt/time",volume,"_",T,"_",cutoff,".dat"),"w")
+
+function autocorrelation2(x,frac)
+    M=size(x)[1]
+    N=Int(trunc(M*frac)-1)
+    C=zeros(N)
+    for n=1:N
+        count=0
+        for m=1:M-n+1
+            C[n] += x[m]*x[m+(n-1)]
+            count +=1
+        end
+        C[n] = C[n]/count
+    end
+    return C
+end
+
+
+file_check=open(string(folder_out,"bond_correlation_general.dat"),"w")
 for i=1:steps-1
-    write(file_check,string(i*unit*stride," ",time_corr[Int(i)],"\n"))
+    write(file_check,string(i*unit," ",time_corr_gen[i]/nb_steps,"\n"))
+end
+close(file_check)
+
+file_check=open(string(folder_out,"bond_correlation_individual.dat"),"w")
+for i=1:steps-1
+    print("Progress: ",i/(steps-1)*100,"%\n")
+    write(file_check,string(i*unit," "))
+    for carbon=1:nbC
+        for oxygen=1:nbO
+            write(file_check,string(time_corr_bonds[carbon,oxygen,i]," "))
+        end
+    end
+    write(file_check,string("\n"))
 end
 close(file_check)
 
@@ -191,11 +231,6 @@ close(file_check)
 # end
 # close(file_check)
 
-file_check=open(string("/home/moogmt/time",volume,"_",T,"_",cutoff,".dat"),"w")
-for i=1:steps-1
-    write(file_check,string(i*unit*stride," ",time_corr[Int(i)],"\n"))
-end
-close(file_check)
 # end
 #end
 #
