@@ -45,7 +45,7 @@ Cut_Off=[1.75]
 
 # Time values
 unit=0.005
-frac=0.2
+frac=0.4
 
 # Number of atoms
 nbC=32
@@ -80,48 +80,29 @@ steps=Int(trunc(nb_steps*frac))
 time_corr_gen=zeros(steps)
 time_corr_bonds=zeros(nbC,nbO,steps)
 
-for carbon=1:2
-    for oxygen=1:4
+for carbon in [1]
+    for oxygen in [35-32]
         bond_vector=zeros(nb_steps)
-        mean=0
+        mean_value=0
         for step=1:nb_steps
-            print("C=",carbon," O=",oxygen,"\n")
+            print("Bond function - C:",carbon," O:",oxygen,"\n")
             if cell_mod.distance(atoms[step],cell,carbon,nbC+oxygen) < cut_off
                 bond_vector[step] = 1
-                mean += 1
+                mean_value += 1
             end
         end
-        mean /= nb_steps
-        for t=1:steps
-            n=0
-            d=0
-            for i=1:nb_steps
-                stock=bond_vector[i]-mean
-                n += stock*(bond_vector[ (i+t)%nb_steps ]-mean)
-                d += stock*stock
+        mean_value /= nb_steps
+        for i=0:steps-1
+            print("Autocorrelation - C:",carbon," O:",oxygen," Progress: ",i/(steps-1)*100,"%\n")
+            for j=1:nb_steps-i-1
+                time_corr_bonds[carbon,oxygen,i+1]+=bond_vector[j]*bond_vector[j+i]
             end
-            time_corr_bonds[t]=n/d
-            time_corr_gen[t] += n/d
+            time_corr_bonds[carbon,oxygen,i+1] /= nb_steps-i
+            time_corr_gen += time_corr_bonds[carbon,oxygen,i+1]
         end
     end
 end
-time_corr_gen /= 2*4
-
-
-function autocorrelation2(x,frac)
-    M=size(x)[1]
-    N=Int(trunc(M*frac)-1)
-    C=zeros(N)
-    for n=1:N
-        count=0
-        for m=1:M-n+1
-            C[n] += x[m]*x[m+(n-1)]
-            count +=1
-        end
-        C[n] = C[n]/count
-    end
-    return C
-end
+time_corr_gen /= nbC*nbO
 
 
 file_check=open(string(folder_out,"bond_correlation_general.dat"),"w")
@@ -132,7 +113,7 @@ close(file_check)
 
 file_check=open(string(folder_out,"bond_correlation_individual.dat"),"w")
 for i=1:steps-1
-    print("Progress: ",i/(steps-1)*100,"%\n")
+    print("Writting to file - Progress: ",i/(steps-1)*100,"%\n")
     write(file_check,string(i*unit," "))
     for carbon=1:nbC
         for oxygen=1:nbO
