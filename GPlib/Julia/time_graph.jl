@@ -10,86 +10,102 @@ Cut_Off=[1.75]
 
 # Time values
 unit=0.005
-frac=0.4
+frac=0.5
 
 # Number of atoms
 nbC=32
 nbO=nbC*2
 
-# for cut_off in Cut_Off
-#     for T in Temperatures
-#         for V in Volumes
 
-V=9.8
-T=3000
-cut_off=1.75
+Volumes=[8.82,9.8]
+Temperatures=[2000,3000]
+
+for cut_off in Cut_Off
+    for T in Temperatures
+        for V in Volumes
 
 
-folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC_wrapped.xyz")
+            folder_in=string(folder_base,V,"/",T,"K/")
+            file=string(folder_in,"TRAJEC_wrapped.xyz")
 
-if ! isfile(folder_in,"TRAJEC_wrapped.xyz")
-    # continue
-    print("Check\n")
-end
-
-folder_out=string(folder_in,"Data/")
-
-atoms = filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(V,V,V)
-
-nb_atoms=size(atoms[1].names)[1]
-nb_steps=size(atoms)[1]
-steps=Int(trunc(nb_steps*frac))
-
-time_corr_gen=zeros(steps)
-time_corr_bonds=zeros(nbC,nbO,steps)
-
-for carbon=1:nbC
-    for oxygen=1:nbO
-        bond_vector=zeros(nb_steps)
-        mean_value=0
-        for step=1:nb_steps
-            print("Bond function - C:",carbon," O:",oxygen," Progress:",step/nb_steps*100,"%\n")
-            if cell_mod.distance(atoms[step],cell,carbon,nbC+oxygen) < cut_off
-                bond_vector[step] = 1
-                mean_value += 1
+            if ! isfile(folder_in,"TRAJEC_wrapped.xyz")
+                continue
             end
-        end
-        mean_value /= nb_steps
-        # If there is no bond except for flickering, we just don't care
-        if sum(bond_vector) < 10
-            continue
-        end
-        # Autocorrelation
-        for i=0:steps-1
-            print("Autocorrelation - C:",carbon," O:",oxygen," Progress: ",i/(steps-1)*100,"%\n")
-            for j=1:nb_steps-i-1
-                time_corr_bonds[carbon,oxygen,i+1]+=bond_vector[j]*bond_vector[j+i]
+
+            folder_out=string(folder_in,"Data/")
+
+            atoms = filexyz.readFastFile(file)
+            cell=cell_mod.Cell_param(V,V,V)
+
+            nb_atoms=size(atoms[1].names)[1]
+            nb_steps=size(atoms)[1]
+            steps=Int(trunc(nb_steps*frac))
+
+            bond_matrix=zeros(nbC,nbO,nb_steps)
+            if ! isfile(string(folder_out,"bonds_book.dat"))
+                file_bookeep=open(string(folder_out,"bonds_book.dat"),"w")
+                for step=1:nb_steps
+                    print("V: ",V," T: ",T,"K Progress: ",step/nb_steps*100,"%\n")
+                    write(file_bookeep,string(step," "))
+                    for carbon=1:nbC
+                        for oxygen=1:nbO
+                            out=0
+                            if cell_mod.distance(atoms[step],cell,carbon,nbC+oxygen) < cut_off
+                                out += 1
+                            end
+                            bond_matrix[carbon,oxygen,step]=out
+                            write(file_bookeep,string(out," "))
+                        end
+                    end
+                    write(file_bookeep,string("\n"))
+                end
+                close(file_bookeep)
+            else
+                file_bookeep=open(string(folder_out,"bonds_book.dat"))
+                for step=1:nb_steps
+                    line=split(readline(file_bookeep))
+                    count=2
+                    for carbon=1:nbC
+                        for oxygen=1:nbO
+                            bond_matrix[carbon,oxygen,step]=parse(Float64,line[count])
+                            count += 1
+                        end
+                    end
+                end
+                close(file_bookeep)
             end
-            time_corr_bonds[carbon,oxygen,i+1] /= nb_steps-i
-            time_corr_gen += time_corr_bonds[carbon,oxygen,i+1]
+
+            time_corr_bonds=zeros(nbC,nbO,steps)
+            for carbon=1:nbC
+                for oxygen=1:nbO
+                    # If there is no bond except for flickering, we just don't care
+                    if sum(bond_matrix[carbon,oxygen,:]) < 20
+                        continue
+                    end
+                    # Autocorrelation
+                    for i=1:steps
+                        print("V: ",V," T:",T,"K Autocorrelation - C:",carbon," O:",oxygen," Progress: ",i/(steps-1)*100,"%\n")
+                        for j=1:nb_steps-i+1
+                            time_corr_bonds[carbon,oxygen,i] += bond_matrix[carbon,oxygen,j]*bond_matrix[carbon,oxygen,j+i-1]
+                        end
+                        time_corr_bonds[carbon,oxygen,i] /= (nb_steps-i+1)
+                    end
+                end
+            end
+
+            file_all=open(string(folder_out,"bond_correlation_individual.dat"),"w")
+            for i=1:steps
+                print("V:",V," T: ",T,"K Writting to file - Progress: ",i/(steps)*100,"%\n")
+                write(file_all,string(i*unit," "))
+                for carbon=1:nbC
+                    for oxygen=1:nbO
+                        write(file_all,string(time_corr_bonds[carbon,oxygen,i]," "))
+                    end
+                end
+                write(file_all,string("\n"))
+            end
+            close(file_all)
+
         end
     end
 end
-time_corr_gen /= nbC*nbO
-
-
-file_check=open(string(folder_out,"bond_correlation_general.dat"),"w")
-for i=1:steps-1
-    write(file_check,string(i*unit," ",time_corr_gen[i]/nb_steps,"\n"))
-end
-close(file_check)
-
-file_check=open(string(folder_out,"bond_correlation_individual.dat"),"w")
-for i=1:steps-1
-    print("Writting to file - Progress: ",i/(steps-1)*100,"%\n")
-    write(file_check,string(i*unit," "))
-    for carbon=1:nbC
-        for oxygen=1:nbO
-            write(file_check,string(time_corr_bonds[carbon,oxygen,i]," "))
-        end
-    end
-    write(file_check,string("\n"))
-end
-close(file_check)
