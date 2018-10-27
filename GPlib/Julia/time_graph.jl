@@ -55,7 +55,8 @@ Temperatures=[3000]
             bond_matrix=zeros(nbC,nbO,nb_steps_analysis)
             if ! isfile(string(folder_out,"bonds_book.dat"))
                 file_bookeep=open(string(folder_out,"bonds_book.dat"),"w")
-                for step=1:stride:nb_steps
+                count=1
+                for step=1:nb_steps
                     print("Computing bond function - V: ",V," T: ",T,"K Progress: ",step/nb_steps*100,"%\n")
                     write(file_bookeep,string(step," "))
                     for carbon=1:nbC
@@ -64,8 +65,12 @@ Temperatures=[3000]
                             if cell_mod.distance(atoms[step],cell,carbon,nbC+oxygen) < cut_off
                                 out += 1
                             end
-                            bond_matrix[carbon,oxygen,step]=out
+                            if count == stride
+                                bond_matrix[carbon,oxygen,step]=out
+                                count=1
+                            end
                             write(file_bookeep,string(out," "))
+                            count += 1
                         end
                     end
                     write(file_bookeep,string("\n"))
@@ -142,16 +147,17 @@ Temperatures=[3000]
             nb_box_corr=50
             inter_corr=1/nb_box_corr
             hist2d=zeros(nb_box_time,nb_box_corr)
-            nb_steps=Int(trunc(nb_steps_analysis/nb_box_time)*nb_box_time)
-            time_inter=Int(nb_steps/nb_box_time)
+            nb_steps_hist=Int(trunc(nb_steps_analysis/nb_box_time)*nb_box_time)
+            time_inter=Int(nb_steps_hist/nb_box_time)
             for carbon=1:nbC
                 for oxygen=1:nbO
                     print("Histogram Printing - C:",carbon," O:",oxygen,"\n")
-                    for box=1:time_inter:nb_steps
-                        for subbox=1:time_inter-1
+                    for box=1:time_inter:nb_steps_hist-1
+                        for subbox=1:time_inter
                             for step=1:max_steps_autocor
                                 for box2=1:nb_box_corr
-                                    if time_corr_bonds < box2*inter_corr
+                                    print("box: ",box," subbox: ",subbox," Total: ",(box-1)*time_inter+subbox,"\n")
+                                    if time_corr_bonds[carbon,oxygen,(box-1)*time_inter+subbox] < box2*inter_corr
                                         hist2d[box,box2] += 1
                                         break
                                     end
