@@ -22,16 +22,19 @@ min_steps=20
 Volumes=[9.8]
 Temperatures=[3000]
 
-for cut_off in Cut_Off
-    for T in Temperatures
-        for V in Volumes
+# for cut_off in Cut_Off
+#     for T in Temperatures
+#         for V in Volumes
 
+            V=9.8
+            T=3000
+            cut_off=1.75
 
             folder_in=string(folder_base,V,"/",T,"K/")
             file=string(folder_in,"TRAJEC_wrapped.xyz")
 
             if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
-                continue
+                #continue
             end
 
             folder_out=string(folder_in,"Data/")
@@ -132,6 +135,43 @@ for cut_off in Cut_Off
             close(file_all)
             #==================================================================#
 
-        end
-    end
-end
+            # Making histogram
+            #==================================================================#
+            time_int = 1 # ps
+            nb_box_time = Int(trunc(nb_steps*unit/time_int))
+            nb_box_corr=50
+            inter_corr=1/nb_box_corr
+            hist2d=zeros(nb_box_time,nb_box_corr)
+            nb_steps=Int(trunc(nb_steps_analysis/nb_box_time)*nb_box_time)
+            time_inter=Int(nb_steps/nb_box_time)
+            for carbon=1:nbC
+                for oxygen=1:nbO
+                    print("Histogram Printing - C:",carbon," O:",oxygen,"\n")
+                    for box=1:time_inter:nb_steps
+                        for subbox=1:time_inter-1
+                            for step=1:max_steps_autocor
+                                for box2=1:nb_box_corr
+                                    if time_corr_bonds < box2*inter_corr
+                                        hist2d[box,box2] += 1
+                                        break
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+            # Printint histogram
+            file_hist=open(string(folder_out,"bond_correlation_density.dat"),"w")
+            for box_time=1:nb_box_time
+                for box_corr=1:nb_box_corr
+                    write(file_hist,string(box_time*unit*stride," ",box_corr*inter_corr," ",hist2d[box_time,box_corr],"\n"))
+                end
+                write(file_hist,string("\n"))
+            end
+            close(file_hist)
+            #==================================================================#
+
+#         end
+#     end
+# end
