@@ -16,9 +16,11 @@ frac=0.5
 nbC=32
 nbO=nbC*2
 
+# min number in which a bond has to be active for the autocorrelation to be done
+min_steps=50
 
-Volumes=[8.82,9.8]
-Temperatures=[2000,3000]
+Volumes=[9.8]
+Temperatures=[2500]
 
 for cut_off in Cut_Off
     for T in Temperatures
@@ -28,7 +30,7 @@ for cut_off in Cut_Off
             folder_in=string(folder_base,V,"/",T,"K/")
             file=string(folder_in,"TRAJEC_wrapped.xyz")
 
-            if ! isfile(folder_in,"TRAJEC_wrapped.xyz")
+            if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
                 continue
             end
 
@@ -39,8 +41,11 @@ for cut_off in Cut_Off
 
             nb_atoms=size(atoms[1].names)[1]
             nb_steps=size(atoms)[1]
-            steps=Int(trunc(nb_steps*frac))
+            max_steps_autocor=Int(trunc(nb_steps*frac))
 
+            #==========================#
+            # Bond matrix computation
+            #==================================================================#
             bond_matrix=zeros(nbC,nbO,nb_steps)
             if ! isfile(string(folder_out,"bonds_book.dat"))
                 file_bookeep=open(string(folder_out,"bonds_book.dat"),"w")
@@ -74,25 +79,42 @@ for cut_off in Cut_Off
                 end
                 close(file_bookeep)
             end
+            #==================================================================#
 
-            time_corr_bonds=zeros(nbC,nbO,steps)
+            #======================#
+            # Bond Autocorrelation
+            #==================================================================#
+            time_corr_bonds=zeros(nbC,nbO,max_steps_autocor)
             for carbon=1:nbC
                 for oxygen=1:nbO
-                    # If there is no bond except for flickering, we just don't care
-                    if sum(bond_matrix[carbon,oxygen,:]) < 20
+                    # Determination of the number of steps for the autocorrelation
+                    steps_corr=sum(bond_matrix[carbon,oxygen,:])
+                    if steps_corr < min_steps
+                        # If there is no bond except for flickering, we just don't care
                         continue
+                    elseif steps_corr > nb_steps - min_steps
+                        # If the bond is always there, no sens in doing autocorrelation
+                        time_corr_bonds[carbon,oxygen,i] += 1
+                        continue
+                    elseif steps_corr > max_steps_autocor
+                        # Boundary on the number of steps of autocorrelation to avoid errors
+                        steps_corr = max_steps_autocor
                     end
                     # Autocorrelation
-                    for i=1:steps
+                    for i=1:steps_corr
                         print("V: ",V," T:",T,"K Autocorrelation - C:",carbon," O:",oxygen," Progress: ",i/(steps-1)*100,"%\n")
                         for j=1:nb_steps-i+1
                             time_corr_bonds[carbon,oxygen,i] += bond_matrix[carbon,oxygen,j]*bond_matrix[carbon,oxygen,j+i-1]
                         end
                         time_corr_bonds[carbon,oxygen,i] /= (nb_steps-i+1)
+                        time_corr_bonds[carbon,oxygen,i] /= time_corr_bonds[carbon,oxygen,1]
                     end
                 end
             end
+            #==================================================================#
 
+            # Writting data to file
+            #==================================================================#
             file_all=open(string(folder_out,"bond_correlation_individual.dat"),"w")
             for i=1:steps
                 print("V:",V," T: ",T,"K Writting to file - Progress: ",i/(steps)*100,"%\n")
@@ -105,6 +127,7 @@ for cut_off in Cut_Off
                 write(file_all,string("\n"))
             end
             close(file_all)
+            #==================================================================#
 
         end
     end
