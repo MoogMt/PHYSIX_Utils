@@ -17,10 +17,10 @@ nbC=32
 nbO=nbC*2
 
 # min number in which a bond has to be active for the autocorrelation to be done
-min_steps=50
+min_steps=20
 
 Volumes=[9.8]
-Temperatures=[2500]
+Temperatures=[3000]
 
 for cut_off in Cut_Off
     for T in Temperatures
@@ -41,16 +41,19 @@ for cut_off in Cut_Off
 
             nb_atoms=size(atoms[1].names)[1]
             nb_steps=size(atoms)[1]
-            max_steps_autocor=Int(trunc(nb_steps*frac))
+
+            stride=5
+            nb_steps_analysis=Int(trunc(nb_steps/stride))
+            max_steps_autocor=Int(trunc(nb_steps/stride*frac))
 
             #==========================#
             # Bond matrix computation
             #==================================================================#
-            bond_matrix=zeros(nbC,nbO,nb_steps)
+            bond_matrix=zeros(nbC,nbO,nb_steps_analysis)
             if ! isfile(string(folder_out,"bonds_book.dat"))
                 file_bookeep=open(string(folder_out,"bonds_book.dat"),"w")
-                for step=1:nb_steps
-                    print("V: ",V," T: ",T,"K Progress: ",step/nb_steps*100,"%\n")
+                for step=1:stride:nb_steps
+                    print("Computing bond function - V: ",V," T: ",T,"K Progress: ",step/nb_steps*100,"%\n")
                     write(file_bookeep,string(step," "))
                     for carbon=1:nbC
                         for oxygen=1:nbO
@@ -67,7 +70,8 @@ for cut_off in Cut_Off
                 close(file_bookeep)
             else
                 file_bookeep=open(string(folder_out,"bonds_book.dat"))
-                for step=1:nb_steps
+                for step=1:stride:nb_steps_analysis
+                    print("Reading bond function - V: ",V," T: ",T,"K Progress: ",step/nb_steps_analysis*100,"%\n")
                     line=split(readline(file_bookeep))
                     count=2
                     for carbon=1:nbC
@@ -88,25 +92,24 @@ for cut_off in Cut_Off
             for carbon=1:nbC
                 for oxygen=1:nbO
                     # Determination of the number of steps for the autocorrelation
-                    steps_corr=sum(bond_matrix[carbon,oxygen,:])
+                    steps_corr=Int(sum(bond_matrix[carbon,oxygen,:]))
                     if steps_corr < min_steps
                         # If there is no bond except for flickering, we just don't care
                         continue
                     elseif steps_corr > nb_steps - min_steps
                         # If the bond is always there, no sens in doing autocorrelation
-                        time_corr_bonds[carbon,oxygen,i] += 1
+                        time_corr_bonds[carbon,oxygen,:] += 1
                         continue
-                    elseif steps_corr > max_steps_autocor
-                        # Boundary on the number of steps of autocorrelation to avoid errors
-                        steps_corr = max_steps_autocor
                     end
+                    # Boundary on the number of steps of autocorrelation to avoid errors
+                    steps_corr = max_steps_autocor
                     # Autocorrelation
                     for i=1:steps_corr
-                        print("V: ",V," T:",T,"K Autocorrelation - C:",carbon," O:",oxygen," Progress: ",i/(steps-1)*100,"%\n")
-                        for j=1:nb_steps-i+1
+                        print("V: ",V," T:",T,"K Autocorrelation - C:",carbon," O:",oxygen," Progress: ",i/(steps_corr-1)*100,"%\n")
+                        for j=1:nb_steps_analysis-i+1
                             time_corr_bonds[carbon,oxygen,i] += bond_matrix[carbon,oxygen,j]*bond_matrix[carbon,oxygen,j+i-1]
                         end
-                        time_corr_bonds[carbon,oxygen,i] /= (nb_steps-i+1)
+                        time_corr_bonds[carbon,oxygen,i] /= (nb_steps_analysis-i+1)
                         time_corr_bonds[carbon,oxygen,i] /= time_corr_bonds[carbon,oxygen,1]
                     end
                 end
@@ -116,9 +119,9 @@ for cut_off in Cut_Off
             # Writting data to file
             #==================================================================#
             file_all=open(string(folder_out,"bond_correlation_individual.dat"),"w")
-            for i=1:steps
-                print("V:",V," T: ",T,"K Writting to file - Progress: ",i/(steps)*100,"%\n")
-                write(file_all,string(i*unit," "))
+            for i=1:max_steps_autocor
+                print("V:",V," T: ",T,"K Writting to file - Progress: ",i/(max_steps_autocor)*100,"%\n")
+                write(file_all,string(i*unit*stride," "))
                 for carbon=1:nbC
                     for oxygen=1:nbO
                         write(file_all,string(time_corr_bonds[carbon,oxygen,i]," "))
