@@ -22,13 +22,9 @@ min_steps=20
 Volumes=[9.8]
 Temperatures=[3000]
 
-# for cut_off in Cut_Off
-#     for T in Temperatures
-#         for V in Volumes
-
-            V=9.8
-            T=3000
-            cut_off=1.75
+for cut_off in Cut_Off
+    for T in Temperatures
+        for V in Volumes
 
             folder_in=string(folder_base,V,"/",T,"K/")
             file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -49,16 +45,20 @@ Temperatures=[3000]
             nb_steps_analysis=Int(trunc(nb_steps/stride))
             max_steps_autocor=Int(trunc(nb_steps/stride*frac))
 
+            restart_bonds_book = true
+
             #==========================#
             # Bond matrix computation
             #==================================================================#
             bond_matrix=zeros(nbC,nbO,nb_steps_analysis)
-            if ! isfile(string(folder_out,"bonds_book.dat"))
+            if ( ! isfile(string(folder_out,"bonds_book.dat")) )|| restart_bonds_book == true
                 file_bookeep=open(string(folder_out,"bonds_book.dat"),"w")
-                count=1
+                count=0
+                step2=1
                 for step=1:nb_steps
                     print("Computing bond function - V: ",V," T: ",T,"K Progress: ",step/nb_steps*100,"%\n")
                     write(file_bookeep,string(step," "))
+                    check=false
                     for carbon=1:nbC
                         for oxygen=1:nbO
                             out=0
@@ -66,13 +66,17 @@ Temperatures=[3000]
                                 out += 1
                             end
                             if count == stride
-                                bond_matrix[carbon,oxygen,step]=out
-                                count=1
+                                bond_matrix[carbon,oxygen,step2]=out
+                                check=true
                             end
                             write(file_bookeep,string(out," "))
-                            count += 1
                         end
                     end
+                    if check
+                        step2 += 1
+                        count=0
+                    end
+                    count+=1
                     write(file_bookeep,string("\n"))
                 end
                 close(file_bookeep)
@@ -110,15 +114,17 @@ Temperatures=[3000]
                         continue
                     end
                     # Boundary on the number of steps of autocorrelation to avoid errors
-                    steps_corr = max_steps_autocor
                     # Autocorrelation
-                    for i=1:steps_corr
-                        print("V: ",V," T:",T,"K Autocorrelation - C:",carbon," O:",oxygen," Progress: ",i/(steps_corr-1)*100,"%\n")
-                        for j=1:nb_steps_analysis-i+1
-                            time_corr_bonds[carbon,oxygen,i] += bond_matrix[carbon,oxygen,j]*bond_matrix[carbon,oxygen,j+i-1]
+                    for step_lag=1:max_steps_autocor
+                        print("V: ",V," T:",T,"K Autocorrelation - C:",carbon," O:",oxygen," Progress: ",step_lag/(max_steps_autocor-1)*100,"%\n")
+                        for step=1:nb_steps_analysis-step_lag+1
+                            time_corr_bonds[carbon,oxygen,step_lag] += bond_matrix[carbon,oxygen,step]*bond_matrix[carbon,oxygen,step+step_lag-1]
                         end
-                        time_corr_bonds[carbon,oxygen,i] /= (nb_steps_analysis-i+1)
-                        time_corr_bonds[carbon,oxygen,i] /= time_corr_bonds[carbon,oxygen,1]
+                        time_corr_bonds[carbon,oxygen,step_lag] /= (nb_steps_analysis-step_lag+1)
+                    end
+                    stock = time_corr_bonds[carbon,oxygen,1]
+                    for step_lag=1:max_steps_autocor
+                        time_corr_bonds[carbon,oxygen,step_lag] = time_corr_bonds[carbon,oxygen,step_lag]/stock
                     end
                 end
             end
@@ -127,57 +133,24 @@ Temperatures=[3000]
             # Writting data to file
             #==================================================================#
             file_all=open(string(folder_out,"bond_correlation_individual.dat"),"w")
+            file_avg=open(string(folder_out,"bond_correlation_average.dat"),"w")
             for i=1:max_steps_autocor
                 print("V:",V," T: ",T,"K Writting to file - Progress: ",i/(max_steps_autocor)*100,"%\n")
                 write(file_all,string(i*unit*stride," "))
+                write(file_avg,string(i*unit*stride," "))
                 for carbon=1:nbC
                     for oxygen=1:nbO
                         write(file_all,string(time_corr_bonds[carbon,oxygen,i]," "))
                     end
                 end
+                write(file_avg,string( sum(time_corr_bonds[:,:,i])/(nbC*nbO)," " )
                 write(file_all,string("\n"))
+                write(file_avg,string("\n"))
             end
             close(file_all)
+            close(file_avg)
             #==================================================================#
 
-            # Making histogram
-            #==================================================================#
-            time_int = 1 # ps
-            nb_box_time = Int(trunc(nb_steps*unit/time_int))
-            nb_box_corr=50
-            inter_corr=1/nb_box_corr
-            hist2d=zeros(nb_box_time,nb_box_corr)
-            nb_steps_hist=Int(trunc(nb_steps_analysis/nb_box_time)*nb_box_time)
-            time_inter=Int(nb_steps_hist/nb_box_time)
-            for carbon=1:nbC
-                for oxygen=1:nbO
-                    print("Histogram Printing - C:",carbon," O:",oxygen,"\n")
-                    for box=1:time_inter:nb_steps_hist-1
-                        for subbox=1:time_inter
-                            for step=1:max_steps_autocor
-                                for box2=1:nb_box_corr
-                                    print("box: ",box," subbox: ",subbox," Total: ",(box-1)*time_inter+subbox,"\n")
-                                    if time_corr_bonds[carbon,oxygen,(box-1)*time_inter+subbox] < box2*inter_corr
-                                        hist2d[box,box2] += 1
-                                        break
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end
-            end
-            # Printint histogram
-            file_hist=open(string(folder_out,"bond_correlation_density.dat"),"w")
-            for box_time=1:nb_box_time
-                for box_corr=1:nb_box_corr
-                    write(file_hist,string(box_time*unit*stride," ",box_corr*inter_corr," ",hist2d[box_time,box_corr],"\n"))
-                end
-                write(file_hist,string("\n"))
-            end
-            close(file_hist)
-            #==================================================================#
-
-#         end
-#     end
-# end
+        end
+    end
+end

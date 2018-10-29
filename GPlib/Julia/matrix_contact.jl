@@ -33,7 +33,7 @@ for T in Temperatures
         file_matrix=open(string(folder_out,"matrix.dat"),"w")
         for step=1:nb_steps
             print("V: ",V," T:",T,"K Progress:",step/nb_steps*100,"%\n")
-            write(file_matrix,string(step," "))
+            write(file_matrix,string(step*unit," "))
             for atom1=1:nb_atoms-1
                 for atom2=atom1+1:nb_atoms
                     write(file_matrix,string(cell_mod.distance(atoms[step],cell,atom1,atom2)," "))
