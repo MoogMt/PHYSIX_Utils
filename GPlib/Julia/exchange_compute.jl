@@ -154,6 +154,7 @@ for cut_off in Cut_Off
             # clear memory
             bond_matrix=[]
 
+            # Reading data for histogram
             file_lifebonds=open(string(folder_out,"lifes_bonds.dat"))
             lines=readlines(file_lifebonds)
             close(file_lifebonds)
@@ -163,7 +164,7 @@ for cut_off in Cut_Off
             avg=0
             var=0
             for i=1:nb_lifes
-                lifes[i]=parse(Float64,split(lines[i])[6])
+                lifes[i]=parse(Float64,split(lines[i])[5])
                 avg += lifes[i]
                 var += lifes[i]*lifes[i]
             end
@@ -172,11 +173,24 @@ for cut_off in Cut_Off
             interval=(4*var)/nb_box
             start_box=avg-2*var
             hist_life=zeros(nb_boxes)
-            for i=1:nb_boxes
-                if start_box+(i-1)*interval < 
-
+            for life in lifes
+                for i=1:nb_boxes
+                    if lifes < start_box+(i-1)*interval
+                        hist_life[i] += 1
+                    end
                 end
             end
+
+            # Normalization
+            hist_life[:] /= nb_lifes
+
+            # Writting histogram
+            file_hist=open(string(folder_out,"histogram_lifes.dat"),"w")
+            for i=1:nb_boxes
+                write(file_hist,string(i*unit*interval," ",hist_life[i],"\n"))
+            end
+            close(file_hist)
+
         end
     end
 end
