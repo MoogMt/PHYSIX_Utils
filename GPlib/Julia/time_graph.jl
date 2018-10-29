@@ -19,9 +19,6 @@ nbO=nbC*2
 # min number in which a bond has to be active for the autocorrelation to be done
 min_steps=20
 
-Volumes=[9.8]
-Temperatures=[3000]
-
 for cut_off in Cut_Off
     for T in Temperatures
         for V in Volumes
@@ -30,7 +27,7 @@ for cut_off in Cut_Off
             file=string(folder_in,"TRAJEC_wrapped.xyz")
 
             if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
-                #continue
+                continue
             end
 
             folder_out=string(folder_in,"Data/")
@@ -143,7 +140,7 @@ for cut_off in Cut_Off
                         write(file_all,string(time_corr_bonds[carbon,oxygen,i]," "))
                     end
                 end
-                write(file_avg,string( sum(time_corr_bonds[:,:,i])/(nbC*nbO)," " )
+                write(file_avg,string( sum(time_corr_bonds[:,:,i])/(nbC*nbO)," " ))
                 write(file_all,string("\n"))
                 write(file_avg,string("\n"))
             end
