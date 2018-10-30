@@ -79,20 +79,29 @@ for cut_off in Cut_Off
                 close(file_bookeep)
             else
                 file_bookeep=open(string(folder_out,"bonds_book.dat"))
-                for step=1:stride:nb_steps_analysis
-                    print("Reading bond function - V: ",V," T: ",T,"K Progress: ",step/nb_steps_analysis*100,"%\n")
+                count_2 = stride
+                count_3=1
+                for step=1:nb_steps-1
+                    print("Reading bond function - V: ",V," T: ",T,"K Progress: ",step/(nb_steps-1)*100,"%\n")
                     line=split(readline(file_bookeep))
-                    count=2
-                    for carbon=1:nbC
-                        for oxygen=1:nbO
-                            bond_matrix[carbon,oxygen,step]=parse(Float64,line[count])
-                            count += 1
+                    if count_2 == stride
+                        count_2=0
+                        count=2
+                        for carbon=1:nbC
+                            for oxygen=1:nbO
+                                bond_matrix[carbon,oxygen,count_3]=parse(Float64,line[count])
+                                count += 1
+                            end
                         end
+                        #print("count: ",count_3,"\n")
+                        count_3 += 1
                     end
+                    count_2 += 1
                 end
                 close(file_bookeep)
             end
             #==================================================================#
+
 
             #======================#
             # Bond Autocorrelation

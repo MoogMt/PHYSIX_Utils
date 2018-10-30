@@ -98,6 +98,7 @@ for cut_off in Cut_Off
             count_nothing=0
             for carbon=1:nbC
                 for oxygen=1:nbO
+                    print(" Counting - C: ",C," O:",O,"\n")
                     sum_of_all_bonds=sum(bond_matrix[carbon,oxygen,:])
                     if sum_of_all_bonds == 0
                         count_nothing += 1
@@ -108,8 +109,8 @@ for cut_off in Cut_Off
                     end
                 end
             end
-            write(file_all,string(count_all,"\n"))
-            write(file_nothing,string(count_nothing,"\n"))
+            write(file_all,string(count_all/nbC*nbO,"\n"))
+            write(file_nothing,string(count_nothing/(nbC*nbO),"\n"))
             close(file_all)
             close(file_nothing)
 

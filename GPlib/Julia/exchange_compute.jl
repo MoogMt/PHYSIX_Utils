@@ -15,18 +15,24 @@ unit=0.005
 nbC=32
 nbO=nbC*2
 
-max_flick=50
+max_flick=5
 
-for cut_off in Cut_Off
-    for T in Temperatures
-        for V in Volumes
+Volumes=[9.8]
+Temperatures=[2000,2500,3000]
 
+# for cut_off in Cut_Off
+#     for T in Temperatures
+#         for V in Volumes
+
+        V=9.8
+        T=2000
+        cut_off=1.75
             folder_in=string(folder_base,V,"/",T,"K/")
             file=string(folder_in,"TRAJEC_wrapped.xyz")
-
-            if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
-                continue
-            end
+            #
+            # if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
+            #     continue
+            # end
 
             folder_out=string(folder_in,"Data/")
 
@@ -77,16 +83,24 @@ for cut_off in Cut_Off
                 close(file_bookeep)
             else
                 file_bookeep=open(string(folder_out,"bonds_book.dat"))
-                for step=1:stride:nb_steps_analysis
-                    print("Reading bond function - V: ",V," T: ",T,"K Progress: ",step/nb_steps_analysis*100,"%\n")
+                count_2 = stride
+                count_3=1
+                for step=1:nb_steps-1
+                    print("Reading bond function - V: ",V," T: ",T,"K Progress: ",step/(nb_steps-1)*100,"%\n")
                     line=split(readline(file_bookeep))
-                    count=2
-                    for carbon=1:nbC
-                        for oxygen=1:nbO
-                            bond_matrix[carbon,oxygen,step]=parse(Float64,line[count])
-                            count += 1
+                    if count_2 == stride
+                        count_2=0
+                        count=2
+                        for carbon=1:nbC
+                            for oxygen=1:nbO
+                                bond_matrix[carbon,oxygen,count_3]=parse(Float64,line[count])
+                                count += 1
+                            end
                         end
+                        #print("count: ",count_3,"\n")
+                        count_3 += 1
                     end
+                    count_2 += 1
                 end
                 close(file_bookeep)
             end
@@ -105,46 +119,55 @@ for cut_off in Cut_Off
                     if check == 0 || check == nb_steps_analysis
                         continue
                     end
-                    for step=1:nb_steps
+                    step=1
+                    while step < nb_steps_analysis-1
                         step_bonds=sum(bond_matrix[carbon,oxygen,step:nb_steps_analysis])
                         if step_bonds == 0
-                            break
-                        end
-                        if bond_matrix[carbon,oxygen,start_step] == 0
-                            continue
-                        end
-                        life=1
-                        write(file_lifebonds,string(carbon," ",oxygen," ",step," "))
-                        if step_bonds == nb_steps_analysis-step
-                            write(file_lifebonds,string(nb_steps_analysis," ",nb_steps_analysis-step," ",0,"\n"))
-                            continue
-                        end
-                        stop_step=0
-                        for step2=step+1:nb_steps
-                            if bond_matrix[carbon,oxygen,step2] == 0
-                                check=true
-                                for step3=step2:step2+50
-                                    if bond_matrix[carbon,oxygen,step3] == 1
-                                        bond_matrix[carbon,oxygen,step2:step3] = ones(step3-step2)
-                                        false
-                                        break
+                            step = nb_steps_analysis
+                        elseif bond_matrix[carbon,oxygen,step] == 0
+                            step += 1
+                        else
+                            #print("V: ",V," T: ",T,"K - Counting lifetimes - C:",carbon," O:",oxygen," step: ",step,"\n")
+                            life=1
+                            write(file_lifebonds,string(carbon," ",oxygen," ",step," "))
+                            #
+                            stop_step=step
+                            if step_bonds == nb_steps_analysis-step
+                                write(file_lifebonds,string(nb_steps_analysis," ",nb_steps_analysis-step," ",0,"\n"))
+                                step = nb_steps_analysis
+                            else
+                                for step2=step+1:nb_steps_analysis
+                                    if bond_matrix[carbon,oxygen,step2] == 0
+                                        check=true
+                                        for step3=step2:step2+max_flick
+                                            if step3 >= nb_steps_analysis
+                                                break
+                                            end
+                                            if bond_matrix[carbon,oxygen,step3] == 1
+                                                bond_matrix[carbon,oxygen,step2:step3] = ones(step3-step2+1)
+                                                check=false
+                                                break
+                                            end
+                                        end
+                                        if check
+                                            stop_step=step2
+                                            break
+                                        end
+                                    else
+                                        stop_step += 1
+                                        life += 1
                                     end
                                 end
-                                if check
-                                    stop_step=step2
+                                write(file_lifebonds,string(stop_step," ",life," "))
+                                if stop_step+1 < nb_steps_analysis
+                                    write(file_lifebonds,string(1,"\n"))
+                                else
+                                    write(file_lifebonds,string(0,"\n"))
                                     break
                                 end
+                                step=stop_step
                             end
-                            life += 1
                         end
-                        write(file_lifebonds,string(stop_step," ",life," "))
-                        if stop_step+1 < nb_steps_analysis
-                            write(file_lifebonds,string(1,"\n"))
-                        else
-                            write(file_lifebonds,string(0,"\n"))
-                            break
-                        end
-                        step=stop_step
                     end
                 end
             end
@@ -169,13 +192,14 @@ for cut_off in Cut_Off
                 var += lifes[i]*lifes[i]
             end
             avg=avg/nb_lifes
-            var=sqrt(var/nb_lifes)-avg*avg
-            interval=(4*var)/nb_box
-            start_box=avg-2*var
+            var=sqrt(var/nb_lifes-avg*avg)
+            print("average: ",avg*stride*unit," variance: ",var*stride*unit,"\n")
+            interval=(2*var)/nb_boxes
+            start_box=avg-var
             hist_life=zeros(nb_boxes)
             for life in lifes
                 for i=1:nb_boxes
-                    if lifes < start_box+(i-1)*interval
+                    if life > start_box+(i-1)*interval && life < start_box+i*interval
                         hist_life[i] += 1
                     end
                 end
@@ -187,10 +211,10 @@ for cut_off in Cut_Off
             # Writting histogram
             file_hist=open(string(folder_out,"histogram_lifes.dat"),"w")
             for i=1:nb_boxes
-                write(file_hist,string(i*unit*interval," ",hist_life[i],"\n"))
+                write(file_hist,string(i*stride*unit*interval," ",hist_life[i],"\n"))
             end
             close(file_hist)
 
-        end
-    end
-end
+#         end
+#     end
+# end
