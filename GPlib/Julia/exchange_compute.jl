@@ -15,24 +15,16 @@ unit=0.005
 nbC=32
 nbO=nbC*2
 
-max_flick=5
+for cut_off in Cut_Off
+    for T in Temperatures
+        for V in Volumes
 
-Volumes=[9.8]
-Temperatures=[2000,2500,3000]
-
-# for cut_off in Cut_Off
-#     for T in Temperatures
-#         for V in Volumes
-
-        V=9.8
-        T=2000
-        cut_off=1.75
             folder_in=string(folder_base,V,"/",T,"K/")
             file=string(folder_in,"TRAJEC_wrapped.xyz")
-            #
-            # if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
-            #     continue
-            # end
+
+            if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
+                continue
+            end
 
             folder_out=string(folder_in,"Data/")
 
@@ -116,11 +108,15 @@ Temperatures=[2000,2500,3000]
                 for oxygen=1:nbO
                     # Not caring about stuff that do not move
                     check=sum(bond_matrix[carbon,oxygen,:])
-                    if check == 0 || check == nb_steps_analysis
+                    if check == 0
+                        continue
+                    end
+                    if check == nb_steps_analysis
+                        write(file_lifebonds,string(carbon," ",oxygen," ",1," ",nb_steps_analysis," ",nb_steps_analysis," ",0,"\n"))
                         continue
                     end
                     step=1
-                    while step < nb_steps_analysis-1
+                    while step < nb_steps_analysis
                         step_bonds=sum(bond_matrix[carbon,oxygen,step:nb_steps_analysis])
                         if step_bonds == 0
                             step = nb_steps_analysis
@@ -138,28 +134,14 @@ Temperatures=[2000,2500,3000]
                             else
                                 for step2=step+1:nb_steps_analysis
                                     if bond_matrix[carbon,oxygen,step2] == 0
-                                        check=true
-                                        for step3=step2:step2+max_flick
-                                            if step3 >= nb_steps_analysis
-                                                break
-                                            end
-                                            if bond_matrix[carbon,oxygen,step3] == 1
-                                                bond_matrix[carbon,oxygen,step2:step3] = ones(step3-step2+1)
-                                                check=false
-                                                break
-                                            end
-                                        end
-                                        if check
-                                            stop_step=step2
-                                            break
-                                        end
+                                        stop_step=step2
                                     else
                                         stop_step += 1
                                         life += 1
                                     end
                                 end
                                 write(file_lifebonds,string(stop_step," ",life," "))
-                                if stop_step+1 < nb_steps_analysis
+                                if stop_step < nb_steps_analysis
                                     write(file_lifebonds,string(1,"\n"))
                                 else
                                     write(file_lifebonds,string(0,"\n"))
@@ -174,47 +156,6 @@ Temperatures=[2000,2500,3000]
             close(file_lifebonds)
             #==================================================================#
 
-            # clear memory
-            bond_matrix=[]
-
-            # Reading data for histogram
-            file_lifebonds=open(string(folder_out,"lifes_bonds.dat"))
-            lines=readlines(file_lifebonds)
-            close(file_lifebonds)
-            nb_lifes=size(lines)[1]
-            lifes=zeros(nb_lifes)
-            nb_boxes=100
-            avg=0
-            var=0
-            for i=1:nb_lifes
-                lifes[i]=parse(Float64,split(lines[i])[5])
-                avg += lifes[i]
-                var += lifes[i]*lifes[i]
-            end
-            avg=avg/nb_lifes
-            var=sqrt(var/nb_lifes-avg*avg)
-            print("average: ",avg*stride*unit," variance: ",var*stride*unit,"\n")
-            interval=(2*var)/nb_boxes
-            start_box=avg-var
-            hist_life=zeros(nb_boxes)
-            for life in lifes
-                for i=1:nb_boxes
-                    if life > start_box+(i-1)*interval && life < start_box+i*interval
-                        hist_life[i] += 1
-                    end
-                end
-            end
-
-            # Normalization
-            hist_life[:] /= nb_lifes
-
-            # Writting histogram
-            file_hist=open(string(folder_out,"histogram_lifes.dat"),"w")
-            for i=1:nb_boxes
-                write(file_hist,string(i*stride*unit*interval," ",hist_life[i],"\n"))
-            end
-            close(file_hist)
-
-#         end
-#     end
-# end
+        end
+    end
+end
