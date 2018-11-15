@@ -24,12 +24,14 @@ close(fileh_s)
 a=30*Bohr2Ang
 
 # 1.2 Loop over all sizes
+file_energy=open(string(folder_base,"BE-n.dat"),"w")
 for n=2:4
     n_mo  = n
     n_s = 2*n
+    nb_atoms=n_mo+n_s
     file_all_data=open(string(folder_base,"Mo",n_mo,"S",n_s,"_unsorted_allinfo.dat"),"w")
     # 1.2.1 - Loop over all clusters
-    file_cluster_all=open(string(folder_base,"cluster_centered.xyz"),"w")
+    file_cluster_all=open(string(folder_base,"Mo",n_mo,"S",n_s,"cluster_centered.xyz"),"w")
     for cluster=1:n_max_cluster
         folder_local=string(folder_base,"Mo",n_mo,"S",n_s,"/Final/",cluster,"_cluster_relax/")
         if isfile(string(folder_local,"output"))
@@ -71,8 +73,7 @@ for n=2:4
                     elseif elements[2] == "magnetization"
                         if elements[1] == "total"
                             mag_tot=parse(Float64,elements[4])
-                        else
-                            print("n_mo: ",n_mo," n_s: ",n_s," elements:",elements,"\n")
+                        elseif  elements[5] == "Bohr"
                             mag_abs=parse(Float64,elements[4])
                         end
                     end
@@ -95,6 +96,7 @@ for n=2:4
                     end
                 end
             end
+            # Compute HL Gap
             hl_gap=min+max
             #-----------------------------------------------------------------
             # 1.2.1.3 - Get Energy
@@ -107,7 +109,7 @@ for n=2:4
             be_cluster = - ( e_cluster - n_mo*e_mo - n_s*e_s )/nb_atoms
             #-----------------------------------------------------------------
             # 1.2.1.5 - Write Data
-            write(file_all_data,string(cluster," ",be_cluster," ",mag_abs," ",mag_tot,"\n"))
+            write(file_all_data,string(cluster," ",be_cluster," ",mag_abs," ",mag_tot," ",hl_gap,"\n"))
             #-----------------------------------------------------------------
             # 1.2.1.6 - Centering cluster
             clusters=filexyz.readFastFile(string(folder_local,"cluster.xyz"))
@@ -168,8 +170,100 @@ for n=2:4
     end
     close(file_all_data)
     close(file_cluster_all)
+    # Sorting clusters
+    file_all_data=open(string(folder_base,"Mo",n_mo,"S",n_s,"_unsorted_allinfo.dat"))
+    lines_data=readlines(file_all_data)
+    close(file_all_data)
+    be=zeros(size(lines_data)[1])
+    hl_gap=zeros(size(lines_data)[1])
+    mag_abs=zeros(size(lines_data)[1])
+    mag_tot=zeros(size(lines_data)[1])
+    index=zeros(size(lines_data)[1])
+    for i=1:size(lines_data)[1]
+        elements=split(lines_data[i])
+        be[i]=parse(Float64,elements[2])
+        mag_abs[i]=parse(Float64,elements[3])
+        mag_tot[i]=parse(Float64,elements[4])
+        hl_gap[i]=parse(Float64,elements[5])
+        index[i]=i
+    end
+    clusters=filexyz.readFastFile(string(folder_base,"Mo",n_mo,"S",n_s,"cluster_centered.xyz"))
+    for i=1:size(clusters)[1]
+        for j=1:size(clusters)[1]
+            if be[i] > be[j]
+                #--------------------------
+                stock=be[i]
+                be[i]=be[j]
+                be[j]=stock
+                #-------------------------
+                stock=mag_abs[i]
+                mag_abs[i]=mag_abs[j]
+                mag_abs[j]=stock
+                #------------------------
+                stock=mag_tot[i]
+                mag_tot[i]=mag_tot[j]
+                mag_tot[j]=stock
+                #-----------------------
+                # Mag tot
+                #--------------------------
+                stock=hl_gap[i]
+                hl_gap[i]=hl_gap[j]
+                hl_gap[j]=stock
+                #--------------------------
+                stock=clusters[i]
+                clusters[i]=clusters[j]
+                clusters[j]=stock
+                #--------------------------
+                stock=index[i]
+                index[i]=index[j]
+                index[j]=stock
+                #--------------------------
+            end
+        end
+    end
+    strike=zeros(size(lines_data)[1])
+    for i=1:size(clusters)[1]-1
+        if strike[i] == 1
+            continue
+        end
+        for j=i+1:size(clusters)[1]
+            if abs(be[i]-be[j]) < 0.001
+                strike[j]=1
+            end
+        end
+    end
+    file_all_data=open(string(folder_base,"Mo",n_mo,"S",n_s,"_sorted_allinfo.dat"),"w")
+    file_all_cluster=open(string(folder_base,"Mo",n_mo,"S",n_s,"_all_sorted_clusters.xyz"),"w")
+    count=1
+    for i=1:size(clusters)[1]
+        if strike[i] == 1
+            print("STRIKE: ",i,"\n")
+            continue
+        end
+        write(file_all_data,string(count," ",be[i]," ",mag_abs[i]," ",mag_tot[i]," ",hl_gap[i]," ",index[i]," ",,"\n"))
+        write(file_all_cluster,string(nb_atoms,"\n"))
+        write(file_all_cluster,string("Cluster: ",index[i],"\n"))
+        for Mo=1:n_mo
+            write(file_all_cluster,string("Mo "))
+            for j=1:3
+                write(file_all_cluster,string(clusters[i].positions[Mo,j]," "))
+            end
+            write(file_all_cluster,string("\n"))
+        end
+        for S=1:n_s
+            write(file_all_cluster,string("S "))
+            for j=1:3
+                write(file_all_cluster,string(clusters[i].positions[n_mo+S,j]," "))
+            end
+            write(file_all_cluster,string("\n"))
+        end
+        count+=1
+    end
+    close(file_all_data)
+    close(file_all_cluster)
+    write(file_energy,string(n," ",be[1],"\n"))
 end
 
+close(file_energy)
 # Indicate possible redundancy for manual check
 # Compute Absolute and Total Magnetization
-# Compute HL Gap
