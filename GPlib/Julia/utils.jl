@@ -8,7 +8,7 @@ module utils
 # VECTORS
 #==============================================================================#
 # - Checks whether vector is of dimension dim
-function check_dim_vec{T <: Real}(vector::Vector{T},dim::Int)
+function check_dim_vec(vector::Vector{T1},dim::T2) where {T1 <: Real, T2 <: Int}
   sizevec = size(vector)[1]
   if ( sizevec == dim )
     return true
@@ -19,7 +19,7 @@ function check_dim_vec{T <: Real}(vector::Vector{T},dim::Int)
 end
 # check_mat_dim
 # - Checks whether matrix is of dimension xdim*ydim
-function check_mat_dim{T<:Real}(matrix::Matrix{T},xdim::Int,ydim::Int)
+function check_mat_dim( matrix::Matrix{T1}, xdim::T2, ydim::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
   sizematx=size(matrix)[1]
   sizematy=size(matrix)[2]
   if ( sizematx == xdim && sizematy == ydim )
@@ -30,7 +30,7 @@ function check_mat_dim{T<:Real}(matrix::Matrix{T},xdim::Int,ydim::Int)
   end
 end
 # Get the minimum value of array
-function getMin{T <: Real}(array::Vector{T})
+function getMin( array::Vector{T} ) where { T <: Real }
   min=array[1]
   for i=2:size(array)[1]
     if array[i] < min
@@ -40,7 +40,7 @@ function getMin{T <: Real}(array::Vector{T})
   return min
 end
 # Get the maximum value of array
-function getMax{T <: Real}(array::Vector{T})
+function getMax( array::Vector{T} ) where { T <: Real }
   max=array[1]
   for i=2:size(array)[1]
     if array[i] > max
@@ -50,7 +50,7 @@ function getMax{T <: Real}(array::Vector{T})
   return max
 end
 # Calculate the distance between two vectors
-function distance{ T1 <:Real , T2 <: Real }(vec1::Vector{T1}, vec2::Vector{T2})
+function distance( vec1::Vector{T1}, vec2::Vector{T2} ) where { T1 <: Real , T2 <: Real }
   if size(vec1)[1] != size(vec2)[1]
     error(string("Size mismatch between the two vectors ",size(vec1)[1]," for first argument and",size(vec1)[2],"for second argument.\n"))
   end
@@ -60,7 +60,7 @@ function distance{ T1 <:Real , T2 <: Real }(vec1::Vector{T1}, vec2::Vector{T2})
   end
   return sqrt(distance)
 end
-function removeDuplicates{T1<:Real}(vector::Vector{T1})
+function removeDuplicates( vector::Vector{T1} ) where { T1 <: Real }
   i=1; j=2;
   while i < size(vector)[1]
     while j <= size(vector)[1]
@@ -78,7 +78,7 @@ end
 #==============================================================================#
 
 # Distance Checkers
-function checkDistance{T <: Real}(distance::T)
+function checkDistance( distance::T ) where { T <: Real }
   if distance >= 0
     return true
   else
@@ -86,7 +86,7 @@ function checkDistance{T <: Real}(distance::T)
     return false
   end
 end
-function checkDistance{T <: Real}(distances::Vector{T})
+function checkDistance( distances::Vector{T} ) where { T <: Real }
   for i=1:size(distances)[1]
     if !(checkDistance(distances[i]))
       return false
@@ -95,7 +95,7 @@ function checkDistance{T <: Real}(distances::Vector{T})
   return true
 end
 # Angles Checkers
-function checkAngle{T <: Real}(angle::T)
+function checkAngle( angle::T ) where { T <: Real }
   if angle < 180 && angle > 0
     return true
   else
@@ -103,7 +103,8 @@ function checkAngle{T <: Real}(angle::T)
     return false
   end
 end
-function checkAngle{T <: Real}(angles::Vector{T})
+#
+function checkAngle( angles::Vector{T} ) where { T <: Real }
   for i=1:size(angles)[1]
     if !(checkAngle(angles[i]))
       return false
@@ -120,17 +121,17 @@ end
 # Parsing
 #--------------------------------------------------------------
 # Prase a string into a real
-function str2rl(string::AbstractString)
+function str2rl( string::T ) where { T <: AbstractString }
   return parse(Float64,string)
 end
 # Parse a string into an Int
-function str2int(string::AbstractString)
+function str2int( string::T ) where { T <: AbstractString }
   return parse(Int64,string)
 end
 #---------------------------------------------------------------
 # Conversion
 # Transforms a character into a int
-function char2int(char::Char)
+function char2int(char::T) where { T <: Char }
   maj=['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
   min=['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
   for i=1:26
@@ -143,7 +144,7 @@ end
 # String
 #----------
 # Puts nb spaces at string1 end
-function spaces(string1::AbstractString,nb::Int)
+function spaces( string1::T1, nb::T2 ) where { T1 <: AbstractString, T2 <: Int }
   string2=string1
   for i=1:nb
     string2=string(string2," ")
@@ -157,7 +158,7 @@ end
 #===============#
 
 #==============================================================================#
-function isIn(element,list)
+function isIn( element, list )
   for i=1:size(list)[1]
     if element == list[i]
       return true

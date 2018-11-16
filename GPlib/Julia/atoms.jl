@@ -1,12 +1,12 @@
-if ! isdefined(:utils)
-    include("utils.jl")
-end
+#if ! isdefined(:utils,Main)
+include("utils.jl")
+#end
 
 module atom_mod
 
 export Atom, AtomList, AtomMolList, switchAtoms
 
-using utils
+using Main.utils
 
 mutable struct Atom
     name::AbstractString
@@ -21,7 +21,7 @@ mutable struct AtomList
     names::Vector{AbstractString}
     index::Vector{Int}
     positions::Array{Real}
-    function AtomList{T1 <: Int}( nb_atoms::T1)
+    function AtomList( nb_atoms::T1 ) where { T1 <: Int }
         new( Vector{AbstractString}(nb_atoms) , zeros(nb_atoms), zeros(nb_atoms,3) )
     end
 end
@@ -32,12 +32,12 @@ mutable struct AtomMolList
     mol_names::Vector{AbstractString}
     mol_index::Vector{Int}
     positions::Array{Real}
-    function AtomMolList{ T1 <: Int }( nb_atoms::T1 )
+    function AtomMolList( nb_atoms::T1 ) where { T1 <: Int }
         new(Vector{AbstractString}( nb_atoms ),Vector{Int}( nb_atoms ) ,Vector{AbstractString}( nb_atoms ), Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3))
     end
 end
 
-function switchAtoms{  T2 <: Int, T3 <: Int }( atoms::AtomMolList , index1::T2, index2::T3 )
+function switchAtoms( atoms::T1 , index1::T2, index2::T3 ) where { T1 <: AtomMolList, T2 <: Int, T3 <: Int }
     # Storing
     a_index=atoms.atom_index[index1]
     a_name=atoms.atom_names[index1]

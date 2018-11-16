@@ -1,6 +1,4 @@
-if ( ! isdefined(:atom_mod) )
-    include("atoms.jl")
-end
+include("atoms.jl")
 
 module cell_mod
 
@@ -10,7 +8,7 @@ export vec2matrix, wrap, dist1D, distance, compressParams, compressAtoms
 
 # Import all import module
 #----------------------------
-using atom_mod
+using Main.atom_mod
 #----------------------------
 
 #-------------
@@ -22,10 +20,10 @@ mutable struct Cell_param
     function Cell_param()
         new([0,0,0],[0,0,0]);
     end
-    function Cell_param{T1 <: Real, T2<: Real, T3 <: Real}( a::T1, b::T2, c::T3)
+    function Cell_param( a::T1, b::T2, c::T3 ) where { T1 <: Real, T2<: Real, T3 <: Real }
         new([a,b,c],[90.,90.,90.])
     end
-    function Cell_param{ T1 <: Real, T2<: Real, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real }( a::T1, b::T2, c::T3, alpha::T4, beta::T5, gamma::T6)
+    function Cell_param( a::T1, b::T2, c::T3, alpha::T4, beta::T5, gamma::T6 ) where { T1 <: Real, T2<: Real, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real }
         new([a,b,c],[alpha,beta,gamma])
     end
 end
@@ -33,8 +31,28 @@ mutable struct Cell_vec
     v1::Vector{Real}
     v2::Vector{Real}
     v3::Vector{Real}
-    function Cell_vec()
+    function Cell_vec( )
         new([],[],[]);
+    end
+    function Cell_vec( v1::Vector{T1} ) where { T1 <: Real }
+        if size(v1)[1] == 3
+            v2    = zeros(3)
+            v3    = zeros(3)
+            v2[2] = v1[1]
+            v3[3] = v1[1]
+            new( v1, v2, v3)
+        else
+            print("Error building vector !\n")
+            new( [], [], [] )
+        end
+    end
+    function Cell_vec( v1::Vector{T1}, v2::Vector{T2}, v3::Vector{T3} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+        if size(v1)[1] == 3 && size(v2)[1] == 3 && size(v3)[1] == 3
+            new( v1, v2, v3 )
+        else
+            print("Error building vector !\n")
+            new( [], [], [] )
+        end
     end
 end
 mutable struct Cell_matrix
@@ -42,13 +60,21 @@ mutable struct Cell_matrix
     function Cell_matrix()
         new(Array{Real}(3,3));
     end
-    function Cell_matrix{ T1 <: Real }( matrix::Array{T1})
+    function Cell_matrix( matrix::Array{T1}) where { T1 <: Real }
         if size(matrix)[1]==3 && size(matrix)[2]==3
             new( matrix )
         end
     end
-    function Cell_matrix{ T1 <: Real }( a::T1, b::T1, c::T1 )
-        new([[a,0,0],[0,b,0],[0,0,c]])
+    function Cell_matrix( a::T1, b::T1, c::T1 ) where { T1 <: Real }
+        new( [ [ a, 0, 0 ], [ 0, b, 0 ] , [ 0, 0, c ] ] )
+    end
+    function Cell_matrix( v1::Vector{T1}, v2::Vector{T2}, v3::Vector{T3} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+        if size(v1)[1] == 3 && size(v2)[1] == 3 && size(v3)[1] == 3
+            new( [ v1, v2, v3 ] )
+        else
+            print("Error building matrix!\n")
+            new( Array{Real}( 3, 3 ) )
+        end
     end
 end
 #------------------------------
@@ -60,7 +86,7 @@ Cell=Union{Cell_param, Cell_vec, Cell_matrix}
 #---------------------------------------------
 
 #---------------------------------------------------------------------------\
-function vec2matrix{ T1 <: Cell_vec}( vectors::T1 )
+function vec2matrix( vectors::T1 ) where { T1 <: Cell_vec }
     matrix=Cell_matrix()
     for i=1:3
         matrix.matrix[i,1] = vectors.v1[i]
@@ -76,7 +102,7 @@ end
 #---------------------------------------------------------------------------\
 
 #-------------------------------------------------------------------------------
-function wrap{ T1 <: Real, T2 <: Real}( position::T1, length::T2 )
+function wrap( position::T1, length::T2 ) where { T1 <: Real, T2 <: Real}
     sign=-1
     if position < 0
         sign=1
@@ -86,7 +112,7 @@ function wrap{ T1 <: Real, T2 <: Real}( position::T1, length::T2 )
     end
     return position
 end
-function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2 )
+function wrap( atoms::T1, cell::T2 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_matrix }
     # Computes cell parameters
     #--------------------------------------------
     params=[0.,0.,0.]
@@ -102,14 +128,14 @@ function wrap{ T1 <: atom_mod.AtomList, T2 <: Cell_matrix }( atoms::T1, cell::T2
     #---------------------------------
     for i=1:size(atoms.positions)[1]
         for j=1:3
-             atoms.positions[i,j] = wrap( atoms.positions[i,j],params[j])
+            atoms.positions[i,j] = wrap( atoms.positions[i,j],params[j])
         end
     end
     #----------------------------------
 
     return atoms
 end
-function wrap{ T1 <: Real, T2 <: Cell_param }( positions::Vector{T1}, cell::T2 )
+function wrap( positions::Vector{T1}, cell::T2 ) where { T1 <: Real, T2 <: Cell_param }
     #---------------
     # Compute atoms
     #---------------------------------
@@ -124,7 +150,7 @@ end
 
 # Distance related functions
 #-------------------------------------------------------------------------------
-function dist1D{ T1 <: Real, T2 <: Real, T3 <: Real }( x1::T1, x2::T2, a::T3 )
+function dist1D( x1::T1, x2::T2, a::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
     dx=x1-x2
     if dx > a*0.5
         dx -= a
@@ -137,14 +163,14 @@ end
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int }( atoms::T1, cell::T2, index1::T3, index2::T3 )
+function distance( atoms::T1, cell::T2, index1::T3, index2::T3 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int }
     dis=0
     for i=1:3
         dis += dist1D( atoms.positions[index1,i],atoms.positions[index2,i], cell.length[i] )
     end
     return sqrt(dis)
 end
-function distance{ T1 <: atom_mod.AtomList, T2 <: Cell_param,  T3 <: Int, T4 <: Bool }( atoms::T1, cell::T2, index1::T3, index2::T3, wrap::T4 )
+function distance( atoms::T1, cell::T2, index1::T3, index2::T3, wrap::T4 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param,  T3 <: Int, T4 <: Bool }
     if (  wrap )
         wrap(atoms,cell)
     end
@@ -155,14 +181,14 @@ end
 #----------
 # Compress
 #---------------------------------------------------------------------------
-function compressParams{ T1 <: Cell_param, T2 <: Real }( cell::T1, fracs::Vector{T2})
+function compressParams( cell::T1, fracs::Vector{T2} ) where { T1 <: Cell_param, T2 <: Real }
     for i=1:3
         cell.lengths[i] *= fracs[i]
     end
     return cell
 end
 #---------------------------------------------------------------------------
-function compressAtoms{ T1 <: atom_mod.AtomList, T2 <: Cell_param, T3 <: Real }( atoms::T1 , cell::T2, fracs::Vector{T3} )
+function compressAtoms( atoms::T1 , cell::T2, fracs::Vector{T3} ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param, T3 <: Real }
     for i=1:size(atoms.names)[1]
         for j=1:3
             atoms.positions[i,j] *= fracs[j]
