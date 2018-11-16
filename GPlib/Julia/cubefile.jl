@@ -1,13 +1,12 @@
 include("cell.jl")
 include("geom.jl")
+include("conversion.jl");
 
 module cube_mod
 
-include("conversion.jl");
-
-importall atom_mod
-importall cell_mod
-importall geom
+using Main.atom_mod
+using Main.cell_mod
+using Main.geom
 
 #-----------------------------------------------------------------------
 # Volume 4, nb_vox*nb_vox*nb_vox
@@ -23,14 +22,14 @@ mutable struct Volume
     function Volume()
         new( Array{Real}(1,1,1), Array{Real}(3,3), Vector{Int}(3),Vector{Real}(3) )
     end
-    function Volume{T1 <: Real}( nb_vox_iso::T1 )
+    function Volume( nb_vox_iso::T1 ) where {T1 <: Real}
         if nb_vox_iso > 0
             new( Array{Real}( nb_vox_iso, nb_vox_iso, nb_vox_iso), Array{Real}(3,3), [nb_vox_iso, nb_vox_iso, nb_vox_iso] )
         else
             print("/!\\ Error: Wrong size for the number of voxels.");
         end
     end
-    function Volume{T1 <: Real}( nb_vox::Vector{T1} )
+    function Volume( nb_vox::Vector{T1} ) where {T1 <: Real}
         if size(nb_vox)[1] == 3
             new( Array{Real}(nb_vox[1],nb_vox[2],nb_vox[3]),Array{Real}(3,3),nb_vox);
         else
@@ -41,7 +40,7 @@ end
 #-----------------------------------------------------------------------
 
 # Reads a cube file and returns all or parts of its informations
-function readCube{T1<:AbstractString}( file_name::T1)
+function readCube( file_name::T1 ) where { T1 <: AbstractString }
     #--------------
     # Reading file
     #----------------------
@@ -144,7 +143,7 @@ function readCube{T1<:AbstractString}( file_name::T1)
     return atom_list, cell_matrix, volume
 end
 
-function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 )
+function getClosest( position::Vector{T1} , vol::T2 ) where { T1 <: Real, T2 <: Volume }
     # Works for orthorombic, not yet for non-orthorombic
     #------------------
     # Compute lengths
@@ -208,7 +207,7 @@ function getClosest{ T1 <: Real, T2 <: Volume }( position::Vector{T1} , vol::T2 
     return floats
 end
 
-function paramVoxVectors{ T1 <: Volume }( volume::T1 )
+function paramVoxVectors( volume::T1 ) where { T1 <: Volume }
     params=Vector{Real}(3)
     for i=1:3
         for j=1:3
@@ -220,7 +219,7 @@ function paramVoxVectors{ T1 <: Volume }( volume::T1 )
 end
 
 # Trace the volume between two points.
-function traceLine{ T1 <: Real, T2 <: Real, T3 <: Volume, T4 <: Int }(     position1::Vector{T1}, position2::Vector{T2}, volume::T3, nb_points::T4 )
+function traceLine( position1::Vector{T1}, position2::Vector{T2}, volume::T3, nb_points::T4 ) where { T1 <: Real, T2 <: Real, T3 <: Volume, T4 <: Int }
     if size(position1)[1] != 3 || size(position2)[1] != 3
         return false
     end
