@@ -22,7 +22,7 @@ mutable struct AtomList
     index::Vector{Int}
     positions::Array{Real}
     function AtomList( nb_atoms::T1 ) where { T1 <: Int }
-        new( Vector{AbstractString}(nb_atoms) , zeros(nb_atoms), zeros(nb_atoms,3) )
+        new( Array{AbstractString,1}(undef,nb_atoms) , zeros(nb_atoms), zeros(nb_atoms,3) )
     end
 end
 

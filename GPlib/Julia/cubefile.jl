@@ -20,7 +20,7 @@ mutable struct Volume
     nb_vox::Vector{Int}
     origin::Vector{Real}
     function Volume()
-        new( Array{Real}(1,1,1), Array{Real}(3,3), Vector{Int}(3),Vector{Real}(3) )
+        new( Array{ Real, 3 }(undef,1,1,1), Array{Real,2}(undef,3,3), Array{Int,1}(undef,3),Array{Real,1}(undef,3) )
     end
     function Volume( nb_vox_iso::T1 ) where {T1 <: Real}
         if nb_vox_iso > 0
@@ -58,7 +58,7 @@ function readCube( file_name::T1 ) where { T1 <: AbstractString }
     #--------------------------------
     # Origin position of the density
     #-----------------------------------------------------
-    center=Vector{Real}(3)
+    center=zeros(3)
     for i=1:3
         center[i]=parse(Float64,split(lines[3])[1+i])*0.529177
     end
@@ -67,7 +67,7 @@ function readCube( file_name::T1 ) where { T1 <: AbstractString }
     #-------------------------------------
     # Number of voxels in each direction
     #-----------------------------------------------------
-    nb_vox=Vector{Int}(3)
+    nb_vox=zeros(Int,3)
     for i=1:3
         nb_vox[i] = parse(Float64, split( lines[3+i] )[1] )
     end
@@ -76,7 +76,7 @@ function readCube( file_name::T1 ) where { T1 <: AbstractString }
     #--------------------
     # Reads Cell Matrix
     #-----------------------------------------------------
-    cell_matrix=Array{Real}(3,3);
+    cell_matrix=zeros(Real,3,3)
     for i=1:3
         for j=1:3
             cell_matrix[i,j] = parse(Float64, split( lines[3+i] )[1+j] )*0.529177
@@ -101,7 +101,7 @@ function readCube( file_name::T1 ) where { T1 <: AbstractString }
     #----------------------------------------------------
     nb_tot=nb_vox[1]*nb_vox[2]*nb_vox[3]
     nb_col=6
-    matrix = Array{Real}( nb_vox[1], nb_vox[2], nb_vox[3] )
+    matrix = Array{Real,3}( undef,nb_vox[1], nb_vox[2], nb_vox[3] )
     offset=(Int)(6+nb_atoms+1)
     x=1; y=1; z=1;
     for i=0:nb_tot/nb_col-1
