@@ -4,21 +4,25 @@ include("atoms.jl")
 include("cell.jl")
 include("cubefile.jl")
 
-step_max=501
+step_max=1001
 step_min=1
-d_step=100
+d_step=1
 
 nbC=32
 nbO=64
 
-bond_matrix_truth=zeros(32,64,Int((step_max-step_min)/10))
-distance_matrix=zeros(32,64,Int((step_max-step_min)/10))
+bond_matrix_truth=zeros(32,64,Int((step_max-step_min)/d_step))
+distance_matrix=zeros(32,64,Int((step_max-step_min)/d_step))
 
-test=zeros(Int,1)
-test[1]=1
-print("step_analysis: ",step_analysis,"\n")
+#test=zeros(Int,1)
+test=1
 for step=step_min:d_step:step_max
-	print("Progress: ",step/step_max,"%\n")
+	print("Progress: ",step/step_max*100,"%\n")
+
+	if ! isfile( string("/home/moogmt/CO2/CO2_AIMD/ELF/ELF_8.82_results/",step,"_elf.cube") )
+		continue
+	end
+
 	atoms, cell_matrix, elf = cube_mod.readCube(string("/home/moogmt/CO2/CO2_AIMD/ELF/ELF_8.82_results/",step,"_elf.cube"))
 	params=zeros(3)
 	for j=1:3
@@ -37,8 +41,8 @@ for step=step_min:d_step:step_max
 	end
 	for carbon=1:nbC
 		for oxygen=1:nbO
-			distance_matrix[carbon,oxygen,test[1]] = cell_mod.distance( atoms, cell, carbon, nbC+oxygen )
-			if distance_matrix[carbon,oxygen,test[1]] < 3.0
+			distance_matrix[carbon,oxygen,test] = cell_mod.distance( atoms, cell, carbon, nbC+oxygen )
+			if distance_matrix[carbon,oxygen,test] < 3.0
 				for j=1:3
 				    di = atoms.positions[carbon,j]-atoms.positions[nbC+oxygen,j]
 				    if di > cell.length[j]*0.5
@@ -103,10 +107,10 @@ for step=step_min:d_step:step_max
 					index[i] += 1
 				end
 				if elf.matrix[index[1],index[2],index[3]] > 0.7
-					bond_matrix_truth[carbon,oxygen,test[1]] = 1
+					bond_matrix_truth[carbon,oxygen,test ] = 1
 				end
 			end
 		end
 	end
-	test[1] = test[1]+1
+	global test = test+1
 end
