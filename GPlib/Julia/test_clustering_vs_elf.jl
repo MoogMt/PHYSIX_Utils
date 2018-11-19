@@ -11,15 +11,17 @@ d_step=1
 nbC=32
 nbO=64
 
-bond_matrix_truth=zeros(32,64,Int((step_max-step_min)/d_step))
-distance_matrix=zeros(32,64,Int((step_max-step_min)/d_step))
+bond_matrix_truth=zeros(nbC,nbO,Int((step_max-step_min)/d_step))
+distance_matrix=zeros(nbC,nbO,Int((step_max-step_min)/d_step))
+
+folder_base="/home/moogmt/CO2/"
 
 #test=zeros(Int,1)
 test=1
 for step=step_min:d_step:step_max
 	print("Progress: ",step/step_max*100,"%\n")
 
-	if ! isfile( string("/home/moogmt/CO2/CO2_AIMD/ELF/ELF_8.82_results/",step,"_elf.cube") )
+	if ! isfile( string(folder_base,"CO2_AIMD/ELF/ELF_8.82_results/",step,"_elf.cube") )
 		continue
 	end
 
@@ -114,3 +116,20 @@ for step=step_min:d_step:step_max
 	end
 	global test = test+1
 end
+
+file_elf=open(string(folder_base,"882_elf_truth.dat"),"w")
+file_distances=open(string(folder_base,"882_distance_matrix.dat"),"w")
+write(file_elf, string(nbO," ",nbC," ",size(bond_matrix_truth)[3],"\n") )
+write(file_distances,string(nbO," ",nbC," ",size(bond_matrix_truth)[3],"\n") )
+for step=1:size(bond_matrix_truth)[3]
+	for carbon=1:nbC
+		for oxygen=1:nbO
+			write(file_distances,string(distance_matrix[carbon,oxygen,step]," "))
+			write(file_elf,string(bond_matrix_truth[carbon,oxygen,step]," "))
+		end
+		write(file_distances,string("\n"))
+		write(file_elf,string("\n"))
+	end
+end
+close(file_elf)
+close(file_distances)
