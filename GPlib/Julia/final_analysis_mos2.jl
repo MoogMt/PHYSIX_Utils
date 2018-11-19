@@ -170,6 +170,7 @@ for n=2:4
     end
     close(file_all_data)
     close(file_cluster_all)
+
     # Sorting clusters
     file_all_data=open(string(folder_base,"Mo",n_mo,"S",n_s,"_unsorted_allinfo.dat"))
     lines_data=readlines(file_all_data)
@@ -234,30 +235,41 @@ for n=2:4
     end
     file_all_data=open(string(folder_base,"Mo",n_mo,"S",n_s,"_sorted_allinfo.dat"),"w")
     file_all_cluster=open(string(folder_base,"Mo",n_mo,"S",n_s,"_all_sorted_clusters.xyz"),"w")
+    file_cluster=open(string(folder_base,"Mo",n_mo,"S",n_s,"_cluster",count,".xyz"),"w")
     count=1
     for i=1:size(clusters)[1]
         if strike[i] == 1
             print("STRIKE: ",i,"\n")
             continue
         end
-        write(file_all_data,string(count," ",be[i]," ",mag_abs[i]," ",mag_tot[i]," ",hl_gap[i]," ",index[i]," ",,"\n"))
+        file_cluster=open(string(folder_base,"Mo",n_mo,"S",n_s,"_cluster",count,".xyz"),"w")
+        write(file_all_data,string(count," ",be[i]," ",mag_abs[i]," ",mag_tot[i]," ",hl_gap[i]," ",index[i],"\n"))
         write(file_all_cluster,string(nb_atoms,"\n"))
         write(file_all_cluster,string("Cluster: ",index[i],"\n"))
+        write(file_cluster,string(nb_atoms,"\n"))
+        write(file_cluster,string("Cluster: ",count,"\n"))
         for Mo=1:n_mo
             write(file_all_cluster,string("Mo "))
+            write(file_cluster,string("Mo "))
             for j=1:3
                 write(file_all_cluster,string(clusters[i].positions[Mo,j]," "))
+                write(file_cluster,string(clusters[i].positions[Mo,j]," "))
             end
             write(file_all_cluster,string("\n"))
+            write(file_cluster,string("\n"))
         end
         for S=1:n_s
             write(file_all_cluster,string("S "))
+            write(file_cluster,string("S "))
             for j=1:3
                 write(file_all_cluster,string(clusters[i].positions[n_mo+S,j]," "))
+                write(file_cluster,string(clusters[i].positions[n_mo+S,j]," "))
             end
             write(file_all_cluster,string("\n"))
+            write(file_cluster,string("\n"))
         end
         count+=1
+        close(file_cluster)
     end
     close(file_all_data)
     close(file_all_cluster)
@@ -265,5 +277,3 @@ for n=2:4
 end
 
 close(file_energy)
-# Indicate possible redundancy for manual check
-# Compute Absolute and Total Magnetization
