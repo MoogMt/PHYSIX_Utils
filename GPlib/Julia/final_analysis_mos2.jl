@@ -25,6 +25,7 @@ a=30*Bohr2Ang
 
 # 1.2 Loop over all sizes
 file_energy=open(string(folder_base,"BE-n.dat"),"w")
+
 for n=2:4
     n_mo  = n
     n_s = 2*n
@@ -235,7 +236,6 @@ for n=2:4
     end
     file_all_data=open(string(folder_base,"Mo",n_mo,"S",n_s,"_sorted_allinfo.dat"),"w")
     file_all_cluster=open(string(folder_base,"Mo",n_mo,"S",n_s,"_all_sorted_clusters.xyz"),"w")
-    file_cluster=open(string(folder_base,"Mo",n_mo,"S",n_s,"_cluster",count,".xyz"),"w")
     count=1
     for i=1:size(clusters)[1]
         if strike[i] == 1
@@ -243,7 +243,7 @@ for n=2:4
             continue
         end
         file_cluster=open(string(folder_base,"Mo",n_mo,"S",n_s,"_cluster",count,".xyz"),"w")
-        write(file_all_data,string(count," ",be[i]," ",mag_abs[i]," ",mag_tot[i]," ",hl_gap[i]," ",index[i],"\n"))
+        write(file_all_data,string(count," ",be[i]," ",mag_abs[i]," ",mag_tot[i]," ",hl_gap[i]," ",index[i]," ",n,"\n"))
         write(file_all_cluster,string(nb_atoms,"\n"))
         write(file_all_cluster,string("Cluster: ",index[i],"\n"))
         write(file_cluster,string(nb_atoms,"\n"))
@@ -274,6 +274,11 @@ for n=2:4
     close(file_all_data)
     close(file_all_cluster)
     write(file_energy,string(n," ",be[1],"\n"))
+    file_BE_relative=open(string(folder_base,"BE-relavtive-",n,".dat"),"w")
+    for i=1:size(be)[1]
+        write(file_BE_relative,string(i," ",abs.(be[i]-be[1]),"\n"))
+    end
+    close(file_BE_relative)
 end
 
 close(file_energy)
