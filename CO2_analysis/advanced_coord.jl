@@ -8,7 +8,7 @@ folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 # Thermo data
 Volumes=[8.82]
 Temperatures=[3000]
-Cut_Off=[1.75]
+Cut_Off=[1.6]
 
 # Number of atoms
 nbC=32
@@ -59,7 +59,7 @@ for step_sim=1:nb_steps
 end
 close(file_out)
 
-global cases=[1,1]
+global cases=ones(0,1)
 global count_cases=[1]
 
 for step_sim=1:nb_steps
@@ -70,17 +70,26 @@ for step_sim=1:nb_steps
         global cases
         global count_cases
         if size(cases)[1] == 0
-            cases=coord_matrix[step_sim,carbon,:]
+            global cases=ones(1,2)
+            cases[1,1]= coord_matrix[step_sim,carbon,1]
+            cases[1,2]= coord_matrix[step_sim,carbon,2]
         else
-            check=true
-            for i=1:size(cases)[1]
-                if abs.(cases[1]-coord_matrix[step_sim,carbon,1]) +  abs.(cases[2]-coord_matrix[step_sim,carbon,2]) == 0
-                    count_cases[i] += 1
-                    new=false
+            global new=true
+            if size(cases)[2] == 1
+                if cases[1] == coord_matrix[step_sim,carbon,1] && cases[2] == coord_matrix[step_sim,carbon,2]
+                    global count[i] += 1
+                    global new=false
+                end
+            else
+                for i=1:size(cases)[1]
+                    if cases[i,1] == coord_matrix[step_sim,carbon,1] && cases[i,2] == coord_matrix[step_sim,carbon,2]
+                        global count_cases[i] += 1
+                        global new=false
+                    end
                 end
             end
-            if check
-                cases=[cases; coord_matrix[step_sim,carbon,:] ]
+            if new
+                global cases=[cases; transpose(coord_matrix[step_sim,carbon,:]) ]
                 push!(count_cases,1)
             end
         end
