@@ -34,58 +34,27 @@ nb_steps=size(traj)[1]
 
 restart=true
 
-file_coordinance=string(folder_out,"advanced_coordinance.dat")
+file_out=open(string(folder_out,"advanced_coordinance.dat"),"w")
 
-file_out=open(file_coordinance,"w")
+for step_sim=1:nb_steps
 
-bond_matrix=zeros(nb_atoms,nb_atoms)
-
-step_sim=1
-
-nb_type=2
-
-bond_matrix=zeros(nb_atoms,nb_atoms)
-for atom1=1:nb_atoms
-    for atom2=atom1+1:nb_atoms
-        if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off
-            bond_matrix[atom1,atom2]=1
-            bond_matrix[atom2,atom1]=1
-        end
-    end
-end
-
-for carbon=1:nbC
-    coord_type=zeros(Int,2)
-    coord_nb=zeros(Int,5,2)
-    index_nb=zeros(Int,5,2)
-    count=0
-    for atom=1:nb_atoms
-        if carbon == atom
-            continue
-        end
-        if bond_matrix[carbon,atom] > 0
-            check=0
-            if atom < 32
-                check += 1
-            else
-                check += 2
+    bond_matrix=zeros(nb_atoms,nb_atoms)
+    for atom1=1:nb_atoms
+        for atom2=atom1+1:nb_atoms
+            if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off
+                bond_matrix[atom1,atom2]=1
+                bond_matrix[atom2,atom1]=1
             end
-            coord_type[check] += 1
-            coord_nb[check] = sum( bond_matrix[atom,:] )
-            index_nb[coord_type[check],check]= atom
-        end
-        if sum(coord_type) > max_coord
-            print("Oupsie: step-",step_sim," carbon-",carbon," atom-",atom,"\n")
         end
     end
-    write(file_coordinance,string(step_sim," ",carbon," "))
-    for type=1:nb_type
-        write(file_coordinance,string(coord_type[type]," "))
-        for i=1:5
-            write(file_coordinance,string(coord_nb[i,type]," ",index_nb[i,type]," "))
-        end
+
+    for carbon=1:nbC
+        coord_type=zeros(Int,2)
+        coord_type[1]=sum(bond_matrix[carbon,1:nbC])
+        coord_type[2]=sum(bond_matrix[carbon,nbC+1:nbC+nbO])
+        write(file_out,string(step_sim," ",))
     end
-    write(file_coordinance,string("\n"))
+
 end
 
 close(file_out)
