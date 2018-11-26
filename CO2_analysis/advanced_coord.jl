@@ -130,3 +130,13 @@ for lag=1:size(case_transition)[3]
     end
 end
 case_transition *= 100
+
+file_test=open(string(folder_out,"check.dat"),"w")
+for i=1:size(case_transition)[3]
+    write(file_test,string(i," "))
+    for j=1:size(cases)[1]
+        write(file_test,string(case_transition[j,j,i]," "))
+    end
+    write(file_test,string("\n"))
+end
+close(file_test)
