@@ -97,7 +97,7 @@ for step_sim=1:nb_steps
 end
 
 case_matrix=zeros(nb_steps,nbC)
-
+file_out=open(string(folder_out,"cases_simple-",cut_off,".dat"),"w")
 for step_sim=1:nb_steps
     print("Case affectation - Progress:",step_sim/nb_steps*100,"%\n")
     for carbon=1:nbC
@@ -106,5 +106,8 @@ for step_sim=1:nb_steps
                 case_matrix[step_sim,carbon]=i
             end
         end
+        write(file_out,string(case_matrix[step_sim,carbon]," "))
     end
+    write(file_out,string("\n"))
 end
+close(file_out)
