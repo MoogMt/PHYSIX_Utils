@@ -6,9 +6,9 @@ include(string(GPfolder,"contactmatrix.jl"))
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
 # Thermo data
-Volumes=[8.82]
-Temperatures=[3000]
-Cut_Off=[1.6]
+Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+Temperatures=[2000,2500,3000]
+Cut_Off=[1.75]
 
 # Number of atoms
 nbC=32
@@ -96,7 +96,7 @@ for step_sim=1:nb_steps
     end
 end
 
-case_matrix=zeros(nb_steps,nbC)
+case_matrix=zeros(Int,nb_steps,nbC)
 file_out=open(string(folder_out,"cases_simple-",cut_off,".dat"),"w")
 for step_sim=1:nb_steps
     print("Case affectation - Progress:",step_sim/nb_steps*100,"%\n")
@@ -111,3 +111,22 @@ for step_sim=1:nb_steps
     write(file_out,string("\n"))
 end
 close(file_out)
+
+lag_min=1
+lag_max=100
+case_transition=zeros(Float64,size(cases)[1],size(cases)[1],lag_max-lag_min+1)
+for lag=lag_min:lag_max
+    print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
+    for carbon=1:nbC
+        for step_sim=lag+1:nb_steps
+            case_transition[ case_matrix[step_sim,carbon], case_matrix[step_sim-lag,carbon], lag] += 1
+        end
+    end
+end
+
+for lag=1:size(case_transition)[3]
+    for i=1:size(cases)[1]
+        case_transition[:,i,lag]/=sum(case_transition[:,i,lag])
+    end
+end
+case_transition *= 100
