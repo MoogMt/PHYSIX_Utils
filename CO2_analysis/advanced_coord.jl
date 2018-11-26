@@ -58,3 +58,31 @@ for step_sim=1:nb_steps
     write(file_out,string("\n"))
 end
 close(file_out)
+
+global cases=[1,1]
+global count_cases=[1]
+
+for step_sim=1:nb_steps
+    print("Progress: ",step_sim/nb_steps*100,"%\n")
+    global cases
+    global count_cases
+    for carbon=1:nbC
+        global cases
+        global count_cases
+        if size(cases)[1] == 0
+            cases=coord_matrix[step_sim,carbon,:]
+        else
+            check=true
+            for i=1:size(cases)[1]
+                if abs.(cases[1]-coord_matrix[step_sim,carbon,1]) +  abs.(cases[2]-coord_matrix[step_sim,carbon,2]) == 0
+                    count_cases[i] += 1
+                    new=false
+                end
+            end
+            if check
+                cases=[cases; coord_matrix[step_sim,carbon,:] ]
+                push!(count_cases,1)
+            end
+        end
+    end
+end
