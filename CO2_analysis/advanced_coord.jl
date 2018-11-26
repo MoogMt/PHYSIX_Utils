@@ -95,3 +95,16 @@ for step_sim=1:nb_steps
         end
     end
 end
+
+case_matrix=zeros(nb_steps,nbC)
+
+for step_sim=1:nb_steps
+    print("Case affectation - Progress:",step_sim/nb_steps*100,"%\n")
+    for carbon=1:nbC
+        for i=1:size(cases)[1]
+            if cases[i,1] == coord_matrix[step_sim,carbon,1] && cases[i,2] == coord_matrix[step_sim,carbon,2]
+                case_matrix[step_sim,carbon]=i
+            end
+        end
+    end
+end
