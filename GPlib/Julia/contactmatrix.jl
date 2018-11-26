@@ -10,7 +10,7 @@ using Main.atom_mod
 using Main.cell_mod
 
 #-------------------------------------------------------------------------------
-function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param }( atoms::T1, cell::T2 )
+function buildMatrix( atoms::T1, cell::T2 ) where { T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param }
   nb_atoms=size(atoms.names)[1]
   matrix=zeros(nb_atoms,nb_atoms)
   for i=1:nb_atoms
@@ -22,19 +22,14 @@ function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param }( ato
   end
   return matrix
 end
-function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param, T3 <: Real }( atoms::T1 , cell::T2, cut_off::T3 )
+function buildMatrix( atoms::T1 , cell::T2, cut_off::T3 ) where { T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param, T3 <: Real }
   nb_atoms=size(atoms.names)[1]
   matrix=zeros(nb_atoms,nb_atoms)
-  value=0
   for i=1:nb_atoms
     for j=1:nb_atoms
-      dist=cell_mod.distance(atoms,cell,i,j)
-      if dist <= cut_off
+      if cell_mod.distance(atoms,cell,i,j) <= cut_off
         matrix[i,j]=1
         matrix[j,i]=1
-      else
-        matrix[i,j]=0
-        matrix[j,i]=0
       end
     end
   end
@@ -42,8 +37,21 @@ function buildMatrix{ T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param, T3 <:
 end
 #-------------------------------------------------------------------------------
 
+#----------------
+function getBonded( atoms::T1, cell::T2, index::T3 , cut_off::T4 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Int , T4 <: Real }
+  nb_atoms=size(atoms.names)[1]
+  for i=1:nb_atoms
+    dist=cell_mod.distance(atoms,cell,index,i)
+    if dist < cut_off
+      print("Bond with ", i, "\n");
+    end
+  end
+  return
+end
+#----------------------------------
+
 #-------------------------------------------------------------------------------
-function readMatrix{ T1 <: IO, T2 <: Int }( input::T1 , nb_atoms::T2)
+function readMatrix( input::T1 , nb_atoms::T2) where { T1 <: IO, T2 <: Int }
   matrix=zeros(nb_atoms,nb_atoms)
   for i=1:nb_atoms
     line=split(readline(input))
@@ -58,13 +66,13 @@ function readMatrix{ T1 <: IO, T2 <: Int }( input::T1 , nb_atoms::T2)
     return
   end
 end
-function readMatrix{ T1 <: AbstractString }( file::T1 )
+function readMatrix( file::T1 ) where { T1 <: AbstractString }
   file=open(file)
   nb_steps=Int(split(readline(file))[1])
   close(file)
   return nb_steps
 end
-function readMatrix{ T1<: AbstractString, T2<: Int }( file::T1, step::T2 )
+function readMatrix( file::T1, step::T2 ) where { T1<: AbstractString, T2<: Int }
   file=open(file)
   line=split(readline(file))
 
@@ -89,35 +97,8 @@ function readMatrix{ T1<: AbstractString, T2<: Int }( file::T1, step::T2 )
   return matrix
 end
 
-function getBonded{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Int , T4 <: Real }( atoms::T1, cell::T2, index::T3 , cut_off::T4 )
-  nb_atoms=size(atoms.names)[1]
-  for i=1:nb_atoms
-    dist=cell_mod.distance(atoms,cell,index,i)
-    if dist < cut_off
-      print("Bond with ", i, "\n");
-    end
-  end
-  return
-end
-
-function computeMatrix{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Real }( atoms::T1, cell::T2 , cut_off::T3 )
-  nb_atoms=size(atoms.names)[1]
-  matrix=zeros(nb_atoms,nb_atoms)
-  for i=1:nb_atoms
-    for j=1:nb_atoms
-      if i != j
-        dist=cell_mod.distance(atoms,cell,i,j)
-        if dist < cut_off
-          matrix[i,j]=1
-          matrix[j,i]=1
-        end
-      end
-    end
-  end
-  return matrix
-end
-
-function writeMatrix{ T1 <: IO , T2 <: Real }( file::T1, matrix::Array{T2} )
+#--------------------------
+function writeMatrix( file::T1, matrix::Array{T2} ) where { T1 <: IO , T2 <: Real }
     nb_atoms=size(matrix)[1]
     for i=1:nb_atoms
         for j=1:nb_atoms
@@ -127,5 +108,6 @@ function writeMatrix{ T1 <: IO , T2 <: Real }( file::T1, matrix::Array{T2} )
     end
     return
 end
+#--------------------------
 
 end

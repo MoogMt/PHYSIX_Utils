@@ -1,10 +1,12 @@
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+
+include(string(GPfolder,"contactmatrix.jl"))
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
 # Thermo data
-Volumes=[8.82]
+Volumes=[9.0]
 Temperatures=[3000]
 Cut_Off=[1.75]
 
@@ -12,7 +14,6 @@ Cut_Off=[1.75]
 nbC=32
 nbO=nbC*2
 max_coord=5
-max_coord_O=3
 
 restart=false
 
@@ -41,6 +42,8 @@ bond_matrix=zeros(nb_atoms,nb_atoms)
 
 step=1
 
+nb_type=2
+
 bond_matrix=zeros(nb_atoms,nb_atoms)
 for atom1=1:nb_atoms
     for atom2=atom1+1:nb_atoms
@@ -49,6 +52,40 @@ for atom1=1:nb_atoms
             bond_matrix[atom2,atom1]=1
         end
     end
+end
+
+for carbon=1:nbC
+    coord_type=zeros(2)
+    coord_nb=zeros(5,2)
+    index_nb=zeros(5,2)
+    count=0
+    for atom=1:nb_atoms
+        if carbon=atom
+            continue
+        end
+        if bond_matrix[carbon,atom] > 0
+            check=0
+            if atom < 32
+                check=1
+            else
+                check=2
+            end
+            coord_type[check] += 1
+            coord_nb[check] = sum( bond_matrix[atom,:] )
+            index_nb[coord_type[check],check]= atom
+        end
+        if sum(coord_type) > max_coord
+            print("Oupsie: step-",step," carbon-",carbon," atom-",atom,"\n")
+        end
+    end
+    write(file_coordinance,string(step," ",carbon," "))
+    for type=1:nb_type
+        write(file_coordinance,string(coord_type[type]," "))
+        for i=1:5
+            write(file_coordinance,string(coord_nb[i,type]," ",index_nb[i,type]," "))
+        end
+    end
+    write(file_coordinance,string("\n"))
 end
 
 close(file_coordinance)

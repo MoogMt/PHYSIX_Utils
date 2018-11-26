@@ -44,17 +44,17 @@ function readFastFile( file::T1 ) where { T1 <: AbstractString }
   #-----------------------------------------
   if size(lines)[1] == 0
     print("File is empty\n")
-    return sim=Vector{ atom_mod.AtomList }( 0 )
+    return sim=Vector{ atom_mod.AtomList }( undef, 0 )
   end
   nb_atoms=parse(Int64,split(lines[1])[1])
   if size(lines)[1]/(nb_atoms+2) - trunc(size(lines)[1]/(nb_atoms+2)) > 0.00000000001
     print("ERROR: Problem inside the file! (number of atoms anounced and given do not match).")
-    return sim=Vector{ atom_mod.AtomList }( 0 )
+    return sim=Vector{ atom_mod.AtomList }( undef, 0 )
   end
   nb_steps=Int(size(lines)[1]/(nb_atoms+2))
   #------------------------------------------
 
-  sim=Vector{ atom_mod.AtomList }( nb_steps )
+  sim=Vector{ atom_mod.AtomList }( undef, nb_steps )
   for step=1:nb_steps
       atom_list = atom_mod.AtomList( nb_atoms )
       for atom=1:nb_atoms
