@@ -34,12 +34,13 @@ nb_steps=size(traj)[1]
 
 restart=true
 
-file_out=open(string(folder_out,"coordinance-",cut_off,".dat"),"w")
+coord_matrix=zeros(nb_steps,nbC,2)
 
+file_out=open(string(folder_out,"coordinance-C-",cut_off,".dat"),"w")
 for step_sim=1:nb_steps
 
     print("Progress: ",step_sim/nb_steps*100,"%\n")
-    write(file_out,string(step_sim," ")
+    write(file_out,string(step_sim," "))
     bond_matrix=zeros(nb_atoms,nb_atoms)
     for atom1=1:nb_atoms
         for atom2=atom1+1:nb_atoms
@@ -49,12 +50,11 @@ for step_sim=1:nb_steps
             end
         end
     end
-
     for carbon=1:nbC
-        write(file_out,string(sum(bond_matrix[carbon,1:nbC])," ",sum(bond_matrix[carbon,nbC+1:nbC+nbO])," "))
+        coord_matrix[step_sim,carbon,1]=sum(bond_matrix[carbon,1:nbC])
+        coord_matrix[step_sim,carbon,2]=sum(bond_matrix[carbon,nbC+1:nbC+nbO])
+        write(file_out,string(sum(bond_matrix[carbon,1:nbC])," ",sum(bond_matrix[carbon,nbC+1:nbC+nbO])," ") )
     end
-
-    write(file_out,string("\n")
+    write(file_out,string("\n"))
 end
-
 close(file_out)
