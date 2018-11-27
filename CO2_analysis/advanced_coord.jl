@@ -152,6 +152,6 @@ for lag=1:size(case_transition)[3]
             end
         end
     end
-    write(file_lag,string(lag," ",max,"\n"))
+    write(file_lag,string(lag," ",max_diff,"\n"))
 end
 close(file_lag)
