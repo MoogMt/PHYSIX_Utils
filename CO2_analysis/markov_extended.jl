@@ -36,127 +36,21 @@ restart=true
 
 coord_matrix=zeros(nb_steps,nbC,2)
 
-file_out=open(string(folder_out,"coordinance-C-",cut_off,".dat"),"w")
-for step_sim=1:nb_steps
-
-    print("Progress: ",step_sim/nb_steps*100,"%\n")
-    write(file_out,string(step_sim," "))
-    bond_matrix=zeros(nb_atoms,nb_atoms)
-    for atom1=1:nb_atoms
-        for atom2=atom1+1:nb_atoms
-            if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off
-                bond_matrix[atom1,atom2]=1
-                bond_matrix[atom2,atom1]=1
-            end
-        end
-    end
-    for carbon=1:nbC
-        coord_matrix[step_sim,carbon,1]=sum(bond_matrix[carbon,1:nbC])
-        coord_matrix[step_sim,carbon,2]=sum(bond_matrix[carbon,nbC+1:nbC+nbO])
-        write(file_out,string(sum(bond_matrix[carbon,1:nbC])," ",sum(bond_matrix[carbon,nbC+1:nbC+nbO])," ") )
-    end
-    write(file_out,string("\n"))
-end
-close(file_out)
-
-global cases=ones(0,1)
-global count_cases=[1]
-
-for step_sim=1:nb_steps
-    print("Progress: ",step_sim/nb_steps*100,"%\n")
-    global cases
-    global count_cases
-    for carbon=1:nbC
-        global cases
-        global count_cases
-        if size(cases)[1] == 0
-            global cases=ones(1,2)
-            cases[1,1]= coord_matrix[step_sim,carbon,1]
-            cases[1,2]= coord_matrix[step_sim,carbon,2]
-        else
-            global new=true
-            if size(cases)[2] == 1
-                if cases[1] == coord_matrix[step_sim,carbon,1] && cases[2] == coord_matrix[step_sim,carbon,2]
-                    global count[i] += 1
-                    global new=false
-                end
-            else
-                for i=1:size(cases)[1]
-                    if cases[i,1] == coord_matrix[step_sim,carbon,1] && cases[i,2] == coord_matrix[step_sim,carbon,2]
-                        global count_cases[i] += 1
-                        global new=false
-                    end
-                end
-            end
-            if new
-                global cases=[cases; transpose(coord_matrix[step_sim,carbon,:]) ]
-                push!(count_cases,1)
-            end
+# file_out=open(string(folder_out,"coordinance-extended-C-",cut_off,".dat"),"w")
+# for step_sim=1:nb_steps
+step_sim=1
+print("Progress: ",step_sim/nb_steps*100,"%\n")
+# write(file_out,string(step_sim," "))
+bond_matrix=zeros(nb_atoms,nb_atoms)
+for atom1=1:nb_atoms
+    for atom2=atom1+1:nb_atoms
+        if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off
+            bond_matrix[atom1,atom2]=1
+            bond_matrix[atom2,atom1]=1
         end
     end
 end
-
-case_matrix=zeros(Int,nb_steps,nbC)
-file_out=open(string(folder_out,"cases_simple-",cut_off,".dat"),"w")
-for step_sim=1:nb_steps
-    print("Case affectation - Progress:",step_sim/nb_steps*100,"%\n")
-    for carbon=1:nbC
-        for i=1:size(cases)[1]
-            if cases[i,1] == coord_matrix[step_sim,carbon,1] && cases[i,2] == coord_matrix[step_sim,carbon,2]
-                case_matrix[step_sim,carbon]=i
-            end
-        end
-        write(file_out,string(case_matrix[step_sim,carbon]," "))
-    end
-    write(file_out,string("\n"))
+for carbon=1:nbC
+    coord_matrix[step_sim,carbon,1]=sum(bond_matrix[carbon,1:nbC])
+    coord_matrix[step_sim,carbon,2]=sum(bond_matrix[carbon,nbC+1:nbC+nbO])
 end
-close(file_out)
-
-lag_min=1
-lag_max=100
-case_transition=zeros(Float64,size(cases)[1],size(cases)[1],lag_max-lag_min+1)
-for lag=lag_min:lag_max
-    print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
-    for carbon=1:nbC
-        for step_sim=lag+1:nb_steps
-            case_transition[ case_matrix[step_sim-lag,carbon], case_matrix[step_sim,carbon], lag] += 1
-        end
-    end
-end
-
-for lag=1:size(case_transition)[3]
-    for i=1:size(cases)[1]
-        case_transition[:,i,lag]/=sum(case_transition[:,i,lag])
-    end
-end
-# case_transition *= 100
-
-
-file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
-for lag=1:size(case_transition)[3]
-    markov_diff=zeros(5,5)
-    for i=1:3
-        for j=1:3
-            if i==j
-                continue
-            end
-            # Specific i-j transition
-            global p_truth=case_transition[i,j,lag]
-            global p_test=0
-            for k=1:size(case_transition)[1]
-                if k != j
-                    global p_test += case_transition[i,k,lag]*case_transition[k,j,lag]
-                end
-            end
-            markov_diff[i,j] = abs.(p_truth-p_test)
-        end
-    end
-    write(file_lag,string(lag," "))
-    for i=1:3
-        for j=1:3
-            write(file_lag,string(markov_diff[i,j]," "))
-        end
-    end
-    write(file_lag,string("\n"))
-end
-close(file_lag)
