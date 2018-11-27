@@ -141,7 +141,7 @@ for lag=1:size(case_transition)[3]
             global p_truth=case_transition[i,j,lag]
             global p_test=0
             for k=1:size(case_transition)[1]
-                if k != j
+                if k != j && k != i 
                     global p_test += case_transition[i,k,lag]*case_transition[k,j,lag]
                 end
             end
