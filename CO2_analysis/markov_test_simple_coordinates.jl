@@ -131,12 +131,12 @@ for lag=1:size(case_transition)[3]
 end
 # case_transition *= 100
 
-
+max_case=3
 file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
 for lag=1:size(case_transition)[3]
-    markov_diff=zeros(5,5)
-    for i=1:3
-        for j=1:3
+    markov_diff=zeros(max_case,max_case)
+    for i=1:max_case
+        for j=1:max_case
             if i==j
                 continue
             end
@@ -152,8 +152,8 @@ for lag=1:size(case_transition)[3]
         end
     end
     write(file_lag,string(lag," "))
-    for i=1:3
-        for j=1:3
+    for i=1:max_case
+        for j=1:max_case
             write(file_lag,string(markov_diff[i,j]," "))
         end
     end
