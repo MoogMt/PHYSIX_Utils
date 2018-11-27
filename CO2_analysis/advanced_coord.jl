@@ -135,7 +135,7 @@ end
 file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
 for lag=1:size(case_transition)[3]
     diff=zeros(size(case_transition)[1],size(case_transition)[1])
-    global max=0
+    global max_diff=0
     for i=1:size(case_transition)[1]
         for j=1:size(case_transition)[1]
             # Specific i-j transition
@@ -147,8 +147,8 @@ for lag=1:size(case_transition)[3]
                 end
             end
             diff = (p_truth-p_test)/p_truth
-            if max < diff
-                max = diff
+            if max_diff < diff
+                max_diff = diff
             end
         end
     end
