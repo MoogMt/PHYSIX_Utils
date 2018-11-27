@@ -119,7 +119,7 @@ for lag=lag_min:lag_max
     print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
     for carbon=1:nbC
         for step_sim=lag+1:nb_steps
-            case_transition[ case_matrix[step_sim,carbon], case_matrix[step_sim-lag,carbon], lag] += 1
+            case_transition[ case_matrix[step_sim-lag,carbon], case_matrix[step_sim,carbon], lag] += 1
         end
     end
 end
@@ -129,14 +129,29 @@ for lag=1:size(case_transition)[3]
         case_transition[:,i,lag]/=sum(case_transition[:,i,lag])
     end
 end
-case_transition *= 100
+# case_transition *= 100
 
-file_test=open(string(folder_out,"check.dat"),"w")
-for i=1:size(case_transition)[3]
-    write(file_test,string(i," "))
-    for j=1:size(cases)[1]
-        write(file_test,string(case_transition[j,j,i]," "))
+
+file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
+for lag=1:size(case_transition)[3]
+    diff=zeros(size(case_transition)[1],size(case_transition)[1])
+    global max=0
+    for i=1:size(case_transition)[1]
+        for j=1:size(case_transition)[1]
+            # Specific i-j transition
+            global p_truth=case_transition[i,j,lag]
+            global p_test=0
+            for k=1:size(case_transition[1])
+                if k != j
+                    p_test += case_transition[i,k,lag]*case_transition[k,j,lag]
+                end
+            end
+            diff = (p_truth-p_test)/p_truth
+            if max < diff
+                max = diff
+            end
+        end
     end
-    write(file_test,string("\n"))
+    write(file_lag,string(lag," ",max,"\n"))
 end
-close(file_test)
+close(file_lag)
