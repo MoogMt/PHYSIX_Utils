@@ -134,10 +134,9 @@ end
 
 file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
 for lag=1:size(case_transition)[3]
-    global max_diff=0
-    global min_diff=10000000000
+    markov_diff=zeros(5,5)
+    for i=1:5
         for j=1:5
-            for i=1:5
             # Specific i-j transition
             global p_truth=case_transition[i,j,lag]
             global p_test=0
@@ -146,15 +145,15 @@ for lag=1:size(case_transition)[3]
                     global p_test += case_transition[i,k,lag]*case_transition[k,j,lag]
                 end
             end
-            diff = abs.(p_truth-p_test)/p_truth
-            if max_diff < diff
-                global max_diff = diff
-            end
-            if min_diff > diff
-                global min_diff = diff
-            end
+            markov_diff[i,j] = abs.(p_truth-p_test)/p_truth
         end
     end
-    write(file_lag,string(lag," ",max_diff," ",min_diff,"\n"))
+    write(file_lag,string(lag," ")
+    for i=1:5
+        for j=1:5
+            write(file_lag,string(markov_diff[i,j]," "))
+        end
+    end
+    write(file_lag,string("\n"))
 end
 close(file_lag)
