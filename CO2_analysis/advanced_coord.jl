@@ -148,7 +148,7 @@ for lag=1:size(case_transition)[3]
             markov_diff[i,j] = abs.(p_truth-p_test)/p_truth
         end
     end
-    write(file_lag,string(lag," ")
+    write(file_lag,string(lag," "))
     for i=1:5
         for j=1:5
             write(file_lag,string(markov_diff[i,j]," "))
