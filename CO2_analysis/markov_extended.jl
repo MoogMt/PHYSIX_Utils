@@ -34,23 +34,37 @@ nb_steps=size(traj)[1]
 
 restart=true
 
-coord_matrix=zeros(nb_steps,nbC,2)
-
-# file_out=open(string(folder_out,"coordinance-extended-C-",cut_off,".dat"),"w")
-# for step_sim=1:nb_steps
-step_sim=1
-print("Progress: ",step_sim/nb_steps*100,"%\n")
-# write(file_out,string(step_sim," "))
-bond_matrix=zeros(nb_atoms,nb_atoms)
-for atom1=1:nb_atoms
-    for atom2=atom1+1:nb_atoms
-        if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off
-            bond_matrix[atom1,atom2]=1
-            bond_matrix[atom2,atom1]=1
+for step_sim=1:nb_steps
+    bond_matrix=zeros(nb_atoms,nb_atoms)
+    print("Progress: ",step_sim/nb_steps*100,"%\n")
+    for atom1=1:nb_atoms
+        for atom2=atom1+1:nb_atoms
+            if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off
+                bond_matrix[atom1,atom2]=1
+                bond_matrix[atom2,atom1]=1
+            end
         end
     end
-end
-for carbon=1:nbC
-    coord_matrix[step_sim,carbon,1]=sum(bond_matrix[carbon,1:nbC])
-    coord_matrix[step_sim,carbon,2]=sum(bond_matrix[carbon,nbC+1:nbC+nbO])
+    coord_local=ones(nbC,max_coord,2)*(-1)
+    for carbon=1:nbC
+        global countC=1
+        for carbon2=1:nbC
+            if carbon == carbon2
+                continue
+            end
+            # If there is a bond
+            if bond_matrix[carbon,carbon2] > 0
+                coord_local[carbon,countC,1] = sum(bond_matrix[carbon2,:])
+                countC += 1
+            end
+        end
+        global countO = 1
+        for oxygen=1:nbO
+            # If there is a bond
+            if bond_matrix[carbon,oxygen+nbC] > 0
+                coord_local[carbon,countO,2] = sum(bond_matrix[oxygen+nbC,:])
+                countO += 1
+            end
+        end
+    end
 end
