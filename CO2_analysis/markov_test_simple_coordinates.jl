@@ -113,48 +113,34 @@ end
 close(file_out)
 
 lag_min=1
-lag_max=100
-case_transition=zeros(Float64,size(cases)[1],size(cases)[1],lag_max-lag_min+1)
-for lag=lag_min:lag_max
+d_lag=100
+lag_max=10001
+case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int((lag_max-lag_min)/d_lag))
+global count_lag=1
+for lag=lag_min:d_lag:lag_max-1
     print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
     for carbon=1:nbC
         for step_sim=lag+1:nb_steps
-            case_transition[ case_matrix[step_sim-lag,carbon], case_matrix[step_sim,carbon], lag] += 1
+            case_transition[ case_matrix[step_sim-lag,carbon], case_matrix[step_sim,carbon], count_lag ] += 1
         end
     end
+    global count_lag += 1
 end
 
-for lag=1:size(case_transition)[3]
-    for i=1:size(cases)[1]
-        case_transition[:,i,lag]/=sum(case_transition[:,i,lag])
-    end
-end
-# case_transition *= 100
 
-max_case=3
+global max_case=5
 file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
-for lag=1:size(case_transition)[3]
-    markov_diff=zeros(max_case,max_case)
+for lag=1:count_lag-1
+    write(file_lag,string(lag*d_lag*0.005," "))
     for i=1:max_case
         for j=1:max_case
-            if i==j
-                continue
-            end
             # Specific i-j transition
-            global p_truth=case_transition[i,j,lag]
+            global p_truth=case_transition[i,j,lag]/sum(case_transition[i,:,lag])
             global p_test=0
-            for k=1:size(case_transition)[1]
-                if k != j
-                    global p_test += case_transition[i,k,lag]*case_transition[k,j,lag]
-                end
+            for k=1:max_case
+                global p_test += case_transition[i,k,lag]/sum(case_transition[i,:,lag])*case_transition[k,j,lag]/sum(case_transition[k,:,lag])
             end
-            markov_diff[i,j] = abs.(p_truth-p_test)
-        end
-    end
-    write(file_lag,string(lag," "))
-    for i=1:max_case
-        for j=1:max_case
-            write(file_lag,string(markov_diff[i,j]," "))
+            write(file_lag,string(p_truth," ",p_test," ",(p_test*(1-p_test))/(1+max_case+(count_cases[i]-lag)/lag)," "))
         end
     end
     write(file_lag,string("\n"))
