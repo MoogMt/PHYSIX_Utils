@@ -112,9 +112,9 @@ for step_sim=1:nb_steps
 end
 close(file_out)
 
-lag_min=2
-d_lag=100
-lag_max=10002
+lag_min=1
+d_lag=1
+lag_max=10000
 case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/d_lag)))
 case_transition2=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/(d_lag))))
 global count_lag=1
@@ -137,14 +137,56 @@ for lag=1:count_lag-1
     for i=1:max_case
         for j=1:max_case
             # Specific i-j transition
-            global p_truth=case_transition[i,j,lag]/sum(case_transition[i,:,lag])
+            global p_truth=case_transition[i,j,lag]/sum(case_transition[1:max_case,i,lag])
             global p_test=0
             global p_test2=0
             for k=1:max_case
-                global p_test += case_transition[i,k,lag]/sum(case_transition[i,:,lag])*case_transition[k,j,lag]/sum(case_transition[k,:,lag])
-                global p_test2 += case_transition2[i,k,lag]/sum(case_transition2[i,:,lag])*case_transition2[k,j,lag]/sum(case_transition2[k,:,lag])
+                global p_test += case_transition[i,k,lag]/sum(case_transition[1:max_case,i,lag])*case_transition[k,j,lag]/sum(case_transition[1:max_case,k,lag])
+                global p_test2 += case_transition2[i,k,lag]/sum(case_transition2[1:max_case,i,lag])*case_transition2[k,j,lag]/sum(case_transition2[1:max_case,k,lag])
             end
             write(file_lag,string(p_truth," ",p_test," ",p_test2," ",(p_test*(1-p_test))/(1+max_case+(count_cases[i]-lag)/lag)," "))
+        end
+    end
+    write(file_lag,string("\n"))
+end
+close(file_lag)
+
+global max_case=5
+file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
+for lag=1:count_lag-1
+    write(file_lag,string(lag*d_lag*0.005," "))
+    for i=1:max_case
+        for j=1:max_case
+            # Specific i-j transition
+            global p_truth=case_transition[i,j,lag]/sum(case_transition[1:max_case,i,lag])
+            global p_test=0
+            global p_test2=0
+            for k=1:max_case
+                global p_test += case_transition[i,k,lag]/sum(case_transition[1:max_case,i,lag])*case_transition[k,j,lag]/sum(case_transition[1:max_case,k,lag])
+                global p_test2 += case_transition2[i,k,lag]/sum(case_transition2[1:max_case,i,lag])*case_transition2[k,j,lag]/sum(case_transition2[1:max_case,k,lag])
+            end
+            write(file_lag,string(p_truth," ",p_test," ",p_test2," ",(p_test*(1-p_test))/(1+max_case+(count_cases[i]-lag)/lag)," "))
+        end
+    end
+    write(file_lag,string("\n"))
+end
+close(file_lag)
+
+case_proba=case_transition[1:max_case,1:max_case,:]
+for lag=1:size(case_proba)[3]
+    for i=1:max_case
+        case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
+    end
+end
+
+file_lag=open(string(folder_out,"markovian_evolution_test-2.dat"),"w")
+for lag=2:count_lag-1
+    case_proba_test=case_proba[:,:,1]^lag
+    write(file_lag,string(lag," "))
+    for i=1:max_case
+        for j=1:max_case
+            # Specific i-j transition
+            write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," ",p_test2," "))
         end
     end
     write(file_lag,string("\n"))
