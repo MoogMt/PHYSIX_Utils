@@ -38,7 +38,6 @@ coord_matrix=zeros(nb_steps,nbC,8)
 
 file_out=open(string(folder_out,"coordinance-C-",cut_off,".dat"),"w")
 for step_sim=1:nb_steps
-
     print("Progress: ",step_sim/nb_steps*100,"%\n")
     write(file_out,string(step_sim," "))
     bond_matrix=zeros(nb_atoms,nb_atoms)
@@ -51,9 +50,36 @@ for step_sim=1:nb_steps
         end
     end
     for carbon=1:nbC
-        coord_matrix[step_sim,carbon,1]=sum(bond_matrix[carbon,1:nbC])
-        coord_matrix[step_sim,carbon,2]=sum(bond_matrix[carbon,nbC+1:nbC+nbO])
-        write(file_out,string(sum(bond_matrix[carbon,1:nbC])," ",sum(bond_matrix[carbon,nbC+1:nbC+nbO])," ") )
+        for carbon2=1:nbC
+            if carbon == carbon2
+                continue
+            end
+        end
+        for oxygen=1:nbO
+
+        end
+        # sort
+        for i=1:4
+            for j=i+1:4
+                if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
+                    stock=coord_matrix[step_sim,carbon,i]
+                    coord_matrix[step_sim,carbon,i]=coord_matrix[step_sim,carbon,j]
+                    coord_matrix[step_sim,carbon,j]=stock
+                end
+            end
+        end
+        for i=5
+            for j=i+1:8
+                if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
+                    stock=coord_matrix[step_sim,carbon,i]
+                    coord_matrix[step_sim,carbon,i]=coord_matrix[step_sim,carbon,j]
+                    coord_matrix[step_sim,carbon,j]=stock
+                end
+            end
+        end
+        for i=1:8
+            write(file_out,string(coord_matrix[step_sim,carbon,i]," " ))
+        end
     end
     write(file_out,string("\n"))
 end
