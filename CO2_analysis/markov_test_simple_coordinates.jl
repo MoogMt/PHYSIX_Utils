@@ -116,7 +116,7 @@ lag_min=2
 d_lag=100
 lag_max=10002
 case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/d_lag)))
-case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/(d_lag))))
+case_transition2=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/(d_lag))))
 global count_lag=1
 for lag=lag_min:d_lag:lag_max-1
     print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
@@ -144,7 +144,7 @@ for lag=1:count_lag-1
                 global p_test += case_transition[i,k,lag]/sum(case_transition[i,:,lag])*case_transition[k,j,lag]/sum(case_transition[k,:,lag])
                 global p_test2 += case_transition2[i,k,lag]/sum(case_transition2[i,:,lag])*case_transition2[k,j,lag]/sum(case_transition2[k,:,lag])
             end
-            write(file_lag,string(p_truth," ",p_test," ",(p_test*(1-p_test))/(1+max_case+(count_cases[i]-lag)/lag)," "))
+            write(file_lag,string(p_truth," ",p_test," ",p_test2," ",(p_test*(1-p_test))/(1+max_case+(count_cases[i]-lag)/lag)," "))
         end
     end
     write(file_lag,string("\n"))
