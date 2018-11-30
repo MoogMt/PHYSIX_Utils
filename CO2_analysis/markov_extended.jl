@@ -34,9 +34,9 @@ nb_steps=size(traj)[1]
 
 restart=true
 
-coord_matrix=zeros(nb_steps,nbC,8)
+coord_matrix=ones(nb_steps,nbC,8)*(-1)
 
-file_out=open(string(folder_out,"coordinance-C-",cut_off,".dat"),"w")
+#file_out=open(string(folder_out,"coordinance-C-",cut_off,".dat"),"w")
 for step_sim=1:nb_steps
     print("Progress: ",step_sim/nb_steps*100,"%\n")
     write(file_out,string(step_sim," "))
@@ -49,14 +49,27 @@ for step_sim=1:nb_steps
             end
         end
     end
+
     for carbon=1:nbC
+        global count_coord=1
         for carbon2=1:nbC
             if carbon == carbon2
                 continue
             end
+            if bond_matrix[carbon,carbon2] > 0
+                coord_matrix[step_sim,carbon,count_coord]=sum(bond_matrix[carbon2,:])
+                global count_coord += 1
+            end
         end
+        global count_coord=1
         for oxygen=1:nbO
-
+            if bond_matrix[carbon,nbC+oxygen] > 0
+                if count_coord > 4
+                    continue
+                end
+                coord_matrix[step_sim,carbon,4+count_coord]=sum(bond_matrix[nbC+oxygen,:])
+                global count_coord += 1
+            end
         end
         # sort
         for i=1:4
@@ -77,13 +90,13 @@ for step_sim=1:nb_steps
                 end
             end
         end
-        for i=1:8
-            write(file_out,string(coord_matrix[step_sim,carbon,i]," " ))
-        end
+        # for i=1:8
+        #     write(file_out,string(coord_matrix[step_sim,carbon,i]," " ))
+        # end
     end
-    write(file_out,string("\n"))
+    #write(file_out,string("\n"))
 end
-close(file_out)
+#close(file_out)
 
 guess_cases=false
 case_matrix=zeros(Int,nb_steps,nbC)
