@@ -17,7 +17,7 @@ max_coord=5
 
 restart=false
 
-V=8.82
+V=9.3
 T=3000
 cut_off=1.75
 
@@ -59,39 +59,81 @@ for step_sim=1:nb_steps
 end
 close(file_out)
 
+guess_cases=false
+
 global cases=ones(0,1)
+
 global count_cases=[1]
 
-for step_sim=1:nb_steps
-    print("Progress: ",step_sim/nb_steps*100,"%\n")
-    global cases
-    global count_cases
-    for carbon=1:nbC
+if guess_cases
+    for step_sim=1:nb_steps
+        print("Computing cases - Progress: ",step_sim/nb_steps*100,"%\n")
         global cases
         global count_cases
-        if size(cases)[1] == 0
-            global cases=ones(1,2)
-            cases[1,1]= coord_matrix[step_sim,carbon,1]
-            cases[1,2]= coord_matrix[step_sim,carbon,2]
-        else
-            global new=true
-            if size(cases)[2] == 1
-                if cases[1] == coord_matrix[step_sim,carbon,1] && cases[2] == coord_matrix[step_sim,carbon,2]
-                    global count[i] += 1
-                    global new=false
-                end
+        for carbon=1:nbC
+            global cases
+            global count_cases
+            if size(cases)[1] == 0
+                global cases=ones(1,2)
+                cases[1,1]= coord_matrix[step_sim,carbon,1]
+                cases[1,2]= coord_matrix[step_sim,carbon,2]
             else
-                for i=1:size(cases)[1]
-                    if cases[i,1] == coord_matrix[step_sim,carbon,1] && cases[i,2] == coord_matrix[step_sim,carbon,2]
-                        global count_cases[i] += 1
+                global new=true
+                if size(cases)[2] == 1
+                    if cases[1] == coord_matrix[step_sim,carbon,1] && cases[2] == coord_matrix[step_sim,carbon,2]
+                        global count[i] += 1
                         global new=false
                     end
+                else
+                    for i=1:size(cases)[1]
+                        if cases[i,1] == coord_matrix[step_sim,carbon,1] && cases[i,2] == coord_matrix[step_sim,carbon,2]
+                            global count_cases[i] += 1
+                            global new=false
+                        end
+                    end
+                end
+                if new
+                    global cases=[cases; transpose(coord_matrix[step_sim,carbon,:]) ]
+                    push!(count_cases,1)
                 end
             end
-            if new
-                global cases=[cases; transpose(coord_matrix[step_sim,carbon,:]) ]
-                push!(count_cases,1)
+        end
+    end
+else
+    cases_CO2=[0,2]
+    cases_CO3=[0,3]
+    cases_CO4=[0,4]
+    cases_C1O2=[1,2]
+    cases_C1O3=[1,3]
+    cases=zeros(5,2)
+    cases[1,:]=cases_CO2
+    cases[2,:]=cases_CO3
+    cases[3,:]=cases_CO4
+    cases[4,:]=cases_C1O2
+    cases[5,:]=cases_C1O3
+    count_cases=zeros(5)
+    for step_sim=1:nb_steps
+        print("Computing cases - Progress: ",step_sim/nb_steps*100,"%\n")
+        global count_cases
+        for carbon=1:nbC
+            global index=1
+            i=1
+            global d=0
+            for k=1:2
+                global d+= (coord_matrix[step_sim,carbon,k] - cases[i,k])*(coord_matrix[step_sim,carbon,k] - cases[i,k])
             end
+            global d_min=d
+            for i=2:size(cases)[1]
+                global d=0
+                for k=1:2
+                    global d+= (coord_matrix[step_sim,carbon,k] - cases[i,k])*(coord_matrix[step_sim,carbon,k] - cases[i,k])
+                end
+                if d > dmin
+                    global index=i
+                    global dmin=d
+                end
+            end
+            count_cases[index] += 1
         end
     end
 end
@@ -129,7 +171,7 @@ for lag=lag_min:d_lag:lag_max-1
     global count_lag += 1
 end
 
-global max_case=3
+global max_case=5
 file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
 for lag=1:count_lag-1
     write(file_lag,string(lag*d_lag*0.005," "))
@@ -167,25 +209,4 @@ for lag=2:count_lag-1
         end
     end
     write(file_lag,string("\n"))
-endcase_proba=case_transition[1:max_case,1:max_case,:]
-for lag=1:size(case_proba)[3]
-    for i=1:max_case
-        case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
-    end
 end
-
-file_lag=open(string(folder_out,"markovian_evolution_test-2.dat"),"w")
-for lag=2:count_lag-1
-    case_proba_test=case_proba[:,:,1]^lag
-    write(file_lag,string(lag*d_lag*0.005," "))
-    for i=1:max_case
-        for j=1:max_case
-            # Specific i-j transition
-            write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," "))
-        end
-    end
-    write(file_lag,string("\n"))
-end
-close(file_lag)
-
-close(file_lag)
