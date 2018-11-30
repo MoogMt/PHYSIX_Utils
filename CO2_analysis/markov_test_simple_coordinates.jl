@@ -17,7 +17,7 @@ max_coord=5
 
 restart=false
 
-V=9.05
+V=8.82
 T=3000
 cut_off=1.75
 
@@ -160,14 +160,14 @@ end
 
 lag_min=1
 d_lag=10
-lag_max=1001
+lag_max=5001
 case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/d_lag)))
 global count_lag=1
 for lag=lag_min:d_lag:lag_max-1
     print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
     for carbon=1:nbC
         for step_sim=lag+1:nb_steps
-            case_transition[ case_matrix[step_sim-Int(trunc(lag/2)),carbon], case_matrix[step_sim,carbon], count_lag ] += 1
+            case_transition[ case_matrix[step_sim-lag,carbon], case_matrix[step_sim,carbon], count_lag ] += 1
         end
     end
     global count_lag += 1
@@ -178,17 +178,24 @@ if ! guess_cases
     global max_cases=size(count_cases)[1]
 end
 
+case_proba=case_transition[1:max_case,1:max_case,:]
+for lag=1:size(case_proba)[3]
+    for i=1:max_case
+        case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
+    end
+end
+
 file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
 for lag=1:count_lag-1
     write(file_lag,string(lag*d_lag*0.005," "))
     for i=1:max_case
         for j=1:max_case
             # Specific i-j transition
-            global p_truth=case_transition[i,j,lag]/sum(case_transition[i,1:max_case,lag])
+            global p_truth=case_proba[i,j,lag]
             global p_test=0
             global p_test2=0
             for k=1:max_case
-                global p_test += case_transition2[i,k,lag]/sum(case_transition2[i,1:max_case,lag])*case_transition2[k,j,lag]/sum(case_transition2[k,1:max_case,lag])
+                global p_test += case_proba[i,k,Int(trunc(lag/2))+1]*case_proba[k,j,Int(trunc(lag/2))+1]
             end
             write(file_lag,string(p_truth," ",p_test," "))
         end
@@ -196,13 +203,6 @@ for lag=1:count_lag-1
     write(file_lag,string("\n"))
 end
 close(file_lag)
-
-case_proba=case_transition[1:max_case,1:max_case,:]
-for lag=1:size(case_proba)[3]
-    for i=1:max_case
-        case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
-    end
-end
 
 file_lag=open(string(folder_out,"markovian_evolution_test-2.dat"),"w")
 for lag=2:count_lag-1
