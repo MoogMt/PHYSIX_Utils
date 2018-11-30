@@ -114,8 +114,8 @@ close(file_out)
 
 lag_min=2
 d_lag=100
-lag_max=10000
-case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int((lag_max-lag_min)/d_lag))
+lag_max=10002
+case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/d_lag)))
 case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/(d_lag))))
 global count_lag=1
 for lag=lag_min:d_lag:lag_max-1
