@@ -1,6 +1,6 @@
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 
-folder=string("/media/moogmt/Stock/MoS2/Relax/PBE/Mo2S4/")
+include(string(GPfolder,"contactmatrix.jl"))
 Bohr2Ang=0.529177
 V=30.0
 

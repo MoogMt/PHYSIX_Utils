@@ -1,4 +1,6 @@
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+
+include(string(GPfolder,"contactmatrix.jl"))
 
 Bohr2Ang=0.529177
 Ry2eV=13.6056980659
@@ -45,6 +47,7 @@ for n=2:4
             mag_abs=0
             hl_gap=0
             fermi_energy=0
+            bands=[]
             for line_nb=1:size(lines)[1]
                 if ! isempty(lines[line_nb])
                     elements=split(lines[line_nb])
@@ -80,7 +83,9 @@ for n=2:4
                     end
                 end
             end
-            bands -= fermi_energy
+            for i=1:size(bands)[1]
+                bands[i] -= fermi_energy
+            end
             min=0
             for i=1:size(bands)[1]
                 if bands[i] > 0
