@@ -2,7 +2,7 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 
 include(string(GPfolder,"contactmatrix.jl"))
 
-function buildCoordinationMatrix( traj::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: Vector{atom_mod.AtomList}, T2 <: cell_mod.Cell_param , T3 <: Real }
+function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
     coord_matrix=ones(nb_steps,nbC,8)*(-1)
@@ -141,24 +141,27 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
                 end
             end
             count_states[index] += 1
-            state_matrix[step_sim,carbon]=index
+            state_matrix[i,j]=index
         end
     end
-    return state_matrix, count_cases/sum(count_cases)*100
+    return state_matrix, count_states/sum(count_states)*100
 end
 
-function markovModelTest( V::T1, T::T2, cut_off_cases::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
-
-    new_size=0
-    index_keep=[]
-    cases_keep=zeros(0,8)
-    for i=1:size(count_cases)[1]
-        if percent[i] > cut_off_cases
+function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, cut_off_states::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Real }
+    old_nb_states=size(count_states)[1]
+    new_nb_states=0
+    states_kept=zeros(0,8)
+    for i=1:old_nb_states
+        if percent_states[i] > cut_off_states
             new_size += 1
-            push!(index_keep, i)
-            cases_keep=[ cases_keep ; transpose(cases[i,:]) ]
+            states_kept=[ states_kept ; transpose( old_states[i,:]) ]
         end
     end
+    return states_kept
+end
+
+function markovModelTest( cut_off_cases::T3 ) where { T3 <: Real }
+
 
     count_cases_keep=zeros(size(cases_keep)[1])
     case_matrix_keep=zeros(Int,nb_steps,nbC)
@@ -240,102 +243,104 @@ cell = cell_mod.Cell_param(V,V,V)
 
 states=defineStates()
 
-assignDataToStates( buildCoordinationMatrix( traj, cell, cut_off_bond ), states )
+case_matrix, percent = assignDataToStates( buildCoordinationMatrix( traj, cell, cut_off_bond ), states )
+
+states = isolateSignificantStates( states, )
 
 cases_keep, count_cases_keep, case_proba = doMarkovExtended( V, T, states, data, cut_off_stat)
 
-
-cases_keep=[]
-count_cases_keep=[]
-case_matrix_keep=[]
-case_proba=[]
-for V in Volumes
-    for T in Temperatures
-        for cut_off in Cut_Off
-
-
-            #
-        end
-    end
-end
-
-file_cases_keep=open(string(folder_out,"cases-",cut_off,".dat"),"w")
-if size(count_cases_keep)[1] == 1
-    for i=1:8
-        write(file_cases_keep,string(cases_keep[i]," "))
-    end
-    write(file_cases_keep,string(count_cases_keep,"\n"))
-else
-    for i=size(count_cases_keep)[1]
-        for j=1:8
-            write(file_cases_keep,string(cases_keep[i,j]," "))
-        end
-        write(file_cases_keep,string(count_cases_keep,"\n"))
-    end
-end
-close(file_cases_keep)
-
-
-file_proba=open(string(folder_out,"proba_transition-",cut_off,".dat"),"w")
-for lag=1:size(case_proba)[3]
-    if size(count_cases_keep)[1] == 1
-        write(file_proba,string(case_proba[1,1,lag]," "))
-        continue
-    end
-    for i=1:size(case_proba)[1]
-        for j=1:size(case_proba)[2]
-            write(file_proba,string(case_proba[i,j,lag]," "))
-        end
-    end
-    write(file_proba,string("\n"))
-end
-close(file_proba)
-
-file_lag=open(string(folder_out,"markovian_evolution_test-",cut_off,".dat"),"w")
-file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
-for lag=1:count_lag-1
-    d_test=0
-    d_test2=0
-    count2=0
-    for i=1:size(cases_keep)[1]
-        for j=1:size(cases_keep)[1]
-            # Specific i-j transition
-            p_truth=case_proba[i,j,lag]
-            p_test=0
-            p_test2=0
-            for k=1:size(cases_keep)[1]
-                p_test += case_proba[i,k,Int(trunc(lag/2))+1]*case_proba[k,j,Int(trunc(lag/2))+1]
-            end
-            d_test += abs(p_truth-p_test)
-            d_test2 += d_test*d_test
-            count2 += 1
-            write(file_lag,string(p_truth," ",p_test," "))
-        end
-    end
-    write(file_lag,string("\n"))
-    write(file_out_2,string(lag*d_lag*0.005," ",d_test/count2," ",d_test2/count2-(d_test/count2)^2,"\n"))
-end
-close(file_lag)
-close(file_out_2)
-
-file_lag=open(string(folder_out,"markovian_evolution_test-3_",cut_off,".dat"),"w")
-for lag=2:count_lag-1
-    case_proba_test=case_proba[:,:,1]^lag
-    write(file_lag,string(lag*d_lag*0.005," "))
-    for i=1:size(cases_keep)[1]
-        for j=1:size(cases_keep)[1]
-            # Specific i-j transition
-            write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," "))
-        end
-    end
-    write(file_lag,string("\n"))
-end
-
-file_cases=open(string(folder_out,"cases_occurences-",cut_off,".dat"),"w")
-for step_sim=1:nb_steps
-    for carbon=1:nbC
-        write(file_cases,string(case_matrix_keep[step_sim,carbon]," "))
-    end
-    write(file_cases,string("\n"))
-end
-close(file_cases)
+#
+# cases_keep=[]
+# count_cases_keep=[]
+# case_matrix_keep=[]
+# case_proba=[]
+# for V in Volumes
+#     for T in Temperatures
+#         for cut_off in Cut_Off
+#
+#
+#             #
+#         end
+#     end
+# end
+#
+# file_cases_keep=open(string(folder_out,"cases-",cut_off,".dat"),"w")
+# if size(count_cases_keep)[1] == 1
+#     for i=1:8
+#         write(file_cases_keep,string(cases_keep[i]," "))
+#     end
+#     write(file_cases_keep,string(count_cases_keep,"\n"))
+# else
+#     for i=size(count_cases_keep)[1]
+#         for j=1:8
+#             write(file_cases_keep,string(cases_keep[i,j]," "))
+#         end
+#         write(file_cases_keep,string(count_cases_keep,"\n"))
+#     end
+# end
+# close(file_cases_keep)
+#
+#
+# file_proba=open(string(folder_out,"proba_transition-",cut_off,".dat"),"w")
+# for lag=1:size(case_proba)[3]
+#     if size(count_cases_keep)[1] == 1
+#         write(file_proba,string(case_proba[1,1,lag]," "))
+#         continue
+#     end
+#     for i=1:size(case_proba)[1]
+#         for j=1:size(case_proba)[2]
+#             write(file_proba,string(case_proba[i,j,lag]," "))
+#         end
+#     end
+#     write(file_proba,string("\n"))
+# end
+# close(file_proba)
+#
+# file_lag=open(string(folder_out,"markovian_evolution_test-",cut_off,".dat"),"w")
+# file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
+# for lag=1:count_lag-1
+#     d_test=0
+#     d_test2=0
+#     count2=0
+#     for i=1:size(cases_keep)[1]
+#         for j=1:size(cases_keep)[1]
+#             # Specific i-j transition
+#             p_truth=case_proba[i,j,lag]
+#             p_test=0
+#             p_test2=0
+#             for k=1:size(cases_keep)[1]
+#                 p_test += case_proba[i,k,Int(trunc(lag/2))+1]*case_proba[k,j,Int(trunc(lag/2))+1]
+#             end
+#             d_test += abs(p_truth-p_test)
+#             d_test2 += d_test*d_test
+#             count2 += 1
+#             write(file_lag,string(p_truth," ",p_test," "))
+#         end
+#     end
+#     write(file_lag,string("\n"))
+#     write(file_out_2,string(lag*d_lag*0.005," ",d_test/count2," ",d_test2/count2-(d_test/count2)^2,"\n"))
+# end
+# close(file_lag)
+# close(file_out_2)
+#
+# file_lag=open(string(folder_out,"markovian_evolution_test-3_",cut_off,".dat"),"w")
+# for lag=2:count_lag-1
+#     case_proba_test=case_proba[:,:,1]^lag
+#     write(file_lag,string(lag*d_lag*0.005," "))
+#     for i=1:size(cases_keep)[1]
+#         for j=1:size(cases_keep)[1]
+#             # Specific i-j transition
+#             write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," "))
+#         end
+#     end
+#     write(file_lag,string("\n"))
+# end
+#
+# file_cases=open(string(folder_out,"cases_occurences-",cut_off,".dat"),"w")
+# for step_sim=1:nb_steps
+#     for carbon=1:nbC
+#         write(file_cases,string(case_matrix_keep[step_sim,carbon]," "))
+#     end
+#     write(file_cases,string("\n"))
+# end
+# close(file_cases)
