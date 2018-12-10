@@ -1,0 +1,14 @@
+#!/bin/bash
+
+typeset -i nb_cluster=5
+
+# Clustering
+mpirun -np 4 piv_clustering.x -filexyz TRAJEC_wrapped_cluster.xyz -bsize 8.82 8.82 8.82 -method 2 -coord1_range 1.6 1.8 -algorithm $nb_cluster
+
+
+echo $nb_cluster > "nb_cluster.dat"
+for (( i=1; i < $nb_cluster ; i++))
+do
+    echo $i" in progress"
+    grep member cluster1.xyz  | cut -d "f" -f2 | cut -d "g" -f1 | cut -d "e" -f2 > $i"_state.dat"
+done
