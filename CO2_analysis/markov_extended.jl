@@ -250,8 +250,8 @@ for V in Volumes
                     write(file_proba,string(case_proba[1,1,lag]," "))
                     continue
                 end
-                for i=1:size(cases_keep)[1]
-                    for j=1:size(cases_keep)[2]
+                for i=1:size(case_proba)[1]
+                    for j=1:size(case_proba)[2]
                         write(file_proba,string(case_proba[i,j,lag]," "))
                     end
                 end
