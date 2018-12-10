@@ -9,7 +9,7 @@ folder_base="/home/moogmt/CO2/CO2_AIMD/"
 # Thermo data
 Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
 Temperatures=[2000,2500,3000]
-Cut_Off=[1.75]
+Cut_Off=[1.65,1.7,1.75,1.8,1.85]
 
 # Number of atoms
 nbC=32
@@ -20,7 +20,9 @@ restart=false
 
 V=8.82
 T=3000
-cut_off=1.7
+cut_off=1.65
+
+#for cut_off in Cut_Off
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -172,7 +174,7 @@ new_size=0
 index_keep=[]
 global cases_keep=zeros(0,8)
 for i=1:size(count_cases)[1]
-    if percent[i] > 0.1
+    if percent[i] > 1
         global new_size += 1
         push!(index_keep, i)
         global cases_keep=[ cases_keep ; transpose(cases[i,:]) ]
@@ -231,7 +233,7 @@ for lag=1:size(case_proba)[3]
 end
 
 file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
-file_out_2=open(string(folder_out,"markovian_evolution_test2.dat"),"w")
+file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
 for lag=1:count_lag-1
     write(file_lag,string(lag*d_lag*0.005," "))
     global d_test=0
@@ -257,3 +259,5 @@ for lag=1:count_lag-1
 end
 close(file_lag)
 close(file_out_2)
+
+#
