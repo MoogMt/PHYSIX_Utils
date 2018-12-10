@@ -19,7 +19,7 @@ max_coord=5
 restart=false
 
 Volumes=[9.8]
-Temperatures=[3000]
+Temperatures=[2000,2500,3000]
 Cut_Off=[1.75]
 
 for V in Volumes
