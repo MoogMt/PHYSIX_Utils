@@ -225,7 +225,7 @@ max_lag=2001
 d_lag=5
 unit=0.005
 
-V=8.82
+V=9.2
 T=3000
 
 folder_in=string(folder_base,V,"/",T,"K/")
@@ -237,17 +237,27 @@ data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V
 case_matrix, percent = assignDataToStates( data , states )
 
 statistic_states = isolateSignificantStates( states, percent, cut_off_states )
-state_matrix, percent = assignDataToStates( data , statistic_states )
+state_matrix, percent_statistics = assignDataToStates( data , statistic_states )
 transition_matrix = transitionMatrix( statistic_states, state_matrix, min_lag, max_lag, d_lag )
 transition_matrix_CK = chappmanKormologov( transition_matrix )
 
-
 nb_states=size(transition_matrix)[1]
+
+test=zeros(nb_states,nb_states)
+for i=1:nb_states
+    for j=1:nb_states
+        test[i,j] = sum(transition_matrix[i,j,:])/size(transition_matrix)[3]*100
+    end
+end
+
 file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-part1.dat"),"w")
-for i=1:size(transition_matrix)[3]
+for i=1:2:size(transition_matrix)[3]
     write(file_out,string(i*unit*d_lag," "))
     for j=1:nb_states
         for k=1:nb_states
+            if test[j,k] <  1
+                continue
+            end
             write(file_out,string(transition_matrix[j,k,i]," "))
         end
     end
@@ -259,6 +269,9 @@ for i=1:size(transition_matrix_CK)[3]
     write(file_out,string(2*i*unit*d_lag," "))
     for j=1:nb_states
         for k=1:nb_states
+            if test[j,k] <  1
+                continue
+            end
             write(file_out,string(transition_matrix_CK[j,k,i]," "))
         end
     end
