@@ -2,15 +2,14 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 
 include(string(GPfolder,"contactmatrix.jl"))
 
-
-function buildCoordinationMatrix( traj::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
+function buildCoordinationMatrix( traj::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: Main.atom_mod.AtomList, T2 <: Main.cell_mod.Cell_param , T3 <: Real }
     coord_matrix=ones(nb_steps,nbC,8)*(-1)
     for step_sim=1:nb_steps
         print("Progress: ",step_sim/nb_steps*100,"%\n")
         bond_matrix=zeros(nb_atoms,nb_atoms)
         for atom1=1:nb_atoms
             for atom2=atom1+1:nb_atoms
-                if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off_bond
+                if Main.cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
                     bond_matrix[atom1,atom2]=1
                     bond_matrix[atom2,atom1]=1
                 end
@@ -112,7 +111,7 @@ function defineStates()
     return states
 end
 
-function assignDataToStates( data, states )
+function assignDataToStates( data::Array{T1,2}, states::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
     state_matrix=zeros(Int, size(data)[2], size(data)[1] )
     count_states=zeros( size(states)[1] )
     for i=1:size(data)[2]
@@ -228,10 +227,6 @@ cut_off_stat = 0.1
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
 
-if ! isfile(file)
-    #print("STOP")
-end
-
 folder_out=string(folder_in,"Data/")
 
 traj = filexyz.readFastFile(file)
@@ -242,15 +237,12 @@ nb_steps=size(traj)[1]
 
 coord_matrix=buildCoordinationMatrix( traj, cell, cut_off_bond )
 
-
-
 states=defineStates()
 
-assignDataToStates( data, states )
+assignDataToStates( coord_matrix, states )
 
 cases_keep, count_cases_keep, case_proba = doMarkovExtended( V, T, states, data, cut_off_stat)
 
-restart=false
 
 cases_keep=[]
 count_cases_keep=[]
