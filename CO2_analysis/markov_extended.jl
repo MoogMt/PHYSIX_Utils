@@ -3,32 +3,14 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 
 
-function doMarkovExtended( V::T1, T::T2, cut_off::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
-    folder_in=string(folder_base,V,"/",T,"K/")
-    file=string(folder_in,"TRAJEC_wrapped.xyz")
-
-    if ! isfile(file)
-        return
-    end
-
-    folder_out=string(folder_in,"Data/")
-
-    traj = filexyz.readFastFile(file)
-    cell=cell_mod.Cell_param(V,V,V)
-
-    nb_atoms=size(traj[1].names)[1]
-    nb_steps=size(traj)[1]
-
-    restart=true
-
+function buildCoordinationMatrix( traj::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     coord_matrix=ones(nb_steps,nbC,8)*(-1)
-
     for step_sim=1:nb_steps
         print("Progress: ",step_sim/nb_steps*100,"%\n")
         bond_matrix=zeros(nb_atoms,nb_atoms)
         for atom1=1:nb_atoms
             for atom2=atom1+1:nb_atoms
-                if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off
+                if cell_mod.distance(traj[step_sim],cell,atom1,atom2) < cut_off_bond
                     bond_matrix[atom1,atom2]=1
                     bond_matrix[atom2,atom1]=1
                 end
@@ -77,86 +59,96 @@ function doMarkovExtended( V::T1, T::T2, cut_off::T3 ) where { T1 <: Real, T2 <:
             end
         end
     end
+    return coord_matrix
+end
 
-    guess_cases=false
-    case_matrix=zeros(Int,nb_steps,nbC)
+function defineStates()
+    states=zeros(39,8)
+    # CO2
+    states[1,:]=[-1,-1,-1,-1,1,1,-1,-1]
+    states[2,:]=[-1,-1,-1,-1,2,1,-1,-1]
+    states[3,:]=[-1,-1,-1,-1,2,2,-1,-1]
+    # CO3
+    states[4,:]=[-1,-1,-1,-1,2,2,2,-1]
+    states[5,:]=[-1,-1,-1,-1,2,2,1,-1]
+    states[6,:]=[-1,-1,-1,-1,2,1,1,-1]
+    states[7,:]=[-1,-1,-1,-1,1,1,1,-1]
+    # CO4
+    states[8,:]=[-1,-1,-1,-1,2,2,2,2]
+    states[9,:]=[-1,-1,-1,-1,2,2,2,1]
+    states[10,:]=[-1,-1,-1,-1,2,2,1,1]
+    states[11,:]=[-1,-1,-1,-1,2,1,1,1]
+    states[12,:]=[-1,-1,-1,-1,1,1,1,1]
+    # CCO1
+    states[13,:]=[2,-1,-1,-1,2,-1,-1,-1]
+    states[14,:]=[2,-1,-1,-1,1,-1,-1,-1]
+    states[15,:]=[3,-1,-1,-1,2,-1,-1,-1]
+    states[16,:]=[3,-1,-1,-1,1,-1,-1,-1]
+    states[17,:]=[4,-1,-1,-1,2,-1,-1,-1]
+    states[18,:]=[4,-1,-1,-1,1,-1,-1,-1]
+    # CCO2
+    states[19,:]=[2,-1,-1,-1,2,2,-1,-1]
+    states[20,:]=[2,-1,-1,-1,2,1,-1,-1]
+    states[21,:]=[2,-1,-1,-1,1,1,-1,-1]
+    states[22,:]=[3,-1,-1,-1,2,2,-1,-1]
+    states[23,:]=[3,-1,-1,-1,2,1,-1,-1]
+    states[24,:]=[3,-1,-1,-1,1,1,-1,-1]
+    states[25,:]=[4,-1,-1,-1,2,2,-1,-1]
+    states[26,:]=[4,-1,-1,-1,2,1,-1,-1]
+    states[27,:]=[4,-1,-1,-1,1,1,-1,-1]
+    # CCO3
+    states[28,:]=[2,-1,-1,-1,2,2,2,-1]
+    states[29,:]=[2,-1,-1,-1,2,2,1,-1]
+    states[30,:]=[2,-1,-1,-1,2,1,1,-1]
+    states[31,:]=[2,-1,-1,-1,1,1,1,-1]
+    states[32,:]=[3,-1,-1,-1,2,2,2,-1]
+    states[33,:]=[3,-1,-1,-1,2,2,1,-1]
+    states[34,:]=[3,-1,-1,-1,2,1,1,-1]
+    states[35,:]=[3,-1,-1,-1,1,1,1,-1]
+    states[36,:]=[4,-1,-1,-1,2,2,2,-1]
+    states[37,:]=[4,-1,-1,-1,2,2,1,-1]
+    states[38,:]=[4,-1,-1,-1,2,1,1,-1]
+    states[39,:]=[4,-1,-1,-1,1,1,1,-1]
+    return states
+end
 
-    cases=zeros(39,8)
-    cases[1,:]=[-1,-1,-1,-1,1,1,-1,-1]
-    cases[2,:]=[-1,-1,-1,-1,2,1,-1,-1]
-    cases[3,:]=[-1,-1,-1,-1,2,2,-1,-1]
-    cases[4,:]=[-1,-1,-1,-1,2,2,2,-1]
-    cases[5,:]=[-1,-1,-1,-1,2,2,1,-1]
-    cases[6,:]=[-1,-1,-1,-1,2,1,1,-1]
-    cases[7,:]=[-1,-1,-1,-1,1,1,1,-1]
-    cases[8,:]=[-1,-1,-1,-1,2,2,2,2]
-    cases[9,:]=[-1,-1,-1,-1,2,2,2,1]
-    cases[10,:]=[-1,-1,-1,-1,2,2,1,1]
-    cases[11,:]=[-1,-1,-1,-1,2,1,1,1]
-    cases[12,:]=[-1,-1,-1,-1,1,1,1,1]
-    cases[13,:]=[2,-1,-1,-1,2,-1,-1,-1]
-    cases[14,:]=[2,-1,-1,-1,1,-1,-1,-1]
-    cases[15,:]=[3,-1,-1,-1,2,-1,-1,-1]
-    cases[16,:]=[3,-1,-1,-1,1,-1,-1,-1]
-    cases[17,:]=[4,-1,-1,-1,2,-1,-1,-1]
-    cases[18,:]=[4,-1,-1,-1,1,-1,-1,-1]
-    cases[19,:]=[2,-1,-1,-1,2,2,-1,-1]
-    cases[20,:]=[2,-1,-1,-1,2,1,-1,-1]
-    cases[21,:]=[2,-1,-1,-1,1,1,-1,-1]
-    cases[22,:]=[3,-1,-1,-1,2,2,-1,-1]
-    cases[23,:]=[3,-1,-1,-1,2,1,-1,-1]
-    cases[24,:]=[3,-1,-1,-1,1,1,-1,-1]
-    cases[25,:]=[4,-1,-1,-1,2,2,-1,-1]
-    cases[26,:]=[4,-1,-1,-1,2,1,-1,-1]
-    cases[27,:]=[4,-1,-1,-1,1,1,-1,-1]
-    cases[28,:]=[2,-1,-1,-1,2,2,2,-1]
-    cases[29,:]=[2,-1,-1,-1,2,2,1,-1]
-    cases[30,:]=[2,-1,-1,-1,2,1,1,-1]
-    cases[31,:]=[2,-1,-1,-1,1,1,1,-1]
-    cases[32,:]=[3,-1,-1,-1,2,2,2,-1]
-    cases[33,:]=[3,-1,-1,-1,2,2,1,-1]
-    cases[34,:]=[3,-1,-1,-1,2,1,1,-1]
-    cases[35,:]=[3,-1,-1,-1,1,1,1,-1]
-    cases[36,:]=[4,-1,-1,-1,2,2,2,-1]
-    cases[37,:]=[4,-1,-1,-1,2,2,1,-1]
-    cases[38,:]=[4,-1,-1,-1,2,1,1,-1]
-    cases[39,:]=[4,-1,-1,-1,1,1,1,-1]
-
-    count_cases=zeros(39)
-
-    for step_sim=1:nb_steps
-        print("Computing cases - Progress: ",step_sim/nb_steps*100,"%\n")
-        count_cases
-        for carbon=1:nbC
+function assignDataToStates( data, states )
+    state_matrix=zeros(Int, size(data)[2], size(data)[1] )
+    count_states=zeros( size(states)[1] )
+    for i=1:size(data)[2]
+        print("Computing - Progress: ",i/size(data)[2]*100,"%\n")
+        for j=1:size(data)[1]
             index=1
             i=1
             d=0
-            for k=1:size(cases)[2]
-                d+= (coord_matrix[step_sim,carbon,k] - cases[i,k])*(coord_matrix[step_sim,carbon,k] - cases[i,k])
+            for k=1:size(states)[2]
+                d+= ( data[step_sim,carbon,k] - states[i,k])*(data[step_sim,carbon,k] - states[i,k])
             end
             d_min=d
-            for i=2:size(cases)[1]
+            for i=2:size(states)[1]
                 d=0
-                for k=1:size(cases)[2]
-                    d+= (coord_matrix[step_sim,carbon,k] - cases[i,k])*(coord_matrix[step_sim,carbon,k] - cases[i,k])
+                for k=1:size(states)[2]
+                    d+= ( data[step_sim,carbon,k] - states[i,k])*(data[step_sim,carbon,k] - states[i,k])
                 end
                 if d < d_min
                     index=i
                     d_min=d
                 end
             end
-            count_cases[index] += 1
-            case_matrix[step_sim,carbon]=index
+            count_states[index] += 1
+            state_matrix[step_sim,carbon]=index
         end
     end
+    return state_matrix, count_cases/sum(count_cases)*100
+end
 
-    percent=count_cases/sum(count_cases)*100
+function markovModelTest( V::T1, T::T2, cut_off_cases::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
 
     new_size=0
     index_keep=[]
     cases_keep=zeros(0,8)
     for i=1:size(count_cases)[1]
-        if percent[i] > 0.5
+        if percent[i] > cut_off_cases
             new_size += 1
             push!(index_keep, i)
             cases_keep=[ cases_keep ; transpose(cases[i,:]) ]
@@ -166,7 +158,7 @@ function doMarkovExtended( V::T1, T::T2, cut_off::T3 ) where { T1 <: Real, T2 <:
     count_cases_keep=zeros(size(cases_keep)[1])
     case_matrix_keep=zeros(Int,nb_steps,nbC)
     for step_sim=1:nb_steps
-        print("Computing cases - 2 - Progress: ",step_sim/nb_steps*100,"%\n")
+        print("Computing cases -",V,"-",T,"K - Second Pass - Progress: ",step_sim/nb_steps*100,"%\n")
         count_cases_keep
         for carbon=1:nbC
             index=1
@@ -191,38 +183,13 @@ function doMarkovExtended( V::T1, T::T2, cut_off::T3 ) where { T1 <: Real, T2 <:
         end
     end
 
-    file_cases_keep=open(string(folder_out,"cases-",cut_off,".dat"),"w")
-    if size(count_cases_keep)[1] == 1
-        for i=1:8
-            write(file_cases_keep,string(cases_keep[i]," "))
-        end
-        write(file_cases_keep,string(count_cases_keep,"\n"))
-    else
-        for i=size(count_cases_keep)[1]
-            for j=1:8
-                write(file_cases_keep,string(cases_keep[i,j]," "))
-            end
-            write(file_cases_keep,string(count_cases_keep,"\n"))
-        end
-    end
-    close(file_cases_keep)
-
-    file_cases=open(string(folder_out,"cases_occurences-",cut_off,".dat"),"w")
-    for step_sim=1:nb_steps
-        for carbon=1:nbC
-            write(file_cases,string(case_matrix_keep[step_sim,carbon]," "))
-        end
-        write(file_cases,string("\n"))
-    end
-    close(file_cases)
-
     lag_min=1
     d_lag=10
     lag_max=5001
     case_transition=zeros(Float64,size(cases_keep)[1],size(cases_keep)[1],Int(trunc((lag_max-lag_min)/d_lag)))
     count_lag=1
     for lag=lag_min:d_lag:lag_max-1
-        print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
+        print("Lag Compute -",V,"-",T,"K - Progress: ",lag/lag_max*100,"%\n")
         for carbon=1:nbC
             for step_sim=lag+1:nb_steps
                 case_transition[ case_matrix_keep[step_sim-lag,carbon], case_matrix_keep[step_sim,carbon], count_lag ] += 1
@@ -237,61 +204,7 @@ function doMarkovExtended( V::T1, T::T2, cut_off::T3 ) where { T1 <: Real, T2 <:
             case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
         end
     end
-    file_proba=open(string(folder_out,"proba_transition-",cut_off,".dat"),"w")
-    for lag=1:size(case_proba)[3]
-        if size(count_cases_keep)[1] == 1
-            write(file_proba,string(case_proba[1,1,lag]," "))
-            continue
-        end
-        for i=1:size(case_proba)[1]
-            for j=1:size(case_proba)[2]
-                write(file_proba,string(case_proba[i,j,lag]," "))
-            end
-        end
-        write(file_proba,string("\n"))
-    end
-    close(file_proba)
 
-
-    file_lag=open(string(folder_out,"markovian_evolution_test-",cut_off,".dat"),"w")
-    file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
-    for lag=1:count_lag-1
-        d_test=0
-        d_test2=0
-        count2=0
-        for i=1:size(cases_keep)[1]
-            for j=1:size(cases_keep)[1]
-                # Specific i-j transition
-                p_truth=case_proba[i,j,lag]
-                p_test=0
-                p_test2=0
-                for k=1:size(cases_keep)[1]
-                    p_test += case_proba[i,k,Int(trunc(lag/2))+1]*case_proba[k,j,Int(trunc(lag/2))+1]
-                end
-                d_test += abs(p_truth-p_test)
-                d_test2 += d_test*d_test
-                count2 += 1
-                write(file_lag,string(p_truth," ",p_test," "))
-            end
-        end
-        write(file_lag,string("\n"))
-        write(file_out_2,string(lag*d_lag*0.005," ",d_test/count2," ",d_test2/count2-(d_test/count2)^2,"\n"))
-    end
-    close(file_lag)
-    close(file_out_2)
-
-    file_lag=open(string(folder_out,"markovian_evolution_test-3_",cut_off,".dat"),"w")
-    for lag=2:count_lag-1
-        case_proba_test=case_proba[:,:,1]^lag
-        write(file_lag,string(lag*d_lag*0.005," "))
-        for i=1:size(cases_keep)[1]
-            for j=1:size(cases_keep)[1]
-                # Specific i-j transition
-                write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," "))
-            end
-        end
-        write(file_lag,string("\n"))
-    end
     return cases_keep, count_cases_keep, case_proba
 end
 
@@ -306,9 +219,36 @@ Cut_Off=[1.75]
 # Number of atoms
 nbC=32
 nbO=nbC*2
-max_coord=5
 
-cases_keep, count_cases_keep, case_proba = doMarkovExtended( 8.82, 3000, 1.75)
+V=8.82
+T=3000
+cut_off_bond = 1.75
+cut_off_stat = 0.1
+
+folder_in=string(folder_base,V,"/",T,"K/")
+file=string(folder_in,"TRAJEC_wrapped.xyz")
+
+if ! isfile(file)
+    #print("STOP")
+end
+
+folder_out=string(folder_in,"Data/")
+
+traj = filexyz.readFastFile(file)
+cell = cell_mod.Cell_param(V,V,V)
+
+nb_atoms=size(traj[1].names)[1]
+nb_steps=size(traj)[1]
+
+coord_matrix=buildCoordinationMatrix( traj, cell, cut_off_bond )
+
+
+
+states=defineStates()
+
+assignDataToStates( data, states )
+
+cases_keep, count_cases_keep, case_proba = doMarkovExtended( V, T, states, data, cut_off_stat)
 
 restart=false
 
@@ -325,3 +265,84 @@ for V in Volumes
         end
     end
 end
+
+file_cases_keep=open(string(folder_out,"cases-",cut_off,".dat"),"w")
+if size(count_cases_keep)[1] == 1
+    for i=1:8
+        write(file_cases_keep,string(cases_keep[i]," "))
+    end
+    write(file_cases_keep,string(count_cases_keep,"\n"))
+else
+    for i=size(count_cases_keep)[1]
+        for j=1:8
+            write(file_cases_keep,string(cases_keep[i,j]," "))
+        end
+        write(file_cases_keep,string(count_cases_keep,"\n"))
+    end
+end
+close(file_cases_keep)
+
+
+file_proba=open(string(folder_out,"proba_transition-",cut_off,".dat"),"w")
+for lag=1:size(case_proba)[3]
+    if size(count_cases_keep)[1] == 1
+        write(file_proba,string(case_proba[1,1,lag]," "))
+        continue
+    end
+    for i=1:size(case_proba)[1]
+        for j=1:size(case_proba)[2]
+            write(file_proba,string(case_proba[i,j,lag]," "))
+        end
+    end
+    write(file_proba,string("\n"))
+end
+close(file_proba)
+
+file_lag=open(string(folder_out,"markovian_evolution_test-",cut_off,".dat"),"w")
+file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
+for lag=1:count_lag-1
+    d_test=0
+    d_test2=0
+    count2=0
+    for i=1:size(cases_keep)[1]
+        for j=1:size(cases_keep)[1]
+            # Specific i-j transition
+            p_truth=case_proba[i,j,lag]
+            p_test=0
+            p_test2=0
+            for k=1:size(cases_keep)[1]
+                p_test += case_proba[i,k,Int(trunc(lag/2))+1]*case_proba[k,j,Int(trunc(lag/2))+1]
+            end
+            d_test += abs(p_truth-p_test)
+            d_test2 += d_test*d_test
+            count2 += 1
+            write(file_lag,string(p_truth," ",p_test," "))
+        end
+    end
+    write(file_lag,string("\n"))
+    write(file_out_2,string(lag*d_lag*0.005," ",d_test/count2," ",d_test2/count2-(d_test/count2)^2,"\n"))
+end
+close(file_lag)
+close(file_out_2)
+
+file_lag=open(string(folder_out,"markovian_evolution_test-3_",cut_off,".dat"),"w")
+for lag=2:count_lag-1
+    case_proba_test=case_proba[:,:,1]^lag
+    write(file_lag,string(lag*d_lag*0.005," "))
+    for i=1:size(cases_keep)[1]
+        for j=1:size(cases_keep)[1]
+            # Specific i-j transition
+            write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," "))
+        end
+    end
+    write(file_lag,string("\n"))
+end
+
+file_cases=open(string(folder_out,"cases_occurences-",cut_off,".dat"),"w")
+for step_sim=1:nb_steps
+    for carbon=1:nbC
+        write(file_cases,string(case_matrix_keep[step_sim,carbon]," "))
+    end
+    write(file_cases,string("\n"))
+end
+close(file_cases)
