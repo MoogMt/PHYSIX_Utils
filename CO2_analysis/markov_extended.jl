@@ -189,6 +189,23 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
     return states_transition_probability
 end
 
+function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real }
+    nb_states   = size(transition_matrix)[1]
+    nb_lag_time = size(transition_matrix)[3]
+    nb_lag_compare = Int(trunc(nb_lag_time/2))
+    transition_matrix_kolmo= zeros(nb_states,nb_states,nb_lag_compare)
+    for lag=1:nb_lag_compare
+        for i=1:nb_states
+            for j=1:nb_states
+                for k=1:nb_states
+                    transition_matrix_kolmo[i,j,lag] += transition_matrix[i,k,lag]*transition_matrix[k,j,lag]
+                end
+            end
+        end
+    end
+    return transition_matrix_kolmo
+end
+
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
@@ -206,6 +223,7 @@ cut_off_states = 0.1
 min_lag=1
 max_lag=2001
 d_lag=5
+unit=0.005
 
 V=8.82
 T=3000
@@ -221,6 +239,32 @@ case_matrix, percent = assignDataToStates( data , states )
 statistic_states = isolateSignificantStates( states, percent, cut_off_states )
 state_matrix, percent = assignDataToStates( data , statistic_states )
 transition_matrix = transitionMatrix( statistic_states, state_matrix, min_lag, max_lag, d_lag )
+transition_matrix_CK = chappmanKormologov( transition_matrix )
+
+
+nb_states=size(transition_matrix)[1]
+file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-part1.dat"),"w")
+for i=1:size(transition_matrix)[3]
+    write(file_out,string(i*unit*d_lag," "))
+    for j=1:nb_states
+        for k=1:nb_states
+            write(file_out,string(transition_matrix[j,k,i]," "))
+        end
+    end
+    write(file_out,string("\n"))
+end
+close(file_out)
+file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-part2.dat"),"w")
+for i=1:size(transition_matrix_CK)[3]
+    write(file_out,string(2*i*unit*d_lag," "))
+    for j=1:nb_states
+        for k=1:nb_states
+            write(file_out,string(transition_matrix_CK[j,k,i]," "))
+        end
+    end
+    write(file_out,string("\n"))
+end
+close(file_out)
 
 #
 # cases_keep=[]
@@ -271,28 +315,7 @@ transition_matrix = transitionMatrix( statistic_states, state_matrix, min_lag, m
 #
 # file_lag=open(string(folder_out,"markovian_evolution_test-",cut_off,".dat"),"w")
 # file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
-# for lag=1:count_lag-1
-#     d_test=0
-#     d_test2=0
-#     count2=0
-#     for i=1:size(cases_keep)[1]
-#         for j=1:size(cases_keep)[1]
-#             # Specific i-j transition
-#             p_truth=case_proba[i,j,lag]
-#             p_test=0
-#             p_test2=0
-#             for k=1:size(cases_keep)[1]
-#                 p_test += case_proba[i,k,Int(trunc(lag/2))+1]*case_proba[k,j,Int(trunc(lag/2))+1]
-#             end
-#             d_test += abs(p_truth-p_test)
-#             d_test2 += d_test*d_test
-#             count2 += 1
-#             write(file_lag,string(p_truth," ",p_test," "))
-#         end
-#     end
-#     write(file_lag,string("\n"))
-#     write(file_out_2,string(lag*d_lag*0.005," ",d_test/count2," ",d_test2/count2-(d_test/count2)^2,"\n"))
-# end
+
 # close(file_lag)
 # close(file_out_2)
 #
