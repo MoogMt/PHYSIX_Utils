@@ -158,7 +158,7 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     return states_kept
 end
 
-function markovModelTest( states::Array{T1,2}, state_matrix::Array{T2,2}, min_lag::T3, max_lag::T4, d_lag::T5) where { T1 <: Real, T2 <: Real, T3 <: Real, T4<:Int, T5 <: Int }
+function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_lag::T3, max_lag::T4, d_lag::T5) where { T1 <: Real, T2 <: Real, T3 <: Real, T4<:Int, T5 <: Int }
 
     nb_states=size(states)[1]
     nb_data_point=size(state_matrix)[1]
@@ -220,7 +220,7 @@ case_matrix, percent = assignDataToStates( data , states )
 
 statistic_states = isolateSignificantStates( states, percent, cut_off_states )
 state_matrix, percent = assignDataToStates( data , statistic_states )
-transition_matrix = markovModelTest( statistic_states, state_matrix, min_lag, max_lag, d_lag )
+transition_matrix = transitionMatrix( statistic_states, state_matrix, min_lag, max_lag, d_lag )
 
 #
 # cases_keep=[]
