@@ -18,9 +18,9 @@ max_coord=5
 
 restart=false
 
-V=8.82
-T=3000
-cut_off=1.65
+V=9.8
+T=2000
+cut_off=1.75
 
 #for cut_off in Cut_Off
 
@@ -166,15 +166,13 @@ for step_sim=1:nb_steps
     end
 end
 
-print( [ cases count_cases/sum(count_cases)*100 ] )
-
 percent=count_cases/sum(count_cases)*100
 
 new_size=0
 index_keep=[]
 global cases_keep=zeros(0,8)
 for i=1:size(count_cases)[1]
-    if percent[i] > 1
+    if percent[i] > 0.5
         global new_size += 1
         push!(index_keep, i)
         global cases_keep=[ cases_keep ; transpose(cases[i,:]) ]
@@ -209,6 +207,14 @@ for step_sim=1:nb_steps
     end
 end
 
+file_cases=open(string(folder_out,"cases_occurences-",cut_off,".dat"),"w")
+for step_sim=1:nb_steps
+    for carbon=1:nbC
+        write(file_cases,string(case_matrix_keep[step_sim,carbon]," "))
+    end
+    write(file_cases,string("\n"))
+end
+close(file_cases)
 
 lag_min=1
 d_lag=10
@@ -231,12 +237,22 @@ for lag=1:size(case_proba)[3]
         case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
     end
 end
+file_proba=open(string(folder_out,"proba_transition-",cut_off,".dat"),"w")
+for lag=1:size(case_proba)[1]
+    for i=1:size(cases_keep)[3]
+        for j=1:size(cases_keep)[3]
+            write(file_proba,string(case_proba[i,j,lag]," "))
+        end
+    end
+    write(file_proba,string("\n"))
+end
+close(file_proba)
 
-file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
+
+file_lag=open(string(folder_out,"markovian_evolution_test-",cut_off,".dat"),"w")
 file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
 for lag=1:count_lag-1
-    write(file_lag,string(lag*d_lag*0.005," "))
-    global d_test=0
+111    global d_test=0
     global d_test2=0
     global count2=0
     for i=1:size(cases_keep)[1]
@@ -259,5 +275,18 @@ for lag=1:count_lag-1
 end
 close(file_lag)
 close(file_out_2)
+
+file_lag=open(string(folder_out,"markovian_evolution_test-3_",cut_off,".dat"),"w")
+for lag=2:count_lag-1
+    case_proba_test=case_proba[:,:,1]^lag
+    write(file_lag,string(lag*d_lag*0.005," "))
+    for i=1:size(cases_keep)[1]
+        for j=1:size(cases_keep)[1]
+            # Specific i-j transition
+            write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," "))
+        end
+    end
+    write(file_lag,string("\n"))
+end
 
 #
