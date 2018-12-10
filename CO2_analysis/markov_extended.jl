@@ -163,25 +163,25 @@ function markovModelTest( states::Array{T1,2}, state_matrix::Array{T2,2}, min_la
     nb_states=size(states)[1]
     nb_data_point=size(state_matrix)[1]
     nb_series = size(state_matrix)[2]
-    nb_lag_points=Int(trunc((lag_max-lag_min)/d_lag))
+    nb_lag_points=Int(trunc((max_lag-min_lag)/d_lag))
 
-    state_transition_probability=zeros(Float64,nb_states,nb_states,nb_lag_points)
+    states_transition_probability=zeros(Float64,nb_states,nb_states,nb_lag_points)
 
     # Chappman Kolmogorov test
     count_lag=1
-    for lag=lag_min:d_lag:lag_max-1
-        print("Chappman Kolmogorov Test - Progress: ",lag/lag_max*100,"%\n")
+    for lag=min_lag:d_lag:max_lag-1
+        print("Chappman Kolmogorov Test - Progress: ",lag/max_lag*100,"%\n")
         for i=1:nb_series
             for j=lag+1:nb_data_point
-                state_transition_probability[ state_matrix[j-lag,i], case_matrix_keep[j,i], count_lag ] += 1
+                states_transition_probability[ state_matrix[j-lag,i], state_matrix[j,i], count_lag ] += 1
             end
         end
         count_lag += 1
     end
 
     # Normalization
-    for lag=1:size(case_proba)[3]
-        for i=1:size(cases_keep)[1]
+    for lag=1:nb_lag_points
+        for i=1:nb_states
             states_transition_probability[:,i,lag] /= sum( states_transition_probability[:,i,lag] )
         end
     end
@@ -201,10 +201,14 @@ Cut_Off=[1.75]
 nbC=32
 nbO=nbC*2
 
-V=8.82
-T=3000
 cut_off_bond = 1.75
 cut_off_states = 0.1
+min_lag=1
+max_lag=2001
+d_lag=5
+
+V=8.82
+T=3000
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -213,10 +217,10 @@ folder_out=string(folder_in,"Data/")
 states=defineStates()
 data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V,V,V), cut_off_bond )
 case_matrix, percent = assignDataToStates( data , states )
-states = isolateSignificantStates( states, percent, cut_off_states )
-case_matrix, percent = assignDataToStates( data , states )
 
-cases_keep, count_cases_keep, case_proba = doMarkovExtended( V, T, states, data, cut_off_stat)
+statistic_states = isolateSignificantStates( states, percent, cut_off_states )
+state_matrix, percent = assignDataToStates( data , statistic_states )
+transition_matrix = markovModelTest( statistic_states, state_matrix, min_lag, max_lag, d_lag )
 
 #
 # cases_keep=[]
