@@ -7,7 +7,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
     nb_steps=size(traj)[1]
     coord_matrix=ones(nb_steps,nbC,8)*(-1)
     for step_sim=1:nb_steps
-        print("Progress: ",step_sim/nb_steps*100,"%\n")
+        print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
         bond_matrix=zeros(nb_atoms,nb_atoms)
         for atom1=1:nb_atoms
             for atom2=atom1+1:nb_atoms
@@ -121,7 +121,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
     state_matrix=zeros(Int, size(data)[1], size(data)[2] )
     count_states=zeros( nb_states )
     for i=1:nb_data_point
-        print("Assigning data to states - 1 - Progress: ",i/nb_data_point*100,"%\n")
+        print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
         for j=1:nb_series
             index=1
             i=1
@@ -148,12 +148,11 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
 end
 
 function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, cut_off_states::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Real }
-    old_nb_states=size(count_states)[1]
+    old_nb_states=size(old_states)[1]
     new_nb_states=0
     states_kept=zeros(0,8)
     for i=1:old_nb_states
         if percent_states[i] > cut_off_states
-            new_size += 1
             states_kept=[ states_kept ; transpose( old_states[i,:]) ]
         end
     end
@@ -231,21 +230,17 @@ nbO=nbC*2
 V=8.82
 T=3000
 cut_off_bond = 1.75
-cut_off_stat = 0.1
+cut_off_states = 0.1
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
-
 folder_out=string(folder_in,"Data/")
 
-traj = filexyz.readFastFile(file)
-cell = cell_mod.Cell_param(V,V,V)
-
 states=defineStates()
-
-case_matrix, percent = assignDataToStates( buildCoordinationMatrix( traj, cell, cut_off_bond ), states )
-
-states = isolateSignificantStates( states, )
+data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V,V,V), cut_off_bond )
+case_matrix, percent = assignDataToStates( data , states )
+states = isolateSignificantStates( states, percent, cut_off_states )
+case_matrix, percent = assignDataToStates( data , states )
 
 cases_keep, count_cases_keep, case_proba = doMarkovExtended( V, T, states, data, cut_off_stat)
 
