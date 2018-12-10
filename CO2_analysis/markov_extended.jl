@@ -116,18 +116,17 @@ end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
     nb_data_point=size(data)[1]
     nb_series = size(data)[2]
-    nb_states = size(states)[1]
     dim_data = size(data)[3]
-    state_matrix=zeros(Int, size(data)[1], size(data)[2] )
+    nb_states = size(states)[1]
+    state_matrix=zeros(Int, nb_data_point, nb_series )
     count_states=zeros( nb_states )
     for i=1:nb_data_point
         print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
         for j=1:nb_series
             index=1
-            i=1
             d=0
             for k=1:dim_data
-                d+= ( data[i,j,k] - states[i,k])*(data[i,j,k] - states[i,k])
+                d+= ( data[i,j,k] - states[1,k])*(data[i,j,k] - states[1,k])
             end
             d_min=d
             for k=2:nb_states
@@ -159,60 +158,35 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     return states_kept
 end
 
-function markovModelTest( cut_off_cases::T3 ) where { T3 <: Real }
+function markovModelTest( states::Array{T1,2}, state_matrix::Array{T2,2}, min_lag::T3, max_lag::T4, d_lag::T5) where { T1 <: Real, T2 <: Real, T3 <: Real, T4<:Int, T5 <: Int }
 
+    nb_states=size(states)[1]
+    nb_data_point=size(state_matrix)[1]
+    nb_series = size(state_matrix)[2]
+    nb_lag_points=Int(trunc((lag_max-lag_min)/d_lag))
 
-    count_cases_keep=zeros(size(cases_keep)[1])
-    case_matrix_keep=zeros(Int,nb_steps,nbC)
-    for step_sim=1:nb_steps
-        print("Computing cases -",V,"-",T,"K - Second Pass - Progress: ",step_sim/nb_steps*100,"%\n")
-        count_cases_keep
-        for carbon=1:nbC
-            index=1
-            i=1
-            d=0
-            for k=1:size(cases_keep)[2]
-                d+= (coord_matrix[step_sim,carbon,k] - cases_keep[i,k])*(coord_matrix[step_sim,carbon,k] - cases_keep[i,k])
-            end
-            d_min=d
-            for i=2:size(cases_keep)[1]
-                d=0
-                for k=1:size(cases_keep)[2]
-                    d+= (coord_matrix[step_sim,carbon,k] - cases_keep[i,k])*(coord_matrix[step_sim,carbon,k] - cases_keep[i,k])
-                end
-                if d < d_min
-                    index=i
-                    d_min=d
-                end
-            end
-            count_cases_keep[index] += 1
-            case_matrix_keep[step_sim,carbon]=index
-        end
-    end
+    state_transition_probability=zeros(Float64,nb_states,nb_states,nb_lag_points)
 
-    lag_min=1
-    d_lag=10
-    lag_max=5001
-    case_transition=zeros(Float64,size(cases_keep)[1],size(cases_keep)[1],Int(trunc((lag_max-lag_min)/d_lag)))
+    # Chappman Kolmogorov test
     count_lag=1
     for lag=lag_min:d_lag:lag_max-1
-        print("Lag Compute -",V,"-",T,"K - Progress: ",lag/lag_max*100,"%\n")
-        for carbon=1:nbC
-            for step_sim=lag+1:nb_steps
-                case_transition[ case_matrix_keep[step_sim-lag,carbon], case_matrix_keep[step_sim,carbon], count_lag ] += 1
+        print("Chappman Kolmogorov Test - Progress: ",lag/lag_max*100,"%\n")
+        for i=1:nb_series
+            for j=lag+1:nb_data_point
+                state_transition_probability[ state_matrix[j-lag,i], case_matrix_keep[j,i], count_lag ] += 1
             end
         end
         count_lag += 1
     end
 
-    case_proba=case_transition[:,:,:]
+    # Normalization
     for lag=1:size(case_proba)[3]
         for i=1:size(cases_keep)[1]
-            case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
+            states_transition_probability[:,i,lag] /= sum( states_transition_probability[:,i,lag] )
         end
     end
 
-    return cases_keep, count_cases_keep, case_proba
+    return states_transition_probability
 end
 
 # Folder for data
