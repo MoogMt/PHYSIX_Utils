@@ -4,6 +4,7 @@ include(string(GPfolder,"contactmatrix.jl"))
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
+folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
 Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
@@ -17,9 +18,9 @@ max_coord=5
 
 restart=false
 
-V=9.325
-T=2500
-cut_off=1.75
+V=8.82
+T=3000
+cut_off=1.7
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -137,7 +138,6 @@ cases[39,:]=[4,-1,-1,-1,1,1,1,-1]
 
 count_cases=zeros(39)
 
-file_out=open(string(folder_out,"cases_simple-",cut_off,"-extended.dat"),"w")
 for step_sim=1:nb_steps
     print("Computing cases - Progress: ",step_sim/nb_steps*100,"%\n")
     global count_cases
@@ -163,19 +163,97 @@ for step_sim=1:nb_steps
         case_matrix[step_sim,carbon]=index
     end
 end
-close(file_out)
+
+print( [ cases count_cases/sum(count_cases)*100 ] )
+
+percent=count_cases/sum(count_cases)*100
+
+new_size=0
+index_keep=[]
+global cases_keep=zeros(0,8)
+for i=1:size(count_cases)[1]
+    if percent[i] > 0.1
+        global new_size += 1
+        push!(index_keep, i)
+        global cases_keep=[ cases_keep ; transpose(cases[i,:]) ]
+    end
+end
+
+count_cases_keep=zeros(size(cases_keep)[1])
+case_matrix_keep=zeros(Int,nb_steps,nbC)
+for step_sim=1:nb_steps
+    print("Computing cases - 2 - Progress: ",step_sim/nb_steps*100,"%\n")
+    global count_cases_keep
+    for carbon=1:nbC
+        global index=1
+        i=1
+        global d=0
+        for k=1:size(cases_keep)[2]
+            global d+= (coord_matrix[step_sim,carbon,k] - cases_keep[i,k])*(coord_matrix[step_sim,carbon,k] - cases_keep[i,k])
+        end
+        global d_min=d
+        for i=2:size(cases_keep)[1]
+            global d=0
+            for k=1:size(cases_keep)[2]
+                global d+= (coord_matrix[step_sim,carbon,k] - cases_keep[i,k])*(coord_matrix[step_sim,carbon,k] - cases_keep[i,k])
+            end
+            if d < d_min
+                global index=i
+                global d_min=d
+            end
+        end
+        count_cases_keep[index] += 1
+        case_matrix_keep[step_sim,carbon]=index
+    end
+end
+
 
 lag_min=1
 d_lag=10
 lag_max=5001
-case_transition=zeros(Float64,size(cases)[1],size(cases)[1],Int(trunc((lag_max-lag_min)/d_lag)))
+case_transition=zeros(Float64,size(cases_keep)[1],size(cases_keep)[1],Int(trunc((lag_max-lag_min)/d_lag)))
 global count_lag=1
 for lag=lag_min:d_lag:lag_max-1
     print("Lag Compute - Progress: ",lag/lag_max*100,"%\n")
     for carbon=1:nbC
         for step_sim=lag+1:nb_steps
-            case_transition[ case_matrix[step_sim-lag,carbon], case_matrix[step_sim,carbon], count_lag ] += 1
+            case_transition[ case_matrix_keep[step_sim-lag,carbon], case_matrix_keep[step_sim,carbon], count_lag ] += 1
         end
     end
     global count_lag += 1
 end
+
+case_proba=case_transition[:,:,:]
+for lag=1:size(case_proba)[3]
+    for i=1:size(cases_keep)[1]
+        case_proba[:,i,lag] /= sum( case_proba[:,i,lag] )
+    end
+end
+
+file_lag=open(string(folder_out,"markovian_evolution_test.dat"),"w")
+file_out_2=open(string(folder_out,"markovian_evolution_test2.dat"),"w")
+for lag=1:count_lag-1
+    write(file_lag,string(lag*d_lag*0.005," "))
+    global d_test=0
+    global d_test2=0
+    global count2=0
+    for i=1:size(cases_keep)[1]
+        for j=1:size(cases_keep)[1]
+            # Specific i-j transition
+            global p_truth=case_proba[i,j,lag]
+            global p_test=0
+            global p_test2=0
+            for k=1:size(cases_keep)[1]
+                global p_test += case_proba[i,k,Int(trunc(lag/2))+1]*case_proba[k,j,Int(trunc(lag/2))+1]
+            end
+            global d_test += abs(p_truth-p_test)
+            global d_test2 += d_test*d_test
+            global count2 += 1
+            write(file_lag,string(p_truth," ",p_test," "))
+        end
+    end
+    write(file_lag,string("\n"))
+    write(file_out_2,string(lag*d_lag*0.005," ",d_test/count2," ",d_test2/count2-(d_test/count2)^2,"\n"))
+end
+close(file_lag)
+close(file_out_2)
