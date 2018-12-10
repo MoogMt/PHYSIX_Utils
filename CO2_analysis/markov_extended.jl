@@ -2,14 +2,16 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 
 include(string(GPfolder,"contactmatrix.jl"))
 
-function buildCoordinationMatrix( traj::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: Main.atom_mod.AtomList, T2 <: Main.cell_mod.Cell_param , T3 <: Real }
+function buildCoordinationMatrix( traj::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: Vector{atom_mod.AtomList}, T2 <: cell_mod.Cell_param , T3 <: Real }
+    nb_atoms=size(traj[1].names)[1]
+    nb_steps=size(traj)[1]
     coord_matrix=ones(nb_steps,nbC,8)*(-1)
     for step_sim=1:nb_steps
         print("Progress: ",step_sim/nb_steps*100,"%\n")
         bond_matrix=zeros(nb_atoms,nb_atoms)
         for atom1=1:nb_atoms
             for atom2=atom1+1:nb_atoms
-                if Main.cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
+                if cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
                     bond_matrix[atom1,atom2]=1
                     bond_matrix[atom2,atom1]=1
                 end
@@ -111,26 +113,30 @@ function defineStates()
     return states
 end
 
-function assignDataToStates( data::Array{T1,2}, states::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
-    state_matrix=zeros(Int, size(data)[2], size(data)[1] )
-    count_states=zeros( size(states)[1] )
-    for i=1:size(data)[2]
-        print("Computing - Progress: ",i/size(data)[2]*100,"%\n")
-        for j=1:size(data)[1]
+function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
+    nb_data_point=size(data)[1]
+    nb_series = size(data)[2]
+    nb_states = size(states)[1]
+    dim_data = size(data)[3]
+    state_matrix=zeros(Int, size(data)[1], size(data)[2] )
+    count_states=zeros( nb_states )
+    for i=1:nb_data_point
+        print("Assigning data to states - 1 - Progress: ",i/nb_data_point*100,"%\n")
+        for j=1:nb_series
             index=1
             i=1
             d=0
-            for k=1:size(states)[2]
-                d+= ( data[step_sim,carbon,k] - states[i,k])*(data[step_sim,carbon,k] - states[i,k])
+            for k=1:dim_data
+                d+= ( data[i,j,k] - states[i,k])*(data[i,j,k] - states[i,k])
             end
             d_min=d
-            for i=2:size(states)[1]
+            for k=2:nb_states
                 d=0
-                for k=1:size(states)[2]
-                    d+= ( data[step_sim,carbon,k] - states[i,k])*(data[step_sim,carbon,k] - states[i,k])
+                for l=1:dim_data
+                    d+= ( data[i,j,l] - states[k,l])*(data[i,j,l] - states[k,l])
                 end
                 if d < d_min
-                    index=i
+                    index=k
                     d_min=d
                 end
             end
@@ -232,14 +238,9 @@ folder_out=string(folder_in,"Data/")
 traj = filexyz.readFastFile(file)
 cell = cell_mod.Cell_param(V,V,V)
 
-nb_atoms=size(traj[1].names)[1]
-nb_steps=size(traj)[1]
-
-coord_matrix=buildCoordinationMatrix( traj, cell, cut_off_bond )
-
 states=defineStates()
 
-assignDataToStates( coord_matrix, states )
+assignDataToStates( buildCoordinationMatrix( traj, cell, cut_off_bond ), states )
 
 cases_keep, count_cases_keep, case_proba = doMarkovExtended( V, T, states, data, cut_off_stat)
 
