@@ -212,13 +212,13 @@ for V in Volumes
             file_cases_keep=open(string(folder_out,"cases-",cut_off,".dat"),"w")
             if size(count_cases_keep)[1] == 1
                 for i=1:8
-                    write(cases_keep[i]," ")
+                    write(file_cases_keep,string(cases_keep[i]," "))
                 end
                 write(file_cases_keep,string(count_cases_keep,"\n"))
             else
                 for i=size(count_cases_keep)[1]
                     for j=1:8
-                        write(cases_keep[i,j]," ")
+                        write(file_cases_keep,string(cases_keep[i,j]," "))
                     end
                     write(file_cases_keep,string(count_cases_keep,"\n"))
                 end
