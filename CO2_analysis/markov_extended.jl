@@ -63,7 +63,24 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
     return coord_matrix
 end
 
-function defineStates()
+
+function defineStatesCoordinances()
+    states=zeros(39,2)
+    # CO2
+    states[1,:]=[0,1]
+    states[2,:]=[0,2]
+    states[3,:]=[0,3]
+    states[4,:]=[0,4]
+    states[5,:]=[1,1]
+    states[6,:]=[1,2]
+    states[7,:]=[1,3]
+    states[8,:]=[1,4]
+    states[9,:]=[2,1]
+    states[10,:]=[2,2]
+    states[11,:]=[2,3]
+    return states
+end
+function defineStatesExtendedCoordinances()
     states=zeros(39,8)
     # CO2
     states[1,:]=[-1,-1,-1,-1,1,1,-1,-1]
@@ -112,7 +129,6 @@ function defineStates()
     states[39,:]=[4,-1,-1,-1,1,1,1,-1]
     return states
 end
-
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
     nb_data_point=size(data)[1]
     nb_series = size(data)[2]
@@ -145,7 +161,6 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
     end
     return state_matrix, count_states/sum(count_states)*100
 end
-
 function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, cut_off_states::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Real }
     old_nb_states=size(old_states)[1]
     new_nb_states=0
@@ -157,7 +172,6 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     end
     return states_kept
 end
-
 function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_lag::T3, max_lag::T4, d_lag::T5) where { T1 <: Real, T2 <: Real, T3 <: Real, T4<:Int, T5 <: Int }
 
     nb_states=size(states)[1]
@@ -188,7 +202,6 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
 
     return states_transition_probability
 end
-
 function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real }
     nb_states   = size(transition_matrix)[1]
     nb_lag_time = size(transition_matrix)[3]
@@ -232,7 +245,7 @@ folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
 folder_out=string(folder_in,"Data/")
 
-states=defineStates()
+states=defineStatesExtendedCoordinances()
 data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V,V,V), cut_off_bond )
 case_matrix, percent = assignDataToStates( data , states )
 
@@ -243,21 +256,11 @@ transition_matrix_CK = chappmanKormologov( transition_matrix )
 
 nb_states=size(transition_matrix)[1]
 
-test=zeros(nb_states,nb_states)
-for i=1:nb_states
-    for j=1:nb_states
-        test[i,j] = sum(transition_matrix[i,j,:])/size(transition_matrix)[3]*100
-    end
-end
-
 file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-part1.dat"),"w")
 for i=1:2:size(transition_matrix)[3]
     write(file_out,string(i*unit*d_lag," "))
     for j=1:nb_states
         for k=1:nb_states
-            if test[j,k] <  1
-                continue
-            end
             write(file_out,string(transition_matrix[j,k,i]," "))
         end
     end
@@ -269,87 +272,9 @@ for i=1:size(transition_matrix_CK)[3]
     write(file_out,string(2*i*unit*d_lag," "))
     for j=1:nb_states
         for k=1:nb_states
-            if test[j,k] <  1
-                continue
-            end
             write(file_out,string(transition_matrix_CK[j,k,i]," "))
         end
     end
     write(file_out,string("\n"))
 end
 close(file_out)
-
-#
-# cases_keep=[]
-# count_cases_keep=[]
-# case_matrix_keep=[]
-# case_proba=[]
-# for V in Volumes
-#     for T in Temperatures
-#         for cut_off in Cut_Off
-#
-#
-#             #
-#         end
-#     end
-# end
-#
-# file_cases_keep=open(string(folder_out,"cases-",cut_off,".dat"),"w")
-# if size(count_cases_keep)[1] == 1
-#     for i=1:8
-#         write(file_cases_keep,string(cases_keep[i]," "))
-#     end
-#     write(file_cases_keep,string(count_cases_keep,"\n"))
-# else
-#     for i=size(count_cases_keep)[1]
-#         for j=1:8
-#             write(file_cases_keep,string(cases_keep[i,j]," "))
-#         end
-#         write(file_cases_keep,string(count_cases_keep,"\n"))
-#     end
-# end
-# close(file_cases_keep)
-#
-#
-# file_proba=open(string(folder_out,"proba_transition-",cut_off,".dat"),"w")
-# for lag=1:size(case_proba)[3]
-#     if size(count_cases_keep)[1] == 1
-#         write(file_proba,string(case_proba[1,1,lag]," "))
-#         continue
-#     end
-#     for i=1:size(case_proba)[1]
-#         for j=1:size(case_proba)[2]
-#             write(file_proba,string(case_proba[i,j,lag]," "))
-#         end
-#     end
-#     write(file_proba,string("\n"))
-# end
-# close(file_proba)
-#
-# file_lag=open(string(folder_out,"markovian_evolution_test-",cut_off,".dat"),"w")
-# file_out_2=open(string(folder_out,"markovian_evolution_test2-",cut_off,".dat"),"w")
-
-# close(file_lag)
-# close(file_out_2)
-#
-# file_lag=open(string(folder_out,"markovian_evolution_test-3_",cut_off,".dat"),"w")
-# for lag=2:count_lag-1
-#     case_proba_test=case_proba[:,:,1]^lag
-#     write(file_lag,string(lag*d_lag*0.005," "))
-#     for i=1:size(cases_keep)[1]
-#         for j=1:size(cases_keep)[1]
-#             # Specific i-j transition
-#             write(file_lag,string(case_proba[i,j,lag]," ",case_proba_test[i,j]," "))
-#         end
-#     end
-#     write(file_lag,string("\n"))
-# end
-#
-# file_cases=open(string(folder_out,"cases_occurences-",cut_off,".dat"),"w")
-# for step_sim=1:nb_steps
-#     for carbon=1:nbC
-#         write(file_cases,string(case_matrix_keep[step_sim,carbon]," "))
-#     end
-#     write(file_cases,string("\n"))
-# end
-# close(file_cases)
