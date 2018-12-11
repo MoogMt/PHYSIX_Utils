@@ -238,7 +238,7 @@ max_lag=2001
 d_lag=5
 unit=0.005
 
-V=9.2
+V=8.82
 T=3000
 
 folder_in=string(folder_base,V,"/",T,"K/")
@@ -256,25 +256,25 @@ transition_matrix_CK = chappmanKormologov( transition_matrix )
 
 nb_states=size(transition_matrix)[1]
 
-file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-part1.dat"),"w")
-for i=1:2:size(transition_matrix)[3]
-    write(file_out,string(i*unit*d_lag," "))
-    for j=1:nb_states
+for j=1:nb_states
+    file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
+    for i=1:2:size(transition_matrix)[3]
+        write(file_out,string(i*unit*d_lag," "))
         for k=1:nb_states
             write(file_out,string(transition_matrix[j,k,i]," "))
         end
+        write(file_out,string("\n"))
     end
-    write(file_out,string("\n"))
+    close(file_out)
 end
-close(file_out)
-file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-part2.dat"),"w")
-for i=1:size(transition_matrix_CK)[3]
-    write(file_out,string(2*i*unit*d_lag," "))
-    for j=1:nb_states
+for j=1:nb_states
+    file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
+    for i=1:size(transition_matrix_CK)[3]
+        write(file_out,string(2*i*unit*d_lag," "))
         for k=1:nb_states
             write(file_out,string(transition_matrix_CK[j,k,i]," "))
         end
+        write(file_out,string("\n"))
     end
-    write(file_out,string("\n"))
+    close(file_out)
 end
-close(file_out)
