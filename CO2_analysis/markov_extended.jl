@@ -62,8 +62,6 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
     end
     return coord_matrix
 end
-
-
 function defineStatesCoordinances()
     states=zeros(39,2)
     # CO2
@@ -127,6 +125,53 @@ function defineStatesExtendedCoordinances()
     states[37,:]=[4,-1,-1,-1,2,2,1,-1]
     states[38,:]=[4,-1,-1,-1,2,1,1,-1]
     states[39,:]=[4,-1,-1,-1,1,1,1,-1]
+    return states
+end
+function defineStatesExtendedCoordinancesO()
+    states=zeros(39,8)
+    # CO2
+    states[1,:]=[2,-1,-1]
+    states[1,:]=[3,-1,-1]
+    states[1,:]=[4,-1,-1]
+    states[1,:]=[2,2,-1]
+    states[1,:]=[2,3,-1]
+    states[1,:]=[2,4,-1]
+    states[1,:]=[3,2,-1]
+    states[1,:]=[3,3,-1]
+    states[1,:]=[3,4,-1]
+    states[1,:]=[4,2,-1]
+    states[1,:]=[4,3,-1]
+    states[1,:]=[4,4,-1]
+    #
+    states[1,:]=[2,2,2]
+    states[1,:]=[2,3,2]
+    states[1,:]=[2,4,2]
+    states[1,:]=[3,2,2]
+    states[1,:]=[3,3,2]
+    states[1,:]=[3,4,2]
+    states[1,:]=[4,2,2]
+    states[1,:]=[4,3,2]
+    states[1,:]=[4,4,2]
+    #
+    states[1,:]=[2,2,3]
+    states[1,:]=[2,3,3]
+    states[1,:]=[2,4,3]
+    states[1,:]=[3,2,3]
+    states[1,:]=[3,3,3]
+    states[1,:]=[3,4,3]
+    states[1,:]=[4,2,3]
+    states[1,:]=[4,3,3]
+    states[1,:]=[4,4,3]
+    #
+    states[1,:]=[2,2,4]
+    states[1,:]=[2,3,4]
+    states[1,:]=[2,4,4]
+    states[1,:]=[3,2,4]
+    states[1,:]=[3,3,4]
+    states[1,:]=[3,4,4]
+    states[1,:]=[4,2,4]
+    states[1,:]=[4,3,4]
+    states[1,:]=[4,4,4]
     return states
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
@@ -196,7 +241,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
     # Normalization
     for lag=1:nb_lag_points
         for i=1:nb_states
-            states_transition_probability[:,i,lag] /= sum( states_transition_probability[:,i,lag] )
+            states_transition_probability[i,:,lag] /= sum( states_transition_probability[i,:,lag] )
         end
     end
 
@@ -239,7 +284,7 @@ d_lag=5
 unit=0.005
 
 V=8.82
-T=3000
+T=2500
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -257,7 +302,7 @@ transition_matrix_CK = chappmanKormologov( transition_matrix )
 nb_states=size(transition_matrix)[1]
 
 for j=1:nb_states
-    file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
+    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
     for i=1:2:size(transition_matrix)[3]
         write(file_out,string(i*unit*d_lag," "))
         for k=1:nb_states
@@ -268,7 +313,7 @@ for j=1:nb_states
     close(file_out)
 end
 for j=1:nb_states
-    file_out=open(string(folder_out,"markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
+    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
     for i=1:size(transition_matrix_CK)[3]
         write(file_out,string(2*i*unit*d_lag," "))
         for k=1:nb_states
