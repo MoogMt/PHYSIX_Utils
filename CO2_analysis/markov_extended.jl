@@ -263,6 +263,19 @@ function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real
     end
     return transition_matrix_kolmo
 end
+function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}) where { T1 <: AbstractString, T2 <: Real, T3 <: Real }
+    file_out=open(file,"w")
+    n_dim = size( states)[1]
+    nb_states=size(percent)[1]
+    for i=1:nb_states
+        for j=1:n_dim
+            write(file_out,string(states[i,j]))
+        end
+        write(file_out,string(percent[i],"\n"))
+    end
+    close(file_out)
+    return
+end
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
@@ -279,47 +292,53 @@ nbO=nbC*2
 cut_off_bond = 1.75
 cut_off_states = 0.1
 min_lag=1
-max_lag=2001
+max_lag=5001
 d_lag=5
 unit=0.005
 
-V=8.82
-T=2500
+for T in Temperatures
+    for V in Volumes
 
-folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC_wrapped.xyz")
-folder_out=string(folder_in,"Data/")
+        folder_in=string(folder_base,V,"/",T,"K/")
+        file=string(folder_in,"TRAJEC_wrapped.xyz")
+        folder_out=string(folder_in,"Data/")
 
-states=defineStatesExtendedCoordinances()
-data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V,V,V), cut_off_bond )
-case_matrix, percent = assignDataToStates( data , states )
+        states=defineStatesExtendedCoordinances()
+        data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V,V,V), cut_off_bond )
+        state_matrix, percent = assignDataToStates( data , states )
 
-statistic_states = isolateSignificantStates( states, percent, cut_off_states )
-state_matrix, percent_statistics = assignDataToStates( data , statistic_states )
-transition_matrix = transitionMatrix( statistic_states, state_matrix, min_lag, max_lag, d_lag )
-transition_matrix_CK = chappmanKormologov( transition_matrix )
+        statistic_states = isolateSignificantStates( states, percent, cut_off_states )
+        state_matrix, percent_statistics = assignDataToStates( data , statistic_states )
+        transition_matrix = transitionMatrix( statistic_states, state_matrix, min_lag, max_lag, d_lag )
+        transition_matrix_CK = chappmanKormologov( transition_matrix )
 
-nb_states=size(transition_matrix)[1]
+        nb_states=size(transition_matrix)[1]
 
-for j=1:nb_states
-    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
-    for i=1:2:size(transition_matrix)[3]
-        write(file_out,string(i*unit*d_lag," "))
-        for k=1:nb_states
-            write(file_out,string(transition_matrix[j,k,i]," "))
+        writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
+        writeStates(string(folder_out,"markov_stat_states.dat"),statistic_states,percent_statistics)
+
+        for j=1:nb_states
+            file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
+            for i=1:2:size(transition_matrix)[3]
+                write(file_out,string(i*unit*d_lag," "))
+                for k=1:nb_states
+                    write(file_out,string(transition_matrix[j,k,i]," "))
+                end
+                write(file_out,string("\n"))
+            end
+            close(file_out)
         end
-        write(file_out,string("\n"))
-    end
-    close(file_out)
-end
-for j=1:nb_states
-    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
-    for i=1:size(transition_matrix_CK)[3]
-        write(file_out,string(2*i*unit*d_lag," "))
-        for k=1:nb_states
-            write(file_out,string(transition_matrix_CK[j,k,i]," "))
+        for j=1:nb_states
+            file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
+            for i=1:size(transition_matrix_CK)[3]
+                write(file_out,string(2*i*unit*d_lag," "))
+                for k=1:nb_states
+                    write(file_out,string(transition_matrix_CK[j,k,i]," "))
+                end
+                write(file_out,string("\n"))
+            end
+            close(file_out)
         end
-        write(file_out,string("\n"))
+
     end
-    close(file_out)
 end
