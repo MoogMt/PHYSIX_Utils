@@ -266,10 +266,10 @@ end
 function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}) where { T1 <: AbstractString, T2 <: Real, T3 <: Real }
     file_out=open(file,"w")
     n_dim = size( states)[1]
-    nb_states=size(percent)[1]
+    nb_states=size(states)[2]
     for i=1:nb_states
         for j=1:n_dim
-            write(file_out,string(states[i,j]))
+            write(file_out,string(states[i,j]," "))
         end
         write(file_out,string(percent[i],"\n"))
     end
@@ -301,9 +301,16 @@ for T in Temperatures
 
         folder_in=string(folder_base,V,"/",T,"K/")
         file=string(folder_in,"TRAJEC_wrapped.xyz")
+
+        if ! isfile(file)
+            continue
+        end
+
         folder_out=string(folder_in,"Data/")
 
         states=defineStatesExtendedCoordinances()
+
+        print("Computing Data\n")
         data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V,V,V), cut_off_bond )
         state_matrix, percent = assignDataToStates( data , states )
 
@@ -318,7 +325,7 @@ for T in Temperatures
         writeStates(string(folder_out,"markov_stat_states.dat"),statistic_states,percent_statistics)
 
         for j=1:nb_states
-            file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
+            file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
             for i=1:2:size(transition_matrix)[3]
                 write(file_out,string(i*unit*d_lag," "))
                 for k=1:nb_states
@@ -329,7 +336,7 @@ for T in Temperatures
             close(file_out)
         end
         for j=1:nb_states
-            file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
+            file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
             for i=1:size(transition_matrix_CK)[3]
                 write(file_out,string(2*i*unit*d_lag," "))
                 for k=1:nb_states
