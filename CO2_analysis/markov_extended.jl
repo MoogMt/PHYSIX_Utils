@@ -1,6 +1,7 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 
 include(string(GPfolder,"contactmatrix.jl"))
+include(string(GPfolder,"geom.jl"))
 
 function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     nb_atoms=size(traj[1].names)[1]
@@ -79,52 +80,54 @@ function defineStatesCoordinances()
     return states
 end
 function defineStatesExtendedCoordinances()
-    states=zeros(39,8)
+    states=zeros(41,8)
+    states[1,:]=[-1,-1,-1,-1,1,-1,-1,-1]
+    states[2,:]=[-1,-1,-1,-1,2,-1,-1,-1]
     # CO2
-    states[1,:]=[-1,-1,-1,-1,1,1,-1,-1]
-    states[2,:]=[-1,-1,-1,-1,2,1,-1,-1]
-    states[3,:]=[-1,-1,-1,-1,2,2,-1,-1]
+    states[3,:]=[-1,-1,-1,-1,1,1,-1,-1]
+    states[4,:]=[-1,-1,-1,-1,2,1,-1,-1]
+    states[5,:]=[-1,-1,-1,-1,2,2,-1,-1]
     # CO3
-    states[4,:]=[-1,-1,-1,-1,2,2,2,-1]
-    states[5,:]=[-1,-1,-1,-1,2,2,1,-1]
-    states[6,:]=[-1,-1,-1,-1,2,1,1,-1]
-    states[7,:]=[-1,-1,-1,-1,1,1,1,-1]
+    states[6,:]=[-1,-1,-1,-1,2,2,2,-1]
+    states[7,:]=[-1,-1,-1,-1,2,2,1,-1]
+    states[8,:]=[-1,-1,-1,-1,2,1,1,-1]
+    states[9,:]=[-1,-1,-1,-1,1,1,1,-1]
     # CO4
-    states[8,:]=[-1,-1,-1,-1,2,2,2,2]
-    states[9,:]=[-1,-1,-1,-1,2,2,2,1]
-    states[10,:]=[-1,-1,-1,-1,2,2,1,1]
-    states[11,:]=[-1,-1,-1,-1,2,1,1,1]
-    states[12,:]=[-1,-1,-1,-1,1,1,1,1]
+    states[10,:]=[-1,-1,-1,-1,2,2,2,2]
+    states[11,:]=[-1,-1,-1,-1,2,2,2,1]
+    states[12,:]=[-1,-1,-1,-1,2,2,1,1]
+    states[13,:]=[-1,-1,-1,-1,2,1,1,1]
+    states[14,:]=[-1,-1,-1,-1,1,1,1,1]
     # CCO1
-    states[13,:]=[2,-1,-1,-1,2,-1,-1,-1]
-    states[14,:]=[2,-1,-1,-1,1,-1,-1,-1]
-    states[15,:]=[3,-1,-1,-1,2,-1,-1,-1]
-    states[16,:]=[3,-1,-1,-1,1,-1,-1,-1]
-    states[17,:]=[4,-1,-1,-1,2,-1,-1,-1]
-    states[18,:]=[4,-1,-1,-1,1,-1,-1,-1]
+    states[15,:]=[2,-1,-1,-1,2,-1,-1,-1]
+    states[16,:]=[2,-1,-1,-1,1,-1,-1,-1]
+    states[17,:]=[3,-1,-1,-1,2,-1,-1,-1]
+    states[18,:]=[3,-1,-1,-1,1,-1,-1,-1]
+    states[19,:]=[4,-1,-1,-1,2,-1,-1,-1]
+    states[20,:]=[4,-1,-1,-1,1,-1,-1,-1]
     # CCO2
-    states[19,:]=[2,-1,-1,-1,2,2,-1,-1]
-    states[20,:]=[2,-1,-1,-1,2,1,-1,-1]
-    states[21,:]=[2,-1,-1,-1,1,1,-1,-1]
-    states[22,:]=[3,-1,-1,-1,2,2,-1,-1]
-    states[23,:]=[3,-1,-1,-1,2,1,-1,-1]
-    states[24,:]=[3,-1,-1,-1,1,1,-1,-1]
-    states[25,:]=[4,-1,-1,-1,2,2,-1,-1]
-    states[26,:]=[4,-1,-1,-1,2,1,-1,-1]
-    states[27,:]=[4,-1,-1,-1,1,1,-1,-1]
+    states[21,:]=[2,-1,-1,-1,2,2,-1,-1]
+    states[22,:]=[2,-1,-1,-1,2,1,-1,-1]
+    states[23,:]=[2,-1,-1,-1,1,1,-1,-1]
+    states[24,:]=[3,-1,-1,-1,2,2,-1,-1]
+    states[25,:]=[3,-1,-1,-1,2,1,-1,-1]
+    states[26,:]=[3,-1,-1,-1,1,1,-1,-1]
+    states[27,:]=[4,-1,-1,-1,2,2,-1,-1]
+    states[28,:]=[4,-1,-1,-1,2,1,-1,-1]
+    states[29,:]=[4,-1,-1,-1,1,1,-1,-1]
     # CCO3
-    states[28,:]=[2,-1,-1,-1,2,2,2,-1]
-    states[29,:]=[2,-1,-1,-1,2,2,1,-1]
-    states[30,:]=[2,-1,-1,-1,2,1,1,-1]
-    states[31,:]=[2,-1,-1,-1,1,1,1,-1]
-    states[32,:]=[3,-1,-1,-1,2,2,2,-1]
-    states[33,:]=[3,-1,-1,-1,2,2,1,-1]
-    states[34,:]=[3,-1,-1,-1,2,1,1,-1]
-    states[35,:]=[3,-1,-1,-1,1,1,1,-1]
-    states[36,:]=[4,-1,-1,-1,2,2,2,-1]
-    states[37,:]=[4,-1,-1,-1,2,2,1,-1]
-    states[38,:]=[4,-1,-1,-1,2,1,1,-1]
-    states[39,:]=[4,-1,-1,-1,1,1,1,-1]
+    states[30,:]=[2,-1,-1,-1,2,2,2,-1]
+    states[31,:]=[2,-1,-1,-1,2,2,1,-1]
+    states[32,:]=[2,-1,-1,-1,2,1,1,-1]
+    states[33,:]=[2,-1,-1,-1,1,1,1,-1]
+    states[34,:]=[3,-1,-1,-1,2,2,2,-1]
+    states[35,:]=[3,-1,-1,-1,2,2,1,-1]
+    states[36,:]=[3,-1,-1,-1,2,1,1,-1]
+    states[37,:]=[3,-1,-1,-1,1,1,1,-1]
+    states[38,:]=[4,-1,-1,-1,2,2,2,-1]
+    states[39,:]=[4,-1,-1,-1,2,2,1,-1]
+    states[40,:]=[4,-1,-1,-1,2,1,1,-1]
+    states[41,:]=[4,-1,-1,-1,1,1,1,-1]
     return states
 end
 function defineStatesExtendedCoordinancesO()
@@ -265,8 +268,8 @@ function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real
 end
 function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}) where { T1 <: AbstractString, T2 <: Real, T3 <: Real }
     file_out=open(file,"w")
-    n_dim = size( states)[1]
-    nb_states=size(states)[2]
+    n_dim = size( states)[2]
+    nb_states=size(states)[1]
     for i=1:nb_states
         for j=1:n_dim
             write(file_out,string(states[i,j]," "))
@@ -279,6 +282,7 @@ end
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
+folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
 Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
@@ -296,6 +300,8 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
+file_coordinance=open(string(folder_base,"coordinances.dat"),"w")
+
 for T in Temperatures
     for V in Volumes
 
@@ -306,13 +312,130 @@ for T in Temperatures
             continue
         end
 
-        folder_out=string(folder_in,"Data/")
+        folder_out=string(folder_in)
 
         states=defineStatesExtendedCoordinances()
 
         print("Computing Data\n")
-        data=buildCoordinationMatrix( filexyz.readFastFile(file),  cell_mod.Cell_param(V,V,V), cut_off_bond )
+        traj=filexyz.readFastFile(file)
+        cell=cell_mod.Cell_param(V,V,V)
+        data=buildCoordinationMatrix( traj , cell , cut_off_bond )
         state_matrix, percent = assignDataToStates( data , states )
+
+        nb_states = size(states)[1]
+        nb_dim = size(states)[2]
+        nb_steps = size(state_matrix)[1]
+        nbC = size(state_matrix)[2]
+        nbO=2*nbC
+
+        coordinances=zeros(nb_states)
+        for i=1:nb_states
+            for j=1:nb_dim
+                if states[i,j] > 0
+                    coordinances[i] += 1
+                end
+            end
+        end
+
+        write(file_coordinance,string(V," ",T," "))
+        for coord=1:4
+            coord_percent=0
+            for state=1:nb_states
+                if coordinances[state] == coord
+                    coord_percent += percent[state]
+                end
+            end
+            write(file_coordinance,string(coord_percent," "))
+        end
+        write(file_coordinance,string("\n"))
+
+        for state=1:nb_states
+            if percent[state] > 0.05
+                distances=[]
+                for step_sim=1:nb_steps
+                    for carbon=1:nbC
+                        if state_matrix[step_sim,carbon] == state
+                            min_dist=V
+                            for atom=1:96
+                                dist=cell_mod.distance(traj[step_sim],cell,carbon,atom)
+                                if atom == carbon
+                                    continue
+                                end
+                                if min_dist > dist
+                                    min_dist = dist
+                                end
+                            end
+                            push!(distances,min_dist)
+                        end
+                    end
+                end
+                min_v=0
+                max_v=2
+                nb_points=200
+                delta=(max_v-min_v)/nb_points
+                hist1D=zeros(nb_points)
+                for j=1:size(distances)[1]
+                    for i=1:nb_points
+                        if distances[j] > min_v + (i-1)*delta && distances[j] < min_v + i*delta
+                            hist1D[i] += 1
+                        end
+                    end
+                end
+                hist1D /= sum(hist1D)
+                file_distance=open(string(folder_out,"distances-",coordinances[state],"-",state,".dat"),"w")
+                for i=1:nb_points
+                    write(file_distance,string(i*delta," ",hist1D[i],"\n"))
+                end
+                close(file_distance)
+            end
+        end
+
+        count_check=0
+        for state=1:nb_states
+            if coordinances[state] == 2
+                count_check +=1
+                angles=[]
+                for step_sim = 1:nb_steps
+                    for carbon = 1:nbC
+                        if state_matrix[step_sim,carbon] == state
+                            indexs=zeros(Int,4)
+                            count2=0
+                            for i=1:96
+                                if cell_mod.distance(traj[step_sim],cell,carbon,i) < cut_off_bond && i != carbon
+                                    indexs[count2+1] = i
+                                    count2 += 1
+                                end
+                            end
+                            dist1=cell_mod.distance(traj[step_sim],cell,carbon,indexs[1])
+                            dist2=cell_mod.distance(traj[step_sim],cell,carbon,indexs[2])
+                            dist3=cell_mod.distance(traj[step_sim],cell,indexs[1],indexs[2])
+                            push!(angles,acos((dist1*dist1+dist2*dist2-dist3*dist3)/(2*dist1*dist2))*180/pi)
+                        end
+                    end
+                end
+                nb_points=360
+                hist1D=zeros(nb_points)
+                min_v=0
+                max_v=180
+                delta=(max_v-min_v)/nb_points
+                for i=1:size(angles)[1]
+                    for j=1:nb_points
+                        if angles[i] > min_v + (j-1)*delta && angles[i] < min_v + j*delta
+                            hist1D[j] += 1
+                        end
+                    end
+                end
+                for i=1:nb_points
+                    hist1D[i] *= sin((min_v+i*delta)*pi/180)
+                end
+                hist1D/=sum(hist1D)
+                file_angle2=open(string(folder_out,"anglesCO2-",count_check,"-",state,".dat"),"w")
+                for i=1:nb_points
+                    write(file_angle2,string(min_v+i*delta," ",hist1D[i],"\n"))
+                end
+                close(file_angle2)
+            end
+        end
 
         statistic_states = isolateSignificantStates( states, percent, cut_off_states )
         state_matrix, percent_statistics = assignDataToStates( data , statistic_states )
@@ -349,3 +472,5 @@ for T in Temperatures
 
     end
 end
+
+close(file_coordinance)
