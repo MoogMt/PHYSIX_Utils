@@ -301,22 +301,22 @@ unit=0.005
 
 file_coordinance=open(string(folder_base,"coordinances.dat"),"w")
 
-for T in Temperatures
-    for V in Volumes
+# for T in Temperatures
+#     for V in Volumes
 
         folder_in=string(folder_base,V,"/",T,"K/")
         file=string(folder_in,"TRAJEC_wrapped.xyz")
 
-        if ! isfile(file)
-            continue
-        end
+        # if ! isfile(file)
+        #     continue
+        # end
 
         folder_in2=string(folder_base,V,"/",T,"K/Data/")
 
         file_pin="Avg_Pressure-BootStrap-nboot_1000.dat"
-        if ! isfile( string(folder_in2,file_pin) )
-            continue
-        end
+        # if ! isfile( string(folder_in2,file_pin) )
+        #     continue
+        # end
         file_p=open(string(folder_in2,file_pin))
         lines=readlines(file_p);
         close(file_p)
@@ -482,7 +482,7 @@ for T in Temperatures
             close(file_out)
         end
 
-    end
-end
+#     end
+# end
 
 close(file_coordinance)
