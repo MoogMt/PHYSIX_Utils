@@ -311,6 +311,18 @@ for T in Temperatures
             continue
         end
 
+        folder_in2=string(folder_base,V,"/",T,"K/Data/")
+
+        file_pin="Avg_Pressure-BootStrap-nboot_1000.dat"
+        if ! isfile( string(folder_in2,file_pin) )
+            continue
+        end
+        file_p=open(string(folder_in2,file_pin))
+        lines=readlines(file_p);
+        close(file_p)
+        P=parse(Float64,split(lines[1])[2])
+
+
         folder_out=string(folder_in,"Data/")
 
         states=defineStatesExtendedCoordinances()
@@ -336,7 +348,7 @@ for T in Temperatures
             end
         end
 
-        write(file_coordinance,string(V," ",T," "))
+        write(file_coordinance,string(P," ",T," "))
         for coord=1:4
             coord_percent=0
             for state=1:nb_states
