@@ -282,7 +282,6 @@ end
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
 Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
@@ -312,7 +311,7 @@ for T in Temperatures
             continue
         end
 
-        folder_out=string(folder_in)
+        folder_out=string(folder_in,"Data/")
 
         states=defineStatesExtendedCoordinances()
 
@@ -437,15 +436,16 @@ for T in Temperatures
             end
         end
 
-        statistic_states = isolateSignificantStates( states, percent, cut_off_states )
-        state_matrix, percent_statistics = assignDataToStates( data , statistic_states )
-        transition_matrix = transitionMatrix( statistic_states, state_matrix, min_lag, max_lag, d_lag )
+        writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
+
+        states = isolateSignificantStates( states, percent, cut_off_states )
+        state_matrix, percent = assignDataToStates( data , states )
+        transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
         transition_matrix_CK = chappmanKormologov( transition_matrix )
 
         nb_states=size(transition_matrix)[1]
 
-        writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
-        writeStates(string(folder_out,"markov_stat_states.dat"),statistic_states,percent_statistics)
+        writeStates(string(folder_out,"markov_stat_states.dat"),states,percent)
 
         for j=1:nb_states
             file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
