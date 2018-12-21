@@ -357,8 +357,8 @@ d_lag=5
 unit=0.005
 
 
-T=3000
-V=8.82
+T=2500
+V=9.3
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -370,12 +370,11 @@ states=defineStatesExtendedCoordinances()
 print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
+
 data=buildCoordinationMatrix( traj , cell , cut_off_bond )
 state_matrix, percent, unused_percent = assignDataToStates( data , states )
 
-nb_states = size(states)[1]
-nb_dim = size(states)[2]
-nb_steps = size(state_matrix)[1]
+nb_states=size(states)[1]
 
 coordinances=zeros(nb_states)
 for i=1:nb_states
@@ -445,6 +444,15 @@ for state=1:nb_states
             write(file_distance,string(min_v+i*delta," ",hist1D[i],"\n"))
         end
         close(file_distance)
+    end
+end
+
+coordinances=zeros(nb_states)
+for i=1:nb_states
+    for j=1:nb_dim
+        if states[i,j] > 0
+            coordinances[i] += 1
+        end
     end
 end
 
