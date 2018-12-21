@@ -6,9 +6,13 @@ include(string(GPfolder,"geom.jl"))
 function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
-    coord_matrix=ones(nb_steps,nbC,8)*(-1)
+    n_dim=9
+    coord_matrix=ones(nb_steps,nbC,n_dim)*(-1)
     for step_sim=1:nb_steps
+
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
+
+        # Bond Matrix
         bond_matrix=zeros(nb_atoms,nb_atoms)
         for atom1=1:nb_atoms
             for atom2=atom1+1:nb_atoms
@@ -18,6 +22,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
                 end
             end
         end
+
 
         for carbon=1:nbC
             count_coord=1
@@ -33,9 +38,6 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
             count_coord=1
             for oxygen=1:nbO
                 if bond_matrix[carbon,nbC+oxygen] > 0
-                    if count_coord > 4
-                        continue
-                    end
                     coord_matrix[step_sim,carbon,4+count_coord]=sum(bond_matrix[nbC+oxygen,:])
                     count_coord += 1
                 end
@@ -50,8 +52,8 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
                     end
                 end
             end
-            for i=5
-                for j=i+1:8
+            for i=5:n_dim
+                for j=i+1:n_dim
                     if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
                         stock=coord_matrix[step_sim,carbon,i]
                         coord_matrix[step_sim,carbon,i]=coord_matrix[step_sim,carbon,j]
@@ -80,91 +82,103 @@ function defineStatesCoordinances()
     return states
 end
 function defineStatesExtendedCoordinances()
-    states=zeros(74,9)
+    states=zeros(86,9)
     states[1,:]=[-1,-1,-1,-1,1,-1,-1,-1,-1]
     states[2,:]=[-1,-1,-1,-1,2,-1,-1,-1,-1]
+    states[3,:]=[-1,-1,-1,-1,3,-1,-1,-1,-1]
     # CO2
-    states[3,:]=[-1,-1,-1,-1,1,1,-1,-1,-1]
-    states[4,:]=[-1,-1,-1,-1,2,1,-1,-1,-1]
-    states[5,:]=[-1,-1,-1,-1,2,2,-1,-1,-1]
+    states[4,:]=[-1,-1,-1,-1,1,1,-1,-1,-1]
+    states[5,:]=[-1,-1,-1,-1,2,1,-1,-1,-1]
+    states[6,:]=[-1,-1,-1,-1,2,2,-1,-1,-1]
+    states[7,:]=[-1,-1,-1,-1,3,1,-1,-1,-1]
+    states[8,:]=[-1,-1,-1,-1,3,2,-1,-1,-1]
+    states[9,:]=[-1,-1,-1,-1,3,3,-1,-1,-1]
     # CO3
-    states[6,:]=[-1,-1,-1,-1,2,2,2,-1,-1]
-    states[7,:]=[-1,-1,-1,-1,2,2,1,-1,-1]
-    states[8,:]=[-1,-1,-1,-1,2,1,1,-1,-1]
-    states[9,:]=[-1,-1,-1,-1,1,1,1,-1,-1]
+    states[10,:]=[-1,-1,-1,-1,2,2,2,-1,-1]
+    states[11,:]=[-1,-1,-1,-1,2,2,1,-1,-1]
+    states[12,:]=[-1,-1,-1,-1,2,1,1,-1,-1]
+    states[13,:]=[-1,-1,-1,-1,1,1,1,-1,-1]
+    #
+    states[14,:]=[-1,-1,-1,-1,3,1,1,-1,-1]
+    states[15,:]=[-1,-1,-1,-1,3,2,1,-1,-1]
+    states[16,:]=[-1,-1,-1,-1,3,2,2,-1,-1]
+    states[17,:]=[-1,-1,-1,-1,3,3,1,-1,-1]
+    states[18,:]=[-1,-1,-1,-1,3,3,2,-1,-1]
+    states[19,:]=[-1,-1,-1,-1,3,3,3,-1,-1]
     # CO4
-    states[10,:]=[-1,-1,-1,-1,2,2,2,2,-1]
-    states[11,:]=[-1,-1,-1,-1,2,2,2,1,-1]
-    states[12,:]=[-1,-1,-1,-1,2,2,1,1,-1]
-    states[13,:]=[-1,-1,-1,-1,2,1,1,1,-1]
-    states[14,:]=[-1,-1,-1,-1,1,1,1,1,-1]
+    states[20,:]=[-1,-1,-1,-1,2,2,2,2,-1]
+    states[21,:]=[-1,-1,-1,-1,2,2,2,1,-1]
+    states[22,:]=[-1,-1,-1,-1,2,2,1,1,-1]
+    states[23,:]=[-1,-1,-1,-1,2,1,1,1,-1]
+    states[24,:]=[-1,-1,-1,-1,1,1,1,1,-1]
+    states[25,:]=[-1,-1,-1,-1,3,1,1,1,-1]
+    states[26,:]=[-1,-1,-1,-1,3,2,1,1,-1]
+    states[27,:]=[-1,-1,-1,-1,3,2,2,1,-1]
+    states[28,:]=[-1,-1,-1,-1,3,2,2,2,-1]
+    states[29,:]=[-1,-1,-1,-1,3,3,1,1,-1]
+    states[30,:]=[-1,-1,-1,-1,3,3,2,1,-1]
+    states[31,:]=[-1,-1,-1,-1,3,3,2,2,-1]
+    states[32,:]=[-1,-1,-1,-1,3,3,3,1,-1]
+    states[33,:]=[-1,-1,-1,-1,3,3,3,2,-1]
+    states[34,:]=[-1,-1,-1,-1,3,3,3,3,-1]
     # CO5
-    states[15,:]=[-1,-1,-1,-1,2,2,2,2,2]
-    states[16,:]=[-1,-1,-1,-1,2,2,2,1,2]
-    states[17,:]=[-1,-1,-1,-1,2,2,1,1,2]
-    states[18,:]=[-1,-1,-1,-1,2,1,1,1,2]
-    states[19,:]=[-1,-1,-1,-1,1,1,1,1,2]
-    states[20,:]=[-1,-1,-1,-1,2,2,2,2,1]
-    states[21,:]=[-1,-1,-1,-1,2,2,2,1,1]
-    states[22,:]=[-1,-1,-1,-1,2,2,1,1,1]
-    states[23,:]=[-1,-1,-1,-1,2,1,1,1,1]
-    states[24,:]=[-1,-1,-1,-1,1,1,1,1,1]
+    states[35,:]=[-1,-1,-1,-1,2,2,2,2,2]
+    states[36,:]=[-1,-1,-1,-1,2,2,2,2,1]
+    states[37,:]=[-1,-1,-1,-1,2,2,2,1,1]
+    states[38,:]=[-1,-1,-1,-1,2,2,1,1,1]
+    states[39,:]=[-1,-1,-1,-1,2,1,1,1,1]
     # CCO1
-    states[25,:]=[2,-1,-1,-1,2,-1,-1,-1,-1]
-    states[26,:]=[2,-1,-1,-1,1,-1,-1,-1,-1]
-    states[27,:]=[3,-1,-1,-1,2,-1,-1,-1,-1]
-    states[28,:]=[3,-1,-1,-1,1,-1,-1,-1,-1]
-    states[29,:]=[4,-1,-1,-1,2,-1,-1,-1,-1]
-    states[30,:]=[4,-1,-1,-1,1,-1,-1,-1,-1]
+    states[40,:]=[2,-1,-1,-1,2,-1,-1,-1,-1]
+    states[41,:]=[2,-1,-1,-1,1,-1,-1,-1,-1]
+    states[42,:]=[3,-1,-1,-1,2,-1,-1,-1,-1]
+    states[43,:]=[3,-1,-1,-1,1,-1,-1,-1,-1]
+    states[44,:]=[4,-1,-1,-1,2,-1,-1,-1,-1]
+    states[45,:]=[4,-1,-1,-1,1,-1,-1,-1,-1]
     # CCO2
-    states[31,:]=[2,-1,-1,-1,2,2,-1,-1,-1]
-    states[32,:]=[2,-1,-1,-1,2,1,-1,-1,-1]
-    states[33,:]=[2,-1,-1,-1,1,1,-1,-1,-1]
-    states[34,:]=[3,-1,-1,-1,2,2,-1,-1,-1]
-    states[35,:]=[3,-1,-1,-1,2,1,-1,-1,-1]
-    states[36,:]=[3,-1,-1,-1,1,1,-1,-1,-1]
-    states[37,:]=[4,-1,-1,-1,2,2,-1,-1,-1]
-    states[38,:]=[4,-1,-1,-1,2,1,-1,-1,-1]
-    states[39,:]=[4,-1,-1,-1,1,1,-1,-1,-1]
+    states[46,:]=[2,-1,-1,-1,2,2,-1,-1,-1]
+    states[47,:]=[2,-1,-1,-1,2,1,-1,-1,-1]
+    states[48,:]=[2,-1,-1,-1,1,1,-1,-1,-1]
+    states[49,:]=[3,-1,-1,-1,2,2,-1,-1,-1]
+    states[50,:]=[3,-1,-1,-1,2,1,-1,-1,-1]
+    states[51,:]=[3,-1,-1,-1,1,1,-1,-1,-1]
+    states[52,:]=[4,-1,-1,-1,2,2,-1,-1,-1]
+    states[53,:]=[4,-1,-1,-1,2,1,-1,-1,-1]
+    states[54,:]=[4,-1,-1,-1,1,1,-1,-1,-1]
     # CCO3
-    states[40,:]=[2,-1,-1,-1,2,2,2,-1,-1]
-    states[41,:]=[2,-1,-1,-1,2,2,1,-1,-1]
-    states[42,:]=[2,-1,-1,-1,2,1,1,-1,-1]
-    states[43,:]=[2,-1,-1,-1,1,1,1,-1,-1]
-    states[44,:]=[3,-1,-1,-1,2,2,2,-1,-1]
-    states[45,:]=[3,-1,-1,-1,2,2,1,-1,-1]
-    states[46,:]=[3,-1,-1,-1,2,1,1,-1,-1]
-    states[47,:]=[3,-1,-1,-1,1,1,1,-1,-1]
-    states[48,:]=[4,-1,-1,-1,2,2,2,-1,-1]
-    states[49,:]=[4,-1,-1,-1,2,2,1,-1,-1]
-    states[50,:]=[4,-1,-1,-1,2,1,1,-1,-1]
-    states[51,:]=[4,-1,-1,-1,1,1,1,-1,-1]
+    states[55,:]=[2,-1,-1,-1,2,2,2,-1,-1]
+    states[56,:]=[2,-1,-1,-1,2,2,1,-1,-1]
+    states[57,:]=[2,-1,-1,-1,2,1,1,-1,-1]
+    states[58,:]=[2,-1,-1,-1,1,1,1,-1,-1]
+    states[59,:]=[3,-1,-1,-1,2,2,2,-1,-1]
+    states[60,:]=[3,-1,-1,-1,2,2,1,-1,-1]
+    states[61,:]=[3,-1,-1,-1,2,1,1,-1,-1]
+    states[62,:]=[3,-1,-1,-1,1,1,1,-1,-1]
+    states[63,:]=[4,-1,-1,-1,2,2,2,-1,-1]
+    states[64,:]=[4,-1,-1,-1,2,2,1,-1,-1]
+    states[65,:]=[4,-1,-1,-1,2,1,1,-1,-1]
+    states[66,:]=[4,-1,-1,-1,1,1,1,-1,-1]
     #
-    states[52,:]=[2,-1,-1,-1,2,2,2,1,-1]
-    states[52,:]=[2,-1,-1,-1,2,2,1,1,-1]
-    states[53,:]=[2,-1,-1,-1,2,1,1,1,-1]
-    states[54,:]=[2,-1,-1,-1,1,1,1,1,-1]
-    states[55,:]=[3,-1,-1,-1,2,2,2,1,-1]
-    states[56,:]=[3,-1,-1,-1,2,2,1,1,-1]
-    states[57,:]=[3,-1,-1,-1,2,1,1,1,-1]
-    states[58,:]=[3,-1,-1,-1,1,1,1,1,-1]
-    states[59,:]=[4,-1,-1,-1,2,2,2,1,-1]
-    states[60,:]=[4,-1,-1,-1,2,2,1,1,-1]
-    states[61,:]=[4,-1,-1,-1,2,1,1,1,-1]
-    states[62,:]=[4,-1,-1,-1,1,1,1,1,-1]
+    states[67,:]=[2,-1,-1,-1,2,2,2,1,-1]
+    states[68,:]=[2,-1,-1,-1,2,2,1,1,-1]
+    states[69,:]=[2,-1,-1,-1,2,1,1,1,-1]
+    states[70,:]=[2,-1,-1,-1,1,1,1,1,-1]
+    states[71,:]=[3,-1,-1,-1,2,2,2,1,-1]
+    states[72,:]=[3,-1,-1,-1,2,2,1,1,-1]
+    states[73,:]=[3,-1,-1,-1,2,1,1,1,-1]
+    states[74,:]=[3,-1,-1,-1,1,1,1,1,-1]
+    states[75,:]=[4,-1,-1,-1,2,2,2,1,-1]
+    states[76,:]=[4,-1,-1,-1,2,2,1,1,-1]
+    states[77,:]=[4,-1,-1,-1,2,1,1,1,-1]
+    states[78,:]=[4,-1,-1,-1,1,1,1,1,-1]
     #
-    states[63,:]=[2,-1,-1,-1,2,2,2,2,-1]
-    states[64,:]=[2,-1,-1,-1,2,2,1,2,-1]
-    states[65,:]=[2,-1,-1,-1,2,1,1,2,-1]
-    states[66,:]=[2,-1,-1,-1,1,1,1,2,-1]
-    states[67,:]=[3,-1,-1,-1,2,2,2,2,-1]
-    states[68,:]=[3,-1,-1,-1,2,2,1,2,-1]
-    states[69,:]=[3,-1,-1,-1,2,1,1,2,-1]
-    states[70,:]=[3,-1,-1,-1,1,1,1,2,-1]
-    states[71,:]=[4,-1,-1,-1,2,2,2,2,-1]
-    states[72,:]=[4,-1,-1,-1,2,2,1,2,-1]
-    states[73,:]=[4,-1,-1,-1,2,1,1,2,-1]
-    states[74,:]=[4,-1,-1,-1,1,1,1,2,-1]
+    states[79,:]=[2,-1,-1,-1,2,2,2,2,-1]
+    states[80,:]=[2,-1,-1,-1,2,2,2,1,-1]
+    states[81,:]=[2,-1,-1,-1,2,2,1,1,-1]
+    states[82,:]=[2,-1,-1,-1,2,1,1,1,-1]
+    states[83,:]=[3,-1,-1,-1,2,2,2,2,-1]
+    states[84,:]=[3,-1,-1,-1,2,2,2,1,-1]
+    states[85,:]=[3,-1,-1,-1,2,2,1,1,-1]
+    states[86,:]=[3,-1,-1,-1,2,1,1,1,-1]
     return states
 end
 function defineStatesExtendedCoordinancesO()
@@ -237,11 +251,16 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
                 end
             end
             if state_matrix[i,j] == -1
+                print("test ")
+                for k=1:dim_data
+                    print(data[i,j,k]," ")
+                end
+                print("\n")
                 unused += 1
             end
         end
     end
-    return state_matrix, count_states/sum(count_states)*100, unused/(unused+sum(count_states))
+    return state_matrix, count_states/sum(count_states)*100, unused/(unused+sum(count_states))*100
 end
 function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, cut_off_states::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Real }
     old_nb_states=size(old_states)[1]
@@ -337,32 +356,12 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-file_coordinance=open(string(folder_base,"coordinances.dat"),"w")
 
-# for T in Temperatures
-#     for V in Volumes
-
-T=2500
+T=3000
 V=8.82
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
-
-# if ! isfile(file)
-#     continue
-# end
-
-folder_in2=string(folder_base,V,"/",T,"K/Data/")
-
-file_pin="Avg_Pressure-BootStrap-nboot_1000.dat"
-# if ! isfile( string(folder_in2,file_pin) )
-#     continue
-# end
-file_p=open(string(folder_in2,file_pin))
-lines=readlines(file_p);
-close(file_p)
-P=parse(Float64,split(lines[1])[2])
-
 
 folder_out=string(folder_in,"Data/")
 
@@ -402,14 +401,14 @@ end
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
 
 states = isolateSignificantStates( states, percent, cut_off_states )
-state_matrix, percent = assignDataToStates( data , states )
+state_matrix, percent, unused_percent = assignDataToStates( data , states )
 transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
 transition_matrix_CK = chappmanKormologov( transition_matrix )
 
 nb_states=size(transition_matrix)[1]
-
 for state=1:nb_states
     if percent[state] > 0.05
+        print("Progress: ",state/nb_states*100,"%\n")
         distances=[]
         for step_sim=1:nb_steps
             for carbon=1:nbC
@@ -443,7 +442,7 @@ for state=1:nb_states
         hist1D /= sum(hist1D)
         file_distance=open(string(folder_out,"distances-",coordinances[state],"-",state,".dat"),"w")
         for i=1:nb_points
-            write(file_distance,string(i*delta," ",hist1D[i],"\n"))
+            write(file_distance,string(min_v+i*delta," ",hist1D[i],"\n"))
         end
         close(file_distance)
     end
