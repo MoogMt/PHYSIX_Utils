@@ -80,54 +80,91 @@ function defineStatesCoordinances()
     return states
 end
 function defineStatesExtendedCoordinances()
-    states=zeros(41,8)
-    states[1,:]=[-1,-1,-1,-1,1,-1,-1,-1]
-    states[2,:]=[-1,-1,-1,-1,2,-1,-1,-1]
+    states=zeros(74,9)
+    states[1,:]=[-1,-1,-1,-1,1,-1,-1,-1,-1]
+    states[2,:]=[-1,-1,-1,-1,2,-1,-1,-1,-1]
     # CO2
-    states[3,:]=[-1,-1,-1,-1,1,1,-1,-1]
-    states[4,:]=[-1,-1,-1,-1,2,1,-1,-1]
-    states[5,:]=[-1,-1,-1,-1,2,2,-1,-1]
+    states[3,:]=[-1,-1,-1,-1,1,1,-1,-1,-1]
+    states[4,:]=[-1,-1,-1,-1,2,1,-1,-1,-1]
+    states[5,:]=[-1,-1,-1,-1,2,2,-1,-1,-1]
     # CO3
-    states[6,:]=[-1,-1,-1,-1,2,2,2,-1]
-    states[7,:]=[-1,-1,-1,-1,2,2,1,-1]
-    states[8,:]=[-1,-1,-1,-1,2,1,1,-1]
-    states[9,:]=[-1,-1,-1,-1,1,1,1,-1]
+    states[6,:]=[-1,-1,-1,-1,2,2,2,-1,-1]
+    states[7,:]=[-1,-1,-1,-1,2,2,1,-1,-1]
+    states[8,:]=[-1,-1,-1,-1,2,1,1,-1,-1]
+    states[9,:]=[-1,-1,-1,-1,1,1,1,-1,-1]
     # CO4
-    states[10,:]=[-1,-1,-1,-1,2,2,2,2]
-    states[11,:]=[-1,-1,-1,-1,2,2,2,1]
-    states[12,:]=[-1,-1,-1,-1,2,2,1,1]
-    states[13,:]=[-1,-1,-1,-1,2,1,1,1]
-    states[14,:]=[-1,-1,-1,-1,1,1,1,1]
+    states[10,:]=[-1,-1,-1,-1,2,2,2,2,-1]
+    states[11,:]=[-1,-1,-1,-1,2,2,2,1,-1]
+    states[12,:]=[-1,-1,-1,-1,2,2,1,1,-1]
+    states[13,:]=[-1,-1,-1,-1,2,1,1,1,-1]
+    states[14,:]=[-1,-1,-1,-1,1,1,1,1,-1]
+    # CO5
+    states[15,:]=[-1,-1,-1,-1,2,2,2,2,2]
+    states[16,:]=[-1,-1,-1,-1,2,2,2,1,2]
+    states[17,:]=[-1,-1,-1,-1,2,2,1,1,2]
+    states[18,:]=[-1,-1,-1,-1,2,1,1,1,2]
+    states[19,:]=[-1,-1,-1,-1,1,1,1,1,2]
+    states[20,:]=[-1,-1,-1,-1,2,2,2,2,1]
+    states[21,:]=[-1,-1,-1,-1,2,2,2,1,1]
+    states[22,:]=[-1,-1,-1,-1,2,2,1,1,1]
+    states[23,:]=[-1,-1,-1,-1,2,1,1,1,1]
+    states[24,:]=[-1,-1,-1,-1,1,1,1,1,1]
     # CCO1
-    states[15,:]=[2,-1,-1,-1,2,-1,-1,-1]
-    states[16,:]=[2,-1,-1,-1,1,-1,-1,-1]
-    states[17,:]=[3,-1,-1,-1,2,-1,-1,-1]
-    states[18,:]=[3,-1,-1,-1,1,-1,-1,-1]
-    states[19,:]=[4,-1,-1,-1,2,-1,-1,-1]
-    states[20,:]=[4,-1,-1,-1,1,-1,-1,-1]
+    states[25,:]=[2,-1,-1,-1,2,-1,-1,-1,-1]
+    states[26,:]=[2,-1,-1,-1,1,-1,-1,-1,-1]
+    states[27,:]=[3,-1,-1,-1,2,-1,-1,-1,-1]
+    states[28,:]=[3,-1,-1,-1,1,-1,-1,-1,-1]
+    states[29,:]=[4,-1,-1,-1,2,-1,-1,-1,-1]
+    states[30,:]=[4,-1,-1,-1,1,-1,-1,-1,-1]
     # CCO2
-    states[21,:]=[2,-1,-1,-1,2,2,-1,-1]
-    states[22,:]=[2,-1,-1,-1,2,1,-1,-1]
-    states[23,:]=[2,-1,-1,-1,1,1,-1,-1]
-    states[24,:]=[3,-1,-1,-1,2,2,-1,-1]
-    states[25,:]=[3,-1,-1,-1,2,1,-1,-1]
-    states[26,:]=[3,-1,-1,-1,1,1,-1,-1]
-    states[27,:]=[4,-1,-1,-1,2,2,-1,-1]
-    states[28,:]=[4,-1,-1,-1,2,1,-1,-1]
-    states[29,:]=[4,-1,-1,-1,1,1,-1,-1]
+    states[31,:]=[2,-1,-1,-1,2,2,-1,-1,-1]
+    states[32,:]=[2,-1,-1,-1,2,1,-1,-1,-1]
+    states[33,:]=[2,-1,-1,-1,1,1,-1,-1,-1]
+    states[34,:]=[3,-1,-1,-1,2,2,-1,-1,-1]
+    states[35,:]=[3,-1,-1,-1,2,1,-1,-1,-1]
+    states[36,:]=[3,-1,-1,-1,1,1,-1,-1,-1]
+    states[37,:]=[4,-1,-1,-1,2,2,-1,-1,-1]
+    states[38,:]=[4,-1,-1,-1,2,1,-1,-1,-1]
+    states[39,:]=[4,-1,-1,-1,1,1,-1,-1,-1]
     # CCO3
-    states[30,:]=[2,-1,-1,-1,2,2,2,-1]
-    states[31,:]=[2,-1,-1,-1,2,2,1,-1]
-    states[32,:]=[2,-1,-1,-1,2,1,1,-1]
-    states[33,:]=[2,-1,-1,-1,1,1,1,-1]
-    states[34,:]=[3,-1,-1,-1,2,2,2,-1]
-    states[35,:]=[3,-1,-1,-1,2,2,1,-1]
-    states[36,:]=[3,-1,-1,-1,2,1,1,-1]
-    states[37,:]=[3,-1,-1,-1,1,1,1,-1]
-    states[38,:]=[4,-1,-1,-1,2,2,2,-1]
-    states[39,:]=[4,-1,-1,-1,2,2,1,-1]
-    states[40,:]=[4,-1,-1,-1,2,1,1,-1]
-    states[41,:]=[4,-1,-1,-1,1,1,1,-1]
+    states[40,:]=[2,-1,-1,-1,2,2,2,-1,-1]
+    states[41,:]=[2,-1,-1,-1,2,2,1,-1,-1]
+    states[42,:]=[2,-1,-1,-1,2,1,1,-1,-1]
+    states[43,:]=[2,-1,-1,-1,1,1,1,-1,-1]
+    states[44,:]=[3,-1,-1,-1,2,2,2,-1,-1]
+    states[45,:]=[3,-1,-1,-1,2,2,1,-1,-1]
+    states[46,:]=[3,-1,-1,-1,2,1,1,-1,-1]
+    states[47,:]=[3,-1,-1,-1,1,1,1,-1,-1]
+    states[48,:]=[4,-1,-1,-1,2,2,2,-1,-1]
+    states[49,:]=[4,-1,-1,-1,2,2,1,-1,-1]
+    states[50,:]=[4,-1,-1,-1,2,1,1,-1,-1]
+    states[51,:]=[4,-1,-1,-1,1,1,1,-1,-1]
+    #
+    states[52,:]=[2,-1,-1,-1,2,2,2,1,-1]
+    states[52,:]=[2,-1,-1,-1,2,2,1,1,-1]
+    states[53,:]=[2,-1,-1,-1,2,1,1,1,-1]
+    states[54,:]=[2,-1,-1,-1,1,1,1,1,-1]
+    states[55,:]=[3,-1,-1,-1,2,2,2,1,-1]
+    states[56,:]=[3,-1,-1,-1,2,2,1,1,-1]
+    states[57,:]=[3,-1,-1,-1,2,1,1,1,-1]
+    states[58,:]=[3,-1,-1,-1,1,1,1,1,-1]
+    states[59,:]=[4,-1,-1,-1,2,2,2,1,-1]
+    states[60,:]=[4,-1,-1,-1,2,2,1,1,-1]
+    states[61,:]=[4,-1,-1,-1,2,1,1,1,-1]
+    states[62,:]=[4,-1,-1,-1,1,1,1,1,-1]
+    #
+    states[63,:]=[2,-1,-1,-1,2,2,2,2,-1]
+    states[64,:]=[2,-1,-1,-1,2,2,1,2,-1]
+    states[65,:]=[2,-1,-1,-1,2,1,1,2,-1]
+    states[66,:]=[2,-1,-1,-1,1,1,1,2,-1]
+    states[67,:]=[3,-1,-1,-1,2,2,2,2,-1]
+    states[68,:]=[3,-1,-1,-1,2,2,1,2,-1]
+    states[69,:]=[3,-1,-1,-1,2,1,1,2,-1]
+    states[70,:]=[3,-1,-1,-1,1,1,1,2,-1]
+    states[71,:]=[4,-1,-1,-1,2,2,2,2,-1]
+    states[72,:]=[4,-1,-1,-1,2,2,1,2,-1]
+    states[73,:]=[4,-1,-1,-1,2,1,1,2,-1]
+    states[74,:]=[4,-1,-1,-1,1,1,1,2,-1]
     return states
 end
 function defineStatesExtendedCoordinancesO()
@@ -182,37 +219,35 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
     nb_series = size(data)[2]
     dim_data = size(data)[3]
     nb_states = size(states)[1]
-    state_matrix=zeros(Int, nb_data_point, nb_series )
+    state_matrix=ones(Int, nb_data_point, nb_series )*(-1)
     count_states=zeros( nb_states )
+    unused=0
     for i=1:nb_data_point
         print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
         for j=1:nb_series
-            index=1
-            d=0
-            for k=1:dim_data
-                d+= ( data[i,j,k] - states[1,k])*(data[i,j,k] - states[1,k])
-            end
-            d_min=d
-            for k=2:nb_states
+            for l=1:nb_states
                 d=0
-                for l=1:dim_data
-                    d+= ( data[i,j,l] - states[k,l])*(data[i,j,l] - states[k,l])
+                for k=1:dim_data
+                    d+= ( data[i,j,k] - states[l,k])*(data[i,j,k] - states[l,k])
                 end
-                if d < d_min
-                    index=k
-                    d_min=d
+                if d == 0
+                    count_states[l] += 1
+                    state_matrix[i,j] = l
+                    break
                 end
             end
-            count_states[index] += 1
-            state_matrix[i,j]=index
+            if state_matrix[i,j] == -1
+                unused += 1
+            end
         end
     end
-    return state_matrix, count_states/sum(count_states)*100
+    return state_matrix, count_states/sum(count_states)*100, unused/(unused+sum(count_states))
 end
 function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, cut_off_states::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Real }
     old_nb_states=size(old_states)[1]
+    dim=size(old_states)[2]
     new_nb_states=0
-    states_kept=zeros(0,8)
+    states_kept=zeros(0,dim)
     for i=1:old_nb_states
         if percent_states[i] > cut_off_states
             states_kept=[ states_kept ; transpose( old_states[i,:]) ]
@@ -235,6 +270,9 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
         print("Chappman Kolmogorov Test - Progress: ",lag/max_lag*100,"%\n")
         for i=1:nb_series
             for j=lag+1:nb_data_point
+                if  state_matrix[j-lag,i] == -1 ||  state_matrix[j,i] == -1
+                    continue
+                end
                 states_transition_probability[ state_matrix[j-lag,i], state_matrix[j,i], count_lag ] += 1
             end
         end
@@ -304,185 +342,233 @@ file_coordinance=open(string(folder_base,"coordinances.dat"),"w")
 # for T in Temperatures
 #     for V in Volumes
 
-        folder_in=string(folder_base,V,"/",T,"K/")
-        file=string(folder_in,"TRAJEC_wrapped.xyz")
+T=2500
+V=8.82
 
-        # if ! isfile(file)
-        #     continue
-        # end
+folder_in=string(folder_base,V,"/",T,"K/")
+file=string(folder_in,"TRAJEC_wrapped.xyz")
 
-        folder_in2=string(folder_base,V,"/",T,"K/Data/")
+# if ! isfile(file)
+#     continue
+# end
 
-        file_pin="Avg_Pressure-BootStrap-nboot_1000.dat"
-        # if ! isfile( string(folder_in2,file_pin) )
-        #     continue
-        # end
-        file_p=open(string(folder_in2,file_pin))
-        lines=readlines(file_p);
-        close(file_p)
-        P=parse(Float64,split(lines[1])[2])
+folder_in2=string(folder_base,V,"/",T,"K/Data/")
+
+file_pin="Avg_Pressure-BootStrap-nboot_1000.dat"
+# if ! isfile( string(folder_in2,file_pin) )
+#     continue
+# end
+file_p=open(string(folder_in2,file_pin))
+lines=readlines(file_p);
+close(file_p)
+P=parse(Float64,split(lines[1])[2])
 
 
-        folder_out=string(folder_in,"Data/")
+folder_out=string(folder_in,"Data/")
 
-        states=defineStatesExtendedCoordinances()
+states=defineStatesExtendedCoordinances()
 
-        print("Computing Data\n")
-        traj=filexyz.readFastFile(file)
-        cell=cell_mod.Cell_param(V,V,V)
-        data=buildCoordinationMatrix( traj , cell , cut_off_bond )
-        state_matrix, percent = assignDataToStates( data , states )
+print("Computing Data\n")
+traj=filexyz.readFastFile(file)
+cell=cell_mod.Cell_param(V,V,V)
+data=buildCoordinationMatrix( traj , cell , cut_off_bond )
+state_matrix, percent, unused_percent = assignDataToStates( data , states )
 
-        nb_states = size(states)[1]
-        nb_dim = size(states)[2]
-        nb_steps = size(state_matrix)[1]
-        nbC = size(state_matrix)[2]
-        nbO=2*nbC
+nb_states = size(states)[1]
+nb_dim = size(states)[2]
+nb_steps = size(state_matrix)[1]
 
-        coordinances=zeros(nb_states)
-        for i=1:nb_states
-            for j=1:nb_dim
-                if states[i,j] > 0
-                    coordinances[i] += 1
-                end
-            end
+coordinances=zeros(nb_states)
+for i=1:nb_states
+    for j=1:nb_dim
+        if states[i,j] > 0
+            coordinances[i] += 1
         end
+    end
+end
 
-        write(file_coordinance,string(P," ",T," "))
-        for coord=1:4
-            coord_percent=0
-            for state=1:nb_states
-                if coordinances[state] == coord
-                    coord_percent += percent[state]
-                end
-            end
-            write(file_coordinance,string(coord_percent," "))
-        end
-        write(file_coordinance,string("\n"))
+# write(file_coordinance,string(P," ",T," "))
+# for coord=1:4
+#     coord_percent=0
+#     for state=1:nb_states
+#         if coordinances[state] == coord
+#             coord_percent += percent[state]
+#         end
+#     end
+#     write(file_coordinance,string(coord_percent," "))
+# end
+# write(file_coordinance,string("\n"))
 
-        for state=1:nb_states
-            if percent[state] > 0.05
-                distances=[]
-                for step_sim=1:nb_steps
-                    for carbon=1:nbC
-                        if state_matrix[step_sim,carbon] == state
-                            min_dist=V
-                            for atom=1:96
-                                dist=cell_mod.distance(traj[step_sim],cell,carbon,atom)
-                                if atom == carbon
-                                    continue
-                                end
-                                if min_dist > dist
-                                    min_dist = dist
-                                end
-                            end
-                            push!(distances,min_dist)
+writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
+
+states = isolateSignificantStates( states, percent, cut_off_states )
+state_matrix, percent = assignDataToStates( data , states )
+transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
+transition_matrix_CK = chappmanKormologov( transition_matrix )
+
+nb_states=size(transition_matrix)[1]
+
+for state=1:nb_states
+    if percent[state] > 0.05
+        distances=[]
+        for step_sim=1:nb_steps
+            for carbon=1:nbC
+                if state_matrix[step_sim,carbon] == state
+                    min_dist=V
+                    for atom=1:96
+                        dist=cell_mod.distance(traj[step_sim],cell,carbon,atom)
+                        if atom == carbon
+                            continue
+                        end
+                        if min_dist > dist
+                            min_dist = dist
                         end
                     end
+                    push!(distances,min_dist)
                 end
-                min_v=0
-                max_v=2
-                nb_points=200
-                delta=(max_v-min_v)/nb_points
-                hist1D=zeros(nb_points)
-                for j=1:size(distances)[1]
-                    for i=1:nb_points
-                        if distances[j] > min_v + (i-1)*delta && distances[j] < min_v + i*delta
-                            hist1D[i] += 1
-                        end
-                    end
-                end
-                hist1D /= sum(hist1D)
-                file_distance=open(string(folder_out,"distances-",coordinances[state],"-",state,".dat"),"w")
-                for i=1:nb_points
-                    write(file_distance,string(i*delta," ",hist1D[i],"\n"))
-                end
-                close(file_distance)
             end
         end
-
-        count_check=0
-        for state=1:nb_states
-            if coordinances[state] == 2
-                count_check +=1
-                angles=[]
-                for step_sim = 1:nb_steps
-                    for carbon = 1:nbC
-                        if state_matrix[step_sim,carbon] == state
-                            indexs=zeros(Int,4)
-                            count2=0
-                            for i=1:96
-                                if cell_mod.distance(traj[step_sim],cell,carbon,i) < cut_off_bond && i != carbon
-                                    indexs[count2+1] = i
-                                    count2 += 1
-                                end
-                            end
-                            dist1=cell_mod.distance(traj[step_sim],cell,carbon,indexs[1])
-                            dist2=cell_mod.distance(traj[step_sim],cell,carbon,indexs[2])
-                            dist3=cell_mod.distance(traj[step_sim],cell,indexs[1],indexs[2])
-                            push!(angles,acos((dist1*dist1+dist2*dist2-dist3*dist3)/(2*dist1*dist2))*180/pi)
-                        end
-                    end
+        min_v=0.8
+        max_v=2
+        nb_points=200
+        delta=(max_v-min_v)/nb_points
+        hist1D=zeros(nb_points)
+        for j=1:size(distances)[1]
+            for i=1:nb_points
+                if distances[j] > min_v + (i-1)*delta && distances[j] < min_v + i*delta
+                    hist1D[i] += 1
                 end
-                nb_points=360
-                hist1D=zeros(nb_points)
-                min_v=0
-                max_v=180
-                delta=(max_v-min_v)/nb_points
-                for i=1:size(angles)[1]
-                    for j=1:nb_points
-                        if angles[i] > min_v + (j-1)*delta && angles[i] < min_v + j*delta
-                            hist1D[j] += 1
-                        end
-                    end
-                end
-                for i=1:nb_points
-                    hist1D[i] *= sin((min_v+i*delta)*pi/180)
-                end
-                hist1D/=sum(hist1D)
-                file_angle2=open(string(folder_out,"anglesCO2-",count_check,"-",state,".dat"),"w")
-                for i=1:nb_points
-                    write(file_angle2,string(min_v+i*delta," ",hist1D[i],"\n"))
-                end
-                close(file_angle2)
             end
         end
-
-        writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
-
-        states = isolateSignificantStates( states, percent, cut_off_states )
-        state_matrix, percent = assignDataToStates( data , states )
-        transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
-        transition_matrix_CK = chappmanKormologov( transition_matrix )
-
-        nb_states=size(transition_matrix)[1]
-
-        writeStates(string(folder_out,"markov_stat_states.dat"),states,percent)
-
-        for j=1:nb_states
-            file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
-            for i=1:2:size(transition_matrix)[3]
-                write(file_out,string(i*unit*d_lag," "))
-                for k=1:nb_states
-                    write(file_out,string(transition_matrix[j,k,i]," "))
-                end
-                write(file_out,string("\n"))
-            end
-            close(file_out)
+        hist1D /= sum(hist1D)
+        file_distance=open(string(folder_out,"distances-",coordinances[state],"-",state,".dat"),"w")
+        for i=1:nb_points
+            write(file_distance,string(i*delta," ",hist1D[i],"\n"))
         end
-        for j=1:nb_states
-            file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
-            for i=1:size(transition_matrix_CK)[3]
-                write(file_out,string(2*i*unit*d_lag," "))
-                for k=1:nb_states
-                    write(file_out,string(transition_matrix_CK[j,k,i]," "))
-                end
-                write(file_out,string("\n"))
-            end
-            close(file_out)
-        end
+        close(file_distance)
+    end
+end
 
+# count_check=0
+# for state=1:nb_states
+#     if coordinances[state] == 2
+#         global count_check +=1
+#         angles=[]
+#         for step_sim = 1:nb_steps
+#             for carbon = 1:nbC
+#                 if state_matrix[step_sim,carbon] == state
+#                     indexs=zeros(Int,4)
+#                     count2=0
+#                     for i=1:96
+#                         if cell_mod.distance(traj[step_sim],cell,carbon,i) < cut_off_bond && i != carbon
+#                             indexs[count2+1] = i
+#                             count2 += 1
+#                         end
+#                     end
+#                     dist1=cell_mod.distance(traj[step_sim],cell,carbon,indexs[1])
+#                     dist2=cell_mod.distance(traj[step_sim],cell,carbon,indexs[2])
+#                     dist3=cell_mod.distance(traj[step_sim],cell,indexs[1],indexs[2])
+#                     push!(angles,acos((dist1*dist1+dist2*dist2-dist3*dist3)/(2*dist1*dist2))*180/pi)
+#                 end
+#             end
+#         end
+#         nb_points=180
+#         hist1D=zeros(nb_points)
+#         min_v=90
+#         max_v=179
+#         delta=(max_v-min_v)/nb_points
+#         for i=1:size(angles)[1]
+#             for j=1:nb_points
+#                 if angles[i] > min_v + (j-1)*delta && angles[i] < min_v + j*delta
+#                     hist1D[j] += 1
+#                 end
+#             end
+#         end
+#         for i=1:nb_points
+#             hist1D[i] /= sin((min_v+i*delta)*pi/180)
+#         end
+#         hist1D/=sum(hist1D)
+#         file_angle2=open(string(folder_out,"anglesCO2-",count_check,"-",state,".dat"),"w")
+#         for i=1:nb_points
+#             write(file_angle2,string(min_v+i*delta," ",hist1D[i],"\n"))
+#         end
+#         close(file_angle2)
+#     end
+# end
+#
+# count_check=0
+# for state=1:nb_states
+#     if coordinances[state] == 3
+#         global count_check +=1
+#         distance_to_plan=[]
+#         for step_sim = 1:nb_steps
+#             for carbon = 1:nbC
+#                 if state_matrix[step_sim,carbon] == state
+#                     indexs=zeros(Int,4)
+#                     count2=0
+#                     for i=1:96
+#                         if cell_mod.distance(traj[step_sim],cell,carbon,i) < cut_off_bond && i != carbon
+#                             indexs[count2+1] = i
+#                             count2 += 1
+#                         end
+#                     end
+#                     dist1=cell_mod.distance(traj[step_sim],cell,carbon,indexs[1])
+#                     dist2=cell_mod.distance(traj[step_sim],cell,carbon,indexs[2])
+#                     dist3=cell_mod.distance(traj[step_sim],cell,indexs[1],indexs[2])
+#                     push!(angles,acos((dist1*dist1+dist2*dist2-dist3*dist3)/(2*dist1*dist2))*180/pi)
+#                 end
+#             end
+#         end
+#         nb_points=180
+#         hist1D=zeros(nb_points)
+#         min_v=90
+#         max_v=179
+#         delta=(max_v-min_v)/nb_points
+#         for i=1:size(angles)[1]
+#             for j=1:nb_points
+#                 if angles[i] > min_v + (j-1)*delta && angles[i] < min_v + j*delta
+#                     hist1D[j] += 1
+#                 end
+#             end
+#         end
+#         for i=1:nb_points
+#             hist1D[i] /= sin((min_v+i*delta)*pi/180)
+#         end
+#         hist1D/=sum(hist1D)
+#         file_angle2=open(string(folder_out,"anglesCO2-",count_check,"-",state,".dat"),"w")
+#         for i=1:nb_points
+#             write(file_angle2,string(min_v+i*delta," ",hist1D[i],"\n"))
+#         end
+#         close(file_angle2)
 #     end
 # end
 
-close(file_coordinance)
+writeStates(string(folder_out,"markov_stat_states.dat"),states,percent)
+
+for j=1:nb_states
+    file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
+    for i=1:2:size(transition_matrix)[3]
+        write(file_out,string(i*unit*d_lag," "))
+        for k=1:nb_states
+            write(file_out,string(transition_matrix[j,k,i]," "))
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+end
+for j=1:nb_states
+    file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
+    for i=1:size(transition_matrix_CK)[3]
+        write(file_out,string(2*i*unit*d_lag," "))
+        for k=1:nb_states
+            write(file_out,string(transition_matrix_CK[j,k,i]," "))
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+end
+#
+#     end
+# end
+#
+# close(file_coordinance)
