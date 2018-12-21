@@ -358,7 +358,7 @@ unit=0.005
 
 
 T=2500
-V=9.3
+V=9.0
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
