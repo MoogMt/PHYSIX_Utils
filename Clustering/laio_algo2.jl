@@ -1,25 +1,27 @@
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+
+include(string(GPfolder,"contactmatrix.jl"))
+include(string(GPfolder,"clustering.jl"))
+
 #==========#
 # Laio Algo
 #==============================================================================#
-include("clustering.jl")
-include("contactmatrix.jl")
 
 V=8.82
 T=3000
 
 ps2fs=0.001
 timestep=0.5
-stride = 1
-unit=ps2fs*timestep*stride
-start_time=5
-start_step=Int(start_time/unit)
+sim_stride=1
+unit=ps2fs*timestep*sim_stride
 nbC=32
 nbO=2*nbC
 
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
+#folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
+folder=string("/home/moogmt/CO2/CO2_AIMD/",V,"/",T,"K/")
 file="TRAJEC_wrapped.xyz"
 
-traj = filexyz.read( string(folder,file), stride, start_step )
+traj = filexyz.readFastFile( string(folder,file))
 cell=cell_mod.Cell_param( V, V, V )
 
 nb_steps=size(traj)[1]

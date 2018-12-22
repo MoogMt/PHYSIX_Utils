@@ -1,19 +1,19 @@
 # TESTED AND FUNCTIONNALS
 #==============================================================================#
-function computeDistance{ T1 <: Real, T2 <: Real, T3 <: Int }( data::Array{T1}, data_point::Vector{T2}, index::T3 )
+function computeDistance( data::Array{T1}, data_point::Vector{T2}, index::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Int }
 	return sum( ( data[ index, :  ] - data_point[:] ).*( data[ index, :  ] - data_point[:] ) )
 end
-function computeDistance{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Array{T1}, index1::T2, index2::T3 )
+function computeDistance( data::Array{T1}, index1::T2, index2::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
 	return sum( ( data[ index1, : ]-data[ index2 , : ] ).*( data[ index1, : ]-data[ index2 , : ] ) )
 end
-function computeDistance{ T1 <: Real,T2 <: Int,  T3 <: Real, T4 <: Real, T5 <: Int, T6 <: Int }( data::Array{T1}, n_dim::T2 , max::Vector{T3}, min::Vector{T4}, index1::T5, index2::T6 )
+function computeDistance( data::Array{T1}, n_dim::T2 , max::Vector{T3}, min::Vector{T4}, index1::T5, index2::T6 ) where { T1 <: Real,T2 <: Int,  T3 <: Real, T4 <: Real, T5 <: Int, T6 <: Int }
     dist=0
     for i=1:n_dim
         dist += ( ((data[index1,i]-min[i])/(max[i]-min[i])) - ((data[index2,i]-min[i])/(max[i]-min[i])) )*( ((data[index1,i]-min[i])/(max[i]-min[i])) - ((data[index2,i]-min[i])/(max[i]-min[i])) )
     end
 	return dist
 end
-function computeDistanceMatrix{ T1 <: Real }( data::Array{T1} )
+function computeDistanceMatrix( data::Array{T1} ) where { T1 <: Real }
     size_data=size(data)[1]
     matrix=zeros(size_data,size_data)
     for i=1:size_data
@@ -23,7 +23,7 @@ function computeDistanceMatrix{ T1 <: Real }( data::Array{T1} )
     end
     return matrix
 end
-function computeDistanceMatrix{ T1 <: Real, T2 <: Int, T3 <: Real, T4 <: Real }( data::Array{T1}, n_dim::T2, max::Vector{T3}, min::Vector{T4} )
+function computeDistanceMatrix( data::Array{T1}, n_dim::T2, max::Vector{T3}, min::Vector{T4} ) where { T1 <: Real, T2 <: Int, T3 <: Real, T4 <: Real }
     size_data=size(data)[1]
     matrix=zeros(size_data,size_data)
     for i=1:size_data
@@ -33,13 +33,13 @@ function computeDistanceMatrix{ T1 <: Real, T2 <: Int, T3 <: Real, T4 <: Real }(
     end
     return matrix
 end
-function swap{ T1 <: Real, T2 <: Int, T3 <: Int }( table::Vector{T1}, index1::T2, index2::T3 )
+function swap( table::Vector{T1}, index1::T2, index2::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
     stock=table[index1]
     table[index1]=table[index2]
     table[index2]=stock
     return
 end
-function initializeCenters{ T1 <: Int, T2 <: Real , T3 <: Int}( n_structures::T1 , distance_matrix::Array{T2,2}  , n_clusters::T3  )
+function initializeCenters( n_structures::T1 , distance_matrix::Array{T2,2}  , n_clusters::T3  ) where { T1 <: Int, T2 <: Real , T3 <: Int}(
     # Bookkeep
     available=ones(Int,n_structures)
 
@@ -82,7 +82,7 @@ function initializeCenters{ T1 <: Int, T2 <: Real , T3 <: Int}( n_structures::T1
 
     return cluster_centers
 end
-function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} , max::Vector{T5}, min::Vector{T6})
+function voronoiAssign( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} , max::Vector{T5}, min::Vector{T6} ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }
 	index_cluster=1
 	min_dist=sum( ( (data[ cluster_centers[1], :  ]-min)./(max-min) - (data_point-min)./(max-min) ).*( (data[ cluster_centers[1], :  ]-min)./(max-min) - (data_point-min)./(max-min) ) )
 	for i=2:n_clusters
@@ -94,7 +94,7 @@ function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Rea
 	end
 	return index_cluster
 end
-function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_points::Array{T4} , max::Vector{T5}, min::Vector{T6} )
+function voronoiAssign( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_points::Array{T4} , max::Vector{T5}, min::Vector{T6} ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }
 	n_points=size(data_points)[1]
 	point_clusters=zeros(Int,n_points)
 	for i=1:n_points
@@ -102,7 +102,7 @@ function voronoiAssign{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Rea
 	end
 	return point_clusters
 end
-function voronoiAssignSingle{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}( distance_matrix::Array{T1,2}, nb_clusters::T2, cluster_centers::Vector{T3}, index::T4 )
+function voronoiAssignSingle( distance_matrix::Array{T1,2}, nb_clusters::T2, cluster_centers::Vector{T3}, index::T4 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}
     min_dist=distance_matrix[ index ,cluster_centers[1] ]
     index_cluster=1
     for i=2:nb_clusters
@@ -114,7 +114,7 @@ function voronoiAssignSingle{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int}( dist
     end
     return index_cluster
 end
-function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int}( nb_structures::T1 , distance_matrix::Array{T2,2}, nb_clusters::T3, cluster_centers::Vector{T4} )
+function voronoiAssignAll( nb_structures::T1 , distance_matrix::Array{T2,2}, nb_clusters::T3, cluster_centers::Vector{T4} ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int}
     # Index of the cluster for each structure
     cluster_indexs = zeros(Int, nb_structures )
     assignments = zeros(Int, nb_clusters, nb_structures )
@@ -127,7 +127,7 @@ function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int}( nb_stru
     end
     return cluster_indexs, cluster_sizes, assignments
 end
-function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Int, T7 <: Int }( n_structures::T1 , distance_matrix::Array{T2,2}, nb_clusters::T3, cluster_centers::Vector{T4}, cluster_indexs::Vector{T5}, cluster_sizes::Vector{T6}, assignments::Array{T7,2} )
+function voronoiAssignAll( n_structures::T1 , distance_matrix::Array{T2,2}, nb_clusters::T3, cluster_centers::Vector{T4}, cluster_indexs::Vector{T5}, cluster_sizes::Vector{T6}, assignments::Array{T7,2} ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Int, T7 <: Int }
     cluster_sizes=zeros(Int,nb_clusters)
     for structure=1:n_structures
         cluster_indexs[ structure ] = voronoiAssignSingle( distance_matrix, nb_clusters, cluster_centers, structure )
@@ -136,14 +136,14 @@ function voronoiAssignAll{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int, T5 <: In
     end
     return
 end
-function computeCost{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int }( n_structures::T1, distance_matrix::Array{T2,2}, cluster_centers::Vector{T3} , cluster_indexs::Vector{T4} )
+function computeCost( n_structures::T1, distance_matrix::Array{T2,2}, cluster_centers::Vector{T3} , cluster_indexs::Vector{T4} ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int }
     cost=0
     for i=1:n_structures
         cost += distance_matrix[ i, cluster_centers[ cluster_indexs[i] ] ]
     end
     return cost
 end
-function updateCenters{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Int }( distance_matrix::Array{T1,2} , n_clusters::T2, cluster_centers::Vector{T3}, cluster_sizes::Vector{T4}, assignments::Array{T5,2} )
+function updateCenters( distance_matrix::Array{T1,2} , n_clusters::T2, cluster_centers::Vector{T3}, cluster_sizes::Vector{T4}, assignments::Array{T5,2} ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Int }
     for cluster=1:n_clusters
         new_center = cluster_centers[ cluster ]
         cost_min = sum(distance_matrix[ assignments[ cluster,1], assignments[ cluster ,1:cluster_sizes[ cluster ] ] ])
@@ -177,7 +177,7 @@ function sortmatrix( x )
     end
     return index_x
 end
-function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 )
+function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
     # Assign all clusters
@@ -197,7 +197,7 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }( n_st
     end
     return cluster_indexs, cluster_centers, cluster_sizes, assignments
 end
-function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: Int }( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4, n_repeat::T5 )
+function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4, n_repeat::T5 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: Int }
     # First Kmenoid
     cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
     old_cost=computeCost( n_structures, distance_matrix, cluster_centers_best, cluster_indexs_best )
@@ -213,7 +213,7 @@ function kmedoidClustering{ T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: 
     end
     return cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best
 end
-function computeClusteringCoefficients{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Real }( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes::Vector{T3} , assignments::Array{T4,2} , cut_off::T5 )
+function computeClusteringCoefficients( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes::Vector{T3} , assignments::Array{T4,2} , cut_off::T5 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Real }
     clustering_coefficients=zeros(n_clusters)
     if cut_off <= 0.0
         return
@@ -235,7 +235,7 @@ function computeClusteringCoefficients{ T1 <: Real, T2 <: Int, T3 <: Int, T4 <: 
     end
     return clustering_coefficients
 end
-function dauraClustering{ T1 <: Int, T2 <: Real, T3 <: Real }( n_elements::T1, distance_matrix::Array{T2,2} , cut_off::T3 )
+function dauraClustering( n_elements::T1, distance_matrix::Array{T2,2} , cut_off::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Real }
     cluster_sizes=zeros(Int,n_elements)
     cluster_centers=zeros(Int,n_elements)
     used=zeros(Int,n_elements)
