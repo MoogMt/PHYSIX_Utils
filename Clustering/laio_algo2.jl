@@ -12,8 +12,7 @@ T=3000
 
 ps2fs=0.001
 timestep=0.5
-sim_stride=1
-unit=ps2fs*timestep*sim_stride
+unit=ps2fs*timestep
 nbC=32
 nbO=2*nbC
 
