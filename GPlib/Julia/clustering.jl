@@ -304,4 +304,63 @@ function dauraClustering( n_elements::T1, distance_matrix::Array{T2,2} , cut_off
     # Voronoi assignement of the points
     return cluster_centers, cluster_sizes, index_data
 end
+function gaussianKernel( matrix_distance::Array{T1,2} , cut_off_distance::T2) where { T1 <: Real, T2 <: Real }
+    nb_element=size(matrix_distance)[1]
+    rho=zeros(nb_element)
+    for i=1:nb_element
+        for j=i+1:nb_element
+            gauss = exp(-(matrix_distance[i,j]/cut_off_distance)*(matrix_distance[i,j]/cut_off_distance))
+            rho[i] += gauss
+            rho[j] += gauss
+        end
+    end
+    return rho
+end
+function max_array( distance_matrix::Array{T1,2} ) where { T1 <: Real }
+    nb_element=size(distance_matrix)[1]
+    max=0
+    for i=1:nb_element
+        for j=i+1:nb_element
+            if distance_matrix[i,j] > max
+                max=distance_matrix[i,j]
+            end
+        end
+    end
+    return max
+end
+function simpleSequence( size_::T1 ) where { T1 <: Int }
+    vector=zeros(Int, size_)
+    for i=1:size_
+        vector[i] = i
+    end
+    return vector
+end
+function sort_descend( vector::Vector{T1} ) where { T1 <: Real }
+    size_vector=size(vector)[1]
+    vector_sorted=copy(vector)
+    index_vector=simpleSequence(size_vector)
+    for i=1:size_vector
+        for j=i+1:size_vector
+            if vector_sorted[i] < vector_sorted[j]
+                stock=vector_sorted[i]
+                stock2=index_vector[i]
+                vector[i]=vector_sorted[j]
+                index_vector[i]=index_vector[j]
+                vector_sorted[j]=stock
+                index_vector[j]=stock2
+            end
+        end
+    end
+    return vector_sorted, index_vector
+end
+function max_vector( vector::Vector{T1} ) where { T1 <: Real }
+    max=0
+    for i=1:size(vector)[1]
+        if max < vector[i]
+            max=vector[i]
+        end
+    end
+    return max
+end
+
 #==============================================================================#

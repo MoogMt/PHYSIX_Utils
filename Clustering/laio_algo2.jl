@@ -58,16 +58,16 @@ close(fileC)
 size_data=4000
 data_train=data_set[1:size_data,:]
 
-max=data_train[1,:]
-min=data_train[1,:]
+max_v = data_train[1,:]
+min_v = data_train[1,:]
 
 for i=1:size_data
     for j=1:n_dim
-        if max[j] < data_train[i,j]
-            max[j] = data_train[i,j]
+        if max_v[j] < data_train[i,j]
+            max_v[j] = data_train[i,j]
         end
-        if min[j] > data_train[i,j]
-            min[j] = data_train[i,j]
+        if min_v[j] > data_train[i,j]
+            min_v[j] = data_train[i,j]
         end
     end
 end
@@ -99,56 +99,53 @@ end
 # end
 
 print("Computing distance matrix\n")
-distance_matrix=computeDistanceMatrix( data_train , n_dim, max, min )
+distance_matrix=computeDistanceMatrix( data_train , n_dim, max_v, min_v )
 
-using PyPlot
 
-dc=0.01
+dc=0.001
 
 rho=zeros(size_data)
 for i=1:size_data
-    for j=1:size_data
-        if distance_matrix[i,j] < dc && i != j
-            rho[i] += 1
-        end
-    end
+	for j=1:size_data
+		if distance_matrix[i,j] < dc && i != j
+			rho[i] += 1
+		end
+	end
 end
 
 delta=zeros(size_data)
 index_delta=zeros(size_data)
 for i=1:size_data
-    for j=1:size_data
-        if i != j && rho[j] > rho[i]
-            if delta[i] == 0
-                delta[i] = distance_matrix[i,j]
-                index_delta[i] = j
-            elseif delta[i] > distance_matrix[i,j]
-                delta[i] = distance_matrix[i,j]
-                index_delta[i] = j
-            end
-        end
-    end
+	for j=1:size_data
+		if i != j && rho[j] > rho[i]
+			if delta[i] == 0
+				delta[i] = distance_matrix[i,j]
+				index_delta[i] = j
+			elseif delta[i] > distance_matrix[i,j]
+				delta[i] = distance_matrix[i,j]
+				index_delta[i] = j
+			end
+		end
+	end
 end
 
 index_max=1
 max_rho=rho[1]
 for i=2:size_data
-    if rho[i] > max_rho
-        max_rho = rho[i]
-        index_max=i
-    end
+	if rho[i] > max_rho
+		global max_rho = rho[i]
+		global index_max=i
+	end
 end
 
 delta[index_max]=distance_matrix[index_max,1]
 for i=2:size_data
-    if delta[index_max] < distance_matrix[index_max,i]
-        delta[index_max] = distance_matrix[index_max,i]
-    end
+	if delta[index_max] < distance_matrix[index_max,i]
+		delta[index_max] = distance_matrix[index_max,i]
+	end
 end
 
-PyPlot.figure()
-PyPlot.plot(rho,delta,"r.")
-PyPlot.show()
+
 
 # file=open(string(folder,"data_cluster_test.dat"),"w")
 # for i=1:size_data
