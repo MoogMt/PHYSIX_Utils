@@ -39,7 +39,7 @@ function swap( table::Vector{T1}, index1::T2, index2::T3 ) where { T1 <: Real, T
     table[index2]=stock
     return
 end
-function initializeCenters( n_structures::T1 , distance_matrix::Array{T2,2}  , n_clusters::T3  ) where { T1 <: Int, T2 <: Real , T3 <: Int}(
+function initializeCenters( n_structures::T1 , distance_matrix::Array{T2,2}  , n_clusters::T3  ) where { T1 <: Int, T2 <: Real , T3 <: Int}
     # Bookkeep
     available=ones(Int,n_structures)
 
