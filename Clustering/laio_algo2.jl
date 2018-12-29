@@ -28,7 +28,7 @@ nb_atoms=size(traj[1].names)[1]
 
 # Training set
 maxN=4
-n_dim=maxN+1
+n_dim=maxN
 data_set=zeros(nb_steps*nbC,n_dim)
 fileC=open(string(folder,"distancesNN.dat"),"w")
 for step=1:nb_steps

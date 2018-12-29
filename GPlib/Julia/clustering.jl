@@ -13,12 +13,23 @@ function computeDistance( data::Array{T1}, n_dim::T2 , max::Vector{T3}, min::Vec
     end
 	return dist
 end
+
 function computeDistanceMatrix( data::Array{T1} ) where { T1 <: Real }
     size_data=size(data)[1]
     matrix=zeros(size_data,size_data)
     for i=1:size_data
         for j=1:size_data
             matrix[i,j] = computeDistance( data, i, j )
+        end
+    end
+    return matrix
+end
+function computeDistanceMatrix( data::Array{T1}, max::T2, min::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+    size_data=size(data)[1]
+    matrix=zeros(size_data,size_data)
+    for i=1:size_data
+        for j=1:size_data
+			matrix[i,j] = sqrt( ( ((data[i]-min)/(max-min)) - ((data[j]-min)/(max-min)) )*( ((data[i]-min)/(max-min)) - ((data[j]-min)/(max-min)) ) )
         end
     end
     return matrix
@@ -362,5 +373,46 @@ function max_vector( vector::Vector{T1} ) where { T1 <: Real }
     end
     return max
 end
+function laioFirstStep( distance_matrix::Array{T1,2} , dc::T2 , file::T3 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
+	# Compute Rho
+	rho = gaussianKernel( distance_matrix, dc)
 
+	max_distance=max_array(distance_matrix)
+
+	# Sort the rho by decreasing order
+	rho_sorted, index_rho = sort_descend(rho)
+
+	# Compute delta
+	delta=zeros(size_data)
+	delta[ index_rho[1] ] = -1
+	nneigh=zeros(Int,size_data)
+	for i=2:size_data
+	    delta[ index_rho[i] ] = max_distance
+	    for j=1:i-1
+	        if distance_matrix[ index_rho[i] , index_rho[j] ] < delta[ index_rho[i] ]
+	            delta[ index_rho[i] ] = distance_matrix[ index_rho[i], index_rho[j] ]
+	            nneigh[ index_rho[i] ] = index_rho[j]
+	        end
+	    end
+	end
+
+	# Compute maximum rho
+	max_rho=0
+	for i=1:size(rho)[1]
+	 	if rho[i] > max_rho
+			max_rho = rho[i]
+		end
+	end
+
+	# put the delta of the max rho point to the max of delta
+	delta[ index_rho[1] ] = max_vector( delta )
+
+	file_out=open(file,"w")
+	for i=1:size(rho)[1]
+		write(file_out,string(rho[i]/max_rho," ",delta[i],"\n"))
+	end
+	close(file_out)
+
+	return rho, index_rho, delta
+end
 #==============================================================================#

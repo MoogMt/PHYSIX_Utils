@@ -2,8 +2,8 @@ include("atoms.jl")
 include("cell.jl")
 include("cubefile.jl")
 
-step_max=49
-step_min=0
+step_max=1000
+step_min=1
 d_step=1
 
 distance_data=[]
@@ -13,7 +13,7 @@ used=[]
 for step=step_min:d_step:step_max
 
 #------------------------------------------------------------------------------
-atoms, cell1, ELF1 = cube_mod.readCube(string("/home/moogmt/ELF_check/8.82_dyn/",step,"_structure/ELF.cube"))
+atoms, cell1, ELF1 = cube_mod.readCube(string("/home/moogmt/CO2/CO2_AIMD/ELF/ELF_8.82_results/",step,"_elf.cube"))
 #------------------------------------------------------------------------------
 
 #---------------
@@ -184,25 +184,20 @@ n_elf=100
 d_elf=(max_elf-min_elf)/n_elf
 
 hist_2D=zeros(n_elf,n_distance)
-
-count=0
-
+count_=0
 for i=1:n_elf
-    print("progress: ",i/n_elf*100,"%\n")
-    for j=1:n_distance
-        for k=1:size(used)[1]
-            if used[k] == 0
-                if i*d_elf+min_elf < elf_data[k] && (i+1)*d_elf+min_elf > elf_data[k] && j*d_distance+min_distance < distance_data[k] && (j+1)*d_distance+min_distance > distance_data[k]
-                    used[k] += 1
-                    hist_2D[i,j] += 1
-                    count += 1
-                end
-            end
-        end
-    end
+	print("progress: ",i/n_elf*100,"%\n")
+	for j=1:n_distance
+		for k=1:size(used)[1]
+			if (i-1)*d_elf+min_elf < elf_data[k] && i*d_elf+min_elf > elf_data[k] && (j-1)*d_distance+min_distance < distance_data[k] && j*d_distance+min_distance > distance_data[k]
+				hist_2D[i,j] += 1
+				global count_ += 1
+			end
+		end
+	end
 end
 
-hist_2D /= count
+hist_2D /= count_
 
 file_hist=open("/home/moogmt/hist.dat","w")
 for i=1:n_elf
