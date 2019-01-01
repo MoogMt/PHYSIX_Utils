@@ -208,27 +208,34 @@ folder2=string("/home/moogmt/CO2/CO2_AIMD/ELF/ELF_8.82_results/")
 
 elf_data=[]
 elf_distance=[]
-n_points=1000
+n_points=500
 for i=1:n_points
 	print("Progress: ",i/n_points*100,"%\n")
 	traj, cell_matrix, elf = cube_mod.readCube( string(folder2,i,"_elf.cube"))
+	cell = cell_mod.Cell_param( V, V, V )
 	for carbon=1:nbC
 		position1=traj.positions[carbon,:]
 		for k=1:3
-			position1[k]=cell_mod.wrap(position1[k],V)
+			position1[k] -= elf.origin[k]
+			position1[k] = cell_mod.wrap(position1[k],V)
 		end
 		for oxygen=1:nbO
 			if cell_mod.distance(traj,cell,carbon,nbC+oxygen) < 2.3
 				position2=traj.positions[nbC+oxygen,:]
-				for j=1:3
-				    di = position1[j]-position2[j]
-				    if di > V*0.5
-						position2[j] += V
-				    end
-				    if di < -V*0.5
-						position2[j] -= V
-				    end
+				for k=1:3
+					position2[k] -= elf.origin[k]
+					position2[k] = cell_mod.wrap(position2[k],V)
 				end
+				for j=1:3
+					di = position1[j]-position2[j]
+					if di > V*0.5
+						position2[j] += V
+					end
+					if di < -V*0.5
+						position2[j] -= V
+					end
+				end
+
 				center=(position1+position2)/2.
 				for dim=1:3
 					center[dim]=cell_mod.wrap(center[dim], V)
@@ -236,17 +243,17 @@ for i=1:n_points
 				index=[0,0,0]
 				for i=1:3
 					check=center[i]*elf.nb_vox[i]/V
-				    	index[i]=trunc(check)
+					index[i]=trunc(check)
 					if check - index[i] > 0.5
 						index[i] += 1
 					end
-					if index[i] > elf.nb_vox[i]-1
-						index[i]=0
+					if index[i] > elf.nb_vox[i]
+						index[i]=1
 					end
 				end
 				distance1=0
 				for k=1:3
-				    distance1+=cell_mod.dist1D( index[k]*V/elf.nb_vox[k], center[k], V )^2
+					distance1+=cell_mod.dist1D( index[k]*V/elf.nb_vox[k], center[k], V )^2
 				end
 				for l=-1:1:1
 					for m=-1:1:1
@@ -256,26 +263,28 @@ for i=1:n_points
 							new_index[2]=index[2]+m
 							new_index[3]=index[3]+n
 							for l=1:3
-						    		if new_index[l] < 0
+								if new_index[l] < 0
 									new_index[l] = elf.nb_vox[l] - new_index[l]
-						    		end
-						    		if new_index[l] >= elf.nb_vox[l]-1
+								end
+								if new_index[l] >= elf.nb_vox[l]-1
 									new_index[l] = new_index[l]-elf.nb_vox[l]
-						    		end
+								end
 							end
 							distance2=0
 							for k=1:3
-						    		distance2+=cell_mod.dist1D( new_index[k]*V/elf.nb_vox[k], center[k], V )^2
+								distance2+=cell_mod.dist1D( new_index[k]*V/elf.nb_vox[k], center[k], V )^2
 							end
 							if distance2 < distance1
-						    		distance1 = distance2
-						    		index=new_index
+								distance1 = distance2
+								index=new_index
 							end
-					    	end
+						end
 					end
 				end
 				for k=1:3
-					index[k] += 1
+					if index[k] == 0
+						index[k] = elf.nb_vox[k]
+					end
 				end
 				push!(elf_data,elf.matrix[index[1],index[2],index[3]])
 				push!(elf_distance,cell_mod.distance(traj,cell,carbon,nbC+oxygen))
@@ -295,7 +304,7 @@ for i=1:size(elf_distance)[1]
 	end
 end
 
-n_box=150
+n_box=200
 delta_distance=(max_-min_)/n_box
 delta_elf = 1/n_box
 
@@ -324,7 +333,7 @@ close(file_out)
 
 # Clustering
 
-n_data=10000
+n_data=12000
 data_train=zeros(n_data,2)
 data_train[:,1]=elf_distance[1:n_data]
 data_train[:,2]=elf_data[1:n_data]
@@ -445,8 +454,24 @@ for i=1:n_cluster
     close(file)
 end
 
+disagree_1=0
+disagree_2=0
+agree = 0
+count_v=0
+for i=1:size(cl)[1]
+	if elf_distance[i] < 1.75 && cl[i] == 2
+		global disagree_1 += 1
+	elseif elf_distance[i] > 1.75 && cl[i] == 1
+		global disagree_2 += 1
+	else
+		global agree += 1
+	end
+	global count_v += 1
+end
 
 
+
+# remains some very problematic issues with the ELF, to be tested.
 
 # HALOOOO
 #
@@ -459,7 +484,7 @@ end
 #         if ( cl[i] == cl[j] ) && ( distance_matrix[i,j] <= dc )
 #             rho_average = (rho[i]+rho[j])/2
 #             if rho_average > bord_rho[ cl[i] ]
-#                 bord_rho[ cl[i] ] = rho_average
+#              X   bord_rho[ cl[i] ] = rho_average
 #             end
 #             if rho_average > bord_rho[ cl[j] ]
 #                 bord_rho[ cl[j] ] = rho_average
