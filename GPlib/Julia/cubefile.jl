@@ -154,10 +154,10 @@ function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T
     for i=1:3
         di = position1[i] - position2[i]
         if di > cell.length[i]*0.5
-            position2[i] += cell.length[i]
+            position2[i] = position2[i] + cell.length[i]
         end
         if di < -cell.length[i]*0.5
-            position2[i] -= cell.length[i]
+            position2[i] = position2[i] - cell.length[i]
         end
     end
     # compute the position of the center (can be out of the box)
@@ -173,57 +173,34 @@ function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T
     index=zeros(Int,3)
     # Rounding up the raw guess
     for i=1:3
-        raw_guess = center[i]/cell.length[i]*data.nb_vox[i]
-        index[i] = trunc( raw_guess )
-        if raw_guess - index[i] > 0.5
-            index[i] += 1
-        end
-        # Wrapping
+        index[i] = trunc(center[i]/cell.length[i]*data.nb_vox[i])  + 1
+    end
+    # Displacement due to origin
+    mod=computeDisplacementOrigin( data , cell )
+    for i=1:3
+        index[i]-=mod[i]
+    end
+    for i=1:3
         if index[i] > data.nb_vox[i]
             index[i] = index[i] - data.nb_vox[i]
         end
-        if index[i] == 0
-            index[i] = data.nb_vox[i]
+        if index[i] < 1
+            index[i] = data.nb_vox[i]+index[i]
         end
     end
-    # Computing distance of the guess to actual position
-    distance1=0
-    for i=1:3
-        distance1 +=  cell_mod.dist1D( index[i]*cell.length[i]/data.nb_vox[i], center[i] , cell.length[i] )^2
-    end
-    #Checking if the nearby points are closer to the actual position
-    # for l=-1:1
-    #     for m=-1:1
-    #         for n=-1:1
-    #             # Building new point indexes
-    #             new_index=zeros(Int,3)
-    #             new_index[1] = index[1] + l
-    #             new_index[2] = index[2] + m
-    #             new_index[3] = index[3] + n
-    #             # Wraping
-    #             for p=1:3
-    #                 if new_index[p] > data.nb_vox[p]
-    #                     new_index[p] -= data.nb_vox[p]
-    #                 end
-    #                 # Should not happen... but still.
-    #                 if new_index[p] == 0
-    #                     new_index[p] =  data.nb_vox[p]
-    #                 end
-    #             end
-    #             # Computing the distance of the new point
-    #             distance2 = 0
-    #             for o=1:3
-    #                 distance2 += cell_mod.dist1D( new_index[o]*cell.length[o]/data.nb_vox[o], center[o], cell.length[o] )^2
-    #             end
-    #             # If the point is actually closer update the indexes and distance
-    #             if distance2 < distance1
-    #                 distance1 = distance2
-    #                 index = new_index
-    #             end
-    #         end
-    #     end
-    # end
     return data.matrix[index[1],index[2],index[3]]
+end
+
+function computeDisplacementOrigin( data::T1 , cell::T2 ) where { T1 <: Volume, T2 <: Cell_param }
+    index=zeros(Int,3)
+    for i=1:3
+        guess=data.origin[i]/cell.length[i]*data.nb_vox[i]
+        index[i]=trunc(guess)
+        if guess-index[i] > 0.5
+            index[i] += 1
+        end
+    end
+    return index
 end
 
 # Does not Work

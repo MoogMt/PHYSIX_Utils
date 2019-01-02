@@ -21,28 +21,23 @@ d_lag=5      # delta tau
 unit=0.005   # units of the simulation
 
 V=8.82
-nb_steps=20
+nb_steps=1000
 
 atom1_data=[]
 atom2_data=[]
 distance_data=[]
 elf_data=[]
-density_data=[]
 for i=1:nb_steps
     print("Progress: ",i/nb_steps*100,"%\n")
     atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,i,"_elf.cube") )
     density = cube_mod.readCube( string(folder_base,i,"_density.cube") )[3]
     cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
-    atoms=atom_mod.move(atoms,elf.origin*(-1))
     atoms=cell_mod.wrap(atoms,cell)
-    for i=1:size(atoms.positions)[1]-1
-        for j=i+1:size(atoms.positions)[1]
+    for i=1:nbC
+        for j=nbC+1:nbC+nbO
             if cell_mod.distance(atoms,cell,i,j) < 2.5
-                push!(atom1_data,i)
-                push!(atom2_data,j)
                 push!(distance_data,cell_mod.distance(atoms,cell,i,j))
-                push!(elf_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf ) )
-                push!(density_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, density ))
+                push!(elf_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf ))
             end
         end
     end
@@ -82,34 +77,6 @@ end
 hist2D /= count_v
 
 file_out=open(string(folder_base,"elf_hist.dat"),"w")
-for i=1:nb_box
-	for j=1:nb_box
-		write(file_out,string(min_dist+i*delta_dist," ",j*delta_denself," ",hist2D[i,j],"\n"))
-	end
-	write(file_out,string("\n"))
-end
-close(file_out)
-
-hist2D=zeros(nb_box,nb_box)
-count_v=0
-for i=1:size(distance_data)[1]
-    for k=1:nb_box
-        if distance_data[i] > min_dist+(k-1)*delta_dist &&  distance_data[i] < min_dist+k*delta_dist
-            for l=1:nb_box
-                if density_data[i] > (l-1)*delta_denself && density_data[i] < l*delta_denself
-                    hist2D[k,l] += 1
-                    break
-                end
-            end
-            break
-        end
-    end
-    global count_v += 1
-end
-
-hist2D /= count_v
-
-file_out=open(string(folder_base,"dens_hist.dat"),"w")
 for i=1:nb_box
 	for j=1:nb_box
 		write(file_out,string(min_dist+i*delta_dist," ",j*delta_denself," ",hist2D[i,j],"\n"))
