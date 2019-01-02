@@ -8,6 +8,8 @@ using Main.atom_mod
 using Main.cell_mod
 using Main.geom
 
+export readCube, dataInTheMiddleWME
+
 #-----------------------------------------------------------------------
 # Volume 4, nb_vox*nb_vox*nb_vox
 #-----------------------
@@ -143,69 +145,155 @@ function readCube( file_name::T1 ) where { T1 <: AbstractString }
     return atom_list, cell_matrix, volume
 end
 
-function getClosest( position::Vector{T1} , vol::T2 ) where { T1 <: Real, T2 <: Volume }
-    # Works for orthorombic, not yet for non-orthorombic
-    #------------------
-    # Compute lengths
-    #--------------------------------------------
-    params=zeros(3,1)
+function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T5 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Int, T4 <: Int, T5 <: Volume }
+    # Wrapped and Moved Edition
+    # Copies of 1 and 2
+    position1 = atoms.positions[atom1,:]
+    position2 = atoms.positions[atom2,:]
+    # Moving 2 to closest image to 1 (can be out of the box)
     for i=1:3
-        for j=1:3
-            params[i] += vol.vox_vec[i,j]^2
+        di = position1[i] - position2[i]
+        if di > cell.length[i]*0.5
+            position2[i] += cell.length[i]
         end
-        params[i]=sqrt(params[i])
-        position[i]=cell_mod.wrap(position[i]-vol.origin[i],params[i])
-    end
-    # # #--------------------------------------------
-    # # #----------------------------------------------------
-    floats=[0,0,0]
-    for i=1:3
-        check=position[i]*vol.nb_vox[i]/params[i]
-        floats[i]=trunc(check)
-        # if check - floats[i] > 0.5
-        #     floats[i] += 1
-        # end
-        if floats[i] == 0
-            floats[i]=1
+        if di < -cell.length[i]*0.5
+            position2[i] -= cell.length[i]
         end
     end
-    # # #----------------------------------------------------
+    # compute the position of the center (can be out of the box)
+    center=zeros(Real,3)
+    for i=1:3
+        center[i] = 0.5*(position1[i]+position2[i])
+    end
+    # wrap the center
+    for i=1:3
+        center[i] = cell_mod.wrap( center[i], cell.length[i] )
+    end
+    # Trying to guess the closest grid point to the center
+    index=zeros(Int,3)
+    # Rounding up the raw guess
+    for i=1:3
+        raw_guess = center[i]/cell.length[i]*data.nb_vox[i]
+        index[i] = trunc( raw_guess )
+        if raw_guess - index[i] > 0.5
+            index[i] += 1
+        end
+        # Wrapping
+        if index[i] > data.nb_vox[i]
+            index[i] = index[i] - data.nb_vox[i]
+        end
+        if index[i] == 0
+            index[i] = data.nb_vox[i]
+        end
+    end
+    # Computing distance of the guess to actual position
     distance1=0
     for i=1:3
-        distance1 += (floats[i]*params[i]/vol.nb_vox[i]+vol.origin[i]- position[i])^2
+        distance1 +=  cell_mod.dist1D( index[i]*cell.length[i]/data.nb_vox[i], center[i] , cell.length[i] )^2
     end
-    #Quickfix
-    for i=-1:2:1
-        for j=-1:2:1
-            for k=-1:2:1
-                new_floats=[0,0,0]
-                new_floats[1]=floats[1]+i
-                new_floats[2]=floats[2]+j
-                new_floats[3]=floats[3]+k
-                for l=1:3
-                    if new_floats[l] <= 0
-                        new_floats[l] = vol.nb_vox[l] - new_floats[l]
+    #Checking if the nearby points are closer to the actual position
+    for l=-1:1
+        for m=-1:1
+            for n=-1:1
+                # Building new point indexes
+                new_index=zeros(Int,3)
+                new_index[1] = index[1] + l
+                new_index[2] = index[2] + m
+                new_index[3] = index[3] + n
+                # Wraping
+                for o=1:3
+                    if new_index[o] > data.nb_vox[o]
+                        new_index[o] -= data.nb_vox[o]
                     end
-                    if new_floats[l] > vol.nb_vox[l]
-                        new_floats[l] = new_floats[l]- vol.nb_vox[l]
+                    # Should not happen... but still.
+                    if new_index[o] == 0
+                        new_index =  data.nb_vox[o]
                     end
                 end
-                distance2=0
-                for l=1:3
-                    distance2 += (new_floats[l]*params[l]/vol.nb_vox[l]+vol.origin[l]- position[l])^2
+                # Computing the distance of the new point
+                distance2 = 0
+                for o=1:3
+                    distance2 += cell_mod.dist1D( new_index[o]*cell.length[o]/data.nb_vox[o], center[o], cell.length[o] )^2
                 end
-                if distance1 > distance2
-                    for p=1:3
-                        floats[p]=new_floats[p]
-                    end
-                    distance1=distance2
+                # If the point is actually closer update the indexes and distance
+                if distance2 < distance1
+                    distance1 = distance2
+                    index = new_index
                 end
             end
         end
     end
-    # Returns the index
-    return floats
+    position=zeros(Real,3)
+    for i=1:3
+        position[i] = index[i]/data.nb_vox[i]*cell.length[i]
+    end
+    return data.matrix[index[1],index[2],index[3]]
 end
+
+# Does not Work
+# function getClosest( position::Vector{T1} , vol::T2 ) where { T1 <: Real, T2 <: Volume }
+#     # Works for orthorombic, not yet for non-orthorombic
+#     #------------------
+#     # Compute lengths
+#     #--------------------------------------------
+#     params=zeros(3,1)
+#     for i=1:3
+#         for j=1:3
+#             params[i] += vol.vox_vec[i,j]^2
+#         end
+#         params[i]=sqrt(params[i])
+#         position[i]=cell_mod.wrap(position[i]-vol.origin[i],params[i])
+#     end
+#     # # #--------------------------------------------
+#     # # #----------------------------------------------------
+#     floats=[0,0,0]
+#     for i=1:3
+#         check=position[i]*vol.nb_vox[i]/params[i]
+#         floats[i]=trunc(check)
+#         # if check - floats[i] > 0.5
+#         #     floats[i] += 1
+#         # end
+#         if floats[i] == 0
+#             floats[i]=1
+#         end
+#     end
+#     # # #----------------------------------------------------
+#     distance1=0
+#     for i=1:3
+#         distance1 += (floats[i]*params[i]/vol.nb_vox[i]+vol.origin[i]- position[i])^2
+#     end
+#     #Quickfix
+#     for i=-1:2:1
+#         for j=-1:2:1
+#             for k=-1:2:1
+#                 new_floats=[0,0,0]
+#                 new_floats[1]=floats[1]+i
+#                 new_floats[2]=floats[2]+j
+#                 new_floats[3]=floats[3]+k
+#                 for l=1:3
+#                     if new_floats[l] <= 0
+#                         new_floats[l] = vol.nb_vox[l] - new_floats[l]
+#                     end
+#                     if new_floats[l] > vol.nb_vox[l]
+#                         new_floats[l] = new_floats[l]- vol.nb_vox[l]
+#                     end
+#                 end
+#                 distance2=0
+#                 for l=1:3
+#                     distance2 += (new_floats[l]*params[l]/vol.nb_vox[l]+vol.origin[l]- position[l])^2
+#                 end
+#                 if distance1 > distance2
+#                     for p=1:3
+#                         floats[p]=new_floats[p]
+#                     end
+#                     distance1=distance2
+#                 end
+#             end
+#         end
+#     end
+#     # Returns the index
+#     return floats
+# end
 
 function paramVoxVectors( volume::T1 ) where { T1 <: Volume }
     params=Vector{Real}(3)

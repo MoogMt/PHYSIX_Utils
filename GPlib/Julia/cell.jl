@@ -18,7 +18,10 @@ mutable struct Cell_param
     length::Vector{Real}
     angles::Vector{Real}
     function Cell_param()
-        new([0,0,0],[0,0,0]);
+        new(zeros(Real,3),zeros(Real,3));
+    end
+    function Cell_param( params::Vector{T1} ) where { T1 <: Real }
+        new(params,ones(Real,3)*90)
     end
     function Cell_param( a::T1, b::T2, c::T3 ) where { T1 <: Real, T2<: Real, T3 <: Real }
         new([a,b,c],[90.,90.,90.])
@@ -85,6 +88,17 @@ end
 Cell=Union{Cell_param, Cell_vec, Cell_matrix}
 #---------------------------------------------
 
+function cellMatrix2Params( cell_matrix::Array{T1,2} )  where { T1 <: Real }
+    params=zeros(Real,3)
+    for i=1:size(cell_matrix)[1]
+        for j=1:size(cell_matrix)[2]
+            params[i] += cell_matrix[i,j]*cell_matrix[i,j]
+        end
+        params[i] = sqrt( params[i])
+    end
+    return params
+end
+
 #---------------------------------------------------------------------------\
 function vec2matrix( vectors::T1 ) where { T1 <: Cell_vec }
     matrix=Cell_matrix()
@@ -133,6 +147,14 @@ function wrap( atoms::T1, cell::T2 ) where { T1 <: atom_mod.AtomList, T2 <: Cell
     end
     #----------------------------------
 
+    return atoms
+end
+function wrap( atoms::T1, cell::T2 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param }
+    for i=1:size(atoms.positions)[1]
+        for j=1:3
+            atoms.positions[i,j] = wrap( atoms.positions[i,j],cell.length[j])
+        end
+    end
     return atoms
 end
 function wrap( positions::Vector{T1}, cell::T2 ) where { T1 <: Real, T2 <: Cell_param }
