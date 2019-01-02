@@ -192,41 +192,37 @@ function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T
         distance1 +=  cell_mod.dist1D( index[i]*cell.length[i]/data.nb_vox[i], center[i] , cell.length[i] )^2
     end
     #Checking if the nearby points are closer to the actual position
-    for l=-1:1
-        for m=-1:1
-            for n=-1:1
-                # Building new point indexes
-                new_index=zeros(Int,3)
-                new_index[1] = index[1] + l
-                new_index[2] = index[2] + m
-                new_index[3] = index[3] + n
-                # Wraping
-                for o=1:3
-                    if new_index[o] > data.nb_vox[o]
-                        new_index[o] -= data.nb_vox[o]
-                    end
-                    # Should not happen... but still.
-                    if new_index[o] == 0
-                        new_index =  data.nb_vox[o]
-                    end
-                end
-                # Computing the distance of the new point
-                distance2 = 0
-                for o=1:3
-                    distance2 += cell_mod.dist1D( new_index[o]*cell.length[o]/data.nb_vox[o], center[o], cell.length[o] )^2
-                end
-                # If the point is actually closer update the indexes and distance
-                if distance2 < distance1
-                    distance1 = distance2
-                    index = new_index
-                end
-            end
-        end
-    end
-    position=zeros(Real,3)
-    for i=1:3
-        position[i] = index[i]/data.nb_vox[i]*cell.length[i]
-    end
+    # for l=-1:1
+    #     for m=-1:1
+    #         for n=-1:1
+    #             # Building new point indexes
+    #             new_index=zeros(Int,3)
+    #             new_index[1] = index[1] + l
+    #             new_index[2] = index[2] + m
+    #             new_index[3] = index[3] + n
+    #             # Wraping
+    #             for p=1:3
+    #                 if new_index[p] > data.nb_vox[p]
+    #                     new_index[p] -= data.nb_vox[p]
+    #                 end
+    #                 # Should not happen... but still.
+    #                 if new_index[p] == 0
+    #                     new_index[p] =  data.nb_vox[p]
+    #                 end
+    #             end
+    #             # Computing the distance of the new point
+    #             distance2 = 0
+    #             for o=1:3
+    #                 distance2 += cell_mod.dist1D( new_index[o]*cell.length[o]/data.nb_vox[o], center[o], cell.length[o] )^2
+    #             end
+    #             # If the point is actually closer update the indexes and distance
+    #             if distance2 < distance1
+    #                 distance1 = distance2
+    #                 index = new_index
+    #             end
+    #         end
+    #     end
+    # end
     return data.matrix[index[1],index[2],index[3]]
 end
 
