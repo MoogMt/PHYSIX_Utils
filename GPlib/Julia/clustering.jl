@@ -191,26 +191,6 @@ function updateCenters( distance_matrix::Array{T1,2} , n_clusters::T2, cluster_c
         cluster_centers[ cluster ] = new_center
     end
 end
-function sortMatrix( x )
-    sizex=size(x)[1]
-    index_x=zeros(sizex)
-    for i=1:sizex
-        index_x[i]=i
-    end
-    for i=1:sizex
-        for j=i:sizex
-            if x[i] > x[j]
-                stock=x[i]
-                stocki=index_x[i]
-                x[i]=x[j]
-                index_x[i]=index_x[j]
-                x[j]=stock
-                index_x[j]=stocki
-            end
-        end
-    end
-    return index_x
-end
 function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
@@ -362,12 +342,41 @@ function maxArray( distance_matrix::Array{T1,2} ) where { T1 <: Real }
     end
     return max
 end
+function maxVector( vector::Vector{T1} ) where { T1 <: Real }
+    max=0
+    for i=1:size(vector)[1]
+        if max < vector[i]
+            max=vector[i]
+        end
+    end
+    return max
+end
 function simpleSequence( size_::T1 ) where { T1 <: Int }
     vector=zeros(Int, size_)
     for i=1:size_
         vector[i] = i
     end
     return vector
+end
+function sortMatrix( x::Vector{T1} ) where { T1 <: Real }
+    sizex=size(x)[1]
+    index_x=zeros(sizex)
+    for i=1:sizex
+        index_x[i]=i
+    end
+    for i=1:sizex
+        for j=i:sizex
+            if x[i] > x[j]
+                stock=x[i]
+                stocki=index_x[i]
+                x[i]=x[j]
+                index_x[i]=index_x[j]
+                x[j]=stock
+                index_x[j]=stocki
+            end
+        end
+    end
+    return index_x
 end
 function sortDescend( vector::Vector{T1} ) where { T1 <: Real }
     size_vector=size(vector)[1]
@@ -387,14 +396,19 @@ function sortDescend( vector::Vector{T1} ) where { T1 <: Real }
     end
     return vector_sorted, index_vector
 end
-function maxVector( vector::Vector{T1} ) where { T1 <: Real }
-    max=0
-    for i=1:size(vector)[1]
-        if max < vector[i]
-            max=vector[i]
-        end
-    end
-    return max
+function sortDescend( data::Array{T1,2}, index::T2 )  where { T1 <: Real , T2 <: Int }
+	size_data=size(data)[1]
+	n_dim=size(data)[2]
+	for i=1:size_data-1
+		for j=i+1:size_data
+			if data[i,index] < data[j,index]
+				stock = data[i,:]
+				data[i,:] = data[j,:]
+				data[j,:] = stock
+			end
+		end
+	end
+	return 
 end
 function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: Real, T2 <: Real }
 
@@ -420,7 +434,7 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: R
 
 	# Compute the distance matrix - most computation expensive
 	# and memory consuming part; each dimension is normalized between 0 and 1
-	distance_matrix=computeDistanceMatrix( data , n_dim, max_v, min_v )
+	distance_matrix, max_array = computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
 
 	# Compute the rho (~ local density of each points)
 	rho = gaussianKernel( distance_matrix, dc)
@@ -525,7 +539,7 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, mi
 
 	# Compute the distance matrix - most computation expensive
 	# and memory consuming part; each dimension is normalized between 0 and 1
-	distance_matrix=computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
+	distance_matrix, max_array=computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
 
 	# Compute the rho (~ local density of each points)
 	rho = gaussianKernel( distance_matrix, dc)
@@ -603,4 +617,5 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, mi
 
 	return cl, icl
 end
+
 end

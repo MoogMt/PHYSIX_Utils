@@ -23,11 +23,11 @@ d_lag=5      # delta tau
 unit=0.005   # units of the simulation
 
 V=8.82
-nb_steps=125
+nb_steps=75
 
-distance_data=[]
-elf_data=[]
-density_data=[]
+# distance_data=[]
+# elf_data=[]
+# density_data=[]
 n_dim=5
 distance_configurations=zeros(Int((nbC+nbO)*nb_steps),n_dim)
 for step=1:nb_steps
