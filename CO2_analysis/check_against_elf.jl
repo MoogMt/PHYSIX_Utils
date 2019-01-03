@@ -23,14 +23,14 @@ d_lag=5      # delta tau
 unit=0.005   # units of the simulation
 
 V=8.82
-nb_steps=75
+nb_steps=150
 
 # distance_data=[]
 # elf_data=[]
 # density_data=[]
 n_dim=5
-distance_configurations=zeros(Int((nbC+nbO)*nb_steps),n_dim)
-elf_configurations=zeros(Int((nbC+nbO)*nb_steps),n_dim)
+distance_configurations=zeros(Int(nbC*nb_steps),n_dim)
+elf_configurations=zeros(Int(nbC*nb_steps),n_dim)
 count_v=1
 for step=1:nb_steps
     print("Progress: ",step/nb_steps*100,"%\n")
@@ -41,9 +41,11 @@ for step=1:nb_steps
     for i=1:nbC
 		distances_sort=zeros(Real,nbO+nbC)
 		elf_sort=zeros(Real,nbO+nbC)
-        for j=i+1:nbC+nbO
-			distances_sort[j]=cell_mod.distance(atoms,cell,i,j)
-			elf_sort[j] = cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf )
+        for j=1:nbC+nbO
+			if i != j
+				distances_sort[j]=cell_mod.distance(atoms,cell,i,j)
+				elf_sort[j] = cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf )
+			end
             # if cell_mod.distance(atoms,cell,i,j) < 2.5
             #     push!(distance_data,cell_mod.distance(atoms,cell,i,j))
             #     push!(elf_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf ))
@@ -63,7 +65,7 @@ for step=1:nb_steps
 			end
 		end
 		distance_configurations[count_v,:]=distances_sort[1:n_dim]
-		elf_configuration[count_v,:]=elf_sort[1:n_dim]
+		elf_configurations[count_v,:]=elf_sort[1:n_dim]
 		global count_v += 1
     end
 end
