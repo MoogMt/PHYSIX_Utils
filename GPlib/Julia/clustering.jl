@@ -1,5 +1,15 @@
 # TESTED AND FUNCTIONNALS
 #==============================================================================#
+module clustering
+
+export computeDistance, computeDistanceMatrix, computeDistanceMatrixAndMax, swap
+export initializeCenter, voronoiAssign, voronoiAssignSingle, voronoiAssignAll
+export computeCost, updateCenters, sortMatrix
+export kmedoidClustering, computeClusteringCoefficients
+export dauraClustering
+export gaussianKernel, maxArray, simpleSequence, maxVector
+export densityPeakClusteringTrain
+
 function computeDistance( data::Array{T1}, data_point::Vector{T2}, index::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Int }
 	return sum( ( data[ index, :  ] - data_point[:] ).*( data[ index, :  ] - data_point[:] ) )
 end
@@ -13,7 +23,6 @@ function computeDistance( data::Array{T1}, n_dim::T2 , max::Vector{T3}, min::Vec
     end
 	return dist
 end
-
 function computeDistanceMatrix( data::Array{T1} ) where { T1 <: Real }
     size_data=size(data)[1]
     matrix=zeros(size_data,size_data)
@@ -182,7 +191,7 @@ function updateCenters( distance_matrix::Array{T1,2} , n_clusters::T2, cluster_c
         cluster_centers[ cluster ] = new_center
     end
 end
-function sortmatrix( x )
+function sortMatrix( x )
     sizex=size(x)[1]
     index_x=zeros(sizex)
     for i=1:sizex
@@ -341,7 +350,7 @@ function gaussianKernel( matrix_distance::Array{T1,2} , cut_off_distance::T2) wh
     end
     return rho
 end
-function max_array( distance_matrix::Array{T1,2} ) where { T1 <: Real }
+function maxArray( distance_matrix::Array{T1,2} ) where { T1 <: Real }
     nb_element=size(distance_matrix)[1]
     max=0
     for i=1:nb_element
@@ -360,7 +369,7 @@ function simpleSequence( size_::T1 ) where { T1 <: Int }
     end
     return vector
 end
-function sort_descend( vector::Vector{T1} ) where { T1 <: Real }
+function sortDescend( vector::Vector{T1} ) where { T1 <: Real }
     size_vector=size(vector)[1]
     vector_sorted=copy(vector)
     index_vector=simpleSequence(size_vector)
@@ -378,7 +387,7 @@ function sort_descend( vector::Vector{T1} ) where { T1 <: Real }
     end
     return vector_sorted, index_vector
 end
-function max_vector( vector::Vector{T1} ) where { T1 <: Real }
+function maxVector( vector::Vector{T1} ) where { T1 <: Real }
     max=0
     for i=1:size(vector)[1]
         if max < vector[i]
@@ -387,46 +396,211 @@ function max_vector( vector::Vector{T1} ) where { T1 <: Real }
     end
     return max
 end
-function laioFirstStep( distance_matrix::Array{T1,2} , dc::T2 , file::T3 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
-	# Compute Rho
-	rho = gaussianKernel( distance_matrix, dc)
+function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: Real, T2 <: Real }
 
-	max_distance=max_array(distance_matrix)
+	# Size and dimension of the input data
+	size_data = size(data)[1]
+	n_dim = size(data)[2]
+	min_delta=0.1  # Decision min-delta to be cluster center
+	min_rho=0.1    # Decision min-rho to be cluster center
 
-	# Sort the rho by decreasing order
-	rho_sorted, index_rho = sort_descend(rho)
-
-	# Compute delta
-	delta=zeros(size_data)
-	delta[ index_rho[1] ] = -1
-	nneigh=zeros(Int,size_data)
-	for i=2:size_data
-	    delta[ index_rho[i] ] = max_distance
-	    for j=1:i-1
-	        if distance_matrix[ index_rho[i] , index_rho[j] ] < delta[ index_rho[i] ]
-	            delta[ index_rho[i] ] = distance_matrix[ index_rho[i], index_rho[j] ]
-	            nneigh[ index_rho[i] ] = index_rho[j]
+	# Compute the maximum values of each dimensions
+	max_v=data[1,:]
+	min_v=data[1,:]
+	for i=1:size_data
+	    for j=1:n_dim
+	        if max_v[j] < data[i,j]
+	            max_v[j] = data[i,j]
+	        end
+	        if min_v[j] > data[i,j]
+	            min_v[j] = data[i,j]
 	        end
 	    end
+	end
+
+	# Compute the distance matrix - most computation expensive
+	# and memory consuming part; each dimension is normalized between 0 and 1
+	distance_matrix=computeDistanceMatrix( data , n_dim, max_v, min_v )
+
+	# Compute the rho (~ local density of each points)
+	rho = gaussianKernel( distance_matrix, dc)
+
+	# Sort the rhos in decreasing order
+	index=simpleSequence(size(rho)[1])
+	for i=1:size(rho)[1]
+		for j=i+1:size(rho)[1]
+			if rho[i] < rho[j]
+				stock=rho[i]
+				rho[i]=rho[j]
+				rho[j]=stock
+				stock=index[i]
+				index[i]=index[j]
+				index[j]=stock
+			end
+		end
+	end
+
+	# Computing maximum distance between two points
+	max_distance=max_array(distance_matrix)
+
+	# Compute delta
+	delta=ones(size_data)*max_distance
+	delta[ 1 ] = -1
+	nneigh=zeros(Int,size_data)
+	for i=2:size_data
+		for j=1:i-1
+			if distance_matrix[ index[i] , index[j] ] < delta[ i ]
+				delta[ i ] = distance_matrix[ index[i], index[j] ]
+				nneigh[ i ] = j
+			end
+		end
 	end
 
 	# Compute maximum rho
 	max_rho=0
 	for i=1:size(rho)[1]
-	 	if rho[i] > max_rho
+		if rho[i] > max_rho
 			max_rho = rho[i]
 		end
 	end
 
 	# put the delta of the max rho point to the max of delta
-	delta[ index_rho[1] ] = max_vector( delta )
-
-	file_out=open(file,"w")
-	for i=1:size(rho)[1]
-		write(file_out,string(rho[i]/max_rho," ",delta[i],"\n"))
+	for i=1:size_data
+		if distance_matrix[index[1],i] > delta[1]
+			delta[1] = distance_matrix[index[1],i]
+		end
 	end
-	close(file_out)
 
-	return rho, index_rho, delta
+	# Computing the max delta and assigning it to the largest cluster centers
+	max_delta=0
+	for i=1:size(delta)[1]
+		if delta[i] > max_delta
+			max_delta  = delta[i]
+		end
+	end
+
+	n_cluster=0 # Number of clusters
+	icl=[]      # Index of cluster centers
+	cl=ones(Int,size_data)*(-1) # Assignement of the data points (cluster #)
+
+	# Determine the cluster centers
+	for i=1:size_data
+	    if rho[i] > min_rho && delta[i] > min_delta
+			n_cluster += 1
+	        cl[index[i]] = n_cluster
+	        icl=push!(icl,index[i])
+	    end
+	end
+
+	# Affectation of points to clusters using their nearest neighbor
+	for i=1:size_data
+	    if cl[index[i]] == -1
+	        cl[index[i]] = cl[ index[nneigh[i]]  ]
+	    end
+	end
+
+	return cl, icl
 end
-#==============================================================================#
+function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, min_delta::T4 ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
+
+	# Size and dimension of the input data
+	size_data = size(data)[1]
+	n_dim = size(data)[2]
+	min_delta=0.1  # Decision min-delta to be cluster center
+	min_rho=0.1    # Decision min-rho to be cluster center
+
+	# Compute the maximum values of each dimensions
+	max_v=data[1,:]
+	min_v=data[1,:]
+	for i=1:size_data
+	    for j=1:n_dim
+	        if max_v[j] < data[i,j]
+	            max_v[j] = data[i,j]
+	        end
+	        if min_v[j] > data[i,j]
+	            min_v[j] = data[i,j]
+	        end
+	    end
+	end
+
+	# Compute the distance matrix - most computation expensive
+	# and memory consuming part; each dimension is normalized between 0 and 1
+	distance_matrix=computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
+
+	# Compute the rho (~ local density of each points)
+	rho = gaussianKernel( distance_matrix, dc)
+
+	# Sort the rhos in decreasing order
+	index=simpleSequence(size(rho)[1])
+	for i=1:size(rho)[1]
+		for j=i+1:size(rho)[1]
+			if rho[i] < rho[j]
+				stock=rho[i]
+				rho[i]=rho[j]
+				rho[j]=stock
+				stock=index[i]
+				index[i]=index[j]
+				index[j]=stock
+			end
+		end
+	end
+
+	# Compute delta
+	delta=ones(size_data)*max_distance
+	delta[ 1 ] = -1
+	nneigh=zeros(Int,size_data)
+	for i=2:size_data
+		for j=1:i-1
+			if distance_matrix[ index[i] , index[j] ] < delta[ i ]
+				delta[ i ] = distance_matrix[ index[i], index[j] ]
+				nneigh[ i ] = j
+			end
+		end
+	end
+
+	# Compute maximum rho
+	max_rho=0
+	for i=1:size(rho)[1]
+		if rho[i] > max_rho
+			max_rho = rho[i]
+		end
+	end
+
+	# put the delta of the max rho point to the max of delta
+	for i=1:size_data
+		if distance_matrix[index[1],i] > delta[1]
+			delta[1] = distance_matrix[index[1],i]
+		end
+	end
+
+	# Computing the max delta and assigning it to the largest cluster centers
+	max_delta=0
+	for i=1:size(delta)[1]
+		if delta[i] > max_delta
+			max_delta  = delta[i]
+		end
+	end
+
+	n_cluster=0 # Number of clusters
+	icl=[]      # Index of cluster centers
+	cl=ones(Int,size_data)*(-1) # Assignement of the data points (cluster #)
+
+	# Determine the cluster centers
+	for i=1:size_data
+	    if rho[i] > min_rho && delta[i] > min_delta
+			n_cluster += 1
+	        cl[index[i]] = n_cluster
+	        icl=push!(icl,index[i])
+	    end
+	end
+
+	# Affectation of points to clusters using their nearest neighbor
+	for i=1:size_data
+	    if cl[index[i]] == -1
+	        cl[index[i]] = cl[ index[nneigh[i]]  ]
+	    end
+	end
+
+	return cl, icl
+end
+end
