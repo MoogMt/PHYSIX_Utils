@@ -231,8 +231,6 @@ end
 
 # Trace the volume between two points.
 function traceLine( atom1::T1, atom2::T2, nb_points::T3, volume::T4, atoms::T5 , cell::T6 ) where { T1 <: Int, T2 <: Int, T3 <: Int, T4 <: Volume , T5 <: atom_mod.AtomList, T6 <: cell_mod.Cell_param }
-    # distance between atoms
-    delta=cell_mod.distance(atoms,cell,atom1,atom2)
 
     # Extracting positions
     position1 = atoms.positions[atom1,:]
@@ -257,12 +255,10 @@ function traceLine( atom1::T1, atom2::T2, nb_points::T3, volume::T4, atoms::T5 ,
 
     # Move vector and distance
     dp=zeros(Real,3)
-    dp_value=0
     for i=1:3
         dp[i]=(position2[i]-position1[i])/nb_points
-        dp_value=dp[i]*dp[i]
     end
-    dp_value=sqrt(dp_value)
+    dp_value=cell_mod.distance(atoms,cell,atom1,atom2)/nb_points
 
     # Displacement due to origin of the volume
     origin=computeDisplacementOrigin( volume , cell )
