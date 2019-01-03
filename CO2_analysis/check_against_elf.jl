@@ -110,9 +110,30 @@ for i=1:size(cl)[1]
 end
 close(file_test)
 
-function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
-	size_data
+for step=1:nb_steps
+	print("Progress: ",step/nb_steps*100,"%\n")
+	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
+	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
+	atoms=cell_mod.wrap(atoms,cell)
+	for carbon1=1:nbC
+		for carbon2=carbon1+1:nbC
+			if carbon1 == carbon2
+				continue
+			end
+			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 2.0
+				print(step," ",carbon1," ",carbon2,"\n")
+			end
+		end
+	end
 end
+
+atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,1,"_elf.cube") )
+cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
+cube_mod.traceLine( 14, 32, 10 , elf, atoms , cell )
+
+# function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
+# 	size_data
+# end
 
 # nb_box=2001
 # delta_denself=1/nb_box

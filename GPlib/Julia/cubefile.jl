@@ -202,7 +202,7 @@ function getClosestIndex( position::Vector{T1}, volume::T2 , cell::T3, origin_in
 end
 
 function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T5 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Int, T4 <: Int, T5 <: Volume }
-    # Wrapped and Moved Edition
+    # Wrapped  Edition
     # Copies of 1 and 2
     position1 = atoms.positions[atom1,:]
     position2 = atoms.positions[atom2,:]
@@ -230,10 +230,41 @@ function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T
 end
 
 # Trace the volume between two points.
-function traceLine( atom1::T1, atom2::T2, volume::T3, nb_points::T4, cell::T5 ) where { T1 <: Int, T2 <: Int, T3 <: Volume, T4 <: Int, T5 <: cell_mod.Cell_param }
+function traceLine( atom1::T1, atom2::T2, nb_points::T3, volume::T4, atoms::T5 , cell::T6 ) where { T1 <: Int, T2 <: Int, T3 <: Int, T4 <: Volume , T5 <: atom_mod.AtomList, T6 <: cell_mod.Cell_param }
     # distance between atoms
-    delta=cell_mod.distance(volume)
+    delta=cell_mod.distance(atoms,cell,atom1,atom2)
 
+    # Extracting positions
+    position1 = atoms.positions[atom1,:]
+    position2 = atoms.positions[atom2,:]
+
+    # Wrapping
+    for i=1:3
+        position1[i]=cell_mod.wrap(position1[i],cell.length[i])
+        position2[i]=cell_mod.wrap(position2[i],cell.length[i])
+    end
+
+    # Moving 2 to closest image to 1 (can be out of the box)
+    for i=1:3
+        di = position1[i] - position2[i]
+        if di > cell.length[i]*0.5
+            position2[i] = position2[i] + cell.length[i]
+        end
+        if di < -cell.length[i]*0.5
+            position2[i] = position2[i] - cell.length[i]
+        end
+    end
+
+    # Move vector and distance
+    dp=zeros(Real,3)
+    dp_value=0
+    for i=1:3
+        dp[i]=(position2[i]-position1[i])/nb_points
+        dp_value=dp[i]*dp[i]
+    end
+    dp_value=sqrt(dp_value)
+
+    # Displacement due to origin of the volume
     origin=computeDisplacementOrigin( volume , cell )
 
     # Output Tables
@@ -243,20 +274,23 @@ function traceLine( atom1::T1, atom2::T2, volume::T3, nb_points::T4, cell::T5 ) 
     # Moving along the lines
     curseur=position1
     for i=1:nb_points
-        indexs=getClosestIndex(curseur - position1,volume,origin)
-        dist=0
-        for j=1:3
-            dist += (indexs[i]*cell.length[j])^2
-        end
+        indexs=getClosestIndex(curseur,volume,cell,origin)
+        # Data
         distances[i]=sqrt(dist)
         data[i]=volume.matrix[indexs[1],indexs[2],indexs[3]]
 
-        curseur += dpos/points
+        # Movement
+        for j=1:3
+            curseur[j] += dp[j]
+        end
+        if i > 1
+            for j=1:3
+                distances[i]=distances[i-1]+dp_value
+            end
+        end
     end
 
-    # Sort by distance from point1
-
-    return dist, values
+    return distances, values
 end
 
 end
