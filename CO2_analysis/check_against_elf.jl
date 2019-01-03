@@ -116,20 +116,27 @@ for step=1:nb_steps
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	atoms=cell_mod.wrap(atoms,cell)
 	for carbon1=1:nbC
-		for carbon2=carbon1+1:nbC
-			if carbon1 == carbon2
-				continue
-			end
-			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 2.0
-				print(step," ",carbon1," ",carbon2,"\n")
+		for oxygen=33:96
+			# if carbon1 == carbon2
+			# 	continue
+			# end
+			if cell_mod.distance(atoms,cell,carbon1,oxygen) < 2.0
+				print(step," ",carbon1," ",oxygen,"\n")
 			end
 		end
 	end
 end
 
+nb_points=20
 atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,1,"_elf.cube") )
 cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
-cube_mod.traceLine( 14, 32, 10 , elf, atoms , cell )
+distances, elfs= cube_mod.traceLine( 32, 80, nb_points , elf, atoms , cell )
+file_line=open(string(folder_base,"test_elf.dat"),"w")
+for i=1:nb_points
+	write(file_line,string(distances[i]," ",elfs[i],"\n"))
+end
+close(file_line)
+
 
 # function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
 # 	size_data

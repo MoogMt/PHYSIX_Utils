@@ -191,11 +191,11 @@ function getClosestIndex( position::Vector{T1}, volume::T2 , cell::T3, origin_in
         index[i]-= origin_index[i]
     end
     for i=1:3
-        if index[i] > data.nb_vox[i]
-            index[i] = index[i] - data.nb_vox[i]
+        if index[i] > volume.nb_vox[i]
+            index[i] = index[i] - volume.nb_vox[i]
         end
         if index[i] < 1
-            index[i] = data.nb_vox[i]+index[i]
+            index[i] = volume.nb_vox[i]+index[i]
         end
     end
     return index
@@ -276,9 +276,7 @@ function traceLine( atom1::T1, atom2::T2, nb_points::T3, volume::T4, atoms::T5 ,
     for i=1:nb_points
         indexs=getClosestIndex(curseur,volume,cell,origin)
         # Data
-        distances[i]=sqrt(dist)
         data[i]=volume.matrix[indexs[1],indexs[2],indexs[3]]
-
         # Movement
         for j=1:3
             curseur[j] += dp[j]
@@ -290,7 +288,7 @@ function traceLine( atom1::T1, atom2::T2, nb_points::T3, volume::T4, atoms::T5 ,
         end
     end
 
-    return distances, values
+    return distances, data
 end
 
 end
