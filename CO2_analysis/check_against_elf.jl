@@ -4,6 +4,8 @@ CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 include(string(GPfolder,"cubefile.jl"))
+include(string(GPfolder,"clustering.jl"))
+
 include(string(CO2folder,"markovCO2.jl"))
 
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"
@@ -234,7 +236,7 @@ d_lag=5      # delta tau
 unit=0.005   # units of the simulation
 
 V=8.82
-nb_steps=250
+nb_steps=125
 
 distance_data=[]
 elf_data=[]
@@ -252,7 +254,7 @@ for step=1:nb_steps
 		elf_sort=zeros(Real,nbO+nbC)
         for j=i+1:nbC+nbO
 			distances_sort[j]=cell_mod.distance(atoms,cell,i,j)
-			elf_sort[j] = cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf ))
+			elf_sort[j] = cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf )
             # if cell_mod.distance(atoms,cell,i,j) < 2.5
             #     push!(distance_data,cell_mod.distance(atoms,cell,i,j))
             #     push!(elf_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf ))
@@ -276,7 +278,15 @@ for step=1:nb_steps
     end
 end
 
-# nb_box=200
+cl, icl = densityPeakClusteringTrain( distance_configurations , 0.05)
+
+file_test=open(string(folder_base,"test-cluster.dat"))
+
+function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
+	size_data
+end
+
+# nb_box=2001
 # delta_denself=1/nb_box
 # min_dist=100
 # max_dist=0

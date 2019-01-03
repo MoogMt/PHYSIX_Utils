@@ -44,6 +44,20 @@ function computeDistanceMatrix( data::Array{T1}, n_dim::T2, max::Vector{T3}, min
     end
     return matrix
 end
+function computeDistanceMatrixAndMax( data::Array{T1}, n_dim::T2, max::Vector{T3}, min::Vector{T4} ) where { T1 <: Real, T2 <: Int, T3 <: Real, T4 <: Real }
+    size_data=size(data)[1]
+	max_matrix=0
+    matrix=zeros(size_data,size_data)
+    for i=1:size_data
+        for j=1:size_data
+            matrix[i,j] = computeDistance( data, n_dim, max, min, i, j )
+			if matrix[i,j] > max_matrix
+				max_matrix = matrix[i,j]
+			end
+        end
+    end
+    return matrix, max_matrix
+end
 function swap( table::Vector{T1}, index1::T2, index2::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
     stock=table[index1]
     table[index1]=table[index2]
