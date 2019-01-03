@@ -30,6 +30,8 @@ nb_steps=75
 # density_data=[]
 n_dim=5
 distance_configurations=zeros(Int((nbC+nbO)*nb_steps),n_dim)
+elf_configurations=zeros(Int((nbC+nbO)*nb_steps),n_dim)
+count_v=1
 for step=1:nb_steps
     print("Progress: ",step/nb_steps*100,"%\n")
     atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
@@ -60,8 +62,9 @@ for step=1:nb_steps
 				end
 			end
 		end
-		distance_configuration=distances_sort[1:n_dim]
-		elf_configuration=elf_sort[1:n_dim]
+		distance_configurations[count_v,:]=distances_sort[1:n_dim]
+		elf_configuration[count_v,:]=elf_sort[1:n_dim]
+		global count_v += 1
     end
 end
 

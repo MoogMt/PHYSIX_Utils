@@ -408,7 +408,7 @@ function sortDescend( data::Array{T1,2}, index::T2 )  where { T1 <: Real , T2 <:
 			end
 		end
 	end
-	return 
+	return
 end
 function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: Real, T2 <: Real }
 
@@ -434,7 +434,7 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: R
 
 	# Compute the distance matrix - most computation expensive
 	# and memory consuming part; each dimension is normalized between 0 and 1
-	distance_matrix, max_array = computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
+	distance_matrix, max_distance = computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
 
 	# Compute the rho (~ local density of each points)
 	rho = gaussianKernel( distance_matrix, dc)
@@ -453,9 +453,6 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: R
 			end
 		end
 	end
-
-	# Computing maximum distance between two points
-	max_distance=max_array(distance_matrix)
 
 	# Compute delta
 	delta=ones(size_data)*max_distance
@@ -539,7 +536,7 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, mi
 
 	# Compute the distance matrix - most computation expensive
 	# and memory consuming part; each dimension is normalized between 0 and 1
-	distance_matrix, max_array=computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
+	distance_matrix, max_distance = computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
 
 	# Compute the rho (~ local density of each points)
 	rho = gaussianKernel( distance_matrix, dc)
