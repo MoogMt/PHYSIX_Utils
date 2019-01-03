@@ -55,8 +55,8 @@ for step=1:nb_steps
 			# 	push!(density_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, density ))
 			# end
 		end
-		for j=1:nbO
-			for k=j+1:nbO
+		for j=1:nbC+nbO-2
+			for k=j+1:nbC+nbO-1
 				if distances_sort[j] > distances_sort[k]
 					stock=distances_sort[j]
 					distances_sort[j]=distances_sort[k]
@@ -84,7 +84,7 @@ for i=1:size(icl_dist)[1]
 			end
 			coord_elf=0
 			for k=1:n_dim
-				if elf_configurations[j,k] > 0.7 && distance_configurations[j,k] < 2.0
+				if elf_configurations[j,k] > 0.7 && distance_configurations[j,k] < 1.8
 					coord_elf += 1
 				end
 			end
@@ -94,7 +94,15 @@ for i=1:size(icl_dist)[1]
 	close(file_cluster)
 end
 
-cl_elf, icl_elf = clustering.densityPeakClusteringTrain( elf_configurations , 0.1)
+cl_elf, icl_elf = clustering.densityPeakClusteringTrain( elf_configurations , 0.005)
+
+for coord=1:n_dim
+	file_elf=open(string(folder_base,"elf_vs_distance-",coord,".dat"),"w")
+	for i=1:size(elf_configurations)[1]
+		write(file_elf,string(i," ",distance_configurations[i,coord]," ",elf_configurations[i,coord],"\n"))
+	end
+	close(file_elf)
+end
 
 file_test=open(string(folder_base,"test.dat"),"w")
 for i=1:size(cl)[1]

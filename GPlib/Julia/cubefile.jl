@@ -8,7 +8,7 @@ using Main.atom_mod
 using Main.cell_mod
 using Main.geom
 
-export readCube, dataInTheMiddleWME
+export readCube, dataInTheMiddleWME, getClosestIndex, traceLine
 
 #-----------------------------------------------------------------------
 # Volume 4, nb_vox*nb_vox*nb_vox
@@ -145,6 +145,62 @@ function readCube( file_name::T1 ) where { T1 <: AbstractString }
     return atom_list, cell_matrix, volume
 end
 
+function computeDisplacementOrigin( data::T1 , cell::T2 ) where { T1 <: Volume, T2 <: Cell_param }
+    index=zeros(Int,3)
+    for i=1:3
+        guess=data.origin[i]/cell.length[i]*data.nb_vox[i]
+        index[i]=trunc(guess)
+        if guess-index[i] > 0.5
+            index[i] += 1
+        end
+    end
+    return index
+end
+
+function getClosestIndex( position::Vector{T1}, volume::T2 , cell::T3 ) where { T1 <: Real, T2 <: Volume, T3 <: cell_mod.Cell_param }
+    # Trying to guess the closest grid point to the center
+    index=zeros(Int,3)
+    # Rounding up the raw guess
+    for i=1:3
+        index[i] = trunc(position[i]/cell.length[i]*volume.nb_vox[i])  + 1
+    end
+    # Displacement due to origin
+    mod=computeDisplacementOrigin( data , cell )
+    for i=1:3
+        index[i]-=mod[i]
+    end
+    for i=1:3
+        if index[i] > data.nb_vox[i]
+            index[i] = index[i] - data.nb_vox[i]
+        end
+        if index[i] < 1
+            index[i] = data.nb_vox[i]+index[i]
+        end
+    end
+    return index
+end
+
+function getClosestIndex( position::Vector{T1}, volume::T2 , cell::T3, origin_index::Vector{T4} ) where { T1 <: Real, T2 <: Volume, T3 <: cell_mod.Cell_param , T4 <: Int }
+    # Trying to guess the closest grid point to the center
+    index=zeros(Int,3)
+    # Rounding up the raw guess
+    for i=1:3
+        index[i] = trunc(position[i]/cell.length[i]*volume.nb_vox[i])  + 1
+    end
+    for i=1:3
+        index[i]-= origin_index[i]
+    end
+    for i=1:3
+        if index[i] > data.nb_vox[i]
+            index[i] = index[i] - data.nb_vox[i]
+        end
+        if index[i] < 1
+            index[i] = data.nb_vox[i]+index[i]
+        end
+    end
+    return index
+end
+
 function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T5 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Int, T4 <: Int, T5 <: Volume }
     # Wrapped and Moved Edition
     # Copies of 1 and 2
@@ -169,138 +225,31 @@ function dataInTheMiddleWME( atoms::T1, cell::T2 , atom1::T3, atom2::T4, data::T
     for i=1:3
         center[i] = cell_mod.wrap( center[i], cell.length[i] )
     end
-    # Trying to guess the closest grid point to the center
-    index=zeros(Int,3)
-    # Rounding up the raw guess
-    for i=1:3
-        index[i] = trunc(center[i]/cell.length[i]*data.nb_vox[i])  + 1
-    end
-    # Displacement due to origin
-    mod=computeDisplacementOrigin( data , cell )
-    for i=1:3
-        index[i]-=mod[i]
-    end
-    for i=1:3
-        if index[i] > data.nb_vox[i]
-            index[i] = index[i] - data.nb_vox[i]
-        end
-        if index[i] < 1
-            index[i] = data.nb_vox[i]+index[i]
-        end
-    end
+    index=getClosestIndex( center , data , cell )
     return data.matrix[index[1],index[2],index[3]]
 end
 
-function computeDisplacementOrigin( data::T1 , cell::T2 ) where { T1 <: Volume, T2 <: Cell_param }
-    index=zeros(Int,3)
-    for i=1:3
-        guess=data.origin[i]/cell.length[i]*data.nb_vox[i]
-        index[i]=trunc(guess)
-        if guess-index[i] > 0.5
-            index[i] += 1
-        end
-    end
-    return index
-end
-
-# Does not Work
-# function getClosest( position::Vector{T1} , vol::T2 ) where { T1 <: Real, T2 <: Volume }
-#     # Works for orthorombic, not yet for non-orthorombic
-#     #------------------
-#     # Compute lengths
-#     #--------------------------------------------
-#     params=zeros(3,1)
-#     for i=1:3
-#         for j=1:3
-#             params[i] += vol.vox_vec[i,j]^2
-#         end
-#         params[i]=sqrt(params[i])
-#         position[i]=cell_mod.wrap(position[i]-vol.origin[i],params[i])
-#     end
-#     # # #--------------------------------------------
-#     # # #----------------------------------------------------
-#     floats=[0,0,0]
-#     for i=1:3
-#         check=position[i]*vol.nb_vox[i]/params[i]
-#         floats[i]=trunc(check)
-#         # if check - floats[i] > 0.5
-#         #     floats[i] += 1
-#         # end
-#         if floats[i] == 0
-#             floats[i]=1
-#         end
-#     end
-#     # # #----------------------------------------------------
-#     distance1=0
-#     for i=1:3
-#         distance1 += (floats[i]*params[i]/vol.nb_vox[i]+vol.origin[i]- position[i])^2
-#     end
-#     #Quickfix
-#     for i=-1:2:1
-#         for j=-1:2:1
-#             for k=-1:2:1
-#                 new_floats=[0,0,0]
-#                 new_floats[1]=floats[1]+i
-#                 new_floats[2]=floats[2]+j
-#                 new_floats[3]=floats[3]+k
-#                 for l=1:3
-#                     if new_floats[l] <= 0
-#                         new_floats[l] = vol.nb_vox[l] - new_floats[l]
-#                     end
-#                     if new_floats[l] > vol.nb_vox[l]
-#                         new_floats[l] = new_floats[l]- vol.nb_vox[l]
-#                     end
-#                 end
-#                 distance2=0
-#                 for l=1:3
-#                     distance2 += (new_floats[l]*params[l]/vol.nb_vox[l]+vol.origin[l]- position[l])^2
-#                 end
-#                 if distance1 > distance2
-#                     for p=1:3
-#                         floats[p]=new_floats[p]
-#                     end
-#                     distance1=distance2
-#                 end
-#             end
-#         end
-#     end
-#     # Returns the index
-#     return floats
-# end
-
-function paramVoxVectors( volume::T1 ) where { T1 <: Volume }
-    params=Vector{Real}(3)
-    for i=1:3
-        for j=1:3
-            params[i]=volume.vox_vec[i,j]^2
-        end
-        params[i] = sqrt(params[i])
-    end
-    return params
-end
-
 # Trace the volume between two points.
-function traceLine( position1::Vector{T1}, position2::Vector{T2}, volume::T3, nb_points::T4 ) where { T1 <: Real, T2 <: Real, T3 <: Volume, T4 <: Int }
-    if size(position1)[1] != 3 || size(position2)[1] != 3
-        return false
-    end
+function traceLine( atom1::T1, atom2::T2, volume::T3, nb_points::T4, cell::T5 ) where { T1 <: Int, T2 <: Int, T3 <: Volume, T4 <: Int, T5 <: cell_mod.Cell_param }
+    # distance between atoms
+    delta=cell_mod.distance(volume)
 
-    dpos=position2-position1
+    origin=computeDisplacementOrigin( volume , cell )
 
     # Output Tables
-    distances=Vector{Real}(1)
+    distances=zeros(Real,nb_points)
+    data=zeros(Real,nb_points)
 
     # Moving along the lines
     curseur=position1
     for i=1:nb_points
-        indexs=getClosest(curseur,volume) - position1
-        params=paramVoxVectors(volume)
+        indexs=getClosestIndex(curseur - position1,volume,origin)
         dist=0
         for j=1:3
-            dist += (indexs[i]*params[j])^2
+            dist += (indexs[i]*cell.length[j])^2
         end
-        dist=sqrt(dist)
-        value=volume.matrix[indexs[1],indexs[2],indexs[3]]
+        distances[i]=sqrt(dist)
+        data[i]=volume.matrix[indexs[1],indexs[2],indexs[3]]
 
         curseur += dpos/points
     end
