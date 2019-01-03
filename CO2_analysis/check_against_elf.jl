@@ -39,12 +39,14 @@ for step=1:nb_steps
     cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
     atoms=cell_mod.wrap(atoms,cell)
     for i=1:nbC
-		distances_sort=zeros(Real,nbO+nbC)
-		elf_sort=zeros(Real,nbO+nbC)
+		distances_sort=zeros(Real,nbO+nbC-1)
+		elf_sort=zeros(Real,nbO+nbC-1)
+		count2=1
         for j=1:nbC+nbO
 			if i != j
-				distances_sort[j]=cell_mod.distance(atoms,cell,i,j)
-				elf_sort[j] = cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf )
+				distances_sort[count2]=cell_mod.distance(atoms,cell,i,j)
+				elf_sort[count2] = cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf )
+				count2+=1
 			end
             # if cell_mod.distance(atoms,cell,i,j) < 2.5
             #     push!(distance_data,cell_mod.distance(atoms,cell,i,j))
@@ -70,9 +72,27 @@ for step=1:nb_steps
     end
 end
 
-cl, icl = clustering.densityPeakClusteringTrain( distance_configurations , 0.05)
+cl_dist, icl_dist = clustering.densityPeakClusteringTrain( distance_configurations , 0.05)
 
-file_test=open(string(folder_base,"test-cluster.dat"))
+for i=1:size(icl_dist)[1]
+	file_cluster=open(string(folder_base,"distance-cluster",i,".dat"))
+	for j=1:size(cl)[1]
+		if cl[j] == icl[i]
+			for k=1:n_dim
+				write(file_cluster,string())
+			end
+		end
+	end
+	close(file_cluster)
+end
+
+cl_elf, icl_elf = clustering.densityPeakClusteringTrain( elf_configurations , 0.1)
+
+file_test=open(string(folder_base,"test.dat"),"w")
+for i=1:size(cl)[1]
+	write(file_test,string(i," ",cl_dist[i]," ",cl_elf[i],"\n"))
+end
+close(file_test)
 
 function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
 	size_data
