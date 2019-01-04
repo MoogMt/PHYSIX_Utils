@@ -254,8 +254,71 @@ for point=1:nb_points
 end
 close(file_elf)
 
+nb_box_line=100
+delta=1/nb_box_line
+hist2D=zeros(nb_points,nb_box_line)
+for point=1:nb_points
+	for i=1:size(elf_bond_store_bond)[2]
+		for box=1:nb_box_line
+			if elf_bond_store_bond[point,i] > (box-1)*delta  && elf_bond_store_bond[point,i] < box*delta
+				hist2D[point,box] += 1
+				break
+			end
+		end
+	end
+	hist2D[point,:]/=sum(hist2D[point,:])
+end
+file_hist=open(string(folder_base,"hist_CC_bond.dat"),"w")
+for i=1:nb_points
+	for j=1:nb_box_line
+		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
+	end
+	write(file_hist,string("\n"))
+end
+close(file_hist)
+hist2D=zeros(nb_points,nb_box_line)
+for point=1:nb_points
+	for i=1:size(elf_bond_store_close1)[2]
+		for box=1:nb_box_line
+			if elf_bond_store_close1[point,i] > (box-1)*delta  && elf_bond_store_close1[point,i] < box*delta
+				hist2D[point,box] += 1
+				break
+			end
+		end
+	end
+	hist2D[point,:]/=sum(hist2D[point,:])
+end
+file_hist=open(string(folder_base,"hist_CC_close1.dat"),"w")
+for i=1:nb_points
+	for j=1:nb_box_line
+		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
+	end
+	write(file_hist,string("\n"))
+end
+close(file_hist)
+hist2D=zeros(nb_points,nb_box_line)
+for point=1:nb_points
+	for i=1:size(elf_bond_store_close2)[2]
+		for box=1:nb_box_line
+			if elf_bond_store_close2[point,i] > (box-1)*delta  && elf_bond_store_close2[point,i] < box*delta
+				hist2D[point,box] += 1
+				break
+			end
+		end
+	end
+	hist2D[point,:]/=sum(hist2D[point,:])
+end
+file_hist=open(string(folder_base,"hist_CC_close2.dat"),"w")
+for i=1:nb_points
+	for j=1:nb_box_line
+		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
+	end
+	write(file_hist,string("\n"))
+end
+close(file_hist)
 
-folder_base2="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/9.8/Trajectory_2/"
+
+folder_base2="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/9.8/Trajectory2/"
 nb_points=50
 max_step=150
 elf_bond_store_bond=zeros(nb_points,0)
@@ -294,9 +357,52 @@ for point=1:nb_points
 	write(file_elf,string("\n"))
 end
 
+nb_box_line=100
+delta=1/nb_box_line
+hist2D=zeros(nb_points,nb_box_line)
+for point=1:nb_points
+	for i=1:size(elf_bond_store_close1)[2]
+		for box=1:nb_box_line
+			if elf_bond_store_close1[point,i] > (box-1)*delta  && elf_bond_store_close1[point,i] < box*delta
+				hist2D[point,box] += 1
+				break
+			end
+		end
+	end
+	hist2D[point,:]/=sum(hist2D[point,:])
+end
+file_hist=open(string(folder_base,"hist_CC_close1.dat"),"w")
+for i=1:nb_points
+	for j=1:nb_box_line
+		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
+	end
+	write(file_hist,string("\n"))
+end
+close(file_hist)
+hist2D=zeros(nb_points,nb_box_line)
+for point=1:nb_points
+	for i=1:size(elf_bond_store_close2)[2]
+		for box=1:nb_box_line
+			if elf_bond_store_close2[point,i] > (box-1)*delta  && elf_bond_store_close2[point,i] < box*delta
+				hist2D[point,box] += 1
+				break
+			end
+		end
+	end
+	hist2D[point,:]/=sum(hist2D[point,:])
+end
+file_hist=open(string(folder_base,"hist_CC_close2.dat"),"w")
+for i=1:nb_points
+	for j=1:nb_box_line
+		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
+	end
+	write(file_hist,string("\n"))
+end
+close(file_hist)
+
+
 max_step_train=4000
-elfs_data=zeros(Real,max_step_train)
-distance_data=zeros(Real,max_step_train)
+elfs_data=zeros(Real,max_step_train,2)
 file_out=open(string(folder_base2,"elf_vs_distance.dat"),"w")
 for step=1:max_step
 	print("Progress: ",step/nb_steps*100,"%\n")
@@ -308,8 +414,8 @@ for step=1:max_step
 				elf = cube_mod.dataInTheMiddleWME( atoms, cell , carbon , nbC+oxygen, elf )
 				write(file_out,string( cell_mod.distance(atoms,cell,carbon,nbC+oxygen), " ", elf, "\n" ) )
 				if  count_v < max_step_train
-					elfs_data[count_v] = elf
-					distance_data[count_v] = cell_mod.distance(atoms,cell,carbon,nbC+oxygen)
+					elfs_data[count_v,1] = elf
+					elfs_data[count_v,2] = cell_mod.distance(atoms,cell,carbon,nbC+oxygen)
 					global count_v += 1
 				end
 			end
@@ -317,3 +423,5 @@ for step=1:max_step
 	end
 end
 close(file_out)
+
+cl, icl = clustering.densityPeakClusteringTrain( elfs_data , 0.005)
