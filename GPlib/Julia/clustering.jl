@@ -614,6 +614,95 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, mi
 
 	return cl, icl
 end
+function densityPeakClusteringFirstStep( data::Array{T1,2}, dc::T2 , file::T3 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
+
+	# Size and dimension of the input data
+	size_data = size(data)[1]
+	n_dim = size(data)[2]
+	min_delta=0.1  # Decision min-delta to be cluster center
+	min_rho=0.1    # Decision min-rho to be cluster center
+
+	# Compute the maximum values of each dimensions
+	max_v=data[1,:]
+	min_v=data[1,:]
+	for i=1:size_data
+	    for j=1:n_dim
+	        if max_v[j] < data[i,j]
+	            max_v[j] = data[i,j]
+	        end
+	        if min_v[j] > data[i,j]
+	            min_v[j] = data[i,j]
+	        end
+	    end
+	end
+
+	# Compute the distance matrix - most computation expensive
+	# and memory consuming part; each dimension is normalized between 0 and 1
+	distance_matrix, max_distance = computeDistanceMatrixAndMax( data , n_dim, max_v, min_v )
+
+	# Compute the rho (~ local density of each points)
+	rho = gaussianKernel( distance_matrix, dc)
+
+	# Sort the rhos in decreasing order
+	index=simpleSequence(size(rho)[1])
+	for i=1:size(rho)[1]
+		for j=i+1:size(rho)[1]
+			if rho[i] < rho[j]
+				stock=rho[i]
+				rho[i]=rho[j]
+				rho[j]=stock
+				stock=index[i]
+				index[i]=index[j]
+				index[j]=stock
+			end
+		end
+	end
+
+	# Compute delta
+	delta=ones(size_data)*max_distance
+	delta[ 1 ] = -1
+	nneigh=zeros(Int,size_data)
+	for i=2:size_data
+		for j=1:i-1
+			if distance_matrix[ index[i] , index[j] ] < delta[ i ]
+				delta[ i ] = distance_matrix[ index[i], index[j] ]
+				nneigh[ i ] = j
+			end
+		end
+	end
+
+	# Compute maximum rho
+	max_rho=0
+	for i=1:size(rho)[1]
+		if rho[i] > max_rho
+			max_rho = rho[i]
+		end
+	end
+
+	# put the delta of the max rho point to the max of delta
+	for i=1:size_data
+		if distance_matrix[index[1],i] > delta[1]
+			delta[1] = distance_matrix[index[1],i]
+		end
+	end
+
+	# Computing the max delta and assigning it to the largest cluster centers
+	max_delta=0
+	for i=1:size(delta)[1]
+		if delta[i] > max_delta
+			max_delta  = delta[i]
+		end
+	end
+
+	# Writting decision diagram
+	file_out=open(file,"w")
+	for i=1:size(rho)[1]
+		write(file_out,string(rho[i]," ",delta[i],"\n"))
+	end
+	close(file_out)
+
+	return rho, delta
+end
 function densityPeakClusteringFirstStep( data::Array{T1,2}, dc::T2 , min_rho::T3, min_delta::T4, file::T5 ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: AbstractString }
 
 	# Size and dimension of the input data
@@ -697,11 +786,35 @@ function densityPeakClusteringFirstStep( data::Array{T1,2}, dc::T2 , min_rho::T3
 	# Writting decision diagram
 	file_out=open(file,"w")
 	for i=1:size(rho)[1]
-		
+		write(file_out,string(rho[i]," ",delta[i],"\n"))
 	end
-	close()
+	close(file_out)
 
 	return rho, delta
+end
+function densityPeakClusteringSecondStep( rho::Vector{T1}, delta::Vector{T2}, min_rho::T3, min_delta::T4 ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
+
+	n_cluster=0 # Number of clusters
+	icl=[]      # Index of cluster centers
+	cl=ones(Int,size_data)*(-1) # Assignement of the data points (cluster #)
+
+	# Determine the cluster centers
+	for i=1:size_data
+	    if rho[i] > min_rho && delta[i] > min_delta
+			n_cluster += 1
+	        cl[index[i]] = n_cluster
+	        icl=push!(icl,index[i])
+	    end
+	end
+
+	# Affectation of points to clusters using their nearest neighbor
+	for i=1:size_data
+	    if cl[index[i]] == -1
+	        cl[index[i]] = cl[ index[nneigh[i]]  ]
+	    end
+	end
+
+	return cl, icl
 end
 
 end

@@ -293,3 +293,19 @@ for point=1:nb_points
 	end
 	write(file_elf,string("\n"))
 end
+
+elfs_data=[]
+distance=[]
+for step=1:max_step
+	print("Progress: ",step/nb_steps*100,"%\n")
+	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base2,step,"_elf.cube") )
+	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
+	for carbon=1:nbC
+		for oxygen=1:nbO
+			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.5
+				push!( selfs_data, cube_mod.dataInTheMiddleWME( atoms, cell , carbon , nbC+oxygen, elf ) )
+				push!( distance,   cell_mod.distance(atoms,cell,carbon,nbC+oxygen) )
+			end
+		end
+	end
+end
