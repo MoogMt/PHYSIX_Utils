@@ -442,7 +442,7 @@ for i=1:max_step
 end
 
 nb_box_dist=100
-delta_distance=(max_dist-min_dist)/nb_box
+delta_distance=(max_dist-min_dist)/nb_box_dist
 
 nb_box_elf=100
 delta_elf=1/nb_box_elf
@@ -450,9 +450,26 @@ delta_elf=1/nb_box_elf
 hist2D=zeros(nb_box_dist,nb_box_elf)
 for k=1:size(elfs_data)[1]
 	for i=1:nb_box_dist
-		if elfs_data[step,]
+		if elfs_data[k,2] > min_dist+(i-1)*delta_distance && elfs_data[k,2] < min_dist+i*delta_distance
+			for j=1:nb_box_elf
+				if elfs_data[k,1] > (j-1)*delta_elf && elfs_data[k,1] < j*delta_elf
+					hist2D[i,j] += 1
+				end
+			end
+		end
 	end
 end
+hist2D /= sum(hist2D)
+
+file_out=open(string(folder_base2,"hist_elf_vs_dist.dat"),"w")
+for i=1:nb_box_dist
+	for j=1:nb_box_elf
+		write(file_out,string(i*delta_distance," ",j*delta_elf," ",hist2D[i,j],"\n"))
+	end
+	write(file_out,"\n")
+end
+close(file_out)
+
 
 # Clustering
 max_step_train=4000
