@@ -366,7 +366,7 @@ hist2D=zeros(nb_points,nb_box_line)
 for point=1:nb_points
 	for i=1:size(elf_bond_store_close1)[2]
 		for box=1:nb_box_line
-			if elf_bond_store_close1[point,i] > (box-1)*delta  && elf_bond_store_close1[point,i] < box*delta
+			if elf_bond_store_bond[point,i] > (box-1)*delta  && elf_bond_store_bond[point,i] < box*delta
 				hist2D[point,box] += 1
 				break
 			end
@@ -374,7 +374,7 @@ for point=1:nb_points
 	end
 	hist2D[point,:]/=sum(hist2D[point,:])
 end
-file_hist=open(string(folder_base,"hist_CC_close1.dat"),"w")
+file_hist=open(string(folder_base2,"hist_CO_bond.dat"),"w")
 for i=1:nb_points
 	for j=1:nb_box_line
 		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
@@ -386,7 +386,7 @@ hist2D=zeros(nb_points,nb_box_line)
 for point=1:nb_points
 	for i=1:size(elf_bond_store_close2)[2]
 		for box=1:nb_box_line
-			if elf_bond_store_close2[point,i] > (box-1)*delta  && elf_bond_store_close2[point,i] < box*delta
+			if elf_bond_store_close[point,i] > (box-1)*delta  && elf_bond_store_close[point,i] < box*delta
 				hist2D[point,box] += 1
 				break
 			end
@@ -394,7 +394,7 @@ for point=1:nb_points
 	end
 	hist2D[point,:]/=sum(hist2D[point,:])
 end
-file_hist=open(string(folder_base,"hist_CC_close2.dat"),"w")
+file_hist=open(string(folder_base,"hist_CC_close.dat"),"w")
 for i=1:nb_points
 	for j=1:nb_box_line
 		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
