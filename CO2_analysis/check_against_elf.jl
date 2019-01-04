@@ -39,24 +39,16 @@ for step=1:nb_steps
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	atoms=cell_mod.wrap(atoms,cell)
 	for i=1:nbC
-		distances_sort=zeros(Real,nbO+nbC-1)
-		elf_sort=zeros(Real,nbO+nbC-1)
+		distances_sort = zeros( Real, nbO )
+		elf_sort       = zeros( Real, nbO )
 		count2=1
-		for j=1:nbO+nbC
-			if i == j
-				continue
-			end
-			distances_sort[count2]=cell_mod.distance(atoms,cell,i,j)
-			elf_sort[count2] = cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf )
+		for j=1:nbO
+			distances_sort[count2]=cell_mod.distance(atoms,cell,i,nbC+j)
+			elf_sort[count2] = cube_mod.dataInTheMiddleWME( atoms, cell , i, nbC+j, elf )
 			count2+=1
-			# if cell_mod.distance(atoms,cell,i,j) < 2.5
-			#     push!(distance_data,cell_mod.distance(atoms,cell,i,j))
-			#     push!(elf_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, elf ))
-			# 	push!(density_data,cube_mod.dataInTheMiddleWME( atoms, cell , i, j, density ))
-			# end
 		end
-		for j=1:nbC+nbO-2
-			for k=j+1:nbC+nbO-1
+		for j=1:nbC-1
+			for k=j+1:nbO
 				if distances_sort[j] > distances_sort[k]
 					stock=distances_sort[j]
 					distances_sort[j]=distances_sort[k]
@@ -72,6 +64,16 @@ for step=1:nb_steps
 		global count_v += 1
 	end
 end
+
+cl_dist, icl_dist = clustering.densityPeakClusteringTrain( distance_configurations , 0.005)
+
+size_origin=Int(nbC*nb_steps*n_dim)
+distances_configurations2=zeros( Real, size_origin )
+
+for i=1:
+
+
+elf_configurations2=zeros()
 
 cl_dist, icl_dist = clustering.densityPeakClusteringTrain( distance_configurations , 0.005)
 
@@ -124,7 +126,7 @@ for step=1:nb_steps
 	end
 end
 
-nb_points=100
+nb_points=50
 nb_steps=1000
 elf_bond_store_double=zeros(nb_points,0)
 elf_bond_store_single=zeros(nb_points,0)
@@ -191,7 +193,7 @@ end
 close(file_elf)
 
 nb_points=50
-nb_steps=20
+nb_steps=50
 elf_bond_store_bond=zeros(nb_points,0)
 elf_bond_store_close1=zeros(nb_points,0)
 elf_bond_store_close2=zeros(nb_points,0)
@@ -199,16 +201,16 @@ for step=1:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
-	for carbon=1:nbC-1
+	for carbon1=1:nbC-1
 		for carbon2=carbon1+1:nbC
-			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.75
-				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 1.75
+				elfs = cube_mod.traceLine( carbon1, carbon2, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_bond = hcat( elf_bond_store_bond, elfs)
-			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.0
-				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+			elseif cell_mod.distance(atoms,cell,carbon1,carbon2) < 2.0
+				elfs = cube_mod.traceLine( carbon1, carbon2, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_close1 = hcat( elf_bond_store_close1, elfs)
-			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.5
-				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+			elseif cell_mod.distance(atoms,cell,carbon1,carbon2) < 2.2
+				elfs = cube_mod.traceLine( carbon1, carbon2, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_close2 = hcat( elf_bond_store_close2, elfs )
 			end
 		end
