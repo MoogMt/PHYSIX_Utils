@@ -404,8 +404,7 @@ end
 close(file_hist)
 
 
-max_step_train=4000
-elfs_data=zeros(Real,max_step_train,2)
+elfs_data=zeros(Real,max_step,2)
 file_out=open(string(folder_base2,"elf_vs_distance.dat"),"w")
 count_v=1
 for step=1:max_step
@@ -431,10 +430,33 @@ for step=1:max_step
 end
 close(file_out)
 
-for i=1:size()[1]
+max_dist = 0
+min_dist = 10000
+for i=1:max_step
+	if max_dist < elfs_data[i,2]
+		global max_dist = elfs_data[i,2]
+	end
+	if min_dist > elfs_data[i,2]
+		global min_dist = elfs_data[i,2]
+	end
+end
+
+nb_box_dist=100
+delta_distance=(max_dist-min_dist)/nb_box
+
+nb_box_elf=100
+delta_elf=1/nb_box_elf
+
+hist2D=zeros(nb_box_dist,nb_box_elf)
+for k=1:size(elfs_data)[1]
+	for i=1:nb_box_dist
+		if elfs_data[step,]
+	end
 end
 
 # Clustering
+max_step_train=4000
+elfs_data=elfs_data[1:max_step_train]
 cl, icl = clustering.densityPeakClusteringTrain( elfs_data , 0.01)
 for i=1:size(icl)[1]
 	file_out=open(string(folder_base2,"elf_clusterCO-",i,".dat"),"w")
