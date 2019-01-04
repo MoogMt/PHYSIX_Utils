@@ -516,7 +516,6 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: R
 	else
 		return [], []
 	end
-	
 end
 function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, min_delta::T4 ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
 
