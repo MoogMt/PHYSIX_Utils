@@ -115,11 +115,8 @@ for step=1:nb_steps
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	atoms=cell_mod.wrap(atoms,cell)
-	for carbon1=1:nbC
-		for carbon2=carbon1+1:nbC
-			if carbon1 == carbon2
-				continue
-			end
+	for carbon=1:nbC
+		for oxygen=1:nbO
 			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 2.0
 				print(step," ",carbon1," ",carbon2,"\n")
 			end
@@ -127,13 +124,17 @@ for step=1:nb_steps
 	end
 end
 
+
+
 nb_points=100
 atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,30,"_elf.cube") )
+density = cube_mod.readCube( string(folder_base,30,"_density.cube") )[3]
 cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 distances, elfs= cube_mod.traceLine( 13, 23, nb_points , elf, atoms , cell )
+distances, density= cube_mod.traceLine( 13, 23, nb_points , density, atoms , cell )
 file_line=open(string(folder_base,"test_elf.dat"),"w")
 for i=1:nb_points
-	write(file_line,string(distances[i]," ",elfs[i],"\n"))
+	write(file_line,string(distances[i]," ",elfs[i]," ",density[i],"\n"))
 end
 close(file_line)
 
