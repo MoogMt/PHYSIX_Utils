@@ -25,9 +25,6 @@ unit=0.005   # units of the simulation
 V=8.82
 nb_steps=300
 
-# distance_data=[]
-# elf_data=[]
-# density_data=[]
 n_dim=4
 nb_carbon=Int(nbC*nb_steps)
 distance_configurations=zeros( nb_carbon ,n_dim )
@@ -215,7 +212,7 @@ for step=1:nb_steps
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	for carbon1=1:nbC-1
 		for carbon2=carbon1+1:nbC
-			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 1.8
+			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 1.75
 				elfs = cube_mod.traceLine( carbon1, carbon2, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_bond = hcat( elf_bond_store_bond, elfs)
 			elseif cell_mod.distance(atoms,cell,carbon1,carbon2) < 2.0
@@ -258,76 +255,41 @@ end
 close(file_elf)
 
 
-# function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
-# 	size_data
-# end
-
-# nb_box=2001
-# delta_denself=1/nb_box
-# min_dist=100
-# max_dist=0
-# for i=1:size(distance_data)[1]
-#     if distance_data[i] < min_dist
-#         global min_dist=distance_data[i]
-#     end
-#     if distance_data[i] > max_dist
-#         global max_dist=distance_data[i]
-#     end
-# end
-# delta_dist=(max_dist-min_dist)/nb_box
-#
-# hist2D=zeros(nb_box,nb_box)
-# count_v=0
-# for i=1:size(distance_data)[1]
-#     for k=1:nb_box
-#         if distance_data[i] > min_dist+(k-1)*delta_dist &&  distance_data[i] < min_dist+k*delta_dist
-#             for l=1:nb_box
-#                 if elf_data[i] > (l-1)*delta_denself && elf_data[i] < l*delta_denself
-#                     hist2D[k,l] += 1
-#                     break
-#                 end
-#             end
-#             break
-#         end
-#     end
-#     global count_v += 1
-# end
-#
-# hist2D /= count_v
-#
-# file_out=open(string(folder_base,"All-elf_hist-",nb_steps,".dat"),"w")
-# for i=1:nb_box
-# 	for j=1:nb_box
-# 		write(file_out,string(min_dist+i*delta_dist," ",j*delta_denself," ",hist2D[i,j],"\n"))
-# 	end
-# 	write(file_out,string("\n"))
-# end
-# close(file_out)
-#
-# hist2D=zeros(nb_box,nb_box)
-# count_v=0
-# for i=1:size(distance_data)[1]
-#     for k=1:nb_box
-#         if distance_data[i] > min_dist+(k-1)*delta_dist &&  distance_data[i] < min_dist+k*delta_dist
-#             for l=1:nb_box
-#                 if density_data[i] > (l-1)*delta_denself && density_data[i] < l*delta_denself
-#                     hist2D[k,l] += 1
-#                     break
-#                 end
-#             end
-#             break
-#         end
-#     end
-#     global count_v += 1
-# end
-
-# hist2D /= count_v
-#
-# file_out=open(string(folder_base,"All-density_hist-",nb_steps,".dat"),"w")
-# for i=1:nb_box
-# 	for j=1:nb_box
-# 		write(file_out,string(min_dist+i*delta_dist," ",j*delta_denself," ",hist2D[i,j],"\n"))
-# 	end
-# 	write(file_out,string("\n"))
-# end
-# close(file_out)
+folder_base2="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/9.8/Trajectory_2/"
+nb_points=50
+max_step=150
+elf_bond_store_bond=zeros(nb_points,0)
+elf_bond_store_close=zeros(nb_points,0)
+for step=1:max_step
+	print("Progress: ",step/nb_steps*100,"%\n")
+	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base2,step,"_elf.cube") )
+	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
+	for carbon=1:nbC
+		for oxygen=1:nbO
+			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.75
+				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+				global elf_bond_store_bond = hcat( elf_bond_store_bond, elfs)
+			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.0
+				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+				global elf_bond_store_close = hcat( elf_bond_store_close, elfs )
+			end
+		end
+	end
+end
+file_elf=open(string(folder_base2,"elf_CO_bond_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_bond)[2]
+		write(file_elf,string(elf_bond_store_bond[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+file_elf=open(string(folder_base2,"elf_CO_close_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_close)[2]
+		write(file_elf,string(elf_bond_store_close[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
