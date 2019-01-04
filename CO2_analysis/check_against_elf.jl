@@ -409,7 +409,7 @@ elfs_data=zeros(Real,max_step_train,2)
 file_out=open(string(folder_base2,"elf_vs_distance.dat"),"w")
 count_v=1
 for step=1:max_step
-	print("Progress: ",step/nb_steps*100,"%\n")
+	print("Progress: ",step/max_step*100,"%\n")
 	if ! isfile(string(folder_base2,step,"_elf.cube"))
 		continue
 	end
