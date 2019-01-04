@@ -124,14 +124,12 @@ for step=1:nb_steps
 	end
 end
 
-
-
-nb_points=50
-nb_steps=50
-elf_bond_store_single=zeros(nb_points,0)
+nb_points=100
+nb_steps=1000
 elf_bond_store_double=zeros(nb_points,0)
+elf_bond_store_single=zeros(nb_points,0)
+elf_bond_store_interm=zeros(nb_points,0)
 elf_bond_store_close=zeros(nb_points,0)
-elf_bond_store_far=zeros(nb_points,0)
 for step=1:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
@@ -141,29 +139,119 @@ for step=1:nb_steps
 			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.4
 				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_double = hcat( elf_bond_store_double, elfs)
-			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.75
+			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.7
 				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_single = hcat( elf_bond_store_single, elfs)
+			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.8
+				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+				global elf_bond_store_interm = hcat( elf_bond_store_interm, elfs)
 			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.0
 				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_close = hcat( elf_bond_store_close, elfs )
-			else
-				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
-				global elf_bond_store_far = hcat( elf_bond_store_far, elfs )
 			end
 		end
 	end
 end
 
-file_elf=open(string(folder_base,"elf_CO_single_line.dat"),"w")
+file_elf=open(string(folder_base,"elf_CO_double_line.dat"),"w")
 for point=1:nb_points
 	write(file_elf,string( (point-1)/nb_points," "))
-	for bond=1:size(elf_bond_store)[2]
-		write(file_elf,string(elf_bond_store[point,bond]," "))
+	for bond=1:size(elf_bond_store_double)[2]
+		write(file_elf,string(elf_bond_store_double[point,bond]," "))
 	end
 	write(file_elf,string("\n"))
 end
 close(file_elf)
+file_elf=open(string(folder_base,"elf_CO_single_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_single)[2]
+		write(file_elf,string(elf_bond_store_single[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+file_elf=open(string(folder_base,"elf_CO_interm_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_interm)[2]
+		write(file_elf,string(elf_bond_store_interm[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+file_elf=open(string(folder_base,"elf_CO_close_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_close)[2]
+		write(file_elf,string(elf_bond_store_close[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+
+nb_points=50
+nb_steps=20
+elf_bond_store_bond=zeros(nb_points,0)
+elf_bond_store_close1=zeros(nb_points,0)
+elf_bond_store_close2=zeros(nb_points,0)
+for step=1:nb_steps
+	print("Progress: ",step/nb_steps*100,"%\n")
+	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
+	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
+	for carbon=1:nbC-1
+		for carbon2=carbon1+1:nbC
+			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.75
+				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+				global elf_bond_store_bond = hcat( elf_bond_store_bond, elfs)
+			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.0
+				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+				global elf_bond_store_close1 = hcat( elf_bond_store_close1, elfs)
+			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.5
+				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
+				global elf_bond_store_close2 = hcat( elf_bond_store_close2, elfs )
+			end
+		end
+	end
+end
+
+file_elf=open(string(folder_base,"elf_CC_bond_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_double)[2]
+		write(file_elf,string(elf_bond_store_double[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+file_elf=open(string(folder_base,"elf_CO_single_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_single)[2]
+		write(file_elf,string(elf_bond_store_single[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+file_elf=open(string(folder_base,"elf_CO_interm_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_interm)[2]
+		write(file_elf,string(elf_bond_store_interm[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+file_elf=open(string(folder_base,"elf_CO_close_line.dat"),"w")
+for point=1:nb_points
+	write(file_elf,string( (point-1)/nb_points," "))
+	for bond=1:size(elf_bond_store_close)[2]
+		write(file_elf,string(elf_bond_store_close[point,bond]," "))
+	end
+	write(file_elf,string("\n"))
+end
+close(file_elf)
+
 
 # function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
 # 	size_data
