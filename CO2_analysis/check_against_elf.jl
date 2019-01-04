@@ -431,4 +431,17 @@ for step=1:max_step
 end
 close(file_out)
 
+for i=1:size()[1]
+end
+
+# Clustering
 cl, icl = clustering.densityPeakClusteringTrain( elfs_data , 0.01)
+for i=1:size(icl)[1]
+	file_out=open(string(folder_base2,"elf_clusterCO-",i,".dat"),"w")
+	for j=1:size(cl)[1]
+		if cl[j] == i
+			write(file_out,string(elfs_data[j,2]," ",elfs_data[j,1],"\n"))
+		end
+	end
+	close(file_out)
+end
