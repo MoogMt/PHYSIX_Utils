@@ -325,6 +325,9 @@ elf_bond_store_bond=zeros(nb_points,0)
 elf_bond_store_close=zeros(nb_points,0)
 for step=1:max_step
 	print("Progress: ",step/nb_steps*100,"%\n")
+	if ! isfile(string(folder_base2,step,"_elf.cube"))
+		continue
+	end
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base2,step,"_elf.cube") )
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	for carbon=1:nbC
