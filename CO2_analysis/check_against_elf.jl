@@ -218,35 +218,26 @@ end
 file_elf=open(string(folder_base,"elf_CC_bond_line.dat"),"w")
 for point=1:nb_points
 	write(file_elf,string( (point-1)/nb_points," "))
-	for bond=1:size(elf_bond_store_double)[2]
-		write(file_elf,string(elf_bond_store_double[point,bond]," "))
+	for bond=1:size(elf_bond_store_bond)[2]
+		write(file_elf,string(elf_bond_store_bond[point,bond]," "))
 	end
 	write(file_elf,string("\n"))
 end
 close(file_elf)
-file_elf=open(string(folder_base,"elf_CO_single_line.dat"),"w")
+file_elf=open(string(folder_base,"elf_CC_close1_line.dat"),"w")
 for point=1:nb_points
 	write(file_elf,string( (point-1)/nb_points," "))
-	for bond=1:size(elf_bond_store_single)[2]
-		write(file_elf,string(elf_bond_store_single[point,bond]," "))
+	for bond=1:size(elf_bond_store_close1)[2]
+		write(file_elf,string(elf_bond_store_close1[point,bond]," "))
 	end
 	write(file_elf,string("\n"))
 end
 close(file_elf)
-file_elf=open(string(folder_base,"elf_CO_interm_line.dat"),"w")
+file_elf=open(string(folder_base,"elf_CC_close2_line.dat"),"w")
 for point=1:nb_points
 	write(file_elf,string( (point-1)/nb_points," "))
-	for bond=1:size(elf_bond_store_interm)[2]
-		write(file_elf,string(elf_bond_store_interm[point,bond]," "))
-	end
-	write(file_elf,string("\n"))
-end
-close(file_elf)
-file_elf=open(string(folder_base,"elf_CO_close_line.dat"),"w")
-for point=1:nb_points
-	write(file_elf,string( (point-1)/nb_points," "))
-	for bond=1:size(elf_bond_store_close)[2]
-		write(file_elf,string(elf_bond_store_close[point,bond]," "))
+	for bond=1:size(elf_bond_store_close2)[2]
+		write(file_elf,string(elf_bond_store_close2[point,bond]," "))
 	end
 	write(file_elf,string("\n"))
 end
