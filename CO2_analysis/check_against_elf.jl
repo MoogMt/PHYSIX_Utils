@@ -127,7 +127,7 @@ end
 
 
 nb_points=50
-nb_steps=200
+nb_steps=50
 elf_bond_store_single=zeros(nb_points,0)
 elf_bond_store_double=zeros(nb_points,0)
 elf_bond_store_close=zeros(nb_points,0)
@@ -135,45 +135,35 @@ elf_bond_store_far=zeros(nb_points,0)
 for step=1:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
-	density = cube_mod.readCube( string(folder_base,step,"_density.cube") )[3]
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	for carbon=1:nbC
 		for oxygen=1:nbO
 			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.4
 				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
-				densities = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , density    , atoms , cell )[2]
-				global elf_bond_store_double = hcat( elf_bond_store, elfs)
+				global elf_bond_store_double = hcat( elf_bond_store_double, elfs)
 			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 1.75
 				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
-				densities = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , density    , atoms , cell )[2]
-				global elf_bond_store_single = hcat( elf_bond_store, elfs)
+				global elf_bond_store_single = hcat( elf_bond_store_single, elfs)
 			elseif cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.0
 				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
-				densities = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , density    , atoms , cell )[2]
-				global elf_bond_store_close = hcat( elf_bond_store, elfs )
+				global elf_bond_store_close = hcat( elf_bond_store_close, elfs )
 			else
 				elfs = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , elf    , atoms , cell )[2]
-				densities = cube_mod.traceLine( carbon, nbC+oxygen, nb_points , density    , atoms , cell )[2]
-				global elf_bond_store_far = hcat( elf_bond_store, elfs )
+				global elf_bond_store_far = hcat( elf_bond_store_far, elfs )
 			end
 		end
 	end
 end
 
-file_elf=open(string(folder_base,"elf_CO_line.dat"),"w")
-file_density=open(string(folder_base,"density_CO_line.dat"),"w")
+file_elf=open(string(folder_base,"elf_CO_single_line.dat"),"w")
 for point=1:nb_points
 	write(file_elf,string( (point-1)/nb_points," "))
-	write(file_density,string( (point-1)/nb_points," "))
 	for bond=1:size(elf_bond_store)[2]
 		write(file_elf,string(elf_bond_store[point,bond]," "))
-		write(file_density,string(density_bond_store[point,bond]," "))
 	end
 	write(file_elf,string("\n"))
-	write(file_density,string("\n"))
 end
 close(file_elf)
-close(file_density)
 
 # function makeHistogram2D( data_x::Vector{T1}, data_y::Vector{T2}, nb_box::Vector{T3} ) where { T1 <: Real, T2<:Real, T3 <: Int }
 # 	size_data
