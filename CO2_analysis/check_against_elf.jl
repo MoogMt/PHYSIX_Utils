@@ -324,7 +324,7 @@ max_step=150
 elf_bond_store_bond=zeros(nb_points,0)
 elf_bond_store_close=zeros(nb_points,0)
 for step=1:max_step
-	print("Progress: ",step/nb_steps*100,"%\n")
+	print("Progress: ",step/max_step*100,"%\n")
 	if ! isfile(string(folder_base2,step,"_elf.cube"))
 		continue
 	end
@@ -384,7 +384,7 @@ end
 close(file_hist)
 hist2D=zeros(nb_points,nb_box_line)
 for point=1:nb_points
-	for i=1:size(elf_bond_store_close2)[2]
+	for i=1:size(elf_bond_store_close)[2]
 		for box=1:nb_box_line
 			if elf_bond_store_close[point,i] > (box-1)*delta  && elf_bond_store_close[point,i] < box*delta
 				hist2D[point,box] += 1
@@ -394,7 +394,7 @@ for point=1:nb_points
 	end
 	hist2D[point,:]/=sum(hist2D[point,:])
 end
-file_hist=open(string(folder_base,"hist_CC_close.dat"),"w")
+file_hist=open(string(folder_base2,"hist_CO_close.dat"),"w")
 for i=1:nb_points
 	for j=1:nb_box_line
 		write(file_hist,string(i/nb_points," ",j*delta," ",hist2D[i,j],"\n"))
@@ -407,17 +407,21 @@ close(file_hist)
 max_step_train=4000
 elfs_data=zeros(Real,max_step_train,2)
 file_out=open(string(folder_base2,"elf_vs_distance.dat"),"w")
+count_v=1
 for step=1:max_step
 	print("Progress: ",step/nb_steps*100,"%\n")
+	if ! isfile(string(folder_base2,step,"_elf.cube"))
+		continue
+	end
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base2,step,"_elf.cube") )
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	for carbon=1:nbC
 		for oxygen=1:nbO
 			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.5
-				elf = cube_mod.dataInTheMiddleWME( atoms, cell , carbon , nbC+oxygen, elf )
-				write(file_out,string( cell_mod.distance(atoms,cell,carbon,nbC+oxygen), " ", elf, "\n" ) )
-				if  count_v < max_step_train
-					elfs_data[count_v,1] = elf
+				elfs = cube_mod.dataInTheMiddleWME( atoms, cell , carbon , nbC+oxygen, elf )
+				write(file_out,string( cell_mod.distance(atoms,cell,carbon,nbC+oxygen), " ", elfs, "\n" ) )
+				if  count_v <= max_step_train
+					elfs_data[count_v,1] = elfs
 					elfs_data[count_v,2] = cell_mod.distance(atoms,cell,carbon,nbC+oxygen)
 					global count_v += 1
 				end
@@ -427,4 +431,4 @@ for step=1:max_step
 end
 close(file_out)
 
-cl, icl = clustering.densityPeakClusteringTrain( elfs_data , 0.005)
+cl, icl = clustering.densityPeakClusteringTrain( elfs_data , 0.01)

@@ -503,14 +503,20 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: R
 	    end
 	end
 
-	# Affectation of points to clusters using their nearest neighbor
-	for i=1:size_data
-	    if cl[index[i]] == -1
-	        cl[index[i]] = cl[ index[nneigh[i]]  ]
-	    end
-	end
+	print("n_cluster: ",n_cluster,"\n")
 
-	return cl, icl
+	if n_cluster != 0
+	# Affectation of points to clusters using their nearest neighbor
+		for i=1:size_data
+	    	if cl[index[i]] == -1
+	        	cl[index[i]] = cl[ index[nneigh[i]]  ]
+	    	end
+		end
+		return cl, icl
+	else
+		return [], []
+	end
+	
 end
 function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, min_delta::T4 ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
 

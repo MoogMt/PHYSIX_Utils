@@ -165,16 +165,16 @@ function getClosestIndex( position::Vector{T1}, volume::T2 , cell::T3 ) where { 
         index[i] = trunc(position[i]/cell.length[i]*volume.nb_vox[i])  + 1
     end
     # Displacement due to origin
-    mod=computeDisplacementOrigin( data , cell )
+    mod=computeDisplacementOrigin( volume , cell )
     for i=1:3
         index[i]-=mod[i]
     end
     for i=1:3
-        if index[i] > data.nb_vox[i]
-            index[i] = index[i] - data.nb_vox[i]
+        if index[i] > volume.nb_vox[i]
+            index[i] = index[i] - volume.nb_vox[i]
         end
         if index[i] < 1
-            index[i] = data.nb_vox[i]+index[i]
+            index[i] = volume.nb_vox[i]+index[i]
         end
     end
     return index
