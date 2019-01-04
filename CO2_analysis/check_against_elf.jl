@@ -294,8 +294,10 @@ for point=1:nb_points
 	write(file_elf,string("\n"))
 end
 
-elfs_data=[]
-distance=[]
+max_step_train=4000
+elfs_data=zeros(Real,max_step_train)
+distance_data=zeros(Real,max_step_train)
+file_out=open(string(folder_base2,"elf_vs_distance.dat"),"w")
 for step=1:max_step
 	print("Progress: ",step/nb_steps*100,"%\n")
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base2,step,"_elf.cube") )
@@ -303,9 +305,15 @@ for step=1:max_step
 	for carbon=1:nbC
 		for oxygen=1:nbO
 			if cell_mod.distance(atoms,cell,carbon,nbC+oxygen) < 2.5
-				push!( selfs_data, cube_mod.dataInTheMiddleWME( atoms, cell , carbon , nbC+oxygen, elf ) )
-				push!( distance,   cell_mod.distance(atoms,cell,carbon,nbC+oxygen) )
+				elf = cube_mod.dataInTheMiddleWME( atoms, cell , carbon , nbC+oxygen, elf )
+				write(file_out,string( cell_mod.distance(atoms,cell,carbon,nbC+oxygen), " ", elf, "\n" ) )
+				if  count_v < max_step_train
+					elfs_data[count_v] = elf
+					distance_data[count_v] = cell_mod.distance(atoms,cell,carbon,nbC+oxygen)
+					global count_v += 1
+				end
 			end
 		end
 	end
 end
+close(file_out)
