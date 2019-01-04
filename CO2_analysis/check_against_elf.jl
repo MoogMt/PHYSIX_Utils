@@ -29,8 +29,9 @@ nb_steps=300
 # elf_data=[]
 # density_data=[]
 n_dim=4
-distance_configurations=zeros(Int(nbC*nb_steps),n_dim)
-elf_configurations=zeros(Int(nbC*nb_steps),n_dim)
+nb_carbon=Int(nbC*nb_steps)
+distance_configurations=zeros( nb_carbon ,n_dim )
+elf_configurations=zeros( nb_carbon, n_dim )
 count_v=1
 for step=1:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
@@ -68,14 +69,25 @@ end
 cl_dist, icl_dist = clustering.densityPeakClusteringTrain( distance_configurations , 0.005)
 
 size_origin=Int(nbC*nb_steps*n_dim)
-distances_configurations2=zeros( Real, size_origin )
 
-for i=1:
+max_step_train=5000
+size_train=size_origin
+if size_origin < max_step_train
+	global size_train = max_step_train
+end
 
+elf_distance_conf=zeros(Real, size_train,2)
+count_v=0
+for carbon=1:n_cartbon
+	for dim=1:n_dim
+		elf_distance_conf[count_v,1] = distance_configuration[carbon,dim]
+		elf_distance_conf[count_v,2] = elf_configuration[carbon,dim]
+		global count_v += 1
+	end
+end
+elf_configuration=[]
 
-elf_configurations2=zeros()
-
-cl_dist, icl_dist = clustering.densityPeakClusteringTrain( distance_configurations , 0.005)
+cl_dist, icl_dist = clustering.densityPeakClusteringTrain( elf_distance_conf , 0.005)
 
 for i=1:size(icl_dist)[1]
 	file_cluster=open(string(folder_base,"distance-cluster",i,".dat"),"w")
@@ -193,7 +205,7 @@ end
 close(file_elf)
 
 nb_points=50
-nb_steps=50
+nb_steps=1000
 elf_bond_store_bond=zeros(nb_points,0)
 elf_bond_store_close1=zeros(nb_points,0)
 elf_bond_store_close2=zeros(nb_points,0)
@@ -203,7 +215,7 @@ for step=1:nb_steps
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	for carbon1=1:nbC-1
 		for carbon2=carbon1+1:nbC
-			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 1.75
+			if cell_mod.distance(atoms,cell,carbon1,carbon2) < 1.8
 				elfs = cube_mod.traceLine( carbon1, carbon2, nb_points , elf    , atoms , cell )[2]
 				global elf_bond_store_bond = hcat( elf_bond_store_bond, elfs)
 			elseif cell_mod.distance(atoms,cell,carbon1,carbon2) < 2.0
