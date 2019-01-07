@@ -3,18 +3,33 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
-function buildContactMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T <: Real }
+function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T <: Real }
+    nb_atoms=size(atoms)[1]
     bond_matrix=zeros(nb_atoms,nb_atoms)
-    for atom1=1:size(traj[1].names)[1]
-        for atom2=atom1+1:size(traj[1].names)[1]
-            if cell_mod.distance( traj[step], cell, atom1, atom2 ) <= cut_off_bond
+    for atom1=1:nb_atoms
+        for atom2=atom1+1:nb_atoms
+            if cell_mod.distance( atoms, cell, atom1, atom2 ) <= cut_off_bond
                 bond_matrix[i,j] = 1
                 bond_matrix[j,i] = 1
             end
         end
     end
     # Deleting doubles
-    for atom=1:size(atoms)
+    for atom=1:nb_atoms
+        bonded=zeros(nb_atoms)
+        for atom2=1:nb_atoms
+            if atom1 == atom2
+                continue
+            end
+            if bond_matrix[atom1,atom2] == 1
+                bonded[atom2]=1
+            end
+        end
+        for atom2=1:nb_atoms
+            
+        end
+    end
+    end
     return bond_matrix
 end
 function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
