@@ -61,12 +61,12 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         # Bond Matrix
         bond_matrix = buildContactMatrix(traj[step_sim],cell,cut_off_bond)
 
-        # Cleaning Oxygens
+        # No O-O bonds
         for oxygen1=1:nbO
             for oxygen2=1:nbO
-                if bond_matrix[i,j] == 1 && cell_mod.distance(traj[step],cell,i,j) > 1.6
-                    bond_matrix[i,j] = 0
-                    bond_matrix[j,i] = 0 
+                if bond_matrix[nbC+oxygen1,nbC+oxygen2] == 1 && cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2) > 1.6
+                    bond_matrix[nbC+oxygen1,nbC+oxygen2] = 0
+                    bond_matrix[nbC+oxygen2,nbC+oxygen1] = 0
                 end
             end
         end
@@ -297,7 +297,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
                 end
             end
             if state_matrix[i,j] == -1
-                print("Non-assigned - time_step: ",i," carbon: ",j," ")
+                print("Non-assigned - time_step: ",i," carbon: ",j," - ")
                 for k=1:dim_data
                     print(data[i,j,k]," ")
                 end
@@ -416,7 +416,7 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
-data=buildCoordinationMatrix( traj , cell , cut_off_bond )
+data=buildCoordinationMatrix( traj, cell, cut_off_bond, nbC, nbO )
 state_matrix, percent, unused_percent = assignDataToStates( data , states )
 
 nb_states=size(states)[1]
