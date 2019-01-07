@@ -4,7 +4,7 @@ include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
 function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Real }
-    nb_atoms=size(atoms)[1]
+    nb_atoms=size(atoms.names)[1]
     bond_matrix=zeros(nb_atoms,nb_atoms)
     for atom1=1:nb_atoms
         for atom2=atom1+1:nb_atoms
@@ -59,7 +59,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
 
         # Bond Matrix
-        bond_matrix = buildContactMatrix(traj,cell,cut_off_bond)
+        bond_matrix = buildContactMatrix(traj[step_sim],cell,cut_off_bond)
 
         for carbon=1:nbC
             count_coord=1
