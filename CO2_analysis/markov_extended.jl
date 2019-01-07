@@ -3,7 +3,7 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
-function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T <: Real }
+function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Real }
     nb_atoms=size(atoms)[1]
     bond_matrix=zeros(nb_atoms,nb_atoms)
     for atom1=1:nb_atoms
