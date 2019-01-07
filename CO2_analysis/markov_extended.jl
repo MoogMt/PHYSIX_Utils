@@ -15,7 +15,7 @@ function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 
         end
     end
     # Deleting doubles
-    for atom=1:nb_atoms
+    for atom1=1:nb_atoms
         bonded=zeros(nb_atoms)
         for atom2=1:nb_atoms
             if atom1 == atom2
@@ -25,10 +25,27 @@ function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 
                 bonded[atom2]=1
             end
         end
-        for atom2=1:nb_atoms
-            
+        for bond_check1=1:nb_atoms
+            if bonded[bond_check1] == 1
+                for bond_check2=1:nb_atoms
+                    if bonded[bond_check2] == 1
+                        if bond_matrix[bond_check1,bond_check2] == 1
+                            if cell_mod.distance(atoms,cell,atom1,bond_check1) < cell_mod.distance(atoms,cell,atom2,bond_check2)
+                                bond_matrix[atom1,bond_check2]=0
+                                bond_matrix[bond_check2,atom1]=0
+                                bonded[bond_check2]=0
+                                break
+                            else
+                                bond_matrix[atom1,bond_check1]=0
+                                bond_matrix[bond_check1,atom1]=0
+                                bonded[bond_check1]=0
+                                break
+                            end
+                        end
+                    end
+                end
+            end
         end
-    end
     end
     return bond_matrix
 end
