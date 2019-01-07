@@ -9,8 +9,8 @@ function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 
     for atom1=1:nb_atoms
         for atom2=atom1+1:nb_atoms
             if cell_mod.distance( atoms, cell, atom1, atom2 ) <= cut_off_bond
-                bond_matrix[i,j] = 1
-                bond_matrix[j,i] = 1
+                bond_matrix[atom1,atom2] = 1
+                bond_matrix[atom2,atom1] = 1
             end
         end
     end
@@ -30,7 +30,7 @@ function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 
                 for bond_check2=1:nb_atoms
                     if bonded[bond_check2] == 1
                         if bond_matrix[bond_check1,bond_check2] == 1
-                            if cell_mod.distance(atoms,cell,atom1,bond_check1) < cell_mod.distance(atoms,cell,atom2,bond_check2)
+                            if cell_mod.distance(atoms,cell,atom1,bond_check1) < cell_mod.distance(atoms,cell,atom1,bond_check2)
                                 bond_matrix[atom1,bond_check2]=0
                                 bond_matrix[bond_check2,atom1]=0
                                 bonded[bond_check2]=0
@@ -49,7 +49,7 @@ function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 
     end
     return bond_matrix
 end
-function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
+function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, nbC::T4, nbO::T5 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real , T4 <: Int, T5 <: Int }
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
     n_dim=9
@@ -60,6 +60,16 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
 
         # Bond Matrix
         bond_matrix = buildContactMatrix(traj[step_sim],cell,cut_off_bond)
+
+        # Cleaning Oxygens
+        for oxygen1=1:nbO
+            for oxygen2=1:nbO
+                if bond_matrix[i,j] == 1 && cell_mod.distance(traj[step],cell,i,j) > 1.6
+                    bond_matrix[i,j] = 0
+                    bond_matrix[j,i] = 0 
+                end
+            end
+        end
 
         for carbon=1:nbC
             count_coord=1
