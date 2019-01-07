@@ -3,6 +3,20 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
+function buildContactMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T <: Real }
+    bond_matrix=zeros(nb_atoms,nb_atoms)
+    for atom1=1:size(traj[1].names)[1]
+        for atom2=atom1+1:size(traj[1].names)[1]
+            if cell_mod.distance( traj[step], cell, atom1, atom2 ) <= cut_off_bond
+                bond_matrix[i,j] = 1
+                bond_matrix[j,i] = 1
+            end
+        end
+    end
+    # Deleting doubles
+    for atom=1:size(atoms)
+    return bond_matrix
+end
 function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
@@ -13,16 +27,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
 
         # Bond Matrix
-        bond_matrix=zeros(nb_atoms,nb_atoms)
-        for atom1=1:nb_atoms
-            for atom2=atom1+1:nb_atoms
-                if cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
-                    bond_matrix[atom1,atom2]=1
-                    bond_matrix[atom2,atom1]=1
-                end
-            end
-        end
-
+        bond_matrix = buildContactMatrix(traj,cell,cut_off_bond)
 
         for carbon=1:nbC
             count_coord=1
@@ -237,7 +242,6 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
     count_states=zeros( nb_states )
     unused=0
     for i=1:nb_data_point
-        print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
         for j=1:nb_series
             for l=1:nb_states
                 d=0
@@ -251,7 +255,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
                 end
             end
             if state_matrix[i,j] == -1
-                print("test ")
+                print("Non-assigned - time_step: ",i," carbon: ",j," ")
                 for k=1:dim_data
                     print(data[i,j,k]," ")
                 end
@@ -356,9 +360,8 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-
-T=2500
-V=9.0
+T=3000
+V=8.82
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
