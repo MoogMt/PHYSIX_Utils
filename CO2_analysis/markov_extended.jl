@@ -61,16 +61,6 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         # Bond Matrix
         bond_matrix = buildContactMatrix(traj[step_sim],cell,cut_off_bond)
 
-        # No O-O bonds
-        for oxygen1=1:nbO
-            for oxygen2=1:nbO
-                if bond_matrix[nbC+oxygen1,nbC+oxygen2] == 1 && cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2) > 1.6
-                    bond_matrix[nbC+oxygen1,nbC+oxygen2] = 0
-                    bond_matrix[nbC+oxygen2,nbC+oxygen1] = 0
-                end
-            end
-        end
-
         for carbon=1:nbC
             count_coord=1
             for carbon2=1:nbC
@@ -423,7 +413,7 @@ nb_states=size(states)[1]
 
 coordinances=zeros(nb_states)
 for i=1:nb_states
-    for j=1:nb_dim
+    for j=1:size(states)[2]
         if states[i,j] > 0
             coordinances[i] += 1
         end
