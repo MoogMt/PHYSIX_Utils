@@ -468,12 +468,7 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: R
 	end
 
 	# Compute maximum rho
-	max_rho=0
-	for i=1:size(rho)[1]
-		if rho[i] > max_rho
-			max_rho = rho[i]
-		end
-	end
+	max_rho=rho[1]
 
 	# put the delta of the max rho point to the max of delta
 	for i=1:size_data
@@ -496,14 +491,12 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: R
 
 	# Determine the cluster centers
 	for i=1:size_data
-	    if rho[i] > min_rho && delta[i] > min_delta
+	    if rho[i]/max_rho > min_rho && delta[i]/max_delta > min_delta
 			n_cluster += 1
 	        cl[index[i]] = n_cluster
 	        icl=push!(icl,index[i])
 	    end
 	end
-
-	print("n_cluster: ",n_cluster,"\n")
 
 	if n_cluster != 0
 	# Affectation of points to clusters using their nearest neighbor
@@ -702,7 +695,7 @@ function densityPeakClusteringFirstStep( data::Array{T1,2}, dc::T2 , file::T3 ) 
 	# Writting decision diagram
 	file_out=open(file,"w")
 	for i=1:size(rho)[1]
-		write(file_out,string(rho[i]," ",delta[i],"\n"))
+		write(file_out,string(rho[i]/max_rho," ",delta[i]/max_delta,"\n"))
 	end
 	close(file_out)
 

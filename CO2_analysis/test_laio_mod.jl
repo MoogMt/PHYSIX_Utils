@@ -6,13 +6,15 @@ include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"clustering.jl"))
 
 n_clusters=8
-n_dim=3
+n_dim=2
 
 p_clusters=rand(n_clusters,n_dim)
 amplitude=ones(n_clusters)
 sigma=ones(n_clusters,n_dim)*0.001
 
-for n_points in [1000,2000,3000,4000,5000,10000]
+#for n_points in [1000,2000,3000,4000,5000,10000]
+
+n_points=3000
 
 file_out=open(string("/home/moogmt/center_clusters.dat"),"w")
 for i=1:n_clusters
@@ -81,8 +83,6 @@ for i=1:n_points
     end
 end
 
-
-
 max_rho=0
 max_delta=0
 for i=1:n_points
@@ -140,4 +140,4 @@ for i=1:n_cluster
     write(file_out,string("\n"))
 end
 close(file_out)
-end
+#end

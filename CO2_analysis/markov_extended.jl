@@ -3,53 +3,7 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
-function buildContactMatrix( atoms::T1, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Real }
-    nb_atoms=size(atoms.names)[1]
-    bond_matrix=zeros(nb_atoms,nb_atoms)
-    for atom1=1:nb_atoms
-        for atom2=atom1+1:nb_atoms
-            if cell_mod.distance( atoms, cell, atom1, atom2 ) <= cut_off_bond
-                bond_matrix[atom1,atom2] = 1
-                bond_matrix[atom2,atom1] = 1
-            end
-        end
-    end
-    # Deleting doubles
-    for atom1=1:nb_atoms
-        bonded=zeros(nb_atoms)
-        for atom2=1:nb_atoms
-            if atom1 == atom2
-                continue
-            end
-            if bond_matrix[atom1,atom2] == 1
-                bonded[atom2]=1
-            end
-        end
-        for bond_check1=1:nb_atoms
-            if bonded[bond_check1] == 1
-                for bond_check2=1:nb_atoms
-                    if bonded[bond_check2] == 1
-                        if bond_matrix[bond_check1,bond_check2] == 1
-                            if cell_mod.distance(atoms,cell,atom1,bond_check1) < cell_mod.distance(atoms,cell,atom1,bond_check2)
-                                bond_matrix[atom1,bond_check2]=0
-                                bond_matrix[bond_check2,atom1]=0
-                                bonded[bond_check2]=0
-                                break
-                            else
-                                bond_matrix[atom1,bond_check1]=0
-                                bond_matrix[bond_check1,atom1]=0
-                                bonded[bond_check1]=0
-                                break
-                            end
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return bond_matrix
-end
-function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, nbC::T4, nbO::T5 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real , T4 <: Int, T5 <: Int }
+function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
     n_dim=9
@@ -59,7 +13,16 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
 
         # Bond Matrix
-        bond_matrix = buildContactMatrix(traj[step_sim],cell,cut_off_bond)
+        bond_matrix=zeros(nb_atoms,nb_atoms)
+        for atom1=1:nb_atoms
+            for atom2=atom1+1:nb_atoms
+                if cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
+                    bond_matrix[atom1,atom2]=1
+                    bond_matrix[atom2,atom1]=1
+                end
+            end
+        end
+
 
         for carbon=1:nbC
             count_coord=1
@@ -274,6 +237,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
     count_states=zeros( nb_states )
     unused=0
     for i=1:nb_data_point
+        print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
         for j=1:nb_series
             for l=1:nb_states
                 d=0
@@ -287,7 +251,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
                 end
             end
             if state_matrix[i,j] == -1
-                print("Non-assigned - time_step: ",i," carbon: ",j," - ")
+                print("test ")
                 for k=1:dim_data
                     print(data[i,j,k]," ")
                 end
@@ -375,6 +339,7 @@ end
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
+folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
 Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
@@ -392,13 +357,15 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-T=3000
+
+T=2000
 V=8.82
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
 
 folder_out=string(folder_in,"Data/")
+folder_out=string(folder_in)
 
 states=defineStatesExtendedCoordinances()
 
@@ -406,8 +373,39 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
-data=buildCoordinationMatrix( traj, cell, cut_off_bond, nbC, nbO )
+data=buildCoordinationMatrix( traj , cell , cut_off_bond )
 state_matrix, percent, unused_percent = assignDataToStates( data , states )
+
+writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
+
+for oxygen=1:nbO
+    if cell_mod.distance(traj[size(traj)[1]],cell,1,nbC+oxygen) < 1.75
+        count=0
+        print("oxygen: ",nbC+oxygen," ")
+        for atom=2:nbC+nbO
+            if cell_mod.distance(traj[size(traj)[1]],cell,nbC+oxygen,atom) < 1.75
+                if atom != nbC+oxygen
+                    count += 1
+                end
+            end
+        end
+        print(count,"\n")
+    end
+end
+for carbon=2:nbC
+    if cell_mod.distance(traj[size(traj)[1]],cell,1,carbon) < 1.75
+        count=0
+        print("carbon: ",carbon," ")
+        for atom=2:nbC+nbO
+            if cell_mod.distance(traj[size(traj)[1]],cell,carbon,atom) < 1.75
+                if atom != carbon
+                    count += 1
+                end
+            end
+        end
+        print(count,"\n")
+    end
+end
 
 nb_states=size(states)[1]
 
@@ -432,7 +430,6 @@ end
 # end
 # write(file_coordinance,string("\n"))
 
-writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
 
 states = isolateSignificantStates( states, percent, cut_off_states )
 state_matrix, percent, unused_percent = assignDataToStates( data , states )
