@@ -1,16 +1,14 @@
-if ! isdefined(:cell_mod)
-  include("cell.jl")
-end
+include("cell.jl")
 
 module pdb
 
 export getNbSteps, readStep, writeStep
 
-using utils
-using atom_mod
-using cell_mod
+using Main.utils
+using Main.atom_mod
+using Main.cell_mod
 
-function getNbSteps{ T1 <: AbstractString }( file::T1 )
+function getNbSteps( file::T1 ) where { T1 <: AbstractString}
   count=0
   count2=0
   open( file ) do f
@@ -33,7 +31,7 @@ function getNbSteps{ T1 <: AbstractString }( file::T1 )
   end
 end
 
-function readStep{ T1 <: AbstractString }( file::T1 )
+function readStep( file::T1 ) where { T1 <: AbstractString }
   #--------------
   # Reading file
   #----------------------
@@ -82,7 +80,7 @@ end
 
 #-------------------------------------------------------------------------------
 
-function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
+function writeStep(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
 
   out=open(file,"w")
 
@@ -121,11 +119,11 @@ function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <:
     atom=utils.spaces(atom,27-length(atom))
     atom=string(atom,atoms.mol_index[i])
     atom=utils.spaces(atom,31-length(atom))
-    atom=string(atom,round(atoms.positions[i,1],3))
+    atom=string(atom,round(atoms.positions[i,1]*1000)/1000)
     atom=utils.spaces(atom,39-length(atom))
-    atom=string(atom,round(atoms.positions[i,2],3))
+    atom=string(atom,round(atoms.positions[i,2]*1000)/1000)
     atom=utils.spaces(atom,47-length(atom))
-    atom=string(atom,round(atoms.positions[i,3],3))
+    atom=string(atom,round(atoms.positions[i,3]*1000)/1000)
     atom=utils.spaces(atom,55-length(atom))
     atom=string(atom,"0.00")
     atom=utils.spaces(atom,61-length(atom))
@@ -142,7 +140,7 @@ function writeStep{ T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <:
 
   return
 end
-function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }(atoms::T1, cell::T2, file::T3 )
+function writeStep(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
 
   out=open(file,"w")
 
@@ -202,7 +200,7 @@ function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: Ab
 
   return
 end
-function writeStep{ T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: IO }(atoms::T1, cell::T2, fileio::T3 )
+function writeStep(atoms::T1, cell::T2, fileio::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: IO }
 
   a,b,c = string(cell.length[1]), string(cell.length[2]), string(cell.length[3])
   alpha, beta, gamma = string(cell.angles[1]), string(cell.angles[2]), string(cell.angles[3])

@@ -157,15 +157,18 @@ function wrap( atoms::T1, cell::T2 ) where { T1 <: atom_mod.AtomList, T2 <: Cell
     end
     return atoms
 end
+function wrap( molecules::T1, cell::T2 ) where { T1 <: atom_mod.AtomMolList, T2 <: Cell_param }
+    for i=1:size(molecules.positions)[1]
+        for j=1:3
+            molecules.positions[i,j] = wrap( molecules.positions[i,j],cell.length[j])
+        end
+    end
+    return molecules
+end
 function wrap( positions::Vector{T1}, cell::T2 ) where { T1 <: Real, T2 <: Cell_param }
-    #---------------
-    # Compute atoms
-    #---------------------------------
     for i=1:3
         positions[i] = wrap( positions[i],cell.length[i] )
     end
-    #----------------------------------
-
     return positions
 end
 #-------------------------------------------------------------------------------
@@ -185,12 +188,19 @@ end
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-function distance( atoms::T1, cell::T2, index1::T3, index2::T3 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int }
+function distance( atoms::T1, cell::T2, index1::T3, index2::T4 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int, T4 <: Int }
     dis=0
     for i=1:3
         dis += dist1D( atoms.positions[index1,i],atoms.positions[index2,i], cell.length[i] )
     end
     return sqrt(dis)
+end
+function distance( molecules::T1, cell::T2, index1::T3, index2::T4 ) where { T1 <: atom_mod.AtomMolList, T2 <: Cell_param , T3 <: Int , T4 <: Int }
+    dist=0
+    for i=1:3
+        dist += dist1D( molecules.positions[index1,i],molecules.positions[index2,i], cell.length[i] )
+    end
+    return sqrt(dist)
 end
 function distance( atoms::T1, cell::T2, index1::T3, index2::T3, wrap::T4 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param,  T3 <: Int, T4 <: Bool }
     if (  wrap )

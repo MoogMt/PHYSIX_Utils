@@ -1,14 +1,13 @@
-include("xyz.jl")
-include("pdb.jl")
+
+# Laio Algo
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+
+include(string(GPfolder,"xyz.jl"))
+include(string(GPfolder,"pdb.jl"))
 
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Pa3/SuperFF/"
 atoms, cell=pdb.readStep( string(folder,"Pa3-super.pdb") )
-
-# folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/"
-# filexyz.getNbSteps(string(folder,"TRAJEC_wrapped.xyz"))
-#folder2="/home/moogmt/Structures/"
-#atoms, cell=pdb.readStep( string(folder2,"Cmca-super.pdb") )
 
 atom2=atom_mod.AtomList(size(atoms.atom_names)[1])
 atom2.positions=atoms.positions
@@ -41,11 +40,11 @@ for i=1:nb_atoms
                 y=(atoms.positions[i,2]+atoms.positions[j,2])/2.
                 z=(atoms.positions[i,3]+atoms.positions[j,3])/2.
                 atoms.positions=vcat(atoms.positions,[x y z])
-                count_atoms+=1
+                global count_atoms+=1
                 count_OM+=1
             end
         end
-        count_mol+=1
+        global count_mol+=1
     end
 end
 #-------------------------------------------------------------------------------

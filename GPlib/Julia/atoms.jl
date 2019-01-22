@@ -33,7 +33,7 @@ mutable struct AtomMolList
     mol_index::Vector{Int}
     positions::Array{Real}
     function AtomMolList( nb_atoms::T1 ) where { T1 <: Int }
-        new(Vector{AbstractString}( nb_atoms ),Vector{Int}( nb_atoms ) ,Vector{AbstractString}( nb_atoms ), Vector{Int}(nb_atoms), Array{Real}(nb_atoms,3))
+        new( Vector{AbstractString}( undef,nb_atoms ),Vector{Int}(undef, nb_atoms ) ,Vector{AbstractString}(undef, nb_atoms ), Vector{Int}(undef,nb_atoms), Array{Real}(undef,nb_atoms,3))
     end
 end
 
