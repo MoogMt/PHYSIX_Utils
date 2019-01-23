@@ -607,12 +607,12 @@ lines=readlines(proposed_energy)
 close(proposed_energy)
 energy_best=parse(Float64,split(lines[1])[1])*Ry2eV
 
-energy_Mo=open("/media/moogmt/Stock/MoS2/Relax/PBE/Mo/30B/energy")
+energy_Mo=open("/media/moogmt/Stock/MoS2/Relax/Mo/30B/energy")
 lines=readlines(energy_Mo)
 close(energy_Mo)
 energy_mo=parse(Float64,split(lines[1])[1])*Ry2eV
 
-energy_S=open("/media/moogmt/Stock/MoS2/Relax/PBE/S/30B/energy")
+energy_S=open("/media/moogmt/Stock/MoS2/Relax/S/30B/energy")
 lines=readlines(energy_S)
 close(energy_S)
 energy_s=parse(Float64,split(lines[1])[1])*Ry2eV
