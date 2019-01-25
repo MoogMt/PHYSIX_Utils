@@ -116,5 +116,5 @@ end
 #-----------------
 # Writting PDB
 #------------------------------------------------
-pdb.writeStep(atoms,cell,"/home/moogmt/Pa3_ready.pdb")
+pdb.writeStep(atoms,cell,"/home/moogmt/Pa3_Virtual.pdb")
 #------------------------------------------------
