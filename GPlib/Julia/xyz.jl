@@ -109,7 +109,7 @@ end
 function read( file::T1 ) where { T1 <: AbstractString }
   nb_steps=getNbSteps(file)
   file_hand=open(file)
-  atoms_sim=Vector{AtomList}(nb_steps)
+  atoms_sim=Vector{AtomList}(undef,nb_steps)
   for i=1:nb_steps
     atoms_sim[1] = readStep(file_hand)
   end

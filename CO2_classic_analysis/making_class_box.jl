@@ -1,5 +1,3 @@
-
-# Laio Algo
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 
 include(string(GPfolder,"xyz.jl"))
@@ -7,39 +5,45 @@ include(string(GPfolder,"pdb.jl"))
 
 # Reading PDB file
 folder="/media/moogmt/Stock/CO2/Structures/Pa3/SuperFF/"
-atoms, cell=pdb.readStep( string(folder,"Pa3-super.pdb") )
+molecules, cell=pdb.readStep( string(folder,"Pa3-super.pdb") )
 
-atom2=atom_mod.AtomList(size(atoms.atom_names)[1])
-atom2.positions=atoms.positions
-atom2.names=atoms.atom_names
-atom2.index=atoms.atom_index
+dCO=1.163
+mo=15.9994
+mc=12.011
+Mt=(2*mo+mc)
+Mm=Mt/2
+dMM=sqrt(2*mo*Mt/Mm^2)*dCO
+dCM=dMM/2
+dOM=dCO-dCM
 
 #--------------------
 # Building molecules
 #------------------------------------------------------------------------------
 count_mol=1
 count_atoms=1
-nb_atoms=size(atoms.atom_names)[1]
+nb_atoms=size(molecules.atom_names)[1]
 for i=1:nb_atoms
-    if atoms.atom_names[i] == "C"
-        atoms.mol_index[i]=count_mol
-        atoms.mol_names[i]="CO2"
+    if molecules.atom_names[i] == "C"
+        molecules.mol_index[i]=count_mol
+        molecules.mol_names[i]="CO2"
         count_OM=1
         for j=1:nb_atoms
-            if cell_mod.distance(atom2,cell,i,j) < 1.6 && i != j
+            if cell_mod.distance(molecules,cell,i,j) < 1.6 && i != j
+                dist=cell_mod.distance(molecules,cell,i,j)
                 #Adding oxygen to molecule
-                atoms.atom_names[j]=string("O",count_OM) # Changing name to O1 or O2
-                atoms.mol_names[j]="CO2"                 # Changing molecule name
-                atoms.mol_index[j]=count_mol             # Putting index of molecule
+                molecules.atom_names[j]=string("O",count_OM) # Changing name to O1 or O2
+                molecules.mol_names[j]="CO2"                 # Changing molecule name
+                molecules.mol_index[j]=count_mol             # Putting index of molecule
                 # # Adding fictif mass
-                push!(atoms.mol_names,"CO2")                        # Molecule name
-                push!(atoms.mol_index,count_mol)
-                push!(atoms.atom_names,string("M",count_OM))
-                push!(atoms.atom_index,nb_atoms+count_atoms)
-                x=(atoms.positions[i,1]+atoms.positions[j,1])/2.
-                y=(atoms.positions[i,2]+atoms.positions[j,2])/2.
-                z=(atoms.positions[i,3]+atoms.positions[j,3])/2.
-                atoms.positions=vcat(atoms.positions,[x y z])
+                push!(molecules.mol_names,"CO2")                        # Molecule name
+                push!(molecules.mol_index,count_mol)
+                push!(molecules.atom_names,string("M",count_OM))
+                push!(molecules.atom_index,nb_atoms+count_atoms)
+                pos=zeros(Real,1,3)
+                for k=1:3
+                     pos[k]=molecules.positions[i,k]+(molecules.positions[i,k]-molecules.positions[j,k])/dist*dCM
+                end
+                molecules.positions=vcat(molecules.positions,pos)
                 global count_atoms+=1
                 count_OM+=1
             end
@@ -52,11 +56,11 @@ end
 #--------------------------------------
 # Sorting atom_list by molecule index
 #-------------------------------------------------------------------------------
-for i=1:size(atoms.atom_names)[1]-1
-    for j=i+1:size(atoms.atom_names)[1]
-        if atoms.mol_index[i] > atoms.mol_index[j]
+for i=1:size(molecules.atom_names)[1]-1
+    for j=i+1:size(molecules.atom_names)[1]
+        if molecules.mol_index[i] > molecules.mol_index[j]
             # Storing
-            atom_mod.switchAtoms(atoms,i,j)
+            atom_mod.switchAtoms(molecules,i,j)
         end
     end
 end
@@ -67,38 +71,38 @@ end
 #-------------------------------------------------------------------------------
 for i=0:count_mol-2
     count1=5*i+1
-    if atoms.atom_names[count1] != "O1"
+    if molecules.atom_names[count1] != "O1"
         for j=count1+1:(i+1)*5
             count2=j
-            if atoms.atom_names[count2] == "O1"
-                atom_mod.switchAtoms(atoms,count1,count2)
+            if molecules.atom_names[count2] == "O1"
+                atom_mod.switchAtoms(molecules,count1,count2)
             end
         end
     end
     count1=5*i+2
-    if atoms.atom_names[count1] != "C"
+    if molecules.atom_names[count1] != "C"
         for j=count1+1:(i+1)*5
             count2=j
-            if atoms.atom_names[count2] == "C"
-                atom_mod.switchAtoms(atoms,count1,count2)
+            if molecules.atom_names[count2] == "C"
+                atom_mod.switchAtoms(molecules,count1,count2)
             end
         end
     end
     count1=5*i+3
-    if atoms.atom_names[count1] != "O1"
+    if molecules.atom_names[count1] != "O1"
         for j=count1+1:(i+1)*5
             count2=j
-            if atoms.atom_names[count2] == "O1"
-                atom_mod.switchAtoms(atoms,count1,count2)
+            if molecules.atom_names[count2] == "O1"
+                atom_mod.switchAtoms(molecules,count1,count2)
             end
         end
     end
     count1=5*i+4
-    if atoms.atom_names[count1] != "M1"
+    if molecules.atom_names[count1] != "M1"
         for j=count1+1:(i+1)*5
             count2=j
-            if atoms.atom_names[count2] == "M1"
-                atom_mod.switchAtoms(atoms,count1,count2)
+            if molecules.atom_names[count2] == "M1"
+                atom_mod.switchAtoms(molecules,count1,count2)
             end
         end
     end
@@ -108,13 +112,36 @@ end
 #-----------------------
 # Changing atom indexes
 #-------------------------------------------------------------------------------
-for i=1:size(atoms.atom_names)[1]
-    atoms.atom_index[i] = i
+for i=1:size(molecules.atom_names)[1]
+    molecules.atom_index[i] = i
 end
 #-------------------------------------------------------------------------------
+
+
+# Computing emptyness
+move=zeros(Real,3)
+for i=1:size(molecules.atom_names)[1]
+    for j=1:3
+        if molecules.positions[i,j] < move[j]
+            move[j] = molecules.positions[i,j]
+        end
+    end
+end
+for i=1:3
+    move[i] = -move[i]
+end
+# Moving all atoms by that amount to put everything in the box
+for i=1:size(molecules.atom_names)[1]
+    for j=1:3
+        molecules.positions[i,j] = molecules.positions[i,j]+move[j]+0.01
+    end
+end
+
 
 #-----------------
 # Writting PDB
 #------------------------------------------------
-pdb.writeStep(atoms,cell,"/home/moogmt/Pa3_Virtual.pdb")
+pdb.writeStep(molecules,cell,"/home/moogmt/start.pdb")
 #------------------------------------------------
+
+print("a = ",(dMM+dMO)/dMM,"\n")
