@@ -143,15 +143,21 @@ min_x=0
 max_x=1000
 nb_box=200
 delta=(max_x-min_x)/nb_box
-hist1D=zeros(Real,100)
+hist1D=zeros(Real,nb_box)
 for carbon=1:nbC
     print("Progress: ",carbon/nbC*100,"%\n")
     for i=1:nb_points
         for j=1:nb_box
-            if rho[carbon,i] > (j-1)*delta && rho[carbon,i] < j*delta
+            if rho[i,carbon] > (j-1)*delta && rho[i,carbon] < j*delta
                 hist1D[j] += 1
             end
         end
     end
 end
 hist1D/=sum(hist1D)
+
+file_out=open(string(folder_out,"hist-carbon.dat"),"w")
+for i=1:nb_box
+    write(file_out,string(i*delta," ",hist1D[i],"\n"))
+end
+close(file_out)
