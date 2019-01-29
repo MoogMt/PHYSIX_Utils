@@ -12,8 +12,8 @@ unit=0.005
 nbC = 32
 nbO = 64
 
-V=9.8
-T=2000
+V=8.82
+T=3000
 
 folder=string(folder_base,V,"/",T,"K/")
 folder_out=string(folder,"Data/")
@@ -89,112 +89,69 @@ for step=1:nb_steps
 end
 close(file_position_O)
 
-cut_off_distance=0.4
-
-nb_points=5000
-
-rho=zeros(Real,nb_points)
-for i=1:nb_points
-    print("Progress: ",i/nb_points*100,"%\n")
-    for j=i+1:nb_points
-        distance=0
-        for k=1:3
-            distance += (traj[i].positions[1,k]-traj[j].positions[1,k])*(traj[i].positions[1,k]-traj[j].positions[1,k])
+min_x=0
+max_x=1.5
+nb_box=100
+delta=(max_x-min_x)/nb_box
+hist1D=zeros(Real,100)
+for carbon=1:nbC
+    print("Progress: ",carbon/nbC*100,"%\n")
+    for step=2:nb_steps
+        for j=1:nb_box
+            distance=0
+            for k=1:3
+                distance+=(traj[step-1].positions[carbon,k]-traj[step].positions[carbon,k])*(traj[step-1].positions[carbon,k]-traj[step].positions[carbon,k])
+            end
+            distance=sqrt(distance)
+            if  distance > (j-1)*delta && distance < j*delta
+                hist1D[j] += 1
+                break
+            end
         end
-        gauss = exp( - distance/(cut_off_distance*cut_off_distance))
-        rho[i] += gauss
-        rho[j] += gauss
     end
 end
+hist1D/=sum(hist1D)
 
-index=clustering.simpleSequence(size(rho)[1])
-for i=1:size(rho)[1]
-	for j=i+1:size(rho)[1]
-		if rho[i] < rho[j]
-			stock=rho[i]
-			rho[i]=rho[j]
-			rho[j]=stock
-			stock=index[i]
-			index[i]=index[j]
-			index[j]=stock
-		end
-	end
-end
-
-max_distance=0
-for i=1:nb_points
-	print("Progress: ",i/nb_points*100,"%\n")
-	for j=i+1:nb_points
-		distance=0
-		for k=1:3
-			distance += (traj[i].positions[1,k]-traj[j].positions[1,k])*(traj[i].positions[1,k]-traj[j].positions[1,k])
-		end
-		if max_distance < distance
-			global max_distance = distance
-		end
-	end
-end
-
-delta=ones(nb_points)*max_distance
-delta[ 1 ] = -1
-nneigh=zeros(Int,nb_points)
-for i=2:nb_points
-	print("Progress: ",i/nb_points*100,"%\n")
-	for j=1:i-1
-		distance=0
-		for k=1:3
-			distance += (traj[ index[i] ].positions[1,k]-traj[ index[j] ].positions[1,k])*(traj[ index[i] ].positions[1,k]-traj[ index[j] ].positions[1,k])
-		end
-		if distance < delta[ i ]
-			delta[ i ] = distance
-			nneigh[ i ] = j
-		end
-	end
-end
-
-delta[1] = 0
-for i=1:size(delta)[1]
-	if delta[i] > delta[1]
-		delta[1] = delta[i]
-	end
-end
-
-file_out=open(string(folder_out,"decision-",1,"-",cut_off_distance,"-",nb_points,".dat"),"w")
-for i=1:size(rho)[1]
-	write(file_out,string(rho[i]," ",delta[i],"\n"))
+file_out=open(string(folder_out,"histDX-carbon.dat"),"w")
+for i=1:nb_box
+    write(file_out,string(i*delta," ",hist1D[i],"\n"))
 end
 close(file_out)
 
-min_delta=5
-min_rho=5
-
-n_cluster=0
-cl=ones(Int,nb_points)*(-1)
-icl=[]
-# Determine the cluster centers
-for i=1:nb_points
-    if rho[i] > min_rho && delta[i] > min_delta
-		global n_cluster += 1
-        cl[index[i]] = n_cluster
-        global icl=push!(icl,index[i])
-    end
-end
-
-for i=1:nb_points
-    if cl[index[i]] == -1
-        cl[index[i]] = cl[ index[nneigh[i]]  ]
-    end
-end
-
-for i=1:n_cluster
-    file=open(string(folder_out,"coord_predict-",1,"-",cut_off_distance,"-",nb_points,"-cluster-",i,"-index.dat"),"w")
-    for j=1:nb_points
-        if i == cl[j]
-            for k=1:3
-                write(file,string( traj[j].positions[1,k]," ",))
+cut_off_distance=0.3
+nb_points=nb_steps
+rho=zeros(Real,nb_points,nbC)
+for carbon=1:nbC
+    print("Progress: ",carbon/nbC*100,"%\n")
+    for i=1:nb_points
+        for j=i-500:i+500
+            if j < 1 || j > nb_steps
+                continue
             end
-            write(file,string("\n"))
+            distance=0
+            for k=1:3
+                distance += (traj[i].positions[carbon,k]-traj[j].positions[carbon,k])*(traj[i].positions[carbon,k]-traj[j].positions[carbon,k])
+            end
+            if distance < cut_off_distance
+                rho[i,carbon] += 1
+            end
         end
     end
-    close(file)
 end
+
+min_x=0
+max_x=1000
+nb_box=200
+delta=(max_x-min_x)/nb_box
+hist1D=zeros(Real,100)
+for carbon=1:nbC
+    print("Progress: ",carbon/nbC*100,"%\n")
+    for i=1:nb_points
+        for j=1:nb_box
+            if rho[carbon,i] > (j-1)*delta && rho[carbon,i] < j*delta
+                hist1D[j] += 1
+            end
+        end
+    end
+end
+hist1D/=sum(hist1D)
