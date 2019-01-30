@@ -10,4 +10,4 @@ This project is its infancy, any input, correction or comment is welcome.
 
 Current participants:
 - Fabio Pietrucci, Assistant Professor
-- Mathieu Moog aka "MoogMt" , 3nd year PhD student
+- Mathieu Moog aka "MoogMt" , 3rd year PhD student
