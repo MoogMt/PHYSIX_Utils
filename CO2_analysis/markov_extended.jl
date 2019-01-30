@@ -339,7 +339,7 @@ end
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/home/moogmt/CO2/CO2_AIMD/"
+#folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
 Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
@@ -358,7 +358,7 @@ d_lag=5
 unit=0.005
 
 
-T=2000
+T=3000
 V=8.82
 
 folder_in=string(folder_base,V,"/",T,"K/")
@@ -378,34 +378,6 @@ state_matrix, percent, unused_percent = assignDataToStates( data , states )
 
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
 
-for oxygen=1:nbO
-    if cell_mod.distance(traj[size(traj)[1]],cell,1,nbC+oxygen) < 1.75
-        count=0
-        print("oxygen: ",nbC+oxygen," ")
-        for atom=2:nbC+nbO
-            if cell_mod.distance(traj[size(traj)[1]],cell,nbC+oxygen,atom) < 1.75
-                if atom != nbC+oxygen
-                    count += 1
-                end
-            end
-        end
-        print(count,"\n")
-    end
-end
-for carbon=2:nbC
-    if cell_mod.distance(traj[size(traj)[1]],cell,1,carbon) < 1.75
-        count=0
-        print("carbon: ",carbon," ")
-        for atom=2:nbC+nbO
-            if cell_mod.distance(traj[size(traj)[1]],cell,carbon,atom) < 1.75
-                if atom != carbon
-                    count += 1
-                end
-            end
-        end
-        print(count,"\n")
-    end
-end
 
 nb_states=size(states)[1]
 
@@ -417,19 +389,6 @@ for i=1:nb_states
         end
     end
 end
-
-# write(file_coordinance,string(P," ",T," "))
-# for coord=1:4
-#     coord_percent=0
-#     for state=1:nb_states
-#         if coordinances[state] == coord
-#             coord_percent += percent[state]
-#         end
-#     end
-#     write(file_coordinance,string(coord_percent," "))
-# end
-# write(file_coordinance,string("\n"))
-
 
 states = isolateSignificantStates( states, percent, cut_off_states )
 state_matrix, percent, unused_percent = assignDataToStates( data , states )
