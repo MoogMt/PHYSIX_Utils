@@ -1,6 +1,6 @@
 # PHYSIX_Utils
 
-Repository for all usefull scripts and codes for the PHYSIX team of IMPMC
+Repository for all usefull scripts and codes for the PHYSIX team of IMPMC at Sorbonne University
 
 Contains:
 - GPlib: Set of functions or bits of codes in several languages (C++,Fortran,Julia,Python) that are used to build the other codes that are in the repository. Should be used to write scripts in order to avoid dealing with software-specific format and not rewrite already written code.
@@ -10,4 +10,4 @@ This project is its infancy, any input, correction or comment is welcome.
 
 Current participants:
 - Fabio Pietrucci, Assistant Professor
-- Mathieu Moog aka "MoogMt" , 2nd year PhD student
+- Mathieu Moog aka "MoogMt" , 3nd year PhD student
