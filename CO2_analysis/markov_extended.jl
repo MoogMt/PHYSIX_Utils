@@ -23,8 +23,38 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
             end
         end
 
+        # Cleaning weird 3-member rings
+        for atom1=1:nb_atoms-1
+            for atom2=atom1+1:nb_atoms
+                if bond_matrix[atom1,atom2] == 1
+                    # For each bonded pair of atoms, check whether they are
+                    # both bonded to another atom, forming unatural 3-member
+                    # ring
+                    for atom3=1:nb_atoms
+                        if atom3 == atom1 || atom3 == atom1
+                            continue
+                        end
+                        if bond_matrix[atom3,atom1] == 1 && bond_matrix[atom3,atom2] == 1
+                            if cell_mod.distance(traj[step_sim],cell,atom1,atom3) > cell_mod.distance(traj[step_sim],cell,atom1,atom2) && cell_mod.distance(traj[step_sim],cell,atom1,atom3) > cell_mod.distance(traj[step_sim],cell,atom2,atom3)
+                                bond_matrix[atom1,atom3]=0
+                                bond_matrix[atom3,atom1]=0
+                            elseif cell_mod.distance(traj[step_sim],cell,atom1,atom2) > cell_mod.distance(traj[step_sim],cell,atom2,atom3)
+                                bond_matrix[atom1,atom2]=0
+                                bond_matrix[atom2,atom1]=0
+                            else
+                                bond_matrix[atom2,atom3]=0
+                                bond_matrix[atom3,atom2]=0
+                            end
+                        end
+                    end
+                end
+            end
+        end
 
+
+        # Compute coord matrix
         for carbon=1:nbC
+            # compute coord
             count_coord=1
             for carbon2=1:nbC
                 if carbon == carbon2
@@ -42,7 +72,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
                     count_coord += 1
                 end
             end
-            # sort
+            # sort coord
             for i=1:4
                 for j=i+1:4
                     if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
