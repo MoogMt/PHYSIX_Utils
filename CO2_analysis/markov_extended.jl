@@ -14,11 +14,22 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
 
         # Bond Matrix
         bond_matrix=zeros(nb_atoms,nb_atoms)
-        for atom1=1:nb_atoms
-            for atom2=atom1+1:nb_atoms
-                if cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
-                    bond_matrix[atom1,atom2]=1
-                    bond_matrix[atom2,atom1]=1
+        for carbon=1:32
+            for atom=1:96
+                if carbon == atom
+                    continue
+                end
+                if cell_mod.distance( traj[step_sim], cell, carbon, atom) < cut_off_bond
+                    bond_matrix[carbon,atom]=1
+                    bond_matrix[atom,carbon]=1
+                end
+            end
+        end
+        for oxygen1=1:64-1
+            for oxygen2=oxygen1+1:64
+                if cell_mod.distance( traj[step_sim], cell, nbC+oxygen1, nbC+oxygen2 ) < 1.6
+                    bond_matrix[nbC+oxygen1,nbC+oxygen2] = 1
+                    bond_matrix[nbC+oxygen2,nbC+oxygen1] = 1
                 end
             end
         end
@@ -258,7 +269,7 @@ function defineStatesExtendedCoordinancesO()
     states[1,:]=[4,4,4]
     return states
 end
-function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
+function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
     nb_data_point=size(data)[1]
     nb_series = size(data)[2]
     dim_data = size(data)[3]
@@ -281,9 +292,11 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} ) where { T1
                 end
             end
             if state_matrix[i,j] == -1
-                print("test ")
-                for k=1:dim_data
-                    print(data[i,j,k]," ")
+                if Err
+                    print("Out ",i," ",j," ")
+                    for k=1:dim_data
+                        print(k," ",data[i,j,k]," ")
+                    end
                 end
                 print("\n")
                 unused += 1
@@ -395,35 +408,45 @@ folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
 
 folder_out=string(folder_in,"Data/")
-folder_out=string(folder_in)
+#folder_out=string(folder_in)
 
-states=defineStatesExtendedCoordinances()
 
 print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
+states=defineStatesExtendedCoordinances()
 data=buildCoordinationMatrix( traj , cell , cut_off_bond )
-state_matrix, percent, unused_percent = assignDataToStates( data , states )
+state_matrix, percent, unused_percent = assignDataToStates( data , states, true )
 
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
 
+states = isolateSignificantStates( states, percent, cut_off_states )
+state_matrix, percent, unused_percent = assignDataToStates( data , states , false)
+transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
+transition_matrix_CK = chappmanKormologov( transition_matrix )
 
-nb_states=size(states)[1]
-
-coordinances=zeros(nb_states)
-for i=1:nb_states
-    for j=1:size(states)[2]
-        if states[i,j] > 0
-            coordinances[i] += 1
+file_Oxygen=open(string(folder_out,"3_neighbourO.dat"),"w")
+for step=1:size(traj)[1]
+    for oxygen1=1:64
+        for oxygen2=oxygen1+1:64
+            if cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2) < 1.6
+                write(file_Oxygen,string("step:",step," O1:",oxygen1," O2:",oxygen2," ",cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2),"\n"))
+                #print("step:",step," O1:",oxygen1," O2:",oxygen2," ",cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2),"\n")
+            end
+        end
+        coord=0
+        for carbon=1:32
+            if cell_mod.distance(traj[step],cell,nbC+oxygen1,carbon) < 1.70
+                coord += 1
+            end
+        end
+        if coord > 2
+            print("step:",step," oxygen:",nbC+oxygen1,"\n")
         end
     end
 end
-
-states = isolateSignificantStates( states, percent, cut_off_states )
-state_matrix, percent, unused_percent = assignDataToStates( data , states )
-transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
-transition_matrix_CK = chappmanKormologov( transition_matrix )
+close(file_Oxygen)
 
 nb_states=size(transition_matrix)[1]
 for state=1:nb_states
