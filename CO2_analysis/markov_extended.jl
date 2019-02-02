@@ -27,7 +27,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
         end
         for oxygen1=1:64-1
             for oxygen2=oxygen1+1:64
-                if cell_mod.distance( traj[step_sim], cell, nbC+oxygen1, nbC+oxygen2 ) < 1.6
+                if cell_mod.distance( traj[step_sim], cell, nbC+oxygen1, nbC+oxygen2 ) < cut_off_bond
                     bond_matrix[nbC+oxygen1,nbC+oxygen2] = 1
                     bond_matrix[nbC+oxygen2,nbC+oxygen1] = 1
                 end
@@ -426,27 +426,6 @@ state_matrix, percent, unused_percent = assignDataToStates( data , states , fals
 transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
 transition_matrix_CK = chappmanKormologov( transition_matrix )
 
-file_Oxygen=open(string(folder_out,"3_neighbourO.dat"),"w")
-for step=1:size(traj)[1]
-    for oxygen1=1:64
-        for oxygen2=oxygen1+1:64
-            if cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2) < 1.6
-                write(file_Oxygen,string("step:",step," O1:",oxygen1," O2:",oxygen2," ",cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2),"\n"))
-                #print("step:",step," O1:",oxygen1," O2:",oxygen2," ",cell_mod.distance(traj[step],cell,nbC+oxygen1,nbC+oxygen2),"\n")
-            end
-        end
-        coord=0
-        for carbon=1:32
-            if cell_mod.distance(traj[step],cell,nbC+oxygen1,carbon) < 1.70
-                coord += 1
-            end
-        end
-        if coord > 2
-            print("step:",step," oxygen:",nbC+oxygen1,"\n")
-        end
-    end
-end
-close(file_Oxygen)
 
 nb_states=size(transition_matrix)[1]
 for state=1:nb_states
@@ -500,100 +479,6 @@ for i=1:nb_states
     end
 end
 
-# count_check=0
-# for state=1:nb_states
-#     if coordinances[state] == 2
-#         global count_check +=1
-#         angles=[]
-#         for step_sim = 1:nb_steps
-#             for carbon = 1:nbC
-#                 if state_matrix[step_sim,carbon] == state
-#                     indexs=zeros(Int,4)
-#                     count2=0
-#                     for i=1:96
-#                         if cell_mod.distance(traj[step_sim],cell,carbon,i) < cut_off_bond && i != carbon
-#                             indexs[count2+1] = i
-#                             count2 += 1
-#                         end
-#                     end
-#                     dist1=cell_mod.distance(traj[step_sim],cell,carbon,indexs[1])
-#                     dist2=cell_mod.distance(traj[step_sim],cell,carbon,indexs[2])
-#                     dist3=cell_mod.distance(traj[step_sim],cell,indexs[1],indexs[2])
-#                     push!(angles,acos((dist1*dist1+dist2*dist2-dist3*dist3)/(2*dist1*dist2))*180/pi)
-#                 end
-#             end
-#         end
-#         nb_points=180
-#         hist1D=zeros(nb_points)
-#         min_v=90
-#         max_v=179
-#         delta=(max_v-min_v)/nb_points
-#         for i=1:size(angles)[1]
-#             for j=1:nb_points
-#                 if angles[i] > min_v + (j-1)*delta && angles[i] < min_v + j*delta
-#                     hist1D[j] += 1
-#                 end
-#             end
-#         end
-#         for i=1:nb_points
-#             hist1D[i] /= sin((min_v+i*delta)*pi/180)
-#         end
-#         hist1D/=sum(hist1D)
-#         file_angle2=open(string(folder_out,"anglesCO2-",count_check,"-",state,".dat"),"w")
-#         for i=1:nb_points
-#             write(file_angle2,string(min_v+i*delta," ",hist1D[i],"\n"))
-#         end
-#         close(file_angle2)
-#     end
-# end
-#
-# count_check=0
-# for state=1:nb_states
-#     if coordinances[state] == 3
-#         global count_check +=1
-#         distance_to_plan=[]
-#         for step_sim = 1:nb_steps
-#             for carbon = 1:nbC
-#                 if state_matrix[step_sim,carbon] == state
-#                     indexs=zeros(Int,4)
-#                     count2=0
-#                     for i=1:96
-#                         if cell_mod.distance(traj[step_sim],cell,carbon,i) < cut_off_bond && i != carbon
-#                             indexs[count2+1] = i
-#                             count2 += 1
-#                         end
-#                     end
-#                     dist1=cell_mod.distance(traj[step_sim],cell,carbon,indexs[1])
-#                     dist2=cell_mod.distance(traj[step_sim],cell,carbon,indexs[2])
-#                     dist3=cell_mod.distance(traj[step_sim],cell,indexs[1],indexs[2])
-#                     push!(angles,acos((dist1*dist1+dist2*dist2-dist3*dist3)/(2*dist1*dist2))*180/pi)
-#                 end
-#             end
-#         end
-#         nb_points=180
-#         hist1D=zeros(nb_points)
-#         min_v=90
-#         max_v=179
-#         delta=(max_v-min_v)/nb_points
-#         for i=1:size(angles)[1]
-#             for j=1:nb_points
-#                 if angles[i] > min_v + (j-1)*delta && angles[i] < min_v + j*delta
-#                     hist1D[j] += 1
-#                 end
-#             end
-#         end
-#         for i=1:nb_points
-#             hist1D[i] /= sin((min_v+i*delta)*pi/180)
-#         end
-#         hist1D/=sum(hist1D)
-#         file_angle2=open(string(folder_out,"anglesCO2-",count_check,"-",state,".dat"),"w")
-#         for i=1:nb_points
-#             write(file_angle2,string(min_v+i*delta," ",hist1D[i],"\n"))
-#         end
-#         close(file_angle2)
-#     end
-# end
-
 writeStates(string(folder_out,"markov_stat_states.dat"),states,percent)
 
 for j=1:nb_states
@@ -618,8 +503,3 @@ for j=1:nb_states
     end
     close(file_out)
 end
-#
-#     end
-# end
-#
-# close(file_coordinance)
