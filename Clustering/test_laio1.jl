@@ -5,16 +5,16 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"clustering.jl"))
 
-n_clusters=5
+n_clusters=10
 n_dim=2
 
 p_clusters=rand(n_clusters,n_dim)
-amplitude=3*rand(n_clusters).+1
-sigma=rand(n_clusters,n_dim)*0.008.+0.005
+amplitude=ones(n_clusters)
+sigma=ones(n_clusters,n_dim)*0.001
 
 #for n_points in [1000,2000,3000,4000,5000,10000]
 
-n_points=4000
+n_points=3000
 
 file_out=open(string("/home/moogmt/center_clusters.dat"),"w")
 for i=1:n_clusters
@@ -25,9 +25,10 @@ for i=1:n_clusters
 end
 close(file_out)
 
-r_points=rand(n_points,n_dim)
+r_points=zeros(Real,n_points,n_dim)
 rho=zeros(Real,n_points)
 for i=1:n_points
+    r_points[i,:]=rand(n_dim)
     for j=1:n_clusters
         exp_int=0
         for k=1:n_dim
@@ -37,11 +38,10 @@ for i=1:n_points
     end
 end
 
-
 # Sorting
 for i=1:n_points
     for j=1:n_points
-        if rho[i] > rho[j]
+        if rho[i] < rho[j]
             stock = rho[j]
             rho[j] = rho[i]
             rho[i] = stock
@@ -79,6 +79,7 @@ end
 
 delta=ones(Real,n_points)*max_distance
 nneigh=zeros(Int,n_points)
+
 # Slow
 for i=1:n_points
     for j=1:n_points
@@ -95,27 +96,21 @@ for i=1:n_points
         end
     end
 end
-
-pointed=zeros(Int,n_points)
-for i=1:n_points
-    for j=1:n_points
-        if nneigh[j] == i
-            pointed[i] += 1
-        end
-    end
-end
-
+ 
+max_rho=0
 max_delta=0
 for i=1:n_points
+    if rho[i] > max_rho
+        global max_rho = rho[i]
+    end
     if delta[i] > max_delta
         global max_delta = delta[i]
     end
 end
-delta[1]=max_delta
 
 file_out=open(string("/home/moogmt/decision_diagram-",n_points,".dat"),"w")
 for i=1:n_points
-    write(file_out,string(rho[i]," ",delta[i]," ",pointed[i],"\n"))
+    write(file_out,string(rho[i]/max_rho," ",delta[i],"\n"))
 end
 close(file_out)
 
@@ -128,11 +123,11 @@ end
 avg_delta /= n_points
 var_delta = var_delta/n_points - avg_delta*avg_delta
 
-n_var=0.05
+n_var=0.2
 
 # min_rho is to be though of carefully, used if there is a group of points
 # that are further away than the other, may form an artificial cluster
-min_rho=1
+min_rho=0.2
 # Statistically relevant clusters
 min_delta=avg_delta+n_var*var_delta
 

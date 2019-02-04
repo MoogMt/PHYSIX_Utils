@@ -168,4 +168,18 @@ function isIn( element, list )
 end
 #==============================================================================#
 
+function sequenceMatrixH( nb_element::T1 ) where { T1 <: Int }
+  matrix=zeros(Int,nb_element,nb_element)
+  for i=1:nb_element
+    for j=1:nb_element
+      matrix[i,j]=j
+    end
+  end
+  return matrix
+end
+
+function switchingFunction( x::T1, d::T2, n::T3, m::T4) where { T1 <: Real, T2 <: Real, T3 <: Int, T4 <: Int}
+    return (1-(x/d)^n)/(1-(x/d)^m)
+end
+
 end
