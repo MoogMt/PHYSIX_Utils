@@ -8,7 +8,6 @@ include(string(GPfolder,"utils.jl"))
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/home/moogmt/CO2/CO2_AIMD/"
 #folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Number of atoms
@@ -97,10 +96,10 @@ end
 
 nb_points=step_max*nbC
 
-dc=0.05
+dc=0.15
 
 dist_max=0
-file_out=open(string(folder_base,"dist_histogram_Cstates.dat"),"w")
+file_out=open(string(folder_out,"dist_histogram_Cstates.dat"),"w")
 rho=zeros(nb_points)
 for step=1:step_max
     print("Progress: ",step/(step_max)*100,"%\n")
@@ -123,38 +122,9 @@ for step=1:step_max
     end
 end
 close(file_out)
-#
-# file_in=open(string(folder_base,"dist_histogram_Cstates.dat"))
-# lines=readlines(file_in)
-# close(file_in)
-# nb_points2=size(lines)[1]
-# dist=zeros(nb_points2)
-# for i=1:nb_points2
-#     dist[i] = parse(Float64,lines[i])
-# end
-# min_dist=0
-# max_dist=dist_max
-# nb_box=100
-# delta=(max_dist-min_dist)/nb_box
-# hist1D=zeros(nb_box)
-# for data=1:nb_points2
-#     print("Progress: ",data/nb_points2*100,"%\n")
-#     for box=1:nb_box
-#         if dist[data] > min_dist+(box-1)*delta && dist[data] < min_dist+box*delta
-#             hist1D[box] += 1
-#             break
-#         end
-#     end
-# end
-# hist1D /= sum(hist1D)
-# file_out=open(string(folder_base,"hist_dist.dat"),"w")
-# for i=1:nb_box
-#     write(file_out,string(min_dist+i*delta," ",hist1D[i],"\n"))
-# end
-# close(file_out)
 
 delta=ones(nb_points)*dist_max
-nneigh=zeros(Int,step_max,nbC)
+nneigh=zeros(Int,nb_points)
 for step=1:step_max
     print("Progress: ",step/(step_max)*100,"%\n")
     for carbon=1:nbC
@@ -173,21 +143,21 @@ for step=1:step_max
                 dist=sqrt(dist)
                 if dist < delta[(step-1)*nbC+carbon]
                     delta[(step-1)*nbC+carbon] = dist
-                    nneigh[step,carbon]=(step2-1)*nbC+carbon2
+                    nneigh[(step-1)*nbC+carbon]=(step2-1)*nbC+carbon2
                 end
             end
         end
     end
 end
 
-file_out=open(string(folder_base,"decision_diagram_markov.dat"),"w")
+file_out=open(string(folder_out,"decision_diagram_markov.dat"),"w")
 for i=1:nb_points
     write(file_out,string(rho[i]," ",delta[i],"\n"))
 end
 close(file_out)
 
 
-min_delta=0.18
+min_delta=dc
 n_cluster=0 # Number of clusters
 icl=[]      # Index of cluster centers
 cl=ones(Int,nb_points)*(-1) # Assignement of the data points (cluster #)
@@ -209,7 +179,7 @@ end
 
 
 for i=1:n_cluster
-    file_out=open(string(folder_base,"cluster-",i,".dat"),"w")
+    file_out=open(string(folder_out,"cluster-",i,".dat"),"w")
     for j=1:nb_points
         if cl[j] == i
             write(file_out,string(x[j]," ",y[j],"\n"))
@@ -218,7 +188,7 @@ for i=1:n_cluster
     close(file_out)
 end
 
-file_out=open(string("/home/moogmt/center_cluster.dat"),"w")
+file_out=open(string(folder_out,"center_cluster.dat"),"w")
 for i=1:n_cluster
     write(file_out,string(x[icl[i]]," ",y[icl[i]],"\n"))
 end
