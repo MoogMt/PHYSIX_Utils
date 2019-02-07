@@ -106,6 +106,106 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 )
     end
     return coord_matrix
 end
+function buildCoordinationMatrixO( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
+    nb_atoms=size(traj[1].names)[1]
+    nb_steps=size(traj)[1]
+    n_dim=6
+    coord_matrix=ones(nb_steps,nbO,n_dim)*(-1)
+    for step_sim=1:nb_steps
+
+        print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
+
+        # Bond Matrix
+        bond_matrix=zeros(nb_atoms,nb_atoms)
+        for carbon=1:32
+            for atom=1:96
+                if carbon == atom
+                    continue
+                end
+                if cell_mod.distance( traj[step_sim], cell, carbon, atom) < cut_off_bond
+                    bond_matrix[carbon,atom]=1
+                    bond_matrix[atom,carbon]=1
+                end
+            end
+        end
+        for oxygen1=1:64-1
+            for oxygen2=oxygen1+1:64
+                if cell_mod.distance( traj[step_sim], cell, nbC+oxygen1, nbC+oxygen2 ) < cut_off_bond
+                    bond_matrix[nbC+oxygen1,nbC+oxygen2] = 1
+                    bond_matrix[nbC+oxygen2,nbC+oxygen1] = 1
+                end
+            end
+        end
+
+        # Cleaning weird 3-member rings
+        for atom1=1:nb_atoms-1
+            for atom2=atom1+1:nb_atoms
+                if bond_matrix[atom1,atom2] == 1
+                    # For each bonded pair of atoms, check whether they are
+                    # both bonded to another atom, forming unatural 3-member
+                    # ring
+                    for atom3=1:nb_atoms
+                        if atom3 == atom1 || atom3 == atom1
+                            continue
+                        end
+                        if bond_matrix[atom3,atom1] == 1 && bond_matrix[atom3,atom2] == 1
+                            if cell_mod.distance(traj[step_sim],cell,atom1,atom3) > cell_mod.distance(traj[step_sim],cell,atom1,atom2) && cell_mod.distance(traj[step_sim],cell,atom1,atom3) > cell_mod.distance(traj[step_sim],cell,atom2,atom3)
+                                bond_matrix[atom1,atom3]=0
+                                bond_matrix[atom3,atom1]=0
+                            elseif cell_mod.distance(traj[step_sim],cell,atom1,atom2) > cell_mod.distance(traj[step_sim],cell,atom2,atom3)
+                                bond_matrix[atom1,atom2]=0
+                                bond_matrix[atom2,atom1]=0
+                            else
+                                bond_matrix[atom2,atom3]=0
+                                bond_matrix[atom3,atom2]=0
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+
+        # Compute coord matrix
+        for oxygen=1:nbO
+            # compute coord
+            count_coord=1
+            for carbon=1:nbC
+                if bond_matrix[nbC+oxygen,carbon] > 0
+                    coord_matrix[step_sim,oxygen,count_coord]=sum(bond_matrix[carbon,:])
+                    count_coord += 1
+                end
+            end
+            count_coord=1
+            for oxygen2=1:nbO
+                if bond_matrix[nbC+oxygen,nbC+oxygen2] > 0
+                    coord_matrix[step_sim,oxygen,4+count_coord]=sum(bond_matrix[nbC+oxygen2,:])
+                    count_coord += 1
+                end
+            end
+            # sort coord
+            for i=1:4
+                for j=i+1:4
+                    if coord_matrix[step_sim,oxygen,i] < coord_matrix[step_sim,oxygen,j]
+                        stock=coord_matrix[step_sim,oxygen,i]
+                        coord_matrix[step_sim,oxygen,i]=coord_matrix[step_sim,oxygen,j]
+                        coord_matrix[step_sim,oxygen,j]=stock
+                    end
+                end
+            end
+            for i=5:n_dim
+                for j=i+1:n_dim
+                    if coord_matrix[step_sim,oxygen,i] < coord_matrix[step_sim,oxygen,j]
+                        stock=coord_matrix[step_sim,oxygen,i]
+                        coord_matrix[step_sim,oxygen,i]=coord_matrix[step_sim,oxygen,j]
+                        coord_matrix[step_sim,oxygen,j]=stock
+                    end
+                end
+            end
+        end
+    end
+    return coord_matrix
+end
 function defineStatesCoordinances()
     states=zeros(39,2)
     # CO2
@@ -223,7 +323,7 @@ function defineStatesExtendedCoordinances()
     return states
 end
 function defineStatesExtendedCoordinancesO()
-    states=zeros(351,6)
+    states=zeros(Real,362,6)
     # CO2
     states[1,:]=[1,-1,-1,-1,-1,-1]
     states[2,:]=[2,-1,-1,-1,-1,-1]
@@ -592,20 +692,24 @@ function defineStatesExtendedCoordinancesO()
     states[357,:]=[4,4,2,1,2,2]
     states[358,:]=[4,4,2,2,2,2]
     states[359,:]=[4,4,3,2,2,2]
-    states[350,:]=[4,4,3,3,2,2]
-    states[351,:]=[4,4,4,4,2,2]
+    states[360,:]=[4,4,3,3,2,2]
+    states[361,:]=[4,4,4,4,2,2]
+    states[362,:]=[4,3,3,-1,-1,-1]
     return states
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
     nb_data_point=size(data)[1]
     nb_series = size(data)[2]
     dim_data = size(data)[3]
+    print("dim_data: ",dim_data,"\n")
     nb_states = size(states)[1]
     state_matrix=ones(Int, nb_data_point, nb_series )*(-1)
     count_states=zeros( nb_states )
     unused=0
+    #6236 34 1 4.0 2 3.0 3 3.0 4 -1.0 5 -1.0 6 -1.0
+
     for i=1:nb_data_point
-        print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
+        #print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
         for j=1:nb_series
             for l=1:nb_states
                 d=0
@@ -620,12 +724,12 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) 
             end
             if state_matrix[i,j] == -1
                 if Err
-                    print("Out ",i," ",j," ")
+                    print("Out ",i," ",j," ",dim_data," ")
                     for k=1:dim_data
-                        print(k," ",data[i,j,k]," ")
+                        print(data[i,j,k]," ")
                     end
+                    print("\n")
                 end
-                print("\n")
                 unused += 1
             end
         end
@@ -727,9 +831,6 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-
-
-
 T=3000
 V=9.0
 
@@ -774,6 +875,40 @@ for j=1:nb_states
 end
 for j=1:nb_states
     file_out=open(string(folder_out,"C_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
+    for i=1:size(transition_matrix_CK)[3]
+        write(file_out,string(2*i*unit*d_lag," "))
+        for k=1:nb_states
+            write(file_out,string(transition_matrix_CK[j,k,i]," "))
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+end
+
+traj=filexyz.readFastFile(file)
+cell=cell_mod.Cell_param(V,V,V)
+statesO=defineStatesExtendedCoordinancesO()
+dataO=buildCoordinationMatrixO( traj , cell , cut_off_bond )
+state_matrix, percent, unused_percent = assignDataToStates( dataO , statesO , true)
+statesO = isolateSignificantStates( statesO, percent, cut_off_states )
+state_matrix, percent, unused_percent = assignDataToStates( dataO , statesO , false)
+writeStates(string(folder_out,"O-markov_final_states-",percent,".dat"),states,percent)
+
+nb_states=size(states)[1]
+
+for j=1:nb_states
+    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
+    for i=1:2:size(transition_matrix)[3]
+        write(file_out,string(i*unit*d_lag," "))
+        for k=1:nb_states
+            write(file_out,string(transition_matrix[j,k,i]," "))
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+end
+for j=1:nb_states
+    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
     for i=1:size(transition_matrix_CK)[3]
         write(file_out,string(2*i*unit*d_lag," "))
         for k=1:nb_states
