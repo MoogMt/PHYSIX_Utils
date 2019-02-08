@@ -141,7 +141,7 @@ end
 #-----------------
 # Writting PDB
 #------------------------------------------------
-pdb.writeStep(molecules,cell,"/home/moogmt/start.pdb")
+pdb.write(molecules,cell,"/home/moogmt/start.pdb")
 #------------------------------------------------
 
-print("a = ",(dMM+dMO)/dMM,"\n")
+print("a = ",(dMM+dOM)/dMM,"\n")
