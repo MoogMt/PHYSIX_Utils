@@ -323,7 +323,7 @@ function defineStatesExtendedCoordinances()
     return states
 end
 function defineStatesExtendedCoordinancesO()
-    states=zeros(Real,362,6)
+    states=zeros(Real,367,6)
     # CO2
     states[1,:]=[1,-1,-1,-1,-1,-1]
     states[2,:]=[2,-1,-1,-1,-1,-1]
@@ -695,6 +695,11 @@ function defineStatesExtendedCoordinancesO()
     states[360,:]=[4,4,3,3,2,2]
     states[361,:]=[4,4,4,4,2,2]
     states[362,:]=[4,3,3,-1,-1,-1]
+    states[363,:]=[3.0,-1.0,-1.0,-1.0,3.0,-1.0]
+    states[364,:]=[2.0,-1.0,-1.0,-1.0,3.0,-1.0]
+    states[365,:]=[5.0,4.0,-1.0,-1.0,-1.0,-1.0]
+    states[366,:]=[5.0,3.0,-1.0,-1.0,-1.0,-1.0]
+    states[367,:]=[5.0,2.0,-1.0,-1.0,-1.0,-1.0]
     return states
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
@@ -831,14 +836,22 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-T=3000
-V=9.0
+for V in Volumes
+    for T in Temperatures
+
+# T=3000
+# V=8.82
+
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
 
 folder_out=string(folder_in,"Data/")
 #folder_out=string(folder_in)
+
+if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
+    continue
+end
 
 
 print("Computing Data\n")
@@ -885,14 +898,14 @@ for j=1:nb_states
     close(file_out)
 end
 
-traj=filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(V,V,V)
 statesO=defineStatesExtendedCoordinancesO()
 dataO=buildCoordinationMatrixO( traj , cell , cut_off_bond )
 state_matrix, percent, unused_percent = assignDataToStates( dataO , statesO , true)
 statesO = isolateSignificantStates( statesO, percent, cut_off_states )
-state_matrix, percent, unused_percent = assignDataToStates( dataO , statesO , false)
-writeStates(string(folder_out,"O-markov_final_states-",percent,".dat"),states,percent)
+state_matrixO, percent, unused_percent = assignDataToStates( dataO , statesO , false)
+transition_matrix = transitionMatrix( statesO, state_matrixO, min_lag, max_lag, d_lag )
+transition_matrix_CK = chappmanKormologov( transition_matrix )
+writeStates(string(folder_out,"O-markov_final_states-",percent,".dat"),statesO,percent)
 
 nb_states=size(states)[1]
 
@@ -919,6 +932,8 @@ for j=1:nb_states
     close(file_out)
 end
 
+end
+end
 
 # nb_states=size(transition_matrix)[1]
 # for state=1:nb_states
