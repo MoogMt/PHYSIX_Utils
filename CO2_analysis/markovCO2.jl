@@ -711,7 +711,8 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
     nbc=32
     nbO=64
     states=zeros(Int,0,n_type*max_coord)
-    record_states=zeros(Int,0,n_type_max_coord)
+    record_states=zeros(Int,0)
+    percent_states=zeros(Real,0)
     count_type=zeros(Real,2)
 
     for i=1:nb_series
@@ -727,6 +728,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
                     count_type[2] += 1
                     push!(record_states,2)
                 end
+                push!(percent_states,1)
                 state_matrix[i,j] = size(states)[1]+1
             else
                 # Loop over recorded states
@@ -745,6 +747,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
                             else
                                 count_type[2] += 1
                             end
+                            percent_states[k] += 1
                             state_matrix[i,j] = k
                             found=true
                             break
@@ -760,6 +763,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
                             push!(record_states,2)
                             count_type[2] += 1
                         end
+                        push!(percent_states,1)
                         state_matrix[i,j] = size(states)[1]+1
                     end
                 end
@@ -769,10 +773,14 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
 
     # Normalizing counts into percent
     for i=1:size(states)[1]
-        if record_states[i]
+        for j=1:nb_type
+            if record_states[i] = j
+                percent_states /= count_type[j]
+            end
+        end
     end
 
-    return states, count_states, state_matrix
+    return states, percent_states, state_matrix
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
     nb_data_point=size(data)[1]

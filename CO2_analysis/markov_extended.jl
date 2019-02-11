@@ -41,7 +41,7 @@ traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
 data=buildCoordinationMatrix( traj , cell , cut_off_bond )
-states, state_matrix, percent = assignDataToStates( data )
+states, percent, state_matrix = assignDataToStates( data )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
 
 cut_off_states = 0.1
