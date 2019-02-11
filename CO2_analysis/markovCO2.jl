@@ -78,54 +78,27 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                     if atom1 == toadd+atom2
                         continue
                     end
-                    if bond_matrix[atom1,toadd+atom] > 0
-                        coord_matrix[step_sim,carbon,count_coord]=sum(bond_matrix[carbon2,:])
+                    if bond_matrix[atom1,toadd+atom2] > 0
+                        coord_matrix[carbon,step_sim,count_coord]=sum(bond_matrix[toadd+atom2,:])
                         count_coord += 1
                     end
-                end
-            end
-
-
-
-
-
-
-            for atom2=1:nb_atoms
-                if atom1 == carbon2
-                    continue
-                end
-                if bond_matrix[carbon,carbon2] > 0
-                    coord_matrix[step_sim,carbon,count_coord]=sum(bond_matrix[carbon2,:])
-                    count_coord += 1
-                end
-            end
-            count_coord=1
-            for oxygen=1:nbO
-                if bond_matrix[carbon,nbC+oxygen] > 0
-                    coord_matrix[step_sim,carbon,4+count_coord]=sum(bond_matrix[nbC+oxygen,:])
-                    count_coord += 1
-                end
-            end
-            # sort coord
-            for i=1:4
-                for j=i+1:4
-                    if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
-                        stock=coord_matrix[step_sim,carbon,i]
-                        coord_matrix[step_sim,carbon,i]=coord_matrix[step_sim,carbon,j]
-                        coord_matrix[step_sim,carbon,j]=stock
+                    if cound_coord == max_neigh
+                        break
                     end
                 end
-            end
-            for i=5:n_dim
-                for j=i+1:n_dim
-                    if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
-                        stock=coord_matrix[step_sim,carbon,i]
-                        coord_matrix[step_sim,carbon,i]=coord_matrix[step_sim,carbon,j]
-                        coord_matrix[step_sim,carbon,j]=stock
+                # sorting by type
+                for i=1:max_neigh-1
+                    for j=i+1:max_neigh
+                        if coord_matrix[carbon,step_sim,i] < coord_matrix[carbon,step_sim,j]
+                            stock = coord_matrix[carbon,step_sim,j]
+                            coord_matrix[carbon,step_sim,j]=coord_matrix[carbon,step_sim,i]
+                            coord_matrix[carbon,step_sim,i]=stock
+                        end
                     end
                 end
             end
         end
+        
     end
     return coord_matrix
 end
