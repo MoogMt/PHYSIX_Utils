@@ -16,7 +16,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
     for i=1:nb_atoms
         found=false
         for j=1:size(types)[1]
-            if types[j] = traj[1].names[i]
+            if types[j] == traj[1].names[i]
                 count_types[j] += 1
                 found=true
             end
@@ -872,7 +872,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where 
     # Normalizing counts into percent
     for i=1:size(states)[1]
         for j=1:nb_type
-            if record_states[i] = j
+            if record_states[i] == j
                 percent_states /= count_type[j]
             end
         end
