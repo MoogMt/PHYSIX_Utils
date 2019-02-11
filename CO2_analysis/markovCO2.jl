@@ -93,7 +93,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                         coord_matrix[carbon,step_sim,count_coord]=sum(bond_matrix[atom2,:])
                         count_coord += 1
                     end
-                    if cound_coord == max_neigh
+                    if count_coord == max_neigh
                         break
                     end
                 end
