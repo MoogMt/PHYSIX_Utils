@@ -814,16 +814,14 @@ function defineStatesExtendedCoordinancesO()
     states[367,:]=[5.0,2.0,-1.0,-1.0,-1.0,-1.0]
     return states
 end
-function assignDataToStates( data::Array{T1,3}, n_type::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
+function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where { T1 <: Real, T2 <: Int , T3 <: Int }
 
     nb_series=size(data)[1]
     nb_steps=size(data)[2]
-    dim_data = size(data)[3]/n_type
+    dim_data = size(data)[3]/nb_types
     state_matrix=ones(Int, nb_steps, nb_series )*(-1)
 
-    nbc=32
-    nbO=64
-    states=zeros(Int,0,n_type*max_coord)
+    states=zeros(Int,0,nb_types*max_coord)
     record_states=zeros(Int,0)
     percent_states=zeros(Real,0)
     count_type=zeros(Real,2)
@@ -837,11 +835,10 @@ function assignDataToStates( data::Array{T1,3}, n_type::T3 ) where { T1 <: Real,
                 # To be generalized
                 if i <= nbC
                     count_type[1] += 1
-                    push!(record_states,1)
                 else
                     count_type[2] += 1
-                    push!(record_states,2)
                 end
+                push!(record_states,types[i])
                 push!(percent_states,1)
                 state_matrix[i,j] = size(states)[1]+1
             else
@@ -852,7 +849,7 @@ function assignDataToStates( data::Array{T1,3}, n_type::T3 ) where { T1 <: Real,
                     if ( i <= nbC || record_states[k] == 1 ) && ( i > nbC || record_states[k] == 2 )
                         # Compute distance between state k and data
                         dist=0
-                        for l=1:n_type*max_coord
+                        for l=1:nb_types*max_coord
                             dist += (states[k,l]-data[i,j,l])*(states[k,l]-data[i,j,l])
                         end
                         # If dist=0 then state of data was already found
@@ -875,12 +872,11 @@ function assignDataToStates( data::Array{T1,3}, n_type::T3 ) where { T1 <: Real,
                     push!(states,data[i,j,:])
                     # To be generalized
                     if i <= nbC
-                        push!(record_states,1)
                         count_type[1] += 1
                     else
-                        push!(record_states,2)
                         count_type[2] += 1
                     end
+                    push!(record_states,types[i])
                     push!(percent_states,1)
                     state_matrix[i,j] = size(states)[1]+1
                 end
