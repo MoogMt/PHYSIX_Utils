@@ -4,11 +4,9 @@ include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
 function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, max_neighbour::T4 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real, T4 <: Int }
-
     # general information about the simulation
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
-
     # Type stuff
     types=[traj[1].names[1]]
     types_number=ones(1)
@@ -36,13 +34,10 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
             end
         end
     end
-
     # Actual computation of the coordination matrix
     coord_matrix=ones(nb_atoms,nb_steps,max_neigh*nb_type)*(-1)
     for step_sim=1:nb_steps
-
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
-
         # Bond Matrix
         bond_matrix=zeros(nb_atoms,nb_atoms)
         for atom1=1:nb_atoms
@@ -80,7 +75,6 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                 end
             end
         end
-
         # Compute coord matrix
         for atom1=1:nb_atoms
             for type=1:nb_type
@@ -97,10 +91,9 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                         break
                     end
                 end
-
                 # sorting by type
-                for i=1:max_neigh-1
-                    for j=i+1:max_neigh
+                for i=(type-1)*max_neigh+1:type*max_neigh-1
+                    for j=i+1:type*max_neigh
                         if coord_matrix[atom1,step_sim,i] < coord_matrix[atom1,step_sim,j]
                             stock = coord_matrix[atom1,step_sim,j]
                             coord_matrix[atom1,step_sim,j]=coord_matrix[atom1,step_sim,i]
@@ -108,10 +101,8 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                         end
                     end
                 end
-
             end
         end
-
     end
     return coord_matrix, types, type_list
 end
@@ -874,7 +865,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
     for i=1:size(states)[1]
         for j=1:nb_types
             if record_states[i] == j
-                percent_states /= count_type[j]
+                percent_states[i] /= count_type[j]
             end
         end
     end
