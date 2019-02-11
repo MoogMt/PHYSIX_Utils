@@ -826,7 +826,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
             # No states, initiatilization
             if size(states)[1] == 0
                 states=vcat(states,transpose(data[i,j,:]))
-                count_type[types[i]]  =+ 1
+                count_type[types[i]] = count_type[types[i]]+ 1
                 push!(record_states,types[i])
                 push!(percent_states,1)
                 state_matrix[i,j] = size(states)[1]+1
@@ -845,7 +845,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                     end
                     # If dist=0 then state of data was already found
                     if dist == 0
-                        count_type[types[i]]  =+ 1
+                        count_type[types[i]]  = count_type[types[i]] + 1
                         percent_states[k] += 1
                         state_matrix[i,j] = k
                         found=true
@@ -855,7 +855,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                 end
                 if ! found
                     states=vcat(states,transpose(data[i,j,:]))
-                    count_type[types[i]]  =+ 1
+                    count_type[types[i]] = count_type[types[i]] + 1
                     push!(record_states,types[i])
                     push!(percent_states,1)
                     state_matrix[i,j] = size(states)[1]+1
@@ -864,13 +864,17 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
         end
     end
 
+
     # Normalizing counts into percent
     for i=1:size(states)[1]
         for j=1:nb_types
             if record_states[i] == j
-                percent_states[i] /= count_type[j]
+                percent_states[i] = percent_states[i]/count_type[j]
             end
         end
+    end
+    for i=1:size(states)[1]
+        percent_states[i] = percent_states[i]*100
     end
 
     return states, percent_states, state_matrix
