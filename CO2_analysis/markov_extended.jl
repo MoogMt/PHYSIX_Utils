@@ -41,7 +41,7 @@ cell=cell_mod.Cell_param(V,V,V)
 max_neigh=5
 
 data,types,type_list=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
-states, percent, state_matrix = assignDataToStates( data, size(type)[1], type_list )
+states, percent, state_matrix = assignDataToStates( data, size(types)[1], type_list )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
 
 cut_off_states = 0.1

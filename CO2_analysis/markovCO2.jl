@@ -28,7 +28,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         end
     end
     nb_type=size(types)[1]
-    type_list=zeros(nb_atoms)
+    type_list=zeros(Int,nb_atoms)
     for i=1:nb_atoms
         for j=1:nb_type
             if traj[1].names[i] == types[j]
@@ -49,7 +49,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
             for atom2=atom1+1:nb_atoms
                 if cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
                     bond_matrix[atom1,atom2]=1
-                    bond_matrix[atom1,atom2]=1
+                    bond_matrix[atom2,atom1]=1
                 end
             end
         end
@@ -814,14 +814,14 @@ function defineStatesExtendedCoordinancesO()
     states[367,:]=[5.0,2.0,-1.0,-1.0,-1.0,-1.0]
     return states
 end
-function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where { T1 <: Real, T2 <: Int , T3 <: Int }
+function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} ) where { T1 <: Real, T2 <: Int , T3 <: Int }
 
-    nb_series=size(data)[1]
-    nb_steps=size(data)[2]
-    dim_data = size(data)[3]/nb_types
-    state_matrix=ones(Int, nb_steps, nb_series )*(-1)
+    nb_series = size(data)[1]
+    nb_steps  = size(data)[2]
+    dim_data  = size(data)[3]
+    state_matrix=ones(Int, nb_series, nb_steps )*(-1)
 
-    states=zeros(Int,0,nb_types*max_coord)
+    states=zeros(Int,0,dim_data)
     record_states=zeros(Int,0)
     percent_states=zeros(Real,0)
     count_type=zeros(Real,nb_types)
@@ -831,7 +831,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where 
         for j=1:nb_steps
             # No states, initiatilization
             if size(states)[1] == 0
-                push!(states,data[i,j,:])
+                states=vcat(states,transpose(data[i,j,:]))
                 count_type[types[i]]  =+ 1
                 push!(record_states,types[i])
                 push!(percent_states,1)
@@ -859,7 +859,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where 
                     # If the state was not found in database we add the state to it
                 end
                 if ! found
-                    push!(states,data[i,j,:])
+                    states=vcat(states,transpose(data[i,j,:]))
                     count_type[types[i]]  =+ 1
                     push!(record_states,types[i])
                     push!(percent_states,1)
