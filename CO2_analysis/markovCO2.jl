@@ -78,7 +78,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         # Compute coord matrix
         for atom1=1:nb_atoms
             for type=1:nb_type
-                count_coord=1
+                count_coord=(type-1)*max_neigh+1
                 for atom2=1:nb_atoms
                     if (atom1 == atom2) || (types[type] != traj[step_sim].names[atom2])
                         continue
@@ -87,19 +87,22 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                         coord_matrix[atom1,step_sim,count_coord]=sum(bond_matrix[atom2,:])
                         count_coord += 1
                     end
-                    if count_coord == max_neigh
+                    if count_coord == type*max_neigh
                         break
                     end
                 end
-                # sorting by type
+                #sorting by type
                 for i=(type-1)*max_neigh+1:type*max_neigh-1
+                    #print("type = ",type,"; i = ",i)
                     for j=i+1:type*max_neigh
+                        #print(" j = ",j," ")
                         if coord_matrix[atom1,step_sim,i] < coord_matrix[atom1,step_sim,j]
                             stock = coord_matrix[atom1,step_sim,j]
                             coord_matrix[atom1,step_sim,j]=coord_matrix[atom1,step_sim,i]
                             coord_matrix[atom1,step_sim,i]=stock
                         end
                     end
+                    #print("\n")
                 end
             end
         end
