@@ -17,6 +17,7 @@ nbC=32
 nbO=nbC*2
 
 cut_off_bond = 1.75
+max_neigh=5
 
 min_lag=1
 max_lag=5001
@@ -38,8 +39,6 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
-max_neigh=5
-
 data,types,type_list=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
 states, percent, state_matrix = assignDataToStates( data, size(types)[1], type_list )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
@@ -47,9 +46,11 @@ writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
 cut_off_states = 0.1
 states = isolateSignificantStates( states, percent, cut_off_states )
 state_matrix, percent, unused_percent = assignDataToStates( data , states , false)
+writeStates(string(folder_out,"markov_final_states-",percent,".dat"),states,percent)
+
+# Checking chappmanKormologov
 transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
 transition_matrix_CK = chappmanKormologov( transition_matrix )
-writeStates(string(folder_out,"markov_final_states-",percent,".dat"),states,percent)
 
 nb_states=size(states)[1]
 
@@ -75,47 +76,3 @@ for j=1:nb_states
     end
     close(file_out)
 end
-
-
-# nb_states=size(transition_matrix)[1]
-# for state=1:nb_states
-#     if percent[state] > 0.05
-#         print("Progress: ",state/nb_states*100,"%\n")
-#         distances=[]
-#         for step_sim=1:nb_steps
-#             for carbon=1:nbC
-#                 if state_matrix[step_sim,carbon] == state
-#                     min_dist=V
-#                     for atom=1:96
-#                         dist=cell_mod.distance(traj[step_sim],cell,carbon,atom)
-#                         if atom == carbon
-#                             continue
-#                         end
-#                         if min_dist > dist
-#                             min_dist = dist
-#                         end
-#                     end
-#                     push!(distances,min_dist)
-#                 end
-#             end
-#         end
-#         min_v=0.8
-#         max_v=2
-#         nb_points=200
-#         delta=(max_v-min_v)/nb_points
-#         hist1D=zeros(nb_points)
-#         for j=1:size(distances)[1]
-#             for i=1:nb_points
-#                 if distances[j] > min_v + (i-1)*delta && distances[j] < min_v + i*delta
-#                     hist1D[i] += 1
-#                 end
-#             end
-#         end
-#         hist1D /= sum(hist1D)
-#         file_distance=open(string(folder_out,"distances-",coordinances[state],"-",state,".dat"),"w")
-#         for i=1:nb_points
-#             write(file_distance,string(min_v+i*delta," ",hist1D[i],"\n"))
-#         end
-#         close(file_distance)
-#     end
-# end
