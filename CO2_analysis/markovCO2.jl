@@ -4,9 +4,12 @@ include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
 function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, max_neighbour::T4 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real, T4 <: Int }
+
+    # general information about the simulation
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
 
+    # Type stuff
     types=[traj[1].names[1]]
     types_number=ones(1)
     count_types=zeros(Int,1)
@@ -25,7 +28,16 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         end
     end
     nb_type=size(types)[1]
+    type_list=zeros(nb_atoms)
+    for i=1:nb_atoms
+        for j=1:nb_types
+            if traj[1].names[i] == types[j]
+                type_list[i]=j
+            end
+        end
+    end
 
+    # Actual computation of the coordination matrix
     coord_matrix=ones(nb_atoms,nb_steps,max_neigh*nb_type)*(-1)
     for step_sim=1:nb_steps
 
@@ -73,9 +85,8 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         for atom1=1:nb_atoms
             for type=1:nb_type
                 count_coord=1
-                for atom2=1:count_type[type]
-                    toadd=sum(1:type-1)
-                    if atom1 == toadd+atom2
+                for atom2=1:nb_atoms
+                    if (atom1 == atom2) || (types[type] != traj[step_sim].names[atom2])
                         continue
                     end
                     if bond_matrix[atom1,toadd+atom2] > 0
@@ -86,6 +97,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                         break
                     end
                 end
+
                 # sorting by type
                 for i=1:max_neigh-1
                     for j=i+1:max_neigh
@@ -96,9 +108,10 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                         end
                     end
                 end
+
             end
         end
-        
+
     end
     return coord_matrix
 end
