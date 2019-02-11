@@ -26,7 +26,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
     end
     nb_type=size(types)[1]
 
-    coord_matrix=ones(nb_steps,nb_atoms,max_neigh*nb_type)*(-1)
+    coord_matrix=ones(nb_atoms,nb_steps,max_neigh*nb_type)*(-1)
     for step_sim=1:nb_steps
 
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
@@ -71,12 +71,19 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
 
         # Compute coord matrix
         for atom1=1:nb_atoms
-
-
-
-
-            # compute coord
-            count_coord=1
+            for type=1:nb_type
+                count_coord=1
+                for atom2=1:count_type[type]
+                    toadd=sum(1:type-1)
+                    if atom1 == toadd+atom2
+                        continue
+                    end
+                    if bond_matrix[atom1,toadd+atom] > 0
+                        coord_matrix[step_sim,carbon,count_coord]=sum(bond_matrix[carbon2,:])
+                        count_coord += 1
+                    end
+                end
+            end
 
 
 
