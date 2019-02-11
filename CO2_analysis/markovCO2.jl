@@ -814,11 +814,12 @@ function defineStatesExtendedCoordinancesO()
     states[367,:]=[5.0,2.0,-1.0,-1.0,-1.0,-1.0]
     return states
 end
-function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
-    nb_data_point=size(data)[1]
-    nb_series=size(data)[2]
-    dim_data = size(data)[3]
-    state_matrix=ones(Int, nb_data_point, nb_series )*(-1)
+function assignDataToStates( data::Array{T1,3}, n_type::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
+
+    nb_series=size(data)[1]
+    nb_steps=size(data)[2]
+    dim_data = size(data)[3]/n_type
+    state_matrix=ones(Int, nb_steps, nb_series )*(-1)
 
     nbc=32
     nbO=64
@@ -829,7 +830,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
 
     for i=1:nb_series
         print("State assignement - Progress: ",i/nb_series*100,"%\n")
-        for j=1:nb_data_point
+        for j=1:nb_steps
             # No states, initiatilization
             if size(states)[1] == 0
                 push!(states,data[i,j,:])
@@ -844,6 +845,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
                 push!(percent_states,1)
                 state_matrix[i,j] = size(states)[1]+1
             else
+                found=false
                 # Loop over recorded states
                 for k=1:size(states)[1]
                     # Check if types are coherent
@@ -868,19 +870,19 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
                         end
                     end
                     # If the state was not found in database we add the state to it
-                    if ! found
-                        push!(states,data[i,j,:])
-                        # To be generalized
-                        if i <= nbC
-                            push!(record_states,1)
-                            count_type[1] += 1
-                        else
-                            push!(record_states,2)
-                            count_type[2] += 1
-                        end
-                        push!(percent_states,1)
-                        state_matrix[i,j] = size(states)[1]+1
+                end
+                if ! found
+                    push!(states,data[i,j,:])
+                    # To be generalized
+                    if i <= nbC
+                        push!(record_states,1)
+                        count_type[1] += 1
+                    else
+                        push!(record_states,2)
+                        count_type[2] += 1
                     end
+                    push!(percent_states,1)
+                    state_matrix[i,j] = size(states)[1]+1
                 end
             end
         end
@@ -898,18 +900,18 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
     return states, percent_states, state_matrix
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
-    nb_data_point=size(data)[1]
+    nb_steps=size(data)[1]
     nb_series = size(data)[2]
     dim_data = size(data)[3]
     print("dim_data: ",dim_data,"\n")
     nb_states = size(states)[1]
-    state_matrix=ones(Int, nb_data_point, nb_series )*(-1)
+    state_matrix=ones(Int, nb_steps, nb_series )*(-1)
     count_states=zeros( nb_states )
     unused=0
     #6236 34 1 4.0 2 3.0 3 3.0 4 -1.0 5 -1.0 6 -1.0
 
-    for i=1:nb_data_point
-        #print("Assigning data to states - Progress: ",i/nb_data_point*100,"%\n")
+    for i=1:nb_steps
+        #print("Assigning data to states - Progress: ",i/nb_steps*100,"%\n")
         for j=1:nb_series
             for l=1:nb_states
                 d=0
@@ -951,7 +953,7 @@ end
 function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_lag::T3, max_lag::T4, d_lag::T5) where { T1 <: Real, T2 <: Real, T3 <: Real, T4<:Int, T5 <: Int }
 
     nb_states=size(states)[1]
-    nb_data_point=size(state_matrix)[1]
+    nb_steps=size(state_matrix)[1]
     nb_series = size(state_matrix)[2]
     nb_lag_points=Int(trunc((max_lag-min_lag)/d_lag))
 
@@ -962,7 +964,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
     for lag=min_lag:d_lag:max_lag-1
         print("Chappman Kolmogorov Test - Progress: ",lag/max_lag*100,"%\n")
         for i=1:nb_series
-            for j=lag+1:nb_data_point
+            for j=lag+1:nb_steps
                 if  state_matrix[j-lag,i] == -1 ||  state_matrix[j,i] == -1
                     continue
                 end
