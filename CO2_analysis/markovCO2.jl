@@ -712,42 +712,66 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
     nbO=64
     states=zeros(Int,0,n_type*max_coord)
     record_states=zeros(Int,0,n_type_max_coord)
-    count_states=zeros(Real,0,n_type)
+    count_type=zeros(Real,2)
 
     for i=1:nb_series
         print("State assignement - Progress: ",i/nb_series*100,"%\n")
         for j=1:nb_data_point
+            # No states, initiatilization
             if size(states)[1] == 0
                 push!(states,data[i,j,:])
                 if i <= nbC
+                    count_type[1] += 1
                     push!(record_states,1)
                 else
+                    count_type[2] += 1
                     push!(record_states,2)
                 end
-                push!(count_states,1)
+                state_matrix[i,j] = size(states)[1]+1
             else
+                # Loop over recorded states
                 for k=1:size(states)[1]
+                    # Check if types are coherent
                     if ( i <= nbC || record_states[k] == 1 ) && ( i > nbC || record_states[k] == 2 )
+                        # Compute distance between state k and data
                         dist=0
                         for l=1:n_type*max_coord
                             dist += (states[k,l]-data[i,j,l])*(states[k,l]-data[i,j,l])
                         end
-                        if dist > 0
-                            push!(states,data[i,j,:])
+                        # If dist=0 then state of data was already found
+                        if dist == 0
                             if i <= nbC
-                                push!(record_states,1)
+                                count_type[1] += 1
                             else
-                                push!(record_states,2)
+                                count_type[2] += 1
                             end
-                            push!(count_states,1)
-                        else
-
+                            state_matrix[i,j] = k
+                            found=true
+                            break
                         end
+                    end
+                    # If the state was not found in database we add the state to it
+                    if ! found
+                        push!(states,data[i,j,:])
+                        if i <= nbC
+                            push!(record_states,1)
+                            count_type[1] += 1
+                        else
+                            push!(record_states,2)
+                            count_type[2] += 1
+                        end
+                        state_matrix[i,j] = size(states)[1]+1
                     end
                 end
             end
         end
     end
+
+    # Normalizing counts into percent
+    for i=1:size(states)[1]
+        if record_states[i]
+    end
+
     return states, count_states, state_matrix
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
