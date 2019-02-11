@@ -25,11 +25,9 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-for V in Volumes
-    for T in Temperatures
 
-# T=3000
-# V=8.82
+T=3000
+V=8.82
 
 
 folder_in=string(folder_base,V,"/",T,"K/")
@@ -37,11 +35,6 @@ file=string(folder_in,"TRAJEC_wrapped.xyz")
 
 folder_out=string(folder_in,"Data/")
 #folder_out=string(folder_in)
-
-if ! isfile(string(folder_in,"TRAJEC_wrapped.xyz"))
-    continue
-end
-
 
 print("Computing Data\n")
 traj=filexyz.readFastFile(file)
@@ -83,42 +76,6 @@ for j=1:nb_states
     close(file_out)
 end
 
-statesO=defineStatesExtendedCoordinancesO()
-dataO=buildCoordinationMatrixO( traj , cell , cut_off_bond )
-state_matrix, percent, unused_percent = assignDataToStates( dataO , statesO , true)
-statesO = isolateSignificantStates( statesO, percent, cut_off_states )
-state_matrixO, percent, unused_percent = assignDataToStates( dataO , statesO , false)
-transition_matrix = transitionMatrix( statesO, state_matrixO, min_lag, max_lag, d_lag )
-transition_matrix_CK = chappmanKormologov( transition_matrix )
-writeStates(string(folder_out,"O-markov_final_states-",percent,".dat"),statesO,percent)
-
-nb_states=size(states)[1]
-
-for j=1:nb_states
-    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part1.dat"),"w")
-    for i=1:2:size(transition_matrix)[3]
-        write(file_out,string(i*unit*d_lag," "))
-        for k=1:nb_states
-            write(file_out,string(transition_matrix[j,k,i]," "))
-        end
-        write(file_out,string("\n"))
-    end
-    close(file_out)
-end
-for j=1:nb_states
-    file_out=open(string(folder_out,"O_markov_CK_test-",cut_off_bond,"-",j,"-part2.dat"),"w")
-    for i=1:size(transition_matrix_CK)[3]
-        write(file_out,string(2*i*unit*d_lag," "))
-        for k=1:nb_states
-            write(file_out,string(transition_matrix_CK[j,k,i]," "))
-        end
-        write(file_out,string("\n"))
-    end
-    close(file_out)
-end
-
-end
-end
 
 # nb_states=size(transition_matrix)[1]
 # for state=1:nb_states

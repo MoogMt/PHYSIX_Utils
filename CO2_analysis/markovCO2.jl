@@ -3,7 +3,7 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
-function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
+function buildCoordinationMatrixC( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
     n_dim=9
@@ -702,42 +702,53 @@ function defineStatesExtendedCoordinancesO()
     states[367,:]=[5.0,2.0,-1.0,-1.0,-1.0,-1.0]
     return states
 end
-function assignDataToStates( data::Array{T1,3} ) where { T1 <: Real }
+function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
     nb_data_point=size(data)[1]
-    nb_series = size(data)[2]
+    nb_series=size(data)[2]
     dim_data = size(data)[3]
-    nb_states = size(states)[1]
     state_matrix=ones(Int, nb_data_point, nb_series )*(-1)
-    count_states=zeros( nb_states )
-    unused=0
 
-    for i=1:nb_data_point
-        print("State assignement - Progress: ",i/nb_data_point*100,"%\n")
-        for j=1:nb_series
-            for l=1:nb_states
-                d=0
-                for k=1:dim_data
-                    d+= ( data[i,j,k] - states[l,k])*(data[i,j,k] - states[l,k])
+    nbc=32
+    nbO=64
+    states=zeros(Int,0,n_type*max_coord)
+    record_states=zeros(Int,0,n_type_max_coord)
+    count_states=zeros(Real,0,n_type)
+
+    for i=1:nb_series
+        print("State assignement - Progress: ",i/nb_series*100,"%\n")
+        for j=1:nb_data_point
+            if size(states)[1] == 0
+                push!(states,data[i,j,:])
+                if i <= nbC
+                    push!(record_states,1)
+                else
+                    push!(record_states,2)
                 end
-                if d == 0
-                    count_states[l] += 1
-                    state_matrix[i,j] = l
-                    break
-                end
-            end
-            if state_matrix[i,j] == -1
-                if Err
-                    print("Out ",i," ",j," ",dim_data," ")
-                    for k=1:dim_data
-                        print(data[i,j,k]," ")
+                push!(count_states,1)
+            else
+                for k=1:size(states)[1]
+                    if ( i <= nbC || record_states[k] == 1 ) && ( i > nbC || record_states[k] == 2 )
+                        dist=0
+                        for l=1:n_type*max_coord
+                            dist += (states[k,l]-data[i,j,l])*(states[k,l]-data[i,j,l])
+                        end
+                        if dist > 0
+                            push!(states,data[i,j,:])
+                            if i <= nbC
+                                push!(record_states,1)
+                            else
+                                push!(record_states,2)
+                            end
+                            push!(count_states,1)
+                        else
+
+                        end
                     end
-                    print("\n")
                 end
-                unused += 1
             end
         end
     end
-    return state_matrix, count_states/sum(count_states)*100, unused/(unused+sum(count_states))*100
+    return states, count_states, state_matrix
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
     nb_data_point=size(data)[1]
