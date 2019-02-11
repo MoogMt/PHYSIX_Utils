@@ -46,7 +46,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         # Bond Matrix
         bond_matrix=zeros(nb_atoms,nb_atoms)
         for atom1=1:nb_atoms
-            for atom2=atom1+1:nb_atom
+            for atom2=atom1+1:nb_atoms
                 if cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
                     bond_matrix[atom1,atom2]=1
                     bond_matrix[atom1,atom2]=1
@@ -89,8 +89,8 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                     if (atom1 == atom2) || (types[type] != traj[step_sim].names[atom2])
                         continue
                     end
-                    if bond_matrix[atom1,toadd+atom2] > 0
-                        coord_matrix[carbon,step_sim,count_coord]=sum(bond_matrix[toadd+atom2,:])
+                    if bond_matrix[atom1,atom2] > 0
+                        coord_matrix[carbon,step_sim,count_coord]=sum(bond_matrix[atom2,:])
                         count_coord += 1
                     end
                     if cound_coord == max_neigh
@@ -101,10 +101,10 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                 # sorting by type
                 for i=1:max_neigh-1
                     for j=i+1:max_neigh
-                        if coord_matrix[carbon,step_sim,i] < coord_matrix[carbon,step_sim,j]
-                            stock = coord_matrix[carbon,step_sim,j]
-                            coord_matrix[carbon,step_sim,j]=coord_matrix[carbon,step_sim,i]
-                            coord_matrix[carbon,step_sim,i]=stock
+                        if coord_matrix[atom1,step_sim,i] < coord_matrix[atom1,step_sim,j]
+                            stock = coord_matrix[atom1,step_sim,j]
+                            coord_matrix[atom1,step_sim,j]=coord_matrix[atom1,step_sim,i]
+                            coord_matrix[atom1,step_sim,i]=stock
                         end
                     end
                 end

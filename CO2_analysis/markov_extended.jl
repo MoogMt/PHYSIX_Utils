@@ -1,8 +1,6 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
-include(string(GPfolder,"contactmatrix.jl"))
-include(string(GPfolder,"geom.jl"))
 include(string(CO2folder,"markovCO2.jl"))
 
 # Folder for data
