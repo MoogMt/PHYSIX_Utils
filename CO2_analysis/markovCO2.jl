@@ -841,7 +841,8 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                 # Loop over recorded states
                 for k=1:size(states)[1]
                     # Check if types are coherent
-                    if ( i <= nbC || record_states[k] == 1 ) && ( i > nbC || record_states[k] == 2 )
+                    if
+                    end
                         # Compute distance between state k and data
                         dist=0
                         for l=1:nb_types*max_coord
@@ -855,7 +856,6 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                             found=true
                             break
                         end
-                    end
                     # If the state was not found in database we add the state to it
                 end
                 if ! found
