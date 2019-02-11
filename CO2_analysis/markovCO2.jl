@@ -824,7 +824,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where 
     states=zeros(Int,0,nb_types*max_coord)
     record_states=zeros(Int,0)
     percent_states=zeros(Real,0)
-    count_type=zeros(Real,2)
+    count_type=zeros(Real,nb_types)
 
     for i=1:nb_series
         print("State assignement - Progress: ",i/nb_series*100,"%\n")
@@ -832,12 +832,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where 
             # No states, initiatilization
             if size(states)[1] == 0
                 push!(states,data[i,j,:])
-                # To be generalized
-                if i <= nbC
-                    count_type[1] += 1
-                else
-                    count_type[2] += 1
-                end
+                count_type[types[i]]  =+ 1
                 push!(record_states,types[i])
                 push!(percent_states,1)
                 state_matrix[i,j] = size(states)[1]+1
@@ -854,12 +849,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where 
                         end
                         # If dist=0 then state of data was already found
                         if dist == 0
-                            # To be generalized
-                            if i <= nbC
-                                count_type[1] += 1
-                            else
-                                count_type[2] += 1
-                            end
+                            count_type[types[i]]  =+ 1
                             percent_states[k] += 1
                             state_matrix[i,j] = k
                             found=true
@@ -870,12 +860,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::T3 ) where 
                 end
                 if ! found
                     push!(states,data[i,j,:])
-                    # To be generalized
-                    if i <= nbC
-                        count_type[1] += 1
-                    else
-                        count_type[2] += 1
-                    end
+                    count_type[types[i]]  =+ 1
                     push!(record_states,types[i])
                     push!(percent_states,1)
                     state_matrix[i,j] = size(states)[1]+1
