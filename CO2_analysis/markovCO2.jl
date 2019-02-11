@@ -30,7 +30,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
     nb_type=size(types)[1]
     type_list=zeros(nb_atoms)
     for i=1:nb_atoms
-        for j=1:nb_types
+        for j=1:nb_type
             if traj[1].names[i] == types[j]
                 type_list[i]=j
             end
