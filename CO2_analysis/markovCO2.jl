@@ -841,21 +841,22 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                 # Loop over recorded states
                 for k=1:size(states)[1]
                     # Check if types are coherent
-                    if
+                    if types[i] == record_states[k]
+
                     end
-                        # Compute distance between state k and data
-                        dist=0
-                        for l=1:nb_types*max_coord
-                            dist += (states[k,l]-data[i,j,l])*(states[k,l]-data[i,j,l])
-                        end
-                        # If dist=0 then state of data was already found
-                        if dist == 0
-                            count_type[types[i]]  =+ 1
-                            percent_states[k] += 1
-                            state_matrix[i,j] = k
-                            found=true
-                            break
-                        end
+                    # Compute distance between state k and data
+                    dist=0
+                    for l=1:dim_data
+                        dist += (states[k,l]-data[i,j,l])*(states[k,l]-data[i,j,l])
+                    end
+                    # If dist=0 then state of data was already found
+                    if dist == 0
+                        count_type[types[i]]  =+ 1
+                        percent_states[k] += 1
+                        state_matrix[i,j] = k
+                        found=true
+                        break
+                    end
                     # If the state was not found in database we add the state to it
                 end
                 if ! found
@@ -871,7 +872,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
 
     # Normalizing counts into percent
     for i=1:size(states)[1]
-        for j=1:nb_type
+        for j=1:nb_types
             if record_states[i] == j
                 percent_states /= count_type[j]
             end
