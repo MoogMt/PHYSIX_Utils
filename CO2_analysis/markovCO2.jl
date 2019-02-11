@@ -3,6 +3,125 @@ GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(GPfolder,"contactmatrix.jl"))
 include(string(GPfolder,"geom.jl"))
 
+function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, max_neighbour::T4 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real, T4 <: Int }
+    nb_atoms=size(traj[1].names)[1]
+    nb_steps=size(traj)[1]
+
+    types=[traj[1].names[1]]
+    types_number=ones(1)
+    count_types=zeros(Int,1)
+    for i=1:nb_atoms
+        found=false
+        for j=1:size(types)[1]
+            if types[j] = traj[1].names[i]
+                count_types[j] += 1
+                found=true
+            end
+        end
+        if ! found
+            push!(types,traj[1].names[i])
+            push!(types_number,size(types)[1])
+            push!(count_types,1)
+        end
+    end
+    nb_type=size(types)[1]
+
+    coord_matrix=ones(nb_steps,nb_atoms,max_neigh*nb_type)*(-1)
+    for step_sim=1:nb_steps
+
+        print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
+
+        # Bond Matrix
+        bond_matrix=zeros(nb_atoms,nb_atoms)
+        for atom1=1:nb_atoms
+            for atom2=atom1+1:nb_atom
+                if cell_mod.distance( traj[step_sim], cell, atom1, atom2) < cut_off_bond
+                    bond_matrix[atom1,atom2]=1
+                    bond_matrix[atom1,atom2]=1
+                end
+            end
+        end
+        # Cleaning weird 3-member rings
+        for atom1=1:nb_atoms-1
+            for atom2=atom1+1:nb_atoms
+                if bond_matrix[atom1,atom2] == 1
+                    # For each bonded pair of atoms, check whether they are
+                    # both bonded to another atom, forming unatural 3-member
+                    # ring
+                    for atom3=1:nb_atoms
+                        if atom3 == atom1 || atom3 == atom1
+                            continue
+                        end
+                        if bond_matrix[atom3,atom1] == 1 && bond_matrix[atom3,atom2] == 1
+                            if cell_mod.distance(traj[step_sim],cell,atom1,atom3) > cell_mod.distance(traj[step_sim],cell,atom1,atom2) && cell_mod.distance(traj[step_sim],cell,atom1,atom3) > cell_mod.distance(traj[step_sim],cell,atom2,atom3)
+                                bond_matrix[atom1,atom3]=0
+                                bond_matrix[atom3,atom1]=0
+                            elseif cell_mod.distance(traj[step_sim],cell,atom1,atom2) > cell_mod.distance(traj[step_sim],cell,atom2,atom3)
+                                bond_matrix[atom1,atom2]=0
+                                bond_matrix[atom2,atom1]=0
+                            else
+                                bond_matrix[atom2,atom3]=0
+                                bond_matrix[atom3,atom2]=0
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        # Compute coord matrix
+        for atom1=1:nb_atoms
+
+
+
+
+            # compute coord
+            count_coord=1
+
+
+
+
+
+
+            for atom2=1:nb_atoms
+                if atom1 == carbon2
+                    continue
+                end
+                if bond_matrix[carbon,carbon2] > 0
+                    coord_matrix[step_sim,carbon,count_coord]=sum(bond_matrix[carbon2,:])
+                    count_coord += 1
+                end
+            end
+            count_coord=1
+            for oxygen=1:nbO
+                if bond_matrix[carbon,nbC+oxygen] > 0
+                    coord_matrix[step_sim,carbon,4+count_coord]=sum(bond_matrix[nbC+oxygen,:])
+                    count_coord += 1
+                end
+            end
+            # sort coord
+            for i=1:4
+                for j=i+1:4
+                    if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
+                        stock=coord_matrix[step_sim,carbon,i]
+                        coord_matrix[step_sim,carbon,i]=coord_matrix[step_sim,carbon,j]
+                        coord_matrix[step_sim,carbon,j]=stock
+                    end
+                end
+            end
+            for i=5:n_dim
+                for j=i+1:n_dim
+                    if coord_matrix[step_sim,carbon,i] < coord_matrix[step_sim,carbon,j]
+                        stock=coord_matrix[step_sim,carbon,i]
+                        coord_matrix[step_sim,carbon,i]=coord_matrix[step_sim,carbon,j]
+                        coord_matrix[step_sim,carbon,j]=stock
+                    end
+                end
+            end
+        end
+    end
+    return coord_matrix
+end
 function buildCoordinationMatrixC( traj::Vector{T1}, cell::T2, cut_off_bond::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Real }
     nb_atoms=size(traj[1].names)[1]
     nb_steps=size(traj)[1]
@@ -721,6 +840,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
             # No states, initiatilization
             if size(states)[1] == 0
                 push!(states,data[i,j,:])
+                # To be generalized
                 if i <= nbC
                     count_type[1] += 1
                     push!(record_states,1)
@@ -742,6 +862,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
                         end
                         # If dist=0 then state of data was already found
                         if dist == 0
+                            # To be generalized
                             if i <= nbC
                                 count_type[1] += 1
                             else
@@ -756,6 +877,7 @@ function assignDataToStates( data::Array{T1,3}, max_coord::T2, n_type::T3 ) wher
                     # If the state was not found in database we add the state to it
                     if ! found
                         push!(states,data[i,j,:])
+                        # To be generalized
                         if i <= nbC
                             push!(record_states,1)
                             count_type[1] += 1
