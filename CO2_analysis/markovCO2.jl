@@ -808,7 +808,7 @@ function defineStatesExtendedCoordinancesO()
     states[367,:]=[5.0,2.0,-1.0,-1.0,-1.0,-1.0]
     return states
 end
-function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} ) where { T1 <: Real, T2 <: Int , T3 <: Int }
+function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vector{T3} ) where { T1 <: Real, T2 <: Int , T3 <: Int }
 
     nb_series = size(data)[1]
     nb_steps  = size(data)[2]
@@ -826,8 +826,8 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
             # No states, initiatilization
             if size(states)[1] == 0
                 states=vcat(states,transpose(data[i,j,:]))
-                count_type[types[i]] = count_type[types[i]]+ 1
-                push!(record_states,types[i])
+                count_type[types_number[i]] = count_type[types_number[i]]+ 1
+                push!(record_states,types_number[i])
                 push!(percent_states,1)
                 state_matrix[i,j] = size(states)[1]+1
             else
@@ -835,7 +835,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                 # Loop over recorded states
                 for k=1:size(states)[1]
                     # Check if types are coherent
-                    if types[i] == record_states[k]
+                    if types_number[i] == record_states[k]
 
                     end
                     # Compute distance between state k and data
@@ -845,7 +845,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                     end
                     # If dist=0 then state of data was already found
                     if dist == 0
-                        count_type[types[i]]  = count_type[types[i]] + 1
+                        count_type[types_number[i]]  = count_type[types_number[i]] + 1
                         percent_states[k] += 1
                         state_matrix[i,j] = k
                         found=true
@@ -855,8 +855,8 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types::Vector{T3} 
                 end
                 if ! found
                     states=vcat(states,transpose(data[i,j,:]))
-                    count_type[types[i]] = count_type[types[i]] + 1
-                    push!(record_states,types[i])
+                    count_type[types_number[i]] = count_type[types_number[i]] + 1
+                    push!(record_states,types_number[i])
                     push!(percent_states,1)
                     state_matrix[i,j] = size(states)[1]+1
                 end
@@ -981,7 +981,7 @@ function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real
     end
     return transition_matrix_kolmo
 end
-function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}) where { T1 <: AbstractString, T2 <: Real, T3 <: Real }
+function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types::Vector{T4}, type_list::Vector{T5} ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real , T4 <: AbstractString, T5 <: Int }
     file_out=open(file,"w")
     n_dim = size( states)[2]
     nb_states=size(states)[1]
@@ -989,7 +989,7 @@ function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}) where
         for j=1:n_dim
             write(file_out,string(states[i,j]," "))
         end
-        write(file_out,string(percent[i],"\n"))
+        write(file_out,string(percent[i]," ",types[type_list[i]],"\n"))
     end
     close(file_out)
     return
