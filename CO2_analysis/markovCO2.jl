@@ -877,7 +877,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
         percent_states[i] = percent_states[i]*100
     end
 
-    return states, percent_states, state_matrix
+    return states, percent_states, state_matrix, record_states
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
     nb_series = size(data)[1]

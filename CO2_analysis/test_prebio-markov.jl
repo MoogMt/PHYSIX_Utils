@@ -36,9 +36,9 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
-data,types,type_list=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
-states, percent, state_matrix = assignDataToStates( data, size(types)[1], type_list )
-writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
+data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
+states, percent, state_matrix, type_states = assignDataToStates( data, size(types)[1], type_atoms )
+writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 
 cut_off_states = 0.1
 states = isolateSignificantStates( states, percent, cut_off_states )
