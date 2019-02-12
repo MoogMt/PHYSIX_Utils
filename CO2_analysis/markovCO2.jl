@@ -942,12 +942,12 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
     count_lag=1
     for lag=min_lag:d_lag:max_lag-1
         print("Chappman Kolmogorov Test - Progress: ",lag/max_lag*100,"%\n")
-        for j=1:nb_series
-            for i=lag+1:nb_steps
-                if  state_matrix[j-lag,i] == -1 ||  state_matrix[j,i] == -1
+        for i=1:nb_series
+            for j=lag+1:nb_steps
+                if state_matrix[i,j-lag] == -1 || state_matrix[i,j] == -1
                     continue
                 end
-                states_transition_probability[ state_matrix[j-lag,i], state_matrix[j,i], count_lag ] += 1
+                states_transition_probability[ state_matrix[i,j-lag], state_matrix[i,j], count_lag ] += 1
             end
         end
         count_lag += 1
@@ -956,9 +956,9 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
     # Normalization
     for lag=1:nb_lag_points
         for i=1:nb_states
-            sum=sum( states_transition_probability[i,:,lag] )
-            if sum != 0
-                states_transition_probability[i,:,lag] /= sum( states_transition_probability[i,:,lag] )
+            sum_transition=sum( states_transition_probability[i,:,lag] )
+            if sum_transition != 0
+                states_transition_probability[i,:,lag] /= sum_transition
             end
         end
     end
