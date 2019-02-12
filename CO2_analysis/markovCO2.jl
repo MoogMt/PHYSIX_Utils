@@ -884,7 +884,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) 
     nb_steps=size(data)[2]
     dim_data = size(data)[3]
     nb_states = size(states)[1]
-    state_matrix=ones(Int, nb_steps, nb_series )*(-1)
+    state_matrix=ones(Int, nb_series, nb_steps )*(-1)
     count_states=zeros( nb_states )
     unused=0
     #6236 34 1 4.0 2 3.0 3 3.0 4 -1.0 5 -1.0 6 -1.0
@@ -956,7 +956,10 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
     # Normalization
     for lag=1:nb_lag_points
         for i=1:nb_states
-            states_transition_probability[i,:,lag] /= sum( states_transition_probability[i,:,lag] )
+            sum=sum( states_transition_probability[i,:,lag] )
+            if sum != 0
+                states_transition_probability[i,:,lag] /= sum( states_transition_probability[i,:,lag] )
+            end
         end
     end
 
