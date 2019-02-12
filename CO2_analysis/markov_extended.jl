@@ -29,11 +29,18 @@ T=3000
 V=8.82
 
 
+for V in Volumes
+    for T in Temperatures
+
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
 
 folder_out=string(folder_in,"Data/")
 #folder_out=string(folder_in)
+
+if ! isfile(file)
+    continue
+end
 
 print("Computing Data\n")
 traj=filexyz.readFastFile(file)
@@ -53,3 +60,29 @@ transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_
 transition_matrix_CK = chappmanKormologov( transition_matrix )
 
 nb_states=size(states)[1]
+
+for j=1:nb_states
+    file_out=open(string(folder_out,"markov_CK_test-All-",cut_off_bond,"-",j,"-part1.dat"),"w")
+    for i=1:2:size(transition_matrix)[3]
+        write(file_out,string(i*unit*d_lag," "))
+        for k=1:nb_states
+            write(file_out,string(transition_matrix[j,k,i]," "))
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+end
+for j=1:nb_states
+    file_out=open(string(folder_out,"markov_CK_test-All-",cut_off_bond,"-",j,"-part2.dat"),"w")
+    for i=1:size(transition_matrix_CK)[3]
+        write(file_out,string(2*i*unit*d_lag," "))
+        for k=1:nb_states
+            write(file_out,string(transition_matrix_CK[j,k,i]," "))
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+end
+
+end
+end
