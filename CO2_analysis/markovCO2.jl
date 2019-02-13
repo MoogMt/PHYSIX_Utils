@@ -879,7 +879,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
 
     return states, percent_states, state_matrix, record_states
 end
-function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::T3 , type_states::Vector{T4}, type_atoms::T5, Err::T6 ) where { T1 <: Real, T2 <: Real , T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Bool }
+function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::T3 , type_states::Vector{T4}, type_atoms::Vector{T5}, Err::T6 ) where { T1 <: Real, T2 <: Real , T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Bool }
     nb_series = size(data)[1]
     nb_steps  = size(data)[2]
     dim_data  = size(data)[3]
@@ -890,7 +890,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
     unused=0
 
     for j=1:nb_steps
-        print("Assigning data to states - Progress: ",i/nb_steps*100,"%\n")
+        print("Assigning data to states - Progress: ",j/nb_steps*100,"%\n")
         for i=1:nb_series
             for l=1:nb_states
                 if type_atoms[i] != type_states[l]
@@ -920,7 +920,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
         end
     end
 
-    for i=1:size(type_atoms)[1]
+    for i=1:size(type_states)[1]
         percent_states[i] /=  count_types[type_atoms[i]]*100
     end
 
