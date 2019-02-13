@@ -40,8 +40,8 @@ data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_n
 states, percent, state_matrix, type_states = assignDataToStates( data, size(types)[1], type_atoms )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 
-cut_off_states = 10
-states, type_states = isolateSignificantStates( states, percent,  type_states, cut_off_states )
+cut_off_states = 5
+states, type_states = isolateSignificantStates( states, percent, cut_off_states, type_states )
 state_matrix, percent, unused_percent = assignDataToStates( data , states , false)
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_list)
 

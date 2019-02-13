@@ -917,12 +917,12 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) 
     end
     return state_matrix, count_states/sum(count_states)*100, unused/(unused+sum(count_states))*100
 end
-function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, type_states::Vector{T3}, cut_off_states::T4 ) where { T1 <: Real, T2 <: Real,  T3 <: Int , T4 <: Real}
+function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, cut_off_states::T3, type_states::Vector{T4} ) where { T1 <: Real, T2 <: Real, T3 <: Real,  T4 <: Int }
     old_nb_states=size(old_states)[1]
     dim=size(old_states)[2]
     new_nb_states=0
     states_kept=zeros(0,dim)
-    types_states_kept=[]
+    types_states_kept=zeros(Int,0)
     for i=1:old_nb_states
         if percent_states[i] > cut_off_states
             states_kept=[ states_kept ; transpose( old_states[i,:]) ]
