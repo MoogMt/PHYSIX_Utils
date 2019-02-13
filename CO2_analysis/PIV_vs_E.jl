@@ -29,7 +29,7 @@ V=8.82
 
 
 folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC_wrapped.xyz")
+file=string(folder_in,"/1-run/PIV_test/TRAJEC_test.xyz")
 
 folder_out=string(folder_in,"Data/")
 
@@ -37,39 +37,44 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
-n_structure=100
+stride2=10
+nb_steps=size(traj)[1]
+traj=traj[1:stride2:nb_steps]
 
-traj=traj[1:n_structure]
+nb_structure=size(traj)[1]
 
 file_energy=open(string(folder_in,"1-run/PIV_test/eks"))
 lines=readlines(file_energy)
 close(file_energy)
 
-energy=zeros(n_structure)
-for i=1:n_structure
-    energy[i] = parse(Float64,split(lines[i])[3])
+energy=zeros(nb_structure)
+count_=1
+for i=1:stride2:nb_steps
+    energy[count_] = parse(Float64,split(lines[i])[3])
+    global count_ += 1
 end
 
 file_matrix=open(string(folder_in,"1-run/PIV_test/FRAME_TO_FRAME.MATRIX"))
 lines=readlines(file_matrix)
 close(file_matrix)
 
-
-distances=zeros(n_structure,n_structure)
-for i=1:n_structure
+distances=zeros(nb_structure,nb_structure)
+count_=1
+for i=1:stride2:nb_steps
     print("Progress: ",i/n_test*100,"%\n")
-    for j=1:n_structure
-        distances[i,j]=parse(Float64,split(lines[i+1])[j])
+    count2=1
+    for j=1:stride2:nb_steps
+        distances[count_,count2]=parse(Float64,split(lines[i+1])[j])
+        count2 += 1
     end
+    global count_ += 1
 end
 
 file_out=open(string(folder_in,"1-run/PIV_test/test.dat"),"w")
 for i=1:n_structure
     print("Progress: ",i/n_structure*100,"%\n")
     for j=1:n_structure
-        if abs(energy[i]-energy[j])*13.6 < 2 && distances[i,j] < 0.3
-            write(file_out,string(distances[i,j]," ",abs(energy[i]-energy[j]),"\n"))
-        end
+        write(file_out,string(distances[i,j]," ",abs(energy[i]-energy[j]),"\n"))
     end
 end
 close(file_out)
