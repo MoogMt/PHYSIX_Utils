@@ -901,8 +901,8 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
                     d+= ( data[i,j,k] - states[l,k])*(data[i,j,k] - states[l,k])
                 end
                 if d == 0
-                    percent_states[l] += 1
-                    count_types[type_atoms[i]] += 1
+                    percent_states[l] = percent_states[l] + 1
+                    count_types[type_atoms[i]] = count_types[type_atoms[i]] + 1
                     state_matrix[i,j] = l
                     break
                 end
