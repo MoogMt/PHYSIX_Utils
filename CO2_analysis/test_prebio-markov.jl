@@ -20,8 +20,8 @@ cut_off_bond = 1.75
 max_neigh=5
 
 min_lag=1
-max_lag=5001
-d_lag=5
+max_lag=2001
+d_lag=2
 unit=0.005
 
 folder_in=folder_base
@@ -40,8 +40,8 @@ data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_n
 states, percent, state_matrix, type_states = assignDataToStates( data, size(types)[1], type_atoms )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 
-cut_off_states = 0.1
-states = isolateSignificantStates( states, percent, cut_off_states )
+cut_off_states = 10
+states, type_states = isolateSignificantStates( states, percent,  type_states, cut_off_states )
 state_matrix, percent, unused_percent = assignDataToStates( data , states , false)
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_list)
 
@@ -72,7 +72,4 @@ for j=1:nb_states
         write(file_out,string("\n"))
     end
     close(file_out)
-end
-
-end
 end
