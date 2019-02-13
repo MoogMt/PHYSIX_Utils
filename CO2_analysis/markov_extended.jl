@@ -29,8 +29,8 @@ T=3000
 V=8.82
 
 
-for V in Volumes
-    for T in Temperatures
+# for V in Volumes
+#     for T in Temperatures
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -38,22 +38,22 @@ file=string(folder_in,"TRAJEC_wrapped.xyz")
 folder_out=string(folder_in,"Data/")
 #folder_out=string(folder_in)
 
-if ! isfile(file)
-    continue
-end
+# if ! isfile(file)
+#     continue
+# end
 
 print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
-data,types,type_list=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
-states, percent, state_matrix = assignDataToStates( data, size(types)[1], type_list )
-writeStates(string(folder_out,"markov_initial_states.dat"),states,percent)
+data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
+states, percent, state_matrix, type_states = assignDataToStates( data, size(types)[1], type_atoms )
+writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 
-cut_off_states = 0.1
-states = isolateSignificantStates( states, percent, cut_off_states )
+cut_off_states = 1
+states, type_states = isolateSignificantStates( states, percent, cut_off_states, type_states )
 state_matrix, percent, unused_percent = assignDataToStates( data , states , false)
-writeStates(string(folder_out,"markov_final_states-",percent,".dat"),states,percent)
+writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_list)
 
 # Checking chappmanKormologov
 transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
@@ -84,5 +84,5 @@ for j=1:nb_states
     close(file_out)
 end
 
-end
-end
+# end
+# end
