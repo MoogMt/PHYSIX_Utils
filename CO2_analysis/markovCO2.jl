@@ -835,8 +835,8 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
                 # Loop over recorded states
                 for k=1:size(states)[1]
                     # Check if types are coherent
-                    if types_number[i] == record_states[k]
-
+                    if types_number[i] != record_states[k]
+                        continue
                     end
                     # Compute distance between state k and data
                     dist=0
@@ -879,7 +879,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
 
     return states, percent_states, state_matrix, record_states
 end
-function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) where { T1 <: Real, T2 <: Real , T3 <: Bool }
+function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::T3 , type_states::Vector{T4}, type_atoms::T5, Err::T6 ) where { T1 <: Real, T2 <: Real , T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Bool }
     nb_series = size(data)[1]
     nb_steps=size(data)[2]
     dim_data = size(data)[3]
@@ -887,12 +887,14 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , Err::T3 ) 
     state_matrix=ones(Int, nb_series, nb_steps )*(-1)
     count_states=zeros( nb_states )
     unused=0
-    #6236 34 1 4.0 2 3.0 3 3.0 4 -1.0 5 -1.0 6 -1.0
 
     for j=1:nb_steps
-        #print("Assigning data to states - Progress: ",i/nb_steps*100,"%\n")
+        print("Assigning data to states - Progress: ",i/nb_steps*100,"%\n")
         for i=1:nb_series
             for l=1:nb_states
+                if type_atoms[i] != type_states[l]
+                    continue
+                end
                 d=0
                 for k=1:dim_data
                     d+= ( data[i,j,k] - states[l,k])*(data[i,j,k] - states[l,k])
