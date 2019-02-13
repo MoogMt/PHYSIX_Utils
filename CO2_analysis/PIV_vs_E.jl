@@ -37,7 +37,7 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
-n_structure=4001
+n_structure=100
 
 traj=traj[1:n_structure]
 
@@ -55,9 +55,8 @@ lines=readlines(file_matrix)
 close(file_matrix)
 
 
-n_test=1000
-distances=zeros(n_test,n_structure)
-for i=1:n_test
+distances=zeros(n_structure,n_structure)
+for i=1:n_structure
     print("Progress: ",i/n_test*100,"%\n")
     for j=1:n_structure
         distances[i,j]=parse(Float64,split(lines[i+1])[j])
@@ -65,8 +64,8 @@ for i=1:n_test
 end
 
 file_out=open(string(folder_in,"1-run/PIV_test/test.dat"),"w")
-for i=1:n_test
-    print("Progress: ",i/n_test*100,"%\n")
+for i=1:n_structure
+    print("Progress: ",i/n_structure*100,"%\n")
     for j=1:n_structure
         if abs(energy[i]-energy[j])*13.6 < 2 && distances[i,j] < 0.3
             write(file_out,string(distances[i,j]," ",abs(energy[i]-energy[j]),"\n"))

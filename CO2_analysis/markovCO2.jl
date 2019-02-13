@@ -921,7 +921,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
     end
 
     for i=1:size(type_states)[1]
-        percent_states[i] /=  count_types[type_atoms[i]]*100
+        percent_states[i] /=  count_types[type_states[i]]*100
     end
 
     return state_matrix, percent_states
