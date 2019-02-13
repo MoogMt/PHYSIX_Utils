@@ -881,11 +881,12 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::T3 , type_states::Vector{T4}, type_atoms::T5, Err::T6 ) where { T1 <: Real, T2 <: Real , T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Bool }
     nb_series = size(data)[1]
-    nb_steps=size(data)[2]
-    dim_data = size(data)[3]
+    nb_steps  = size(data)[2]
+    dim_data  = size(data)[3]
     nb_states = size(states)[1]
     state_matrix=ones(Int, nb_series, nb_steps )*(-1)
-    count_states=zeros( nb_states )
+    percent_states=zeros(Real, nb_states )
+    count_types=zeros(Real, nb_types)
     unused=0
 
     for j=1:nb_steps
@@ -900,7 +901,8 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
                     d+= ( data[i,j,k] - states[l,k])*(data[i,j,k] - states[l,k])
                 end
                 if d == 0
-                    count_states[l] += 1
+                    percent_states[l] += 1
+                    count_types[type_atoms[i]] += 1
                     state_matrix[i,j] = l
                     break
                 end
@@ -917,7 +919,12 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
             end
         end
     end
-    return state_matrix, count_states/sum(count_states)*100, unused/(unused+sum(count_states))*100
+
+    for i=1:size(type_atoms)[1]
+        percent_states[i] /=  count_types[type_atoms[i]]*100
+    end
+
+    return state_matrix, percent_states
 end
 function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vector{T2}, cut_off_states::T3, type_states::Vector{T4} ) where { T1 <: Real, T2 <: Real, T3 <: Real,  T4 <: Int }
     old_nb_states=size(old_states)[1]

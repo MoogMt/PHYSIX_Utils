@@ -52,7 +52,7 @@ writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,
 
 cut_off_states = 1
 states, type_states = isolateSignificantStates( states, percent, cut_off_states, type_states )
-state_matrix, percent, unused_percent = assignDataToStates( data , states , size(types)[1], type_states, false)
+state_matrix, percent = assignDataToStates( data , states , size(types)[1], type_states, type_atoms, false)
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_list)
 
 # Checking chappmanKormologov
