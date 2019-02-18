@@ -14,17 +14,17 @@ Temperatures=[2000,2500,3000]
 Cut_Off=[1.75]
 
 T=2000
-V=9.8
+V=8.82
 
 n_run=1
 
 folder_in=string(folder_base,V,"/",T,"K/",n_run,"-run/")
 
 print("Computing Data\n")
-traj=filexyz.readFastFile(string(folder_in,"TRAJEC_copy.xyz"))
+traj=filexyz.readFastFile(string(folder_in,"TRAJEC.xyz"))
 cell=cell_mod.Cell_param(V,V,V)
 
-traj=traj[1:100]
+traj=traj[1:2000]
 nb_structure=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 nbC=32
@@ -106,7 +106,7 @@ end
 
 d0=1.8
 n=12
-m=18
+m=25
 distances=zeros(nb_structure,nb_structure)
 for step1=1:nb_structure
     print("Computing distance matrix: ",step1/nb_structure*100,"%\n")
@@ -128,7 +128,7 @@ for i=1:nb_structure
     energy[i] = parse(Float64,split(lines[i])[3])
 end
 
-file_out=open(string(folder_in,"PIV_1/result.dat"),"w")
+file_out=open(string(folder_in,"PIV_1/results",d0,"-",n,"-",m,".dat"),"w")
 for i=1:nb_structure
     print("Progress: ",i/nb_structure*100,"%\n")
     for j=i+1:nb_structure

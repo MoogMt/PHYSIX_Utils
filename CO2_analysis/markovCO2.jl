@@ -886,7 +886,6 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
     nb_states = size(states)[1]
     state_matrix=ones(Int, nb_series, nb_steps )*(-1)
     percent_states=zeros(Real, nb_states )
-    count_types=zeros(Real, nb_types)
     unused=0
 
     for j=1:nb_steps
@@ -902,7 +901,6 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
                 end
                 if d == 0
                     percent_states[l] = percent_states[l] + 1
-                    count_types[type_atoms[i]] = count_types[type_atoms[i]] + 1
                     state_matrix[i,j] = l
                     break
                 end
@@ -920,9 +918,20 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
         end
     end
 
-    # for i=1:size(type_states)[1]
-    #     percent_states[i] /=  count_types[type_states[i]]*100
-    # end
+    # Counting the number of participant states for each type
+    type_count=zeros(nb_types)
+    for type=1:nb_types
+        for state=1:nb_states
+            if type_states[state] == type
+                type_count[type] += percent_states[state]
+            end
+        end
+    end
+
+    # Normalizing
+    for state=1:nb_states
+         percent_states[state] = percent_states[state]/type_count[type_states[state]]*100
+    end
 
     return state_matrix, percent_states
 end
