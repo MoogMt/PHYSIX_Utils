@@ -24,11 +24,6 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-
-T=3000
-V=8.82
-
-
 for V in Volumes
     for T in Temperatures
 
@@ -38,9 +33,9 @@ file=string(folder_in,"TRAJEC_wrapped.xyz")
 folder_out=string(folder_in,"Data/")
 #folder_out=string(folder_in)
 
-# if ! isfile(file)
-#     continue
-# end
+if ! isfile(file)
+    continue
+end
 
 print("Computing Data\n")
 traj=filexyz.readFastFile(file)
