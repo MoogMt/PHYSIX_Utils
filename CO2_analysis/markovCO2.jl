@@ -1005,6 +1005,13 @@ function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types
     file_out=open(file,"w")
     n_dim = size( states)[2]
     nb_states=size(states)[1]
+    nb_types=size(types)[1]
+    for i=1:nb_types
+        for j=1:Int(n_dim/nb_types)
+            write(file_out,string(types[i]," "))
+        end
+    end
+    write(file_out,string("\n"))
     for i=1:nb_states
         for j=1:n_dim
             write(file_out,string(states[i,j]," "))

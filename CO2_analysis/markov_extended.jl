@@ -56,8 +56,8 @@ state_matrix, percent = assignDataToStates( data , states , size(types)[1], type
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_states)
 
 # Checking chappmanKormologov
-transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
-transition_matrix_CK = chappmanKormologov( transition_matrix )
+# transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
+# transition_matrix_CK = chappmanKormologov( transition_matrix )
 
 nb_states=size(states)[1]
 
