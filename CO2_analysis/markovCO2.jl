@@ -958,7 +958,7 @@ function writeStateMatrix( file::T1, state_matrix::Array{T2,2}) where { T1 <: Ab
         for serie=1:nb_series
             write(file_out,string(state_matrix[serie,step]," "))
         end
-        write(file_out,string("\n")
+        write(file_out,string("\n"))
     end
     close(file_out)
     return
