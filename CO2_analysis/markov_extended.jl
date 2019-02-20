@@ -8,8 +8,8 @@ folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 #folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
-Volumes=[8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
-Temperatures=[2000,2500,3000]
+Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+Temperatures=[1750,2000,2500,3000]
 Cut_Off=[1.75]
 
 # Number of atoms
@@ -24,8 +24,8 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-for V in Volumes
-    for T in Temperatures
+# for V in Volumes
+#     for T in Temperatures
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -49,9 +49,9 @@ cut_off_states = 0.1
 states, type_states = isolateSignificantStates( states, percent, cut_off_states, type_states )
 state_matrix, percent = assignDataToStates( data , states , size(types)[1], type_states, type_atoms, false)
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_states)
-
-end
-end
+#
+# end
+# end
 
 # Checking chappmanKormologov
 # transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )

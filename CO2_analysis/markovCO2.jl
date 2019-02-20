@@ -35,7 +35,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         end
     end
     # Actual computation of the coordination matrix
-    coord_matrix=ones(nb_atoms,nb_steps,max_neigh*nb_type)*(-1)
+    coord_matrix=zeros(nb_atoms,nb_steps,max_neigh*nb_type)
     for step_sim=1:nb_steps
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
         # Bond Matrix
@@ -813,7 +813,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
     nb_series = size(data)[1]
     nb_steps  = size(data)[2]
     dim_data  = size(data)[3]
-    state_matrix=ones(Int, nb_series, nb_steps )*(-1)
+    state_matrix=zeros(Int, nb_series, nb_steps )
 
     states=zeros(Int,0,dim_data)
     record_states=zeros(Int,0)
@@ -884,7 +884,7 @@ function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::
     nb_steps  = size(data)[2]
     dim_data  = size(data)[3]
     nb_states = size(states)[1]
-    state_matrix=ones(Int, nb_series, nb_steps )*(-1)
+    state_matrix=zeros(Int, nb_series, nb_steps )
     percent_states=zeros(Real, nb_states )
     unused=0
 
@@ -1008,13 +1008,13 @@ function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types
     nb_types=size(types)[1]
     for i=1:nb_types
         for j=1:Int(n_dim/nb_types)
-            write(file_out,string(types[i]," "))
+            write(file_out,string(types[i],"  "))
         end
     end
     write(file_out,string("\n"))
     for i=1:nb_states
         for j=1:n_dim
-            write(file_out,string(states[i,j]," "))
+            write(file_out,string(Int(states[i,j])," "))
         end
         write(file_out,string(percent[i]," ",types[type_list[i]],"\n"))
     end
