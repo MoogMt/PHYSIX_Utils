@@ -949,20 +949,6 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     end
     return states_kept, types_states_kept
 end
-function writeStateMatrix( file::T1, state_matrix::Array{T2,2}) where { T1 <: AbstractString, T2 <: Real }
-    nb_steps=size(state_matrix)[1]
-    nb_series=size(state_matrix)[2]
-    file_out=open(file,"w")
-    for step=1:nb_steps
-        write(file_out,string(step," "))
-        for serie=1:nb_series
-            write(file_out,string(state_matrix[serie,step]," "))
-        end
-        write(file_out,string("\n"))
-    end
-    close(file_out)
-    return
-end
 function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_states::Vector{T3}, min_lag::T4, max_lag::T5, d_lag::T6) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Int, T6 <: Int }
 
     nb_states=size(states)[1]
@@ -974,9 +960,9 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
     nb_type=1
     type=ones(Int,1)*type_states[1]
     type_count=ones(Int,1)
-    for i=2:size(type_states)
+    for i=2:size(type_states)[1]
         found=false
-        for j=1:size(type)
+        for j=1:size(type)[1]
             if type[j] == type_states[i]
                 type_count[j] += 1
                 found=true
@@ -998,7 +984,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
         for lag=min_lag:d_lag:max_lag-1
             print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
             count_serie=1
-            for i=1:nb_series
+            for i=1:nb_states
                 if type_states[i] == type
                     continue
                 end
@@ -1006,7 +992,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
                     if state_matrix[i,j-lag] == -1 || state_matrix[i,j] == -1
                         continue
                     end
-                    states_transition_probability[ state_matrix[count_serie,j-lag], state_matrix[count_serie,j], count_lag ] += 1
+                    state_transition_probability[ state_matrix[count_serie,j-lag], state_matrix[count_serie,j], count_lag ] += 1
                 end
                 count_serie += 1
             end
@@ -1019,7 +1005,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
             for i=1:type_count[type]
                 sum_transition=sum( states_transition_probability[i,:,lag] )
                 if sum_transition != 0
-                    states_transition_probability[i,:,lag] /= sum_transition
+                    state_transition_probability[i,:,lag] /= sum_transition
                 end
             end
         end
@@ -1063,6 +1049,20 @@ function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types
             write(file_out,string(Int(states[i,j])," "))
         end
         write(file_out,string(percent[i],"\n"))
+    end
+    close(file_out)
+    return
+end
+function writeStateMatrix( file::T1, state_matrix::Array{T2,2}) where { T1 <: AbstractString, T2 <: Real }
+    nb_steps=size(state_matrix)[1]
+    nb_series=size(state_matrix)[2]
+    file_out=open(file,"w")
+    for step=1:nb_steps
+        write(file_out,string(step," "))
+        for serie=1:nb_series
+            write(file_out,string(state_matrix[step,serie]," "))
+        end
+        write(file_out,string("\n"))
     end
     close(file_out)
     return
