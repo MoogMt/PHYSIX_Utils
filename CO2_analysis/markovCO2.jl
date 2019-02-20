@@ -973,17 +973,15 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
         state_transition_probability=zeros( nb_states_loc, nb_states_loc, nb_lag_points )
         count_lag=1
         for lag=min_lag:d_lag:max_lag-1
-            #print("Computing Transition Matrix - Type: ",type," - Progress: ",lag/max_lag*100,"%\n")
-            count_serie=1
+            print("Computing Transition Matrix - Type: ",type," - Progress: ",lag/max_lag*100,"%\n")
             for serie=1:nb_series
                 if type_series[serie] == type
                     for j=lag+1:nb_steps
-                        if state_matrix[count_serie,j-lag] == 0 || state_matrix[count_serie,j] == 0
+                        if state_matrix[serie,j-lag] == 0 || state_matrix[serie,j] == 0
                             continue
                         end
-                        state_transition_probability[ state_matrix[count_serie,j-lag]-sum(count_states[1:type-1]), state_matrix[count_serie,j]-sum(count_states[1:type-1]), count_lag ] += 1
+                        state_transition_probability[ state_matrix[serie,j-lag]-sum(count_states[1:type-1]), state_matrix[serie,j]-sum(count_states[1:type-1]), count_lag ] += 1
                     end
-                    count_serie = count_serie+ 1
                 end
             end
             count_lag += 1
