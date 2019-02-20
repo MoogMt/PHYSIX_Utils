@@ -999,9 +999,9 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
         end
 
         if size(states_transition_matrices)[1] == 0
-            state_transition_matrices=state_transition_probability
+            states_transition_matrices=state_transition_probability
         else
-            state_transition_matrices=[state_transition_matrices, state_transition_probability]
+            push!(states_transition_matrices, state_transition_probability)
         end
     end
 
