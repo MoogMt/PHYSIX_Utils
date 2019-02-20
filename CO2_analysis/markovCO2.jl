@@ -985,7 +985,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
             print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
             count_serie=1
             for i=1:nb_states
-                if type_states[i] == type
+                if type_states[i] != type
                     continue
                 end
                 for j=lag+1:nb_steps
