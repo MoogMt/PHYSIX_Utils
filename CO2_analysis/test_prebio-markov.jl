@@ -43,7 +43,7 @@ state_matrix, percent = assignDataToStates( data , states , size(types)[1], type
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_states)
 writeStateMatrix( string(folder_out,"final_state_matrix.dat"), state_matrix )
 
-transtitions_matrix=transitionMatrix(states,state_matrix,types,type_states,min_lag,max_lag,d_lag)
+transtitions_matrix=transitionMatrix(states,state_matrix,type_states,min_lag,max_lag,d_lag)
 #
 # end
 # end

@@ -969,35 +969,65 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
     nb_steps=size(state_matrix)[2]
     nb_lag_points=Int(trunc((max_lag-min_lag)/d_lag))
 
-    states_transition_probability=zeros(Float64,nb_states,nb_states,nb_lag_points)
+    # COULD BE DONE ELSEWHERE BUT I AM LAZY
+    # also could have desactivated capslock...
+    nb_type=1
+    type=ones(Int,1)*type_states[1]
+    type_count=ones(Int,1)
+    for i=2:size(type_states)
+        found=false
+        for j=1:size(type)
+            if type[j] == type_states[i]
+                type_count[j] += 1
+                found=true
+                break
+            end
+        end
+        if ! found
+            push!(type,type_states[i])
+            push!(type_count,1)
+        end
+    end
+    nb_type=sum(type_count)
 
-    # Chappman Kolmogorov test
-    count_lag=1
-    for lag=min_lag:d_lag:max_lag-1
-        print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
-        for i=1:nb_series
-            for j=lag+1:nb_steps
-                if state_matrix[i,j-lag] == -1 || state_matrix[i,j] == -1
+    states_transition_matrices=[]
+
+    for type=1:nb_type
+        state_transition_probability=zeros( type_count[type], type_count[type], nb_lag_points )
+        count_lag=1
+        for lag=min_lag:d_lag:max_lag-1
+            print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
+            count_serie=1
+            for i=1:nb_series
+                if type_states[i] == type
                     continue
                 end
-                states_transition_probability[ state_matrix[i,j-lag], state_matrix[i,j], count_lag ] += 1
+                for j=lag+1:nb_steps
+                    if state_matrix[i,j-lag] == -1 || state_matrix[i,j] == -1
+                        continue
+                    end
+                    states_transition_probability[ state_matrix[count_serie,j-lag], state_matrix[count_serie,j], count_lag ] += 1
+                end
+                count_serie += 1
+            end
+            count_lag += 1
+        end
+
+        # Normalization
+        for lag=1:nb_lag_points
+            print("Normalizing Transition Matrix: ",lag/nb_lag_points*100,"%\n")
+            for i=1:type_count[type]
+                sum_transition=sum( states_transition_probability[i,:,lag] )
+                if sum_transition != 0
+                    states_transition_probability[i,:,lag] /= sum_transition
+                end
             end
         end
-        count_lag += 1
+
+        state_transition_matrices=[state_transition_matrices, state_transition_probability]
     end
 
-    # Normalization
-    for lag=1:nb_lag_points
-        print("Normalizing Transition Matrix: ",lag/nb_lag_points*100,"%\n")
-        for i=1:nb_states
-            sum_transition=sum( states_transition_probability[i,:,lag] )
-            if sum_transition != 0
-                states_transition_probability[i,:,lag] /= sum_transition
-            end
-        end
-    end
-
-    return states_transition_probability
+    return states_transition_matrices
 end
 function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real }
     nb_states   = size(transition_matrix)[1]
