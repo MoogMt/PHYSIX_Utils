@@ -969,7 +969,6 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
 
     for type=1:nb_type
         nb_states_loc=count_states[type]
-        print("Type: ",type," count: ",nb_states_loc,"\n")
         state_transition_probability=zeros( nb_states_loc, nb_states_loc, nb_lag_points )
         count_lag=1
         for lag=min_lag:d_lag:max_lag-1
