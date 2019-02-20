@@ -35,11 +35,15 @@ cell=cell_mod.Cell_param(V,V,V)
 data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
 states, percent, state_matrix, type_states = assignDataToStates( data, size(types)[1], type_atoms )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
+writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
 
 cut_off_states = 0.1
 states, type_states = isolateSignificantStates( states, percent, cut_off_states, type_states )
 state_matrix, percent = assignDataToStates( data , states , size(types)[1], type_states, type_atoms, false)
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_states)
+writeStateMatrix( string(folder_out,"final_state_matrix.dat"), state_matrix )
+
+transtitions_matrix=transitionMatrix(states,state_matrix,types,type_states,min_lag,max_lag,d_lag)
 #
 # end
 # end

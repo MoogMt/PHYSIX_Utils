@@ -949,10 +949,23 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     end
     return states_kept, types_states_kept
 end
-function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_lag::T3, max_lag::T4, d_lag::T5) where { T1 <: Real, T2 <: Real, T3 <: Real, T4<:Int, T5 <: Int }
+function writeStateMatrix( file::T1, state_matrix::Array{T2,2}) where { T1 <: AbstractString, T2 <: Real }
+    nb_steps=size(state_matrix)[1]
+    nb_series=size(state_matrix)[2]
+    file_out=open(file,"w")
+    for step=1:nb_steps
+        write(file_out,string(step," "))
+        for serie=1:nb_series
+            write(file_out,string(state_matrix[serie,step]," "))
+        end
+        write(file_out,string("\n")
+    end
+    close(file_out)
+    return
+end
+function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_states::Vector{T3}, min_lag::T4, max_lag::T5, d_lag::T6) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Int, T6 <: Int }
 
     nb_states=size(states)[1]
-    nb_series = size(state_matrix)[1]
     nb_steps=size(state_matrix)[2]
     nb_lag_points=Int(trunc((max_lag-min_lag)/d_lag))
 
@@ -961,7 +974,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
     # Chappman Kolmogorov test
     count_lag=1
     for lag=min_lag:d_lag:max_lag-1
-        print("Chappman Kolmogorov Test - Progress: ",lag/max_lag*100,"%\n")
+        print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
         for i=1:nb_series
             for j=lag+1:nb_steps
                 if state_matrix[i,j-lag] == -1 || state_matrix[i,j] == -1
@@ -975,6 +988,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, min_l
 
     # Normalization
     for lag=1:nb_lag_points
+        print("Normalizing Transition Matrix: ",lag/nb_lag_points*100,"%\n")
         for i=1:nb_states
             sum_transition=sum( states_transition_probability[i,:,lag] )
             if sum_transition != 0
@@ -1006,17 +1020,19 @@ function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types
     n_dim = size( states)[2]
     nb_states=size(states)[1]
     nb_types=size(types)[1]
+    write(file_out,string("  "))
     for i=1:nb_types
         for j=1:Int(n_dim/nb_types)
-            write(file_out,string(types[i],"  "))
+            write(file_out,string(types[i]," "))
         end
     end
     write(file_out,string("\n"))
     for i=1:nb_states
+        write(file_out,string(types[type_list[i]]," "))
         for j=1:n_dim
             write(file_out,string(Int(states[i,j])," "))
         end
-        write(file_out,string(percent[i]," ",types[type_list[i]],"\n"))
+        write(file_out,string(percent[i],"\n"))
     end
     close(file_out)
     return
