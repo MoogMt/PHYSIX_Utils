@@ -949,52 +949,42 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     end
     return states_kept, types_states_kept
 end
-function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_states::Vector{T3}, min_lag::T4, max_lag::T5, d_lag::T6) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Int, T6 <: Int }
+function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_states::Vector{T3}, nb_type::T4, type_series::Vector{T5}, min_lag::T6, max_lag::T7, d_lag::T8) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real, T7 <: Int, T8 <: Int }
 
     nb_states=size(states)[1]
+    nb_series=size(state_matrix)[1]
     nb_steps=size(state_matrix)[2]
     nb_lag_points=Int(trunc((max_lag-min_lag)/d_lag))
 
-    # COULD BE DONE ELSEWHERE BUT I AM LAZY
-    # also could have desactivated capslock...
-    nb_type=1
-    type=ones(Int,1)*type_states[1]
-    type_count=ones(Int,1)
-    for i=2:size(type_states)[1]
-        found=false
-        for j=1:size(type)[1]
-            if type[j] == type_states[i]
-                type_count[j] += 1
-                found=true
-                break
+    count_states=zeros(Int,nb_types)
+    for type=1:nb_type
+        for state=1:nb_states
+            if type_states[state] == type
+                count_states[type] += 1
             end
         end
-        if ! found
-            push!(type,type_states[i])
-            push!(type_count,1)
-        end
     end
-    nb_type=sum(type_count)
 
     states_transition_matrices=[]
 
     for type=1:nb_type
-        state_transition_probability=zeros( type_count[type], type_count[type], nb_lag_points )
+        nb_states_loc=count_states[type]
+        print("Type: ",type," count: ",nb_states_loc,"\n")
+        state_transition_probability=zeros( nb_states_loc, nb_states_loc, nb_lag_points )
         count_lag=1
         for lag=min_lag:d_lag:max_lag-1
-            print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
+            #print("Computing Transition Matrix - Type: ",type," - Progress: ",lag/max_lag*100,"%\n")
             count_serie=1
-            for i=1:nb_states
-                if type_states[i] != type
-                    continue
-                end
-                for j=lag+1:nb_steps
-                    if state_matrix[i,j-lag] == -1 || state_matrix[i,j] == -1
-                        continue
+            for serie=1:nb_series
+                if type_series[serie] == type
+                    for j=lag+1:nb_steps
+                        if state_matrix[count_serie,j-lag] == 0 || state_matrix[count_serie,j] == 0
+                            continue
+                        end
+                        state_transition_probability[ state_matrix[count_serie,j-lag]-sum(count_states[1:type-1]), state_matrix[count_serie,j]-sum(count_states[1:type-1]), count_lag ] += 1
                     end
-                    state_transition_probability[ state_matrix[count_serie,j-lag], state_matrix[count_serie,j], count_lag ] += 1
+                    count_serie = count_serie+ 1
                 end
-                count_serie += 1
             end
             count_lag += 1
         end
@@ -1002,15 +992,19 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
         # Normalization
         for lag=1:nb_lag_points
             print("Normalizing Transition Matrix: ",lag/nb_lag_points*100,"%\n")
-            for i=1:type_count[type]
-                sum_transition=sum( states_transition_probability[i,:,lag] )
+            for i=1:nb_states_loc
+                sum_transition=sum( state_transition_probability[i,:,lag] )
                 if sum_transition != 0
                     state_transition_probability[i,:,lag] /= sum_transition
                 end
             end
         end
 
-        state_transition_matrices=[state_transition_matrices, state_transition_probability]
+        if size(states_transition_matrices)[1] == 0
+            state_transition_matrices=state_transition_probability
+        else
+            state_transition_matrices=[state_transition_matrices, state_transition_probability]
+        end
     end
 
     return states_transition_matrices
