@@ -24,6 +24,9 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
+V=8.82
+T=3000
+
 # for V in Volumes
 #     for T in Temperatures
 
@@ -33,9 +36,6 @@ file=string(folder_in,"TRAJEC_wrapped.xyz")
 folder_out=string(folder_in,"Data/")
 #folder_out=string(folder_in)
 
-if ! isfile(file)
-    continue
-end
 
 print("Computing Data\n")
 traj=filexyz.readFastFile(file)
@@ -44,40 +44,28 @@ cell=cell_mod.Cell_param(V,V,V)
 data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
 states, percent, state_matrix, type_states = assignDataToStates( data, size(types)[1], type_atoms )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
+writeStateMatrix( string(folder_out,"final_state_matrix.dat"), state_matrix )
+
 
 cut_off_states = 0.1
 states, type_states = isolateSignificantStates( states, percent, cut_off_states, type_states )
 state_matrix, percent = assignDataToStates( data , states , size(types)[1], type_states, type_atoms, false)
 writeStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"),states,percent,types,type_states)
-#
-# end
-# end
+writeStateMatrix( string(folder_out,"final_state_matrix.dat"), state_matrix )
 
-# Checking chappmanKormologov
-# transition_matrix = transitionMatrix( states, state_matrix, min_lag, max_lag, d_lag )
-# transition_matrix_CK = chappmanKormologov( transition_matrix )
+# Transition matrix study
+transitions_matrix=transitionMatrix(states,state_matrix,type_states,nb_types,type_atoms,min_lag,max_lag,d_lag)
+# test of Chappman Kolmogorov test (Markov Testing not necessary if one just wants to study the transitions)
+transitions_matrix_CK=[chappmanKormologov( transitions_matrix[1])]
+for i=2:nb_types
+    push!( transitions_matrix_CK, chappmanKormologov( transitions_matrix[i] ) )
+end
 
-# nb_states=size(states)[1]
-#
-# for j=1:nb_states
-#     file_out=open(string(folder_out,"markov_CK_test-All-",cut_off_bond,"-",j,"-part1.dat"),"w")
-#     for i=1:2:size(transition_matrix)[3]
-#         write(file_out,string(i*unit*d_lag," "))
-#         for k=1:nb_states
-#             write(file_out,string(transition_matrix[j,k,i]," "))
-#         end
-#         write(file_out,string("\n"))
-#     end
-#     close(file_out)
+# Writting results
+for i=1:nb_types
+    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[i],".dat"),transitions_matrix[i])
+    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[i],"-CK.dat"),transitions_matrix_CK[i])
+end
+
 # end
-# for j=1:nb_states
-#     file_out=open(string(folder_out,"markov_CK_test-All-",cut_off_bond,"-",j,"-part2.dat"),"w")
-#     for i=1:size(transition_matrix_CK)[3]
-#         write(file_out,string(2*i*unit*d_lag," "))
-#         for k=1:nb_states
-#             write(file_out,string(transition_matrix_CK[j,k,i]," "))
-#         end
-#         write(file_out,string("\n"))
-#     end
-#     close(file_out)
 # end

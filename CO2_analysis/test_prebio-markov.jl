@@ -18,8 +18,8 @@ cut_off_states = 0.1
 # Parameters for the autocorrelation for the transition matrix
 min_lag=1
 max_lag=5001
-d_lag=5
-unit=0.005
+d_lag=2
+unit=0.001
 
 # Volume of the cell (only orthorombic is implemented yet)
 V=16.36074
