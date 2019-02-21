@@ -360,3 +360,21 @@ function writeStateMatrix( file::T1, state_matrix::Array{T2,2}) where { T1 <: Ab
     close(file_out)
     return
 end
+function writeTransitionsMatrix( file::T1, transitions_matrix::Array{T2,3} ) where { T1 <: AbstractString, T2<: Real}
+    nb_states=size(transitions_matrix)[1]
+    nb_steps=size(transitions_matrix)[3]
+
+    file_out=open(file,"w")
+    for step=1:nb_steps
+        write(file_out,string(step," "))
+        for state_i=1:nb_states
+            for state_f=1:nb_states
+                write(file_out,string(transitions_matrix[state_i,state_f,step]," "))
+            end
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+
+    return
+end

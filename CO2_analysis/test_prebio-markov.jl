@@ -60,3 +60,9 @@ transitions_matrix_CK=[chappmanKormologov( transitions_matrix[1])]
 for i=2:nb_types
     push!( transitions_matrix_CK, chappmanKormologov( transitions_matrix[i] ) )
 end
+
+# Writting results
+for i=1:nb_types
+    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[i],".dat"),transitions_matrix[i])
+    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[i],"-CK.dat"),transitions_matrix_CK[i])
+end
