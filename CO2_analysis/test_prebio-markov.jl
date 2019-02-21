@@ -7,7 +7,7 @@ include(string(CO2folder,"markovCO2.jl"))
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
 
 # Cut-off distance for bonds
-cut_off_bond = 1.75
+cut_off_bond = 2.2
 
 # Maximum of number of neighbor for a given atom
 max_neigh=5
@@ -22,7 +22,7 @@ d_lag=2
 unit=0.001
 
 # Volume of the cell (only orthorombic is implemented yet)
-V=16.36074
+V=13.36074
 
 # Defining base folder
 folder_in=string("/media/moogmt/Stock/Theo_equilibration/")
