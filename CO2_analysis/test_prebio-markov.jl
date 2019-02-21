@@ -56,7 +56,7 @@ writeStateMatrix( string(folder_out,"final_state_matrix.dat"), state_matrix )
 # Transition matrix study
 transitions_matrix=transitionMatrix(states,state_matrix,type_states,nb_types,type_atoms,min_lag,max_lag,d_lag)
 # test of Chappman Kolmogorov test (Markov Testing not necessary if one just wants to study the transitions)
-transitions_matrix_CK=[chappmanKormologov( transition_matrix[1])]
+transitions_matrix_CK=[chappmanKormologov( transitions_matrix[1])]
 for i=2:nb_types
-    push!( transition_matrix_CK, chappmanKormologov( transition_matrix[i] ) )
+    push!( transitions_matrix_CK, chappmanKormologov( transitions_matrix[i] ) )
 end
