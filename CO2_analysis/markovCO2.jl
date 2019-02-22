@@ -411,3 +411,20 @@ function writeTransitionsMatrix( file::T1, transitions_matrix::Array{T2,3}, file
 
     return
 end
+function readStateMatrix( file::T1 ) where { T1 <: AbstractString }
+    file_in=open(file)
+    lines=readlines(file_in)
+    close(file_in)
+
+    nb_steps=size(lines)[1]
+    nb_states=size(split(lines[1]))[1]
+
+    state_matrix=zeros(nb_steps,nb_states)
+    for step=1:nb_steps
+        for states=1:nb_states
+            state_matrix[step,states] = parse(Float64,split(lines[step])[states])
+        end
+    end
+
+    return state_matrix
+end
