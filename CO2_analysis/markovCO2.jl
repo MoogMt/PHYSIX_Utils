@@ -378,3 +378,36 @@ function writeTransitionsMatrix( file::T1, transitions_matrix::Array{T2,3} ) whe
 
     return
 end
+function writeTransitionsMatrix( file::T1, transitions_matrix::Array{T2,3}, file2::T3, transition_matrix_CK::Array{T3,3} ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real }
+    nb_states=size(transitions_matrix)[1]
+    nb_steps=size(transitions_matrix)[3]
+
+    file_out=open(file,"w")
+    for step=1:nb_steps
+        write(file_out,string(step," "))
+        for state_i=1:nb_states
+            for state_f=1:nb_states
+                write(file_out,string(transitions_matrix[state_i,state_f,step]," "))
+            end
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+
+    nb_states=size(transitions_matrix_CK)[1]
+    nb_steps=size(transitions_matrix_CK)[3]
+
+    file_out=open(file2,"w")
+    for step=1:nb_steps
+        write(file_out,string(step*2," "))
+        for state_i=1:nb_states
+            for state_f=1:nb_states
+                write(file_out,string(transitions_matrix_CK[state_i,state_f,step]," "))
+            end
+        end
+        write(file_out,string("\n"))
+    end
+    close(file_out)
+
+    return
+end
