@@ -428,3 +428,20 @@ function readStateMatrix( file::T1 ) where { T1 <: AbstractString }
 
     return state_matrix
 end
+function readStates( file::T1 ) where { T1 <: AbstractString }
+    file_in=open(file)
+    lines=readlines(file_in)
+    close(file_in)
+
+    nb_states=size(lines)[1]-1
+    nb_dim=size(split(lines[1]))[1]
+
+    states=zeros(nb_states,n_dim)
+    for state=1:nb_states
+        for i=1:nb_dim
+            states[state,i] = parse(Float64,split(lines[state+1])[i])
+        end
+    end
+
+    return states, nb_states
+end
