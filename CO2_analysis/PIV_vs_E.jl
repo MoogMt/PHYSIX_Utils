@@ -24,42 +24,32 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(string(folder_in,"TRAJEC.xyz"))
 cell=cell_mod.Cell_param(V,V,V)
 
-traj=traj[1:2000]
+traj=traj[1:500]
 nb_structure=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 nbC=32
 nbO=64
 
-
-
-# file_matrix=open(string(folder_in,"1-run/PIV_1/FRAME_TO_FRAME.MATRIX"))
-# lines=readlines(file_matrix)
-# close(file_matrix)
-
-# dist_max=parse(Float64,split(lines[1])[2])
-# distances=zeros(nb_structure,nb_structure)
-# for i=1:nb_structure
-#     print("Progress: ",i/nb_structure*100,"%\n")
-#     for j=i+1:nb_structure
-#         distances[i,j]=parse(Float64,split(lines[i+1])[j])*dist_max
-#         distances[j,i]=parse(Float64,split(lines[i+1])[j])*dist_max
-#     end
-# end
+# Wrapping
+for i=1:nb_structure
+    cell_mod.wrap(traj[i],cell)
+end
 
 # ComputePIV
 piv=zeros(Int(nb_atoms*(nb_atoms-1)/2),nb_structure)
 for step=1:nb_structure
     print("PIV computation progress: ",step/nb_structure*100,"%\n")
     count=1
+    start=count
     for carbon=1:nbC
         for carbon2=carbon+1:nbC
             piv[count,step] = cell_mod.distance(traj[step],cell,carbon,carbon2)
             count = count + 1
         end
     end
-    # Sort
-    for atom=1:nbC-1
-        for atom2=atom+1:nbC
+    # # Sort
+    for atom=start:count-2
+        for atom2=atom+1:count-1
             if piv[atom,step] > piv[atom2,step]
                 stock=piv[atom,step]
                 piv[atom,step] = piv[atom2,step]
@@ -87,7 +77,7 @@ for step=1:nb_structure
     start=count
     for carbon=1:nbC
         for oxygen=1:nbO
-            piv[count,step] = cell_mod.distance(traj[step],cell,carbon,oxygen)
+            piv[count,step] = cell_mod.distance(traj[step],cell,carbon,nbC+oxygen)
             count = count + 1
         end
     end
@@ -105,8 +95,21 @@ end
 
 
 d0=1.8
-n=12
-m=25
+n=4
+m=10
+
+file_out=open(string("/home/moogmt/test.dat"),"w")
+for i=1:size(piv)[1]
+    print("Progress : ",i/size(piv)[1]*100,"%\n")
+    write(file_out,string(i," "))
+    for j=1:size(piv)[2]
+        write(file_out,string(utils.switchingFunction(piv[i,j],d0,n,m)," "))
+    end
+    write(file_out,string("\n"))
+end
+close(file_out)
+
+
 distances=zeros(nb_structure,nb_structure)
 for step1=1:nb_structure
     print("Computing distance matrix: ",step1/nb_structure*100,"%\n")
