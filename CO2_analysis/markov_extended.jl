@@ -68,16 +68,3 @@ for V in Volumes
 
     end
 end
-
-V=8.82
-T=3000
-
-folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC_wrapped.xyz")
-folder_out=string(folder_in,"Data/")
-
-traj=filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(V,V,V)
-
-state_matrix=readStateMatrix(string(folder_out,"final_state_matrix.dat"))
-states=readStates(string(folder_out,"final_state_matrix.dat")

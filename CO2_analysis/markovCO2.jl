@@ -347,8 +347,8 @@ function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types
     return
 end
 function writeStateMatrix( file::T1, state_matrix::Array{T2,2}) where { T1 <: AbstractString, T2 <: Real }
-    nb_steps=size(state_matrix)[1]
-    nb_series=size(state_matrix)[2]
+    nb_steps=size(state_matrix)[2]
+    nb_series=size(state_matrix)[1]
     file_out=open(file,"w")
     for step=1:nb_steps
         write(file_out,string(step," "))
@@ -421,8 +421,10 @@ function readStateMatrix( file::T1 ) where { T1 <: AbstractString }
 
     state_matrix=zeros(nb_steps,nb_states)
     for step=1:nb_steps
+        print("Progress: ",step/nb_steps*100,"%\n")
+        line=split(lines[step])
         for states=1:nb_states
-            state_matrix[step,states] = parse(Float64,split(lines[step])[states])
+            state_matrix[step,states] = parse(Float64,line[states])
         end
     end
 
@@ -436,10 +438,11 @@ function readStates( file::T1 ) where { T1 <: AbstractString }
     nb_states=size(lines)[1]-1
     nb_dim=size(split(lines[1]))[1]
 
-    states=zeros(nb_states,n_dim)
+    states=zeros(nb_states,nb_dim)
     for state=1:nb_states
+        line=split(lines[state+1])
         for i=1:nb_dim
-            states[state,i] = parse(Float64,split(lines[state+1])[i])
+            states[state,i] = parse(Float64,line[i+1])
         end
     end
 
