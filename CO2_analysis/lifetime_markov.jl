@@ -38,3 +38,4 @@ cell=cell_mod.Cell_param(V,V,V)
 
 state_matrix=readStateMatrix(string(folder_out,"final_state_matrix.dat"))
 states, nb_states=readStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"))
+transition_matrix=readTransitionMatrix(string(folder_out,"TransitionsMatrix-C.dat"))

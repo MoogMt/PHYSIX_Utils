@@ -448,3 +448,23 @@ function readStates( file::T1 ) where { T1 <: AbstractString }
 
     return states, nb_states
 end
+function readTransitionMatrix( file::T1 ) where { T1 <: AbstractString }
+    file_in=open(file)
+    lines=readlines(file_in)
+    close(file_in)
+
+    nb_states=Int(sqrt(size(split(lines[1]) )[1]-1))
+    nb_steps=size(lines)[1]
+
+    transition_matrix=zeros(nb_states,nb_states,nb_steps)
+    for step=1:nb_steps
+        line=split(lines[step])
+        for state_i=1:nb_states
+            for state_j=1:nb_states
+                transition_matrix[state_i,state_j,step] = parse(Float64,line[ (state_i-1)*nb_states+state_j+1 ])
+            end
+        end
+    end
+
+    return transition_matrix
+end
