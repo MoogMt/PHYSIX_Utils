@@ -26,8 +26,8 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-V=8.82
-T=3000
+V=9.8
+T=2500
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -39,3 +39,11 @@ cell=cell_mod.Cell_param(V,V,V)
 state_matrix=readStateMatrix(string(folder_out,"final_state_matrix.dat"))
 states, nb_states=readStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"))
 transition_matrix=readTransitionMatrix(string(folder_out,"TransitionsMatrix-C.dat"))
+
+lifetime=0
+for step=1:size(transition_matrix)[3]
+    global lifetime += transition_matrix[1,1,step]*d_lag*unit*step
+end
+lifetime /= sum(transition_matrix[1,1,:])
+
+print("CO2_life: ",lifetime," fs\n")
