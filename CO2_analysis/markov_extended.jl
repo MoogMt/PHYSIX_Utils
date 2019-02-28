@@ -44,7 +44,7 @@ for V in Volumes
 
         states, percent, state_matrix, type_states = assignDataToStates( data, nb_types, type_atoms )
         writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
-        writeStateMatrix( string(folder_out,"final_state_matrix.dat"), state_matrix )
+        writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
 
         cut_off_states = 0.1
         states, type_states = isolateSignificantStates( states, percent, cut_off_states, type_states )

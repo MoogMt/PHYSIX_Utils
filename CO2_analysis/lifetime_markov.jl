@@ -26,6 +26,9 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
+V=9.8
+T=3000
+
 # for V in Volumes
 #     for T in Temperatures
 
@@ -36,7 +39,7 @@ folder_out=string(folder_in,"Data/")
 # if  ! isfile(string(folder_out,"TransitionsMatrix-C.dat"))
 #     continue
 # end
-
+readStates(
 transition_matrix=readTransitionMatrix(string(folder_out,"TransitionsMatrix-C.dat"))
 file=open(string(folder_out,"test_life.dat"),"w")
 for step=1:size(transition_matrix)[3]
