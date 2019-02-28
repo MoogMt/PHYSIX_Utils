@@ -38,6 +38,7 @@ T25K=T25K[T25K<3000]
 plt.plot(P2K,O2_2K,"g.")
 plt.plot(P25K,O2_25K,"b.")
 plt.plot(P3K,O2_3K,"r.")
+plt.show()
 
 # Recupere les donnees
 P,T,C3 = np.loadtxt(str(folder+"3-CoordinancesC_map.dat"), unpack=True )
@@ -60,6 +61,7 @@ T25K=T25K[T25K<3000]
 plt.plot(P2K,C3_2K,"g.")
 plt.plot(P25K,C3_25K,"b.")
 plt.plot(P3K,C3_3K,"r.")
+plt.show()
 
 # Recupere les donnees
 P,T,C4 = np.loadtxt(str(folder+"4-CoordinancesC_map.dat"), unpack=True )
@@ -82,6 +84,7 @@ T25K=T25K[T25K<3000]
 plt.plot(P2K,C4_2K,"g.")
 plt.plot(P25K,C4_25K,"b.")
 plt.plot(P3K,C4_3K,"r.")
+plt.show()
 
 for i in range(len(P2K)):
     for j in range(i+1,len(P2K)):

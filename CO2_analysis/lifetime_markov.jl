@@ -26,24 +26,23 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-V=9.8
-T=2500
+# for V in Volumes
+#     for T in Temperatures
+
 
 folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC_wrapped.xyz")
 folder_out=string(folder_in,"Data/")
 
-traj=filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(V,V,V)
+# if  ! isfile(string(folder_out,"TransitionsMatrix-C.dat"))
+#     continue
+# end
 
-state_matrix=readStateMatrix(string(folder_out,"final_state_matrix.dat"))
-states, nb_states=readStates(string(folder_out,"markov_final_states-",cut_off_states,".dat"))
 transition_matrix=readTransitionMatrix(string(folder_out,"TransitionsMatrix-C.dat"))
-
-lifetime=0
+file=open(string(folder_out,"test_life.dat"),"w")
 for step=1:size(transition_matrix)[3]
-    global lifetime += transition_matrix[1,1,step]*d_lag*unit*step
+        write(file,string(step," ",1/(1-transition_matrix[1,1,step])*unit*d_lag,"\n"))
 end
-lifetime /= sum(transition_matrix[1,1,:])
+close(file)
 
-print("CO2_life: ",lifetime," fs\n")
+#     end
+# end
