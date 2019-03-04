@@ -114,71 +114,61 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
     nb_series = size(data)[1]
     nb_steps  = size(data)[2]
     dim_data  = size(data)[3]
-    state_matrix=zeros(Int, nb_series, nb_steps )
 
-    states=zeros(Int,0,dim_data)
-    record_states=zeros(Int,0)
-    percent_states=zeros(Real,0)
-    count_type=zeros(Real,nb_types)
+    number_per_types=zeros(Int,nb_types)
+    for i=1:nb_types
+        for j=1:nb_series
+            if types_number[j] == i
+                number_per_types[i] += 1
+            end
+        end
+    end
 
-    for i=1:nb_series
-        print("State assignement - Progress: ",i/nb_series*100,"%\n")
-        for j=1:nb_steps
-            # No states, initiatilization
-            if size(states)[1] == 0
-                states=vcat(states,transpose(data[i,j,:]))
-                count_type[types_number[i]] = count_type[types_number[i]]+ 1
-                push!(record_states,types_number[i])
-                push!(percent_states,1)
-                state_matrix[i,j] = size(states)[1]+1
-            else
-                found=false
-                # Loop over recorded states
-                for k=1:size(states)[1]
-                    # Check if types are coherent
-                    if types_number[i] != record_states[k]
-                        continue
+    states=[zeros(Int,0,dim_data)]
+    counts=[zeros(Real,0)]
+    states_matrices=[zeros(number_per_types[1],nb_steps)]
+    for i=2:nb_types
+        push!(states_matrices,zeros(number_per_types[i],nb_steps))
+        push!(counts,zeros(Real,0))
+        push!(states,zeros(Int,0,dim_data))
+    end
+
+    for type=1:nb_types
+        for serie=1:number_per_types[type]
+            for step=1:nb_steps
+                print("State assignement - Type: ",type," - Series progress : ",serie/nb_series*100,"% - Step progress: ",step/nb_steps*100,"%\n")
+                # Initiatilization
+                nb_states=size(states[type])[1]
+                if nb_states == 0
+                    states_matrices[type][serie,step] = size(states[type])[1] + 1
+                    states[type]=vcat(states[type],transpose(data[serie,step,:]))
+                    push!(counts[type],1)
+                else
+                    found=false
+                    # Loop over states
+                    for state=1:nb_states
+                        dist=0
+                        for i=1:dim_data
+                            dist += (states[type][state,i]-data[serie,step,i])*(states[type][state,i]-data[serie,step,i])
+                        end
+                        if dist == 0
+                            counts[type][state] += 1
+                            states_matrices[type][serie,step] = state
+                            found=true
+                            break
+                        end
                     end
-                    # Compute distance between state k and data
-                    dist=0
-                    for l=1:dim_data
-                        dist += (states[k,l]-data[i,j,l])*(states[k,l]-data[i,j,l])
+                    if ! found
+                        states_matrices[type][serie,step] = size(states[type])[1] + 1
+                        states[type]=vcat(states[type],transpose(data[serie,step,:]))
+                        push!(counts[type],1)
                     end
-                    # If dist=0 then state of data was already found
-                    if dist == 0
-                        count_type[types_number[i]]  = count_type[types_number[i]] + 1
-                        percent_states[k] += 1
-                        state_matrix[i,j] = k
-                        found=true
-                        break
-                    end
-                    # If the state was not found in database we add the state to it
-                end
-                if ! found
-                    states=vcat(states,transpose(data[i,j,:]))
-                    count_type[types_number[i]] = count_type[types_number[i]] + 1
-                    push!(record_states,types_number[i])
-                    push!(percent_states,1)
-                    state_matrix[i,j] = size(states)[1]+1
                 end
             end
         end
     end
 
-
-    # Normalizing counts into percent
-    for i=1:size(states)[1]
-        for j=1:nb_types
-            if record_states[i] == j
-                percent_states[i] = percent_states[i]/count_type[j]
-            end
-        end
-    end
-    for i=1:size(states)[1]
-        percent_states[i] = percent_states[i]*100
-    end
-
-    return states, percent_states, state_matrix, record_states
+    return states, states_matrices, counts
 end
 function assignDataToStates( data::Array{T1,3}, states::Array{T2,2} , nb_types::T3 , type_states::Vector{T4}, type_atoms::Vector{T5}, Err::T6 ) where { T1 <: Real, T2 <: Real , T3 <: Int, T4 <: Int, T5 <: Int, T6 <: Bool }
     nb_series = size(data)[1]
@@ -266,6 +256,8 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
         end
     end
 
+    print(count_states,"\n")
+
     states_transition_matrices=[]
 
     for type=1:nb_type
@@ -280,6 +272,9 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_
                         if state_matrix[serie,j-lag] == 0 || state_matrix[serie,j] == 0
                             continue
                         end
+                        print("test: ",state_matrix[serie,j-lag]-sum(count_states[1:type-1]),"\n")
+                        print("test2: ",state_matrix[serie,j]-sum(count_states[1:type-1]),"\n")
+                        print("test3: ",serie," ",j," ",j-lag,"\n")
                         state_transition_probability[ state_matrix[serie,j-lag]-sum(count_states[1:type-1]), state_matrix[serie,j]-sum(count_states[1:type-1]), count_lag ] += 1
                     end
                 end
