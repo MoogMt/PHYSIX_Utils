@@ -27,8 +27,8 @@ unit=0.005
 # for V in Volumes
 #     for T in Temperatures
 
-V=9.5
-T=3000
+V=9.8
+T=2000
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -49,23 +49,18 @@ states, percent, state_matrix, type_states = assignDataToStates( data, nb_types,
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
 
-stateO=[3,3,0,0,0,0,0,0]
-stateC=[0,0,0,0,2,2,0,0]
+stateO=[3,3,0,0,0,0,0,0,0,0]
+stateC=[0,0,0,0,0,2,2,0,0,0]
 
 O_nb=0
 C_nb=0
 for i=1:size(states)[1]
-    dC=0
     dO=0
-    for j=1:size(states[1])[1]
-        dC += (states[i,j]-stateC)^2
-        dO += (states[i,j]-stateO)^2
-    end
-    if dC == 0
-        C_nb = i
+    for j=1:size(states)[2]
+        dO += (states[i,j]-stateO[j])^2
     end
     if dO == 0
-        O_nb = i
+        global O_nb = i
     end
 end
 
