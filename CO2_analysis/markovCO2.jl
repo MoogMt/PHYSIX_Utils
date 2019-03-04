@@ -136,12 +136,12 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
     for type=1:nb_types
         for serie=1:number_per_types[type]
             for step=1:nb_steps
-                print("State assignement - Type: ",type," - Series progress : ",serie/nb_series*100,"% - Step progress: ",step/nb_steps*100,"%\n")
+                print("State assignement - Type: ",type," - Series progress : ",serie/number_per_types[type]*100,"% - Step progress: ",step/nb_steps*100,"%\n")
                 # Initiatilization
                 nb_states=size(states[type])[1]
                 if nb_states == 0
                     states_matrices[type][serie,step] = size(states[type])[1] + 1
-                    states[type]=vcat(states[type],transpose(data[serie,step,:]))
+                    states[type]=vcat(states[type],transpose(data[serie+sum(number_per_types[1:type-1]),step,:]))
                     push!(counts[type],1)
                 else
                     found=false
@@ -149,7 +149,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
                     for state=1:nb_states
                         dist=0
                         for i=1:dim_data
-                            dist += (states[type][state,i]-data[serie,step,i])*(states[type][state,i]-data[serie,step,i])
+                            dist += (states[type][state,i]-data[serie+sum(number_per_types[1:type-1]),step,i])*(states[type][state,i]-data[serie+sum(number_per_types[1:type-1]),step,i])
                         end
                         if dist == 0
                             counts[type][state] += 1
@@ -160,7 +160,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
                     end
                     if ! found
                         states_matrices[type][serie,step] = size(states[type])[1] + 1
-                        states[type]=vcat(states[type],transpose(data[serie,step,:]))
+                        states[type]=vcat(states[type],transpose(data[serie+sum(number_per_types[1:type-1]),step,:]))
                         push!(counts[type],1)
                     end
                 end

@@ -16,7 +16,7 @@ Cut_Off=[1.75]
 nbC=32
 nbO=nbC*2
 
-cut_off_bond = 1.75
+cut_off_bond = 1.6
 max_neigh=5
 
 min_lag=1
