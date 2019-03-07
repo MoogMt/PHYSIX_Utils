@@ -98,3 +98,19 @@ for i=1:size_piv
     write(file_out,string("\n"))
 end
 close(file_out)
+
+file_out=open(string("/home/moogmt/test-",nb_box,".dat"),"w")
+for structure1=1:nb_structure
+    for structure2=1:nb_structure
+        dist_piv=0
+        for i=1:size_piv
+            dist_piv += abs(piv[i,structure1]-piv[i,structure2])
+        end
+        dist_hist=0
+        for i=1:nb_box
+            dist_hist += abs( (box_piv[i,structure1]-box_piv[i,structure2])/nb_box )
+        end
+        write(file_out,string(dist_piv," ",dist_hist,"\n"))
+    end
+end
+close(file_out)
