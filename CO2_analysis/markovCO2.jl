@@ -126,7 +126,7 @@ function assignDataToStates( data::Array{T1,3}, nb_types::T2, types_number::Vect
 
     states=[zeros(Int,0,dim_data)]
     counts=[zeros(Real,0)]
-    states_matrices=[zeros(number_per_types[1],nb_steps)]
+    states_matrices=[zeros(Int,number_per_types[1],nb_steps)]
     for i=2:nb_types
         push!(states_matrices,zeros(number_per_types[i],nb_steps))
         push!(counts,zeros(Real,0))
@@ -240,69 +240,42 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     end
     return states_kept, types_states_kept
 end
-function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, type_states::Vector{T3}, nb_type::T4, type_series::Vector{T5}, min_lag::T6, max_lag::T7, d_lag::T8) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real, T7 <: Int, T8 <: Int }
+function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, nb_type::T4, type_series::Vector{T5}, min_lag::T6, max_lag::T7, d_lag::T8) where { T1 <: Int, T2 <: Real, T4 <: Real, T5 <: Real, T6 <: Real, T7 <: Int, T8 <: Int }
 
     nb_states=size(states)[1]
     nb_series=size(state_matrix)[1]
     nb_steps=size(state_matrix)[2]
     nb_lag_points=Int(trunc((max_lag-min_lag)/d_lag))
 
-    count_states=zeros(Int,nb_types)
-    for type=1:nb_type
-        for state=1:nb_states
-            if type_states[state] == type
-                count_states[type] += 1
+    state_transition_matrix=zeros( nb_states, nb_states, nb_lag_points )
+    count_lag=1
+    for lag=min_lag:d_lag:max_lag-1
+        print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
+        for serie=1:nb_series
+            for j=lag+1:nb_steps
+                if state_matrix[serie,j-lag] == 0 || state_matrix[serie,j] == 0
+                    continue
+                end
+                state_transition_matrix[ state_matrix[serie,j-lag], state_matrix[serie,j], count_lag ] += 1
+            end
+        end
+        count_lag += 1
+    end
+
+    # Normalization
+    for lag=1:nb_lag_points
+        print("Normalizing Transition Matrix: ",lag/nb_lag_points*100,"%\n")
+        for i=1:nb_states
+            sum_transition=sum( state_transition_matrix[i,:,lag] )
+            if sum_transition != 0
+                state_transition_matrix[i,:,lag] /= sum_transition
             end
         end
     end
 
-    print(count_states,"\n")
-
-    states_transition_matrices=[]
-
-    for type=1:nb_type
-        nb_states_loc=count_states[type]
-        state_transition_probability=zeros( nb_states_loc, nb_states_loc, nb_lag_points )
-        count_lag=1
-        for lag=min_lag:d_lag:max_lag-1
-            print("Computing Transition Matrix - Type: ",type," - Progress: ",lag/max_lag*100,"%\n")
-            for serie=1:nb_series
-                if type_series[serie] == type
-                    for j=lag+1:nb_steps
-                        if state_matrix[serie,j-lag] == 0 || state_matrix[serie,j] == 0
-                            continue
-                        end
-                        print("test: ",state_matrix[serie,j-lag]-sum(count_states[1:type-1]),"\n")
-                        print("test2: ",state_matrix[serie,j]-sum(count_states[1:type-1]),"\n")
-                        print("test3: ",serie," ",j," ",j-lag,"\n")
-                        state_transition_probability[ state_matrix[serie,j-lag]-sum(count_states[1:type-1]), state_matrix[serie,j]-sum(count_states[1:type-1]), count_lag ] += 1
-                    end
-                end
-            end
-            count_lag += 1
-        end
-
-        # Normalization
-        for lag=1:nb_lag_points
-            print("Normalizing Transition Matrix: ",lag/nb_lag_points*100,"%\n")
-            for i=1:nb_states_loc
-                sum_transition=sum( state_transition_probability[i,:,lag] )
-                if sum_transition != 0
-                    state_transition_probability[i,:,lag] /= sum_transition
-                end
-            end
-        end
-
-        if size(states_transition_matrices)[1] == 0
-            states_transition_matrices=[state_transition_probability]
-        else
-            push!(states_transition_matrices, state_transition_probability)
-        end
-    end
-
-    return states_transition_matrices
+    return state_transition_matrix
 end
-function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real }
+function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Int }
     nb_states   = size(transition_matrix)[1]
     nb_lag_time = size(transition_matrix)[3]
     nb_lag_compare = Int(trunc(nb_lag_time/2))
@@ -319,12 +292,11 @@ function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real
     end
     return transition_matrix_kolmo
 end
-function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types::Vector{T4}, type_list::Vector{T5} ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real , T4 <: AbstractString, T5 <: Int }
+function writeStates( file::T1 , states::Array{T2,2}, count_states::Vector{T3}, types::Vector{T4} ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real , T4 <: AbstractString }
     file_out=open(file,"w")
     n_dim = size( states)[2]
     nb_states=size(states)[1]
     nb_types=size(types)[1]
-    write(file_out,string("  "))
     for i=1:nb_types
         for j=1:Int(n_dim/nb_types)
             write(file_out,string(types[i]," "))
@@ -332,11 +304,10 @@ function writeStates( file::T1 , states::Array{T2,2}, percent::Vector{T3}, types
     end
     write(file_out,string("\n"))
     for i=1:nb_states
-        write(file_out,string(types[type_list[i]]," "))
         for j=1:n_dim
             write(file_out,string(Int(states[i,j])," "))
         end
-        write(file_out,string(percent[i],"\n"))
+        write(file_out,string(count_states[i],"\n"))
     end
     close(file_out)
     return
@@ -346,7 +317,6 @@ function writeStateMatrix( file::T1, state_matrix::Array{T2,2}) where { T1 <: Ab
     nb_series=size(state_matrix)[1]
     file_out=open(file,"w")
     for step=1:nb_steps
-        write(file_out,string(step," "))
         for serie=1:nb_series
             write(file_out,string(state_matrix[serie,step]," "))
         end

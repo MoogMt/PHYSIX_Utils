@@ -16,7 +16,7 @@ Cut_Off=[1.75]
 nbC=32
 nbO=nbC*2
 
-cut_off_bond = 1.6
+cut_off_bond = 1.75
 max_neigh=5
 
 min_lag=1
@@ -27,8 +27,15 @@ unit=0.005
 T=2000
 V=9.8
 
+for V in Volumes
+    for T in Temperatures
+
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
+
+if ! isfile(file)
+    continue
+end
 folder_out=string(folder_in,"Data/")
 
 print("Reading Trajectory\n")
@@ -39,19 +46,24 @@ data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_n
 nb_types=size(types)[1]
 
 states, state_matrices, counts_states = assignDataToStates( data, nb_types, type_atoms )
-writeStates(string(folder_out,"markov_initial_states-",cut_off_bond,".dat"),states,percent,types,type_states)
-writeStateMatrix( string(folder_out,"initial_state_matrix-",cut_off_bond,".dat"), state_matrix )
 
-# Transition matrix study
-transitions_matrix=transitionMatrix(states,state_matrix,type_states,nb_types,type_atoms,min_lag,max_lag,d_lag)
-# test of Chappman Kolmogorov test (Markov Testing not necessary if one just wants to study the transitions)
-transitions_matrix_CK=[chappmanKormologov( transitions_matrix[1])]
-for i=2:nb_types
-    push!( transitions_matrix_CK, chappmanKormologov( transitions_matrix[i] ) )
+for type=1:2
+    writeStates( string(folder_out,"markov_intial_states-",types[type],"-",cut_off_bond,".dat"),states[type],counts_states[type],types)
+    writeStateMatrix( string(folder_out,"initial_state_matrix-",types[type],"-",cut_off_bond,".dat"), state_matrices[type] )
 end
 
-# Writting results
-for i=1:nb_types
-    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[i],".dat"),transitions_matrix[i])
-    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[i],"-CK.dat"),transitions_matrix_CK[i])
+# Transition matrix study
+transitions_matrix=[transitionMatrix(states[1],state_matrices[1],nb_types,type_atoms,min_lag,max_lag,d_lag)]
+transitions_matrix_CK=[chappmanKormologov( transitions_matrix[1])]
+for type=2:nb_types
+    push!( transitions_matrix, transitionMatrix( states[type], state_matrices[type], nb_types, type_atoms, min_lag, max_lag, d_lag) )
+    push!( transitions_matrix_CK, chappmanKormologov( transitions_matrix[type] ) )
+end
+
+for type=1:nb_types
+    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[type],".dat"),transitions_matrix[type])
+    writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[type],"-CK.dat"),transitions_matrix_CK[type])
+end
+
+end
 end
