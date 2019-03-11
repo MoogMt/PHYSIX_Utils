@@ -24,7 +24,7 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(string(folder_in,"TRAJEC.xyz"))
 cell=cell_mod.Cell_param(V,V,V)
 
-traj=traj[1:100]
+traj=traj[1:500]
 nb_structure=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 nbC=32
@@ -101,6 +101,7 @@ close(file_out)
 
 file_out=open(string("/home/moogmt/test-",nb_box,".dat"),"w")
 for structure1=1:nb_structure
+    print("Progress: ",structure1/nb_structure*100,"%\n")
     for structure2=1:nb_structure
         dist_piv=0
         for i=1:size_piv
@@ -108,7 +109,7 @@ for structure1=1:nb_structure
         end
         dist_hist=0
         for i=1:nb_box
-            dist_hist += abs( (box_piv[i,structure1]-box_piv[i,structure2])/nb_box )
+            dist_hist +=  ( (box_piv[i,structure1]-box_piv[i,structure2])/nb_box )^2
         end
         write(file_out,string(dist_piv," ",dist_hist,"\n"))
     end

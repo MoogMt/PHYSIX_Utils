@@ -1,11 +1,12 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
+
 include(string(CO2folder,"markovCO2.jl"))
 
+
 # Folder for data
-folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/home/moogmt/CO2/CO2_AIMD/"
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
 # Thermo data
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
@@ -24,8 +25,7 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-T=2000
-V=9.8
+
 
 for V in Volumes
     for T in Temperatures
