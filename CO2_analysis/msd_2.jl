@@ -15,170 +15,125 @@ cut_off_bond = 1.75
 nbC=32
 nbO=64
 nb_cut=10
-#
 
-T=2000
-V=9.8
-
-# for V in Volumes
-#     for T in Temperatures
-# Folders
-folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC.xyz")
-folder_out=string(folder_in,"Data/")
-
-    # if ! isfile(file)
-    #     continue
-    # end
-
-# Reading xyz
-print("Computing Data\n")
-traj=filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(V,V,V)
-
-nb_steps=size(traj)[1]
-nb_atoms=size(traj[1].names)[1]
+nb_delta2=5000
+nb_space=1000
 
 
-nb_delta=Int(trunc(nb_steps/nb_cut))
+for V in Volumes
+    for T in Temperatures
+        print(V," ",T,"\n")
+        # Folders
+        folder_in=string(folder_base,V,"/",T,"K/")
+        file=string(folder_in,"TRAJEC.xyz")
+        folder_out=string(folder_in,"Data/")
 
-MSD_C=zeros(nbC,nb_cut,nb_delta)
-for carbon=1:nbC
-    for cut=1:nb_cut
-        start_cut=Int((cut-1)*nb_delta)+1
-        end_cut=Int(cut*nb_delta)+1
-        positions=traj[start_cut].positions[carbon,:]
-        count=1
-        for step=start_cut:end_cut-1
-            dist=0
-            for i=1:3
-                dist += (traj[step].positions[carbon,i]-traj[start_cut].positions[carbon,i])*(traj[step].positions[carbon,i]-traj[start_cut].positions[carbon,i])
+        if ! isfile(file)
+            continue
+        end
+
+        # Reading xyz
+        print("Computing Data\n")
+        traj=filexyz.readFastFile(file)
+        cell=cell_mod.Cell_param(V,V,V)
+
+        nb_steps=size(traj)[1]
+        nb_atoms=size(traj[1].names)[1]
+
+        MSD_C2=zeros(nb_delta2)
+        count_2=0
+        for start_cut=1:nb_space:nb_steps-nb_delta2
+            MSD_local=zeros(nb_delta2)
+            for carbon=1:nbC
+                positions=traj[start_cut].positions[carbon,:]
+                count=1
+                for step=1:nb_delta2
+                    dist=0
+                    for i=1:3
+                        dist += (traj[step+start_cut].positions[carbon,i]-traj[start_cut].positions[carbon,i])*(traj[step+start_cut].positions[carbon,i]-traj[start_cut].positions[carbon,i])
+                    end
+                    dist=sqrt(dist)
+                    MSD_local[step] += dist*dist
+                    count+=1
+                end
             end
-            dist=sqrt(dist)
-            MSD_C[carbon,cut,count] = dist*dist
-            count+=1
-        end
-    end
-end
-
-MSD_C2=zeros(nb_delta)
-for carbon=1:nbC
-    for cut=1:nb_cut
-        start_cut=Int((cut-1)*nb_delta)+1
-        end_cut=Int(cut*nb_delta)+1
-        positions=traj[start_cut].positions[carbon,:]
-        count=1
-        for step=start_cut:end_cut-1
-            dist=0
-            for i=1:3
-                dist += (traj[step].positions[carbon,i]-traj[start_cut].positions[carbon,i])*(traj[step].positions[carbon,i]-traj[start_cut].positions[carbon,i])
+            MSD_local /= nbC
+            for i=1:nb_delta2
+                MSD_C2[i] += MSD_local[i]
             end
-            dist=sqrt(dist)
-            MSD_C[carbon,cut,count] = dist*dist
-            count+=1
+            count_2 += 1
         end
-    end
-end
+        MSD_C2 /= count_2
 
-
-file_out=open(string(folder_out,"MSD_C_total.dat"),"w")
-for step=1:size(MSD_C)[3]
-    write(file_out,string(step," "))
-    for carbon=1:size(MSD_C)[1]
-        for cut=1:nb_cut
-            write(file_out,string(MSD_C[carbon,cut,step]," "))
+        file_out=open(string(folder_out,"MSD_C_slide_total.dat"),"w")
+        for i=1:nb_delta2
+            write(file_out,string(i*0.005," ",MSD_C2[i],"\n"))
         end
-    end
-    write(file_out,string("\n"))
-end
-close(file_out)
+        close(file_out)
 
-file_out=open(string(folder_out,"MSD_C_Avg.dat"),"w")
-for step=1:size(MSD_C)[3]
-    write(file_out,string(step," "))
-    MSD=0
-    count=0
-    for carbon=1:size(MSD_C)[1]
-        for cut=1:nb_cut
-            MSD += MSD_C[carbon,cut,step]
-            count += 1
-        end
-    end
-    write(file_out,string(" ",MSD/count,"\n"))
-end
-close(file_out)
-
-MSD_O=zeros(nbO,nb_cut,nb_delta)
-for oxygen=1:nbO
-    for cut=1:nb_cut
-        start_cut=Int((cut-1)*nb_delta)+1
-        end_cut=Int(cut*nb_delta)+1
-        positions=traj[start_cut].positions[nbC+oxygen,:]
-        count=1
-        for step=start_cut:end_cut-1
-            dist=0
-            for i=1:3
-                dist += (traj[step].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i])*(traj[step].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i])
+        MSD_O2=zeros(nb_delta2)
+        count_2=0
+        for start_cut=1:nb_space:nb_steps-nb_delta2
+            MSD_local=zeros(nb_delta2)
+            for oxygen=1:nbO
+                positions=traj[start_cut].positions[nbC+oxygen,:]
+                for step=1:nb_delta2
+                    dist=0
+                    for i=1:3
+                        dist += (traj[step+start_cut].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i])*(traj[step+start_cut].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i])
+                    end
+                    dist=sqrt(dist)
+                    MSD_local[step] += dist*dist
+                end
             end
-            dist=sqrt(dist)
-            MSD_O[oxygen,cut,count] = dist*dist
-            count+=1
+            MSD_local /= nbO
+            for i=1:nb_delta2
+                MSD_O2[i] += MSD_local[i]
+            end
+            count_2 += 1
         end
+        MSD_O2 /= count_2
+
+        file_out=open(string(folder_out,"MSD_O_slide_total.dat"),"w")
+        for i=1:nb_delta2
+            write(file_out,string(i*0.005," ",MSD_O2[i],"\n"))
+        end
+        close(file_out)
+
+        file_out=open(string(folder_out,"MSD_CO_slide_total.dat"),"w")
+        for i=1:nb_delta2
+            write(file_out,string(i*0.005," ",MSD_C2[i]-MSD_O2[i],"\n"))
+        end
+        close(file_out)
+
+        MSD_atoms=zeros(nb_delta2)
+        count_2=0
+        for start_cut=1:nb_space:nb_steps-nb_delta2
+            MSD_local=zeros(nb_delta2)
+            for atom=1:nb_atoms
+                positions=traj[start_cut].positions[atom,:]
+                for step=1:nb_delta2
+                    dist=0
+                    for i=1:3
+                        dist += (traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i])*(traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i])
+                    end
+                    dist=sqrt(dist)
+                    MSD_local[step] += dist*dist
+                end
+            end
+            MSD_local /= nbO
+            for i=1:nb_delta2
+                MSD_atoms[i] += MSD_local[i]
+            end
+            count_2 += 1
+        end
+        MSD_atoms /= count_2
+
+        file_out=open(string(folder_out,"MSD_Atoms_Slide_Total.dat"),"w")
+        for i=1:nb_delta2
+            write(file_out,string(i*0.005," ",MSD_atoms[i],"\n"))
+        end
+        close(file_out)
+
     end
 end
-
-file_out=open(string(folder_out,"MSD_O_total.dat"),"w")
-for step=1:size(MSD_O)[3]
-    write(file_out,string(step," "))
-    for oxygen=1:size(MSD_O)[1]
-        for cut=1:nb_cut
-            write(file_out,string(MSD_O[oxygen,cut,step]," "))
-        end
-    end
-    write(file_out,string("\n"))
-end
-close(file_out)
-
-file_out=open(string(folder_out,"MSD_O_Avg.dat"),"w")
-for step=1:size(MSD_O)[3]
-    write(file_out,string(step," "))
-    MSD=0
-    count=0
-    for oxygen=1:size(MSD_O)[1]
-        for cut=1:nb_cut
-            MSD += MSD_O[oxygen,cut,step]
-            count += 1
-        end
-    end
-    write(file_out,string(" ",MSD/count,"\n"))
-end
-close(file_out)
-
-
-file_out=open(string(folder_out,"MSD_CO_Avg.dat"),"w")
-for step=1:size(MSD_C)[3]
-    write(file_out,string(step," "))
-    MSDC=0
-    count=0
-    for carbon=1:size(MSD_C)[1]
-        for cut=1:nb_cut
-            MSDC += MSD_C[carbon,cut,step]
-            count += 1
-        end
-    end
-    MSDC = MSDC/count
-    count=0
-    MSDO = 0
-    for oxygen=1:size(MSD_O)[1]
-        for cut=1:nb_cut
-            MSDO += MSD_O[oxygen,cut,step]
-            count += 1
-        end
-    end
-    MSDO = MSDO/count
-    write(file_out,string(" ",MSDO-MSDC,"\n"))
-end
-close(file_out)
-
-# end
-# end
