@@ -21,7 +21,7 @@ cut_off_bond = 1.75
 # Defining base folder
 folder_in=string("/media/moogmt/Stock/Mathieu/Sulfur/")
 
-V=15.0
+V=16.0
 
 if ! ispath( string(folder_in,"/",V,"/") )
     mkdir(string(folder_in,"/",V,"/"))
