@@ -4,7 +4,7 @@ include(string(GPfolder,"xyz.jl"))
 include(string(GPfolder,"pdb.jl"))
 
 # Reading PDB file
-folder="/media/moogmt/Stock/CO2/Structures/Pa3/SuperFF/"
+folder="/media/moogmt/Stock/Mathieu/CO2/Structures/Pa3/SuperFF/"
 molecules, cell=pdb.readStep( string(folder,"Pa3-super.pdb") )
 
 dCO=1.16
@@ -141,7 +141,7 @@ end
 #-----------------
 # Writting PDB
 #------------------------------------------------
-pdb.write(molecules,cell,"/home/moogmt/start2.pdb")
+pdb.write(molecules,cell,"/home/moogmt/III.pdb")
 #------------------------------------------------
 
 print("a = ",(dMM+dOM)/dMM,"\n")

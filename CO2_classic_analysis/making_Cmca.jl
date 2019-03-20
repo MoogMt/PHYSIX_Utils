@@ -7,7 +7,7 @@ include(string(GPfolder,"cell.jl"))
 include(string(GPfolder,"pdb.jl"))
 
 # Reading PDB file
-folder="/media/moogmt/Stock/CO2/Structures/Cmca/SuperFF/"
+folder="/media/moogmt/Stock/Mathieu/CO2/Structures/Cmca/SuperFF/"
 molecules, cell = pdb.readStep( string(folder,"Cmca-super.pdb") )
 
 # C-O cut-off to build molecules
@@ -95,9 +95,9 @@ end
 #-----------------
 # Writting PDB
 #------------------------------------------------
-pdb.writeStep(molecules,cell,"/home/moogmt/Cmca_ready.pdb")
+pdb.write(molecules,cell,"/home/moogmt/Cmca_ready.pdb")
 #------------------------------------------------
 
 cell_mod.wrap(molecules,cell)
 
-pdb.writeStep(molecules,cell,"/home/moogmt/Cmca_ready_wrapped.pdb")
+pdb.write(molecules,cell,"/home/moogmt/Cmca_ready_wrapped.pdb")
