@@ -61,7 +61,7 @@ cd plumed2
 
 folder_plumed=$(pwd)"install_plumed"
 
-./configure --prefix=$folder
+./configure --prefix=$folder --enable-modules=+piv
 
 -> Installing
 
@@ -103,7 +103,7 @@ fftw_include=$fftw_folder"/include"
 
 fftw_lib=$fftw_folder"/lib"
 
-cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=$grmx_install -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=$fftw_lib-DFFTWF_INCLUDE_DIR=$fftw_folder
+cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=$grmx_install -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=$fftw_lib        -DFFTWF_INCLUDE_DIR=$fftw_folder -DGMX_DEFAULT_SUFFIX=OFF -DGMX_BINARY_SUFFIX=_piv -DGMX_LIBS_SUFFIX=_piv
 
 -> Compiling
 
