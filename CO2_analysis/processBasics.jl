@@ -1,19 +1,20 @@
-include("contactmatrix.jl")
-include("CPMD.jl")
-include("statistics.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
-importall CPMD
+include(string(GPfolder,"cpmd.jl"))
+include(string(GPfolder,"statistics.jl"))
+include(string(GPfolder,"contactmatrix.jl"))
 
 func="PBE-MT"
 
-Volumes=[9.8]
-Temperatures=[1750]
+Volumes=[9.25,9.3]
+Temperatures=[2000,2500,3000]
 
 for V in Volumes
 for T in Temperatures
 
-folder_input=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
-folder_output=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/Data/")
+folder_input=string("/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/")
+folder_output=string("/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/Data/")
 
 # Pressure
 #==============================================================================#

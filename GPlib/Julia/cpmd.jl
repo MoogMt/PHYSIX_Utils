@@ -14,11 +14,11 @@ function readEnergy( file_name:: AbstractString )
     # Array Init
     #----------------------------------------
     nb_steps=size(lines)[1]
-    temperature=Vector{Real}(nb_steps)
-    e_class=Vector{Real}(nb_steps)
-    e_ks=Vector{Real}(nb_steps)
-    msd=Vector{Real}(nb_steps)
-    time=Vector{Real}(nb_steps)
+    temperature=Vector{Real}(undef,nb_steps)
+    e_class=Vector{Real}(undef,nb_steps)
+    e_ks=Vector{Real}(undef,nb_steps)
+    msd=Vector{Real}(undef,nb_steps)
+    time=Vector{Real}(undef,nb_steps)
     #----------------------------------------
 
     # Getting data from lines

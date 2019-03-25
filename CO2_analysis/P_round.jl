@@ -1,5 +1,10 @@
-# Loading file
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
+
+include(string(GPfolder,"cpmd.jl"))
+include(string(GPfolder,"statistics.jl"))
+include(string(GPfolder,"contactmatrix.jl"))
+
 
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
 Temperatures=[1750,2000,2250,2500,2750,3000]

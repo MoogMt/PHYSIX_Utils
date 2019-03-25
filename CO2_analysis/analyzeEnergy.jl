@@ -1,28 +1,29 @@
-include("contactmatrix.jl")
-include("CPMD.jl")
-include("statistics.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
-importall CPMD
+include(string(GPfolder,"cpmd.jl"))
+include(string(GPfolder,"statistics.jl"))
+include(string(GPfolder,"contactmatrix.jl"))
 
 func="PBE-MT"
 
-V=9.35
-T=2000
+V=9.3
+T=3000
 
 run_nb=1
 timestep=1
 
 fs2ps=0.001
-stride=1
-unit_sim=stride*fs2ps*timestep
+sim_stride=5
+unit_sim=sim_stride*fs2ps*timestep
 unit_target=0.005
 
-stride = Int(unit_target/unit_sim)
+time_stride = Int(unit_target/unit_sim)
 
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/",run_nb,"-run/")
+folder=string("/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/",func,"/",V,"/",T,"K/",run_nb,"-run/")
 file="ENERGIES"
 
-temperature, e_ks, e_class, msd, time = CPMD.readEnergy( string(folder,file) )
+temperature, e_ks, e_class, msd, time_data = CPMD.readEnergy( string(folder,file) )
 
 temp_file=open(string(folder,"Temp_base"),"w")
 eks_file=open(string(folder,"EKS_base"),"w")
@@ -30,13 +31,13 @@ eclass_file=open(string(folder,"EClass_base"),"w")
 msd_file=open(string(folder,"MSD_base"),"w")
 time_file=open(string(folder,"Time_base"),"w")
 j=1
-for i=1:stride:size(temperature)[1]
-    write(temp_file,string(j," ",j*unit_target," ",temperature[i],"\n"))
-    write(eclass_file,string(j," ",j*unit_target," ",e_class[i],"\n"))
-    write(msd_file,string(j," ",j*unit_target," ",msd[i],"\n"))
-    write(time_file,string(j," ",j*unit_target," ",time[i],"\n"))
-    write(eks_file,string(j," ",j*unit_target," ",e_ks[i],"\n"))
-    j+=1
+for i=1:time_stride:size(temperature)[1]
+    write(temp_file,string(i," ",i*unit_target," ",temperature[i],"\n"))
+    write(eclass_file,string(i," ",i*unit_target," ",e_class[i],"\n"))
+    write(msd_file,string(i," ",i*unit_target," ",msd[i],"\n"))
+    write(time_file,string(i," ",i*unit_target," ",time_data[i],"\n"))
+    write(eks_file,string(i," ",i*unit_target," ",e_ks[i],"\n"))
+    i+=1
 end
 close(temp_file)
 close(eks_file)
