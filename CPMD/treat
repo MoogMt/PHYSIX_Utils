@@ -5,6 +5,7 @@ cat 1-run/EKS_base > EKS_all.dat
 cat 1-run/EClass_base > EClass_all.dat
 cat 1-run/Time_base > Time_all.dat
 cat 1-run/Temp_base > Temp_all.dat
+cat 1-run/STRESS_copy > P_all.dat
 
 
 # Second run
@@ -14,6 +15,7 @@ cat 2-run/Time_base >> Time_all.dat
 cat 2-run/EClass_base >> EClass_all.dat
 cat 2-run/EKS_base >> EKS_all.dat
 cat 2-run/Temp_base >> Temp_all.dat
+cat 2-run/STRESS_copy >> P_all.dat
 fi
 
 # Third run
@@ -23,6 +25,7 @@ cat 3-run/Time_base >> Time_all.dat
 cat 3-run/EClass_base >> EClass_all.dat
 cat 3-run/EKS_base >> EKS_all.dat
 cat 3-run/Temp_base >> Temp_all.dat
+cat 2-run/STRESS_copy >> P_all.dat
 fi
 
 # Fourth run
@@ -32,4 +35,5 @@ cat 4-run/Time_base >> Time_all.dat
 cat 4-run/EClass_base >> EClass_all.dat
 cat 4-run/EKS_base >> EKS_all.dat
 cat 4-run/Temp_base >> Temp_all.dat
+cat 4-run/STRESS_copy >> P_all.dat
 fi
