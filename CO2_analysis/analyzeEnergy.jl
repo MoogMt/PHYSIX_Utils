@@ -7,7 +7,7 @@ include(string(GPfolder,"contactmatrix.jl"))
 
 func="PBE-MT"
 
-V=9.3
+V=9.25
 T=3000
 
 run_nb=1
