@@ -1,6 +1,6 @@
 module statistics
 
-function simpleAverage{T1 <: Real}( data::Vector{T1})
+function simpleAverage( data::Vector{T1}) where {T1 <: Real}
     average=0.
     size_data=size(data)[1]
     for i=1:size_data
@@ -9,7 +9,7 @@ function simpleAverage{T1 <: Real}( data::Vector{T1})
     return average/size_data
 end
 
-function simpleMoment{T1 <: Real, T2 <: Int}( data::Vector{T1}, n::T2)
+function simpleMoment( data::Vector{T1}, n::T2) where {T1 <: Real, T2 <: Int}
     moment=0
     momentn=0
     size_data=size(data)[1]
@@ -20,7 +20,7 @@ function simpleMoment{T1 <: Real, T2 <: Int}( data::Vector{T1}, n::T2)
     return momentn/size_data - (moment/size_data)^n
 end
 
-function blockAverage{T1 <: Real,  T2 <: Int}( data::Vector{T1}, block_size::T2 )
+function blockAverage( data::Vector{T1}, block_size::T2 ) where {T1 <: Real,  T2 <: Int}
     average=0
     data_size=size(data)[1]
     nb_block=Int(trunc(data_size/block_size))
@@ -40,7 +40,7 @@ function blockAverage{T1 <: Real,  T2 <: Int}( data::Vector{T1}, block_size::T2 
     return average/count
 end
 
-function blockMoment{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Vector{T1}, block_size::T2 , n::T3)
+function blockMoment( data::Vector{T1}, block_size::T2 , n::T3) where { T1 <: Real, T2 <: Int, T3 <: Int }
     moment=0; momentn=0;
     data_size = size(data)[1]
     nb_block = Int(trunc(size_data/block_size))
@@ -58,9 +58,9 @@ function blockMoment{ T1 <: Real, T2 <: Int, T3 <: Int }( data::Vector{T1}, bloc
     return momentn/nb_block - (moment/nb_block)^n
 end
 
-function bootStrap{ T1 <: Real, T2 <: Int}( data::Vector{T1}, sample_size::T2, n::T2)
+function bootStrap( data::Vector{T1}, sample_size::T2, n::T2) where { T1 <: Real, T2 <: Int}
     average=0; moment=0;
-    return average, moment; 
+    return average, moment;
 end
 
 end

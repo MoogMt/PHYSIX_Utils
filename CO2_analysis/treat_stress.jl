@@ -1,10 +1,10 @@
-include("CPMD.jl")
-include("statistics.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
-importall CPMD
-importall statistics
+include(string(GPfolder,"cpmd.jl"))
+include(string(GPfolder,"statistics.jl"))
 
-folder="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
+folder="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
 N=96
 kb=1.380648*10^-23.
@@ -12,12 +12,12 @@ kb=1.380648*10^-23.
 V=9.3
 T=3000
 
-run_number=2
+run_number=1
 
 fs2ps=0.001
-stride=1
+time_stride=1
 timestep=1
-unit_sim=stride*fs2ps*timestep
+unit_sim=time_stride*fs2ps*timestep
 unit_target=0.005
 
 stride_press = Int(unit_target/unit_sim)
