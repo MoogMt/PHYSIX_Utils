@@ -7,10 +7,10 @@ include(string(GPfolder,"contactmatrix.jl"))
 
 func="PBE-MT"
 
-V=9.25
-T=3000
+V=9.35
+T=2500
 
-run_nb=1
+run_nb=2
 timestep=1
 
 fs2ps=0.001
