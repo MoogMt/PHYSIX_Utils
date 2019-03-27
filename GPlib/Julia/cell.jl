@@ -188,6 +188,14 @@ end
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
+function distance( positions1::Vector{T1}, positions2::Vector{T2}, cell_length::Vector{T3} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+    dist=0
+    for i=1:3
+        temp=dist1D(positions1[i],positions2[i],cell_length[i])
+        dist += temp*temp
+    end
+    return sqrt(dist)
+end
 function distance( atoms::T1, cell::T2, index1::T3, index2::T4 ) where { T1 <: atom_mod.AtomList, T2 <: Cell_param , T3 <: Int, T4 <: Int }
     dis=0
     for i=1:3

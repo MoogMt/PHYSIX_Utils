@@ -4,8 +4,8 @@ include(string(GPfolder,"xyz.jl"))
 include(string(GPfolder,"pdb.jl"))
 
 # Reading PDB file
-folder="/media/moogmt/Stock/Mathieu/CO2/Structures/Cmca/SuperFF/"
-molecules, cell=pdb.readStep( string(folder,"Cmca-super.pdb") )
+folder="/home/moogmt/II/"
+molecules, cell=pdb.readStep( string(folder,"P42nmn-super.pdb") )
 
 dCO=1.163
 mo=15.9994
@@ -15,13 +15,6 @@ Mm=Mt/2
 dMM=sqrt(2*mo*Mt/Mm^2)*dCO
 dCM=dMM/2
 dOM=dCO-dCM
-
-test=12
-for i=1:nb_atoms
-    if cell_mod.distance(molecules,cell,test,i) < 1.5 && i != test
-        print("i ",i,"\n")
-    end
-end
 
 #--------------------
 # Building molecules
@@ -167,5 +160,3 @@ end
 #------------------------------------------------
 pdb.write(molecules,cell,"/home/moogmt/III.pdb")
 #------------------------------------------------
-
-print("a = ",(dMM+dOM)/dMM,"\n")
