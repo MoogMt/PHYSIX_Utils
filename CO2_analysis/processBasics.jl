@@ -7,8 +7,8 @@ include(string(GPfolder,"contactmatrix.jl"))
 
 func="PBE-MT"
 
-Volumes=[9.35]
-Temperatures=[2500]
+Volumes=[9.2]
+Temperatures=[3000]
 
 for V in Volumes
     for T in Temperatures
