@@ -14,11 +14,11 @@ function readEnergy( file_name:: AbstractString )
     # Array Init
     #----------------------------------------
     nb_steps=size(lines)[1]
-    temperature=Vector{Real}(nb_steps)
-    e_class=Vector{Real}(nb_steps)
-    e_ks=Vector{Real}(nb_steps)
-    msd=Vector{Real}(nb_steps)
-    time=Vector{Real}(nb_steps)
+    temperature=Vector{Real}(undef,nb_steps)
+    e_class=Vector{Real}(undef,nb_steps)
+    e_ks=Vector{Real}(undef,nb_steps)
+    msd=Vector{Real}(undef,nb_steps)
+    time=Vector{Real}(undef,nb_steps)
     #----------------------------------------
 
     # Getting data from lines
@@ -47,7 +47,7 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
 
     nb_lines=size(lines)[1]
     nb_pressure_points=Int(trunc(nb_lines/(4*stride)))
-    pressure=Vector{Real}(nb_pressure_points)
+    pressure=Vector{Real}(undef,nb_pressure_points)
     for i=1:nb_pressure_points
         pressure[i]=0
     end

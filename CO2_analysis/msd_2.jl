@@ -6,11 +6,8 @@ include(string(CO2folder,"markovCO2.jl"))
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
-#Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
-#Temperatures=[1750,2000,2500,3000]
-
-Volumes=[9.3]
-Temperatures=[3000]
+Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+Temperatures=[1750,2000,2500,3000]
 
 # Cut-off distance for bonds
 cut_off_bond = 1.75
@@ -18,8 +15,8 @@ nbC=32
 nbO=64
 nb_cut=10
 
-nb_delta2=5000
-nb_space=1000
+nb_delta2=4000
+nb_space=500
 
 
 for V in Volumes
@@ -42,6 +39,29 @@ for V in Volumes
         nb_steps=size(traj)[1]
         nb_atoms=size(traj[1].names)[1]
 
+        barycenter_C=zeros(nb_steps,3)
+        barycenter_O=zeros(nb_steps,3)
+        barycenter_all=zeros(nb_steps,3)
+        for step=1:nb_steps
+            for carbon=1:nbC
+                for i=1:3
+                    barycenter_C[step,i] += traj[step].positions[carbon,i]
+                    barycenter_all[step,i] += traj[step].positions[carbon,i]
+                end
+            end
+            for oxygen=1:nbO
+                for i=1:3
+                    barycenter_O[step,i] += traj[step].positions[nbC+oxygen,i]
+                    barycenter_all[step,i] += traj[step].positions[nbC+oxygen,i]
+                end
+            end
+            for j=1:3
+                barycenter_C[step,j] = barycenter_C[step,j]/nbC
+                barycenter_O[step,j] = barycenter_O[step,j]/nbO
+                barycenter_all[step,j] = barycenter_all[step,j]/(nbC+nbO)
+            end
+        end
+
         MSD_C2=zeros(nb_delta2)
         count_2=0
         for start_cut=1:nb_space:nb_steps-nb_delta2
@@ -52,11 +72,12 @@ for V in Volumes
                 for step=1:nb_delta2
                     dist=0
                     for i=1:3
-                        dist += (traj[step+start_cut].positions[carbon,i]-traj[start_cut].positions[carbon,i])*(traj[step+start_cut].positions[carbon,i]-traj[start_cut].positions[carbon,i])
+                        dist += ( (traj[step+start_cut].positions[carbon,i]-traj[start_cut].positions[carbon,i])-(barycenter_C[step+start_cut,i]-barycenter_C[start_cut,i]) )*( (traj[step+start_cut].positions[carbon,i]-traj[start_cut].positions[carbon,i]) - (barycenter_C[step+start_cut,i]-barycenter_C[start_cut,i]) )
                     end
                     dist=sqrt(dist)
                     MSD_local[step] += dist*dist
                     count+=1
+
                 end
             end
             MSD_local /= nbC
@@ -66,6 +87,7 @@ for V in Volumes
             count_2 += 1
         end
         MSD_C2 /= count_2
+
 
         file_out=open(string(folder_out,"MSD_C_slide_total.dat"),"w")
         for i=1:nb_delta2
@@ -82,7 +104,7 @@ for V in Volumes
                 for step=1:nb_delta2
                     dist=0
                     for i=1:3
-                        dist += (traj[step+start_cut].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i])*(traj[step+start_cut].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i])
+                        dist += ( (traj[step+start_cut].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i]) - (barycenter_O[step+start_cut,i]-barycenter_O[start_cut,i]) )*( (traj[step+start_cut].positions[nbC+oxygen,i]-traj[start_cut].positions[nbC+oxygen,i]) - (barycenter_O[step+start_cut,i]-barycenter_O[start_cut,i]) )
                     end
                     dist=sqrt(dist)
                     MSD_local[step] += dist*dist
@@ -117,7 +139,7 @@ for V in Volumes
                 for step=1:nb_delta2
                     dist=0
                     for i=1:3
-                        dist += (traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i])*(traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i])
+                        dist += ( (traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i]) - (barycenter_all[step+start_cut,i]-barycenter_all[start_cut,i]) )*( (traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i]) - (barycenter_all[step+start_cut,i]-barycenter_all[start_cut,i]) )
                     end
                     dist=sqrt(dist)
                     MSD_local[step] += dist*dist
