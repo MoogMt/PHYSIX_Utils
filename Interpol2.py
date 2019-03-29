@@ -14,6 +14,8 @@ from scipy.optimize import curve_fit
 end_P_1=47
 end_P_2=70
 
+
+
 P_fic1=np.linspace(25,end_P_1,100)
 P_fic2=np.linspace(end_P_1,end_P_2,100)
 
@@ -33,9 +35,14 @@ plt.show()
 def expdec(x,A,B,C):
     return B*np.exp(-A*(x-C))
 
+#==============================================================================
+
+end_P_1_3K=44
+
 P_3000_1=P_3000[P_3000<end_P_1]
 D_3000_1=D_3000[P_3000<end_P_1]
 
+P_fic1_3K=np.linspace(25,end_P_1_3K,100)
 
 A_3K_1,B_3K_1,C_3K_1 = curve_fit(expdec,P_3000_1,D_3000_1,p0=[0.01,0.6,30])[0]
 
@@ -46,16 +53,20 @@ plt.xlabel("P (GPa)")
 plt.ylabel("D (cm^2/s)")
 plt.show()
 
-P_3000_2=P_3000[P_3000>end_P_1]
-D_3000_2=D_3000[P_3000>end_P_1]
+end_P_2_3K=49
+P_fic2_3K=np.linspace(end_P_2_3K,end_P_2,100)
 
 
-A_3K_2,B_3K_2,C_3K_2 = curve_fit(expdec,P_3000_2,D_3000_2,p0=[0.01,0.6,30])[0]
+P_3000_2=P_3000[P_3000>end_P_2_3K]
+D_3000_2=D_3000[P_3000>end_P_2_3K]
+
+
+A_3K_2,B_3K_2,C_3K_2 = curve_fit(expdec,P_3000_2,D_3000_2,p0=[0.05,0.78,50])[0]
 
 plt.plot(P_3000_1,D_3000_1,"ro")
 plt.plot(P_3000_2,D_3000_2,"bo")
-plt.plot(P_fic1,expdec(P_fic1,A_3K_1,B_3K_1,C_3K_1),"r-")
-plt.plot(P_fic2,expdec(P_fic2,A_3K_2,B_3K_2,C_3K_2),"b-")
+plt.plot(P_fic1_3K,expdec(P_fic1,A_3K_1,B_3K_1,C_3K_1),"r-")
+plt.plot(P_fic2_3K,expdec(P_fic2,A_3K_2,B_3K_2,C_3K_2),"b-")
 plt.xlabel("P (GPa)")
 plt.ylabel("D (cm^2/s)")
 plt.show()
@@ -140,7 +151,7 @@ plt.plot(P_fic1,expdec(P_fic1,A_2K_1,B_2K_1,C_2K_1)*5e-5,"b-")
 plt.plot(P_fic2,expdec(P_fic2,A_2K_2,B_2K_2,C_2K_2)*5e-5,"b-")
 plt.xlabel("P (GPa)")
 plt.ylabel("D (cm^2/s)")
-plt.legend(["3000K","","","2500K","","","3000K","",""])
+plt.legend(["3000K","","","2500K","","","2000K","",""])
 plt.show()
 
 

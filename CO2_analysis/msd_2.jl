@@ -87,7 +87,6 @@ for V in Volumes
         end
         MSD_C2 /= count_2
 
-
         file_out=open(string(folder_out,"MSD_C_slide_total.dat"),"w")
         for i=1:nb_delta2
             write(file_out,string(i*0.005," ",MSD_C2[i],"\n"))
