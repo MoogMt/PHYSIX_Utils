@@ -20,8 +20,8 @@ nbC=32
 nbO=64
 nb_cut=10
 
-nb_delta2=5000
-nb_space=100
+nb_delta2=10000
+nb_space=500
 
 for T in Temperatures
     file_out=open(string(folder_base,"D_",T,".dat"),"w")

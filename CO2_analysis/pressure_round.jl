@@ -7,9 +7,8 @@ include(string(GPfolder,"contactmatrix.jl"))
 
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
-#volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8,10]
-volumes=[9.25,9.3]
-temperatures=[2000,2250,2500,2750,3000]
+volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8,10]
+temperatures=[2000,2500]
 
 file=open(string(folder_base,"pressure_all.dat"),"w")
 
