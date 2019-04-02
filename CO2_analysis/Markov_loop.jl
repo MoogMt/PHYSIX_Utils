@@ -8,12 +8,10 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 #folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
-Volumes=[9.35,9.375,9.4,9.5,9.8,10.0]
+Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.6]
 Temperatures=[1750,2000,2500,3000]
 Cut_Off=[1.75]
 
-V=9.8
-T=3000
 
 nbC=32
 nbO=nbC*2
@@ -27,10 +25,18 @@ d_lag=5
 unit=0.005
 
 for T in Temperatures
-    file_coordinanceC=open(string(folder_base,"coordinancesC.dat"),"w")
-    file_coordinanceO=open(string(folder_base,"coordinancesC.dat"),"w")
-    file_coordinanceC=open(string(folder_base,"coordinancesC.dat"),"w")
+
+    file_coordinanceC=open(string(folder_base,"coordinancesC-",T,".dat"),"w")
+    file_coordinanceO=open(string(folder_base,"coordinancesO-",T,".dat"),"w")
+    file_CO2=open(string(folder_base,"CO2-",T,".dat"),"w")
+    file_charged=open(string(folder_base,"charged-",T,".dat"),"w")
+    file_exchange=open(string(folder_base,"exchange-",T,".dat"),"w")
+    file_exchange_count=open(string(folder_base,"exchange_count-",T,".dat"),"w")
+
     for V in Volumes
+
+        print("V=",V," T=",T,"\n")
+
         folder_in=string(folder_base,V,"/",T,"K/")
         file=string(folder_in,"TRAJEC_wrapped.xyz")
         folder_out=string(folder_in,"Data/")
@@ -39,9 +45,23 @@ for T in Temperatures
             continue
         end
 
+
+        fileP="Avg_Pressure-BootStrap-nboot_1000.dat"
+        if ! isfile( string(folder_out,fileP) )
+            continue
+        end
+
+        file_p=open(string(folder_out,fileP))
+        lines=readlines(file_p);
+        close(file_p)
+        P=parse(Float64,split(lines[1])[2])
+
         print("Reading Trajectory\n")
         traj=filexyz.readFastFile(file)
         cell=cell_mod.Cell_param(V,V,V)
+
+        nb_steps=size(traj)[1]
+        nb_atoms=size(traj[1].names)[1]
 
         data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
         nb_types=size(types)[1]
@@ -81,6 +101,8 @@ for T in Temperatures
         end
         percent_excited=nb_states_exc/count_states_all
 
+        write(file_charged,string(P," ",percent_excited,"\n"))
+
         coordinancesC=zeros(max_neigh)
         for state=1:nb_states
             nb=0
@@ -96,6 +118,12 @@ for T in Temperatures
         end
         coordinancesC *= 100
 
+        write(file_coordinanceC,string(P," "))
+        for i=1:max_neigh
+            write(file_coordinanceC,string(coordinancesC[i]," "))
+        end
+        write(file_out,"\n")
+
         percent_CO2=0
         stateC=[0,0,0,0,0,1,1,0,0,0]
         for state=1:nb_states
@@ -106,11 +134,11 @@ for T in Temperatures
                 end
             end
             if found
-                global percent_CO2=percent[1][state]/count_states_all*100
+                percent_CO2=percent[1][state]/count_states_all*100
                 break
             end
         end
-
+        write(file_CO2,string(P," ",percent_CO2,"\n"))
 
         stateC=[0,0,0,0,0,2,2,1,0,0]
         nb_state_dimer=0
@@ -127,16 +155,15 @@ for T in Temperatures
             end
         end
 
-
         dt=25
         time_stock=[]
         count_exchange=0
         carbon_stock=[]
         for carbon=1:nbC
             record=zeros(nb_steps)
-            for step=1:nb_steps
+            for step_=1:nb_steps
                 found_one=false
-                if state_matrix[1][carbon,step] == nb_state_dimer
+                if state_matrix[1][carbon,step_] == nb_state_dimer
                     # Check the exchange in two step:
                     max_neigh2=zeros(2)
                     count_bond_main=0
@@ -144,11 +171,11 @@ for T in Temperatures
                         if atom == carbon
                             continue
                         end
-                        step_before=step-dt
+                        step_before=step_-dt
                         if step_before <= 0
                             step_before=1
                         end
-                        step_after = step+dt
+                        step_after = step_+dt
                         if step_after > nb_steps
                             step_after=nb_steps
                         end
@@ -156,23 +183,23 @@ for T in Temperatures
                             count_bond_main += 1
                         end
                     end
-                    if count_bond_main < 2 && record[step] < 1
+                    if count_bond_main < 2 && record[step_] < 1
                         for i=1:dt
-                            if step+dt < nb_steps
-                                record[step+i] += 1
+                            if step_+dt < nb_steps
+                                record[step_+i] += 1
                             else
                                 break
                             end
                         end
                         global count_exchange += 1
-                        push!(time_stock,step)
+                        push!(time_stock,step_)
                         push!(carbon_stock,carbon)
                         found_one=true
                     end
                 end
                 if found_one
-                    if step+dt < nb_steps
-                        step += dt
+                    if step_+dt < nb_steps
+                        step_ += dt
                     else
                         break
                     end
@@ -180,15 +207,15 @@ for T in Temperatures
             end
         end
 
+
         count_exchange2=0
-        carbon_exchange=zeros(nbC)
+        carbon_exchange2=zeros(nbC)
         time_stock2=[]
         carbon_stock2=[]
         check=zeros(size(carbon_stock)[1])
         for i=1:size(carbon_stock)[1]-1
             print("size:",size(check)[1],"\n")
             found=false
-            marker=0
             for j=i+1:size(carbon_stock)[1]
                 if check[j] == true
                     continue
@@ -201,22 +228,30 @@ for T in Temperatures
                     push!(time_stock2,time_stock[j])
                     push!(carbon_stock2,carbon_stock[j])
                     found=true
-                    marker=j
+                    global count_exchange2 += 1
+                    if carbon_exchange2[carbon_stock[j]] < 1
+                        global carbon_exchange2[carbon_stock[j]] += 1
+                    end
+                    if carbon_exchange2[carbon_stock[i]] < 1
+                        global carbon_exchange2[carbon_stock[i]] += 1
+                    end
                     break
                 end
             end
-            if found
-                global count_exchange += 1
-                if carbon_exchange[j] < 1
-                    carbon_exchange[j] += 1
-                end
-                if carbon_exchange[i] < 1
-                    carbon_exchange[i] += 1
-                end
-            end
         end
-        nb_carbons=sum(carbon_exchange)
+        nb_carbons=sum(carbon_exchange2)
         frac_carbon=nb_carbons/nbC*100
 
+        write(file_exchange,string(P," ",frac_carbon,"\n"))
+        write(file_exchange_count,string(P," ",count_exchange2,"\n"))
+
     end
+
+    close(file_coordinanceC)
+    close(file_coordinanceO)
+    close(file_CO2)
+    close(file_charged)
+    close(file_exchange)
+    close(file_exchange_count)
+
 end
