@@ -291,7 +291,9 @@ for N in N_structure
 
     file_out=open(string(folder_base,"decision_diagram-",N,".dat"),"w")
     for i=1:nb_structure
-        write(file_out,string(rho[i]," ",delta[i],"\n"))
+        if burn[i] < 1
+            write(file_out,string(rho[i]," ",delta[i],"\n"))
+        end
     end
     close(file_out)
 
@@ -303,7 +305,7 @@ for N in N_structure
     icl=[]
     # Determine the cluster centers
     for i=1:nb_structure
-        if rho[i] < max_rho && delta[i] > min_delta
+        if rho[i] < max_rho && delta[i] > min_delta && burn[i] < 1
     		n_cluster += 1
             cl[indexs_ranking[i]] = n_cluster
             icl=push!(icl,indexs_ranking[i])

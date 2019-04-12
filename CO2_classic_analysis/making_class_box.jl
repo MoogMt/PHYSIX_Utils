@@ -4,8 +4,8 @@ include(string(GPfolder,"xyz.jl"))
 include(string(GPfolder,"pdb.jl"))
 
 # Reading PDB file
-folder="/home/moogmt/II/"
-molecules, cell=pdb.readStep( string(folder,"P42nmn-super.pdb") )
+folder="/media/moogmt/Stock/Mathieu/CO2/Structures/R-3c/SuperFF/"
+molecules, cell=pdb.readStep( string(folder,"R3c-super.pdb") )
 
 dCO=1.163
 mo=15.9994
