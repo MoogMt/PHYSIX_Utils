@@ -182,4 +182,8 @@ function switchingFunction( x::T1, d::T2, n::T3, m::T4) where { T1 <: Real, T2 <
     return (1-(x/d)^n)/(1-(x/d)^m)
 end
 
+function switchingFunction( x::T1, d::T2, n::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Int }
+    return 1/(1+(x/d)^n)
+end
+
 end

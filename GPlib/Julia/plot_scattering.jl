@@ -1,4 +1,4 @@
-function computeCost{ T1 <: Real, T2 <: Real, T3 <: Real }( distance_matrix::Array{T1,2}, positions::Array{T2}, cost_coeff::T3 )
+function computeCost( distance_matrix::Array{T1,2}, positions::Array{T2}, cost_coeff::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
     n_structures=size(distance_matrix)[1]
     cost=0.
     n_dim=size(positions)[2]
@@ -16,7 +16,7 @@ function computeCost{ T1 <: Real, T2 <: Real, T3 <: Real }( distance_matrix::Arr
 end
 
 # Folder where to find file
-folder="/home/moogmt/CO2/CO2_AIMD/clusters/"
+folder="/home/moogmt/CO2_Classic/"
 
 # Convergence parameters
 n_iterations=100000
@@ -49,36 +49,36 @@ cost=computeCost(distance_matrix,[x y],k)
 
 for iteration=1:n_iterations
     # Moving randomly a single element
-    element= Int( trunc( rand()*number_structure+1 ) )
-    xx=copy(x)
-    yy=copy(y)
+    global element= Int( trunc( rand()*number_structure+1 ) )
+    global xx=copy(x)
+    global yy=copy(y)
     xx[ element ] = x[element] + ( rand() - 0.5 )*s
     yy[ element ] = y[element] + ( rand() - 0.5 )*s
     # Compute cost of move
-    cost_move=computeCost(distance_matrix,[xx yy],k)
+    global cost_move=computeCost(distance_matrix,[xx yy],k)
     # Evalutating change of cost
-    r=rand()
-    m=0
-    de=( cost_move - cost )/kT
+    global r=rand()
+    global m=0
+    global de=( cost_move - cost )/kT
     if de > 0
-        m=exp(-de)
+        global m=exp(-de)
         if r < m
-            x=copy(xx)
-            y=copy(yy)
-            cost = cost_move
+            global x=copy(xx)
+            global y=copy(yy)
+            global cost = cost_move
         end
     else
-        x=copy(xx)
-        y=copy(yy)
-        cost = cost_move
+        global x=copy(xx)
+        global y=copy(yy)
+        global cost = cost_move
     end
 end
 
-map=open(string(folder,"map.dat"),"w")
+map_stuff=open(string(folder,"map.dat"),"w")
 for i=1:number_structure
-    write(map,string(x[i]," ",y[i],"\n"))
+    write(map_stuff,string(x[i]," ",y[i],"\n"))
 end
-close(map)
+close(map_stuff)
 
 error_map=open(string(folder,"error_map.dat"),"w")
 for i=1:number_structure

@@ -38,7 +38,7 @@ end
 # ComputePIV
 d0=1.8
 m=10
-n=4
+n=40
 size_piv=Int(nbC*nbO)
 piv=zeros(size_piv,nb_structure)
 for step=1:nb_structure
