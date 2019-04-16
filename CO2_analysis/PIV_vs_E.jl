@@ -14,7 +14,7 @@ V=8.82
 n_run=2
 
 d0=1.75
-n=6
+n=20
 
 folder_in=string(folder_base,V,"/",T,"K/",n_run,"-run/")
 
@@ -34,7 +34,8 @@ for i=1:nb_structure
 end
 
 # ComputePIV
-piv=zeros(Int(nb_atoms*(nb_atoms-1)/2),nb_structure)
+piv_element=Int(nb_atoms*(nb_atoms-1)/2)
+piv=zeros(piv_element,nb_structure)
 for step=1:nb_structure
     print("PIV computation progress: ",step/nb_structure*100,"%\n")
     count=1
@@ -45,16 +46,7 @@ for step=1:nb_structure
             count = count + 1
         end
     end
-    # # Sort
-    for atom=start:count-2
-        for atom2=atom+1:count-1
-            if piv[atom,step] > piv[atom2,step]
-                stock=piv[atom,step]
-                piv[atom,step] = piv[atom2,step]
-                piv[atom2,step] = stock
-            end
-        end
-    end
+    piv[start:count-1,step]=sort(piv[start:count-1,step])
     start=count
     for oxygen=1:nbO
         for oxygen2=oxygen+1:nbO
@@ -63,15 +55,7 @@ for step=1:nb_structure
         end
     end
     # Sort
-    for atom=start:count-2
-        for atom2=atom+1:count-1
-            if piv[atom,step] > piv[atom2,step]
-                stock=piv[atom,step]
-                piv[atom,step] = piv[atom2,step]
-                piv[atom2,step] = stock
-            end
-        end
-    end
+    piv[start:count-1,step]=sort(piv[start:count-1,step])
     start=count
     for carbon=1:nbC
         for oxygen=1:nbO
@@ -80,15 +64,7 @@ for step=1:nb_structure
         end
     end
     # Sort
-    for atom=start:count-2
-        for atom2=atom+1:count-1
-            if piv[atom,step] > piv[atom2,step]
-                stock=piv[atom,step]
-                piv[atom,step] = piv[atom2,step]
-                piv[atom2,step] = stock
-            end
-        end
-    end
+    piv[start:count-1,step]=sort(piv[start:count-1,step])
 end
 
 file_out=open(string("/home/moogmt/PIV-",d0,"-",n,"-",m,".dat"),"w")
@@ -124,11 +100,22 @@ for i=1:nb_structure
     energy[i] = parse(Float64,split(lines[i])[3])
 end
 
-file_out=open(string(folder_in,"PIV_1/results",d0,"-",n,"-",m,".dat"),"w")
+file_out=open(string(folder_in,"PIV_1/results",d0,"-",n,".dat"),"w")
 for i=1:nb_structure
     print("Progress: ",i/nb_structure*100,"%\n")
     for j=i+1:nb_structure
         write(file_out,string(distances[i,j]," ",abs(energy[i]-energy[j])/32*13.605693,"\n"))
     end
+end
+close(file_out)
+
+file_out=open(string(folder_in,"PIV_1/piv-",d0,"-",n,".dat"),"w")
+for i=1:piv_element
+    print("Progress: ",i/piv_element*100,"%\n")
+    write(file_out,string(i," "))
+    for j=1:nb_structure
+        write(file_out,string(piv[i,j]," "))
+    end
+    write(file_out,string("\n"))
 end
 close(file_out)
