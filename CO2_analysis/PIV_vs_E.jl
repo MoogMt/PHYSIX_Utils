@@ -8,13 +8,13 @@ include(string(GPfolder,"utils.jl"))
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
 
-T=3000
+T=2500
 V=8.82
 
-n_run=2
+n_run=1
 
 d0=1.75
-n=20
+n=2
 
 folder_in=string(folder_base,V,"/",T,"K/",n_run,"-run/")
 
@@ -66,17 +66,6 @@ for step=1:nb_structure
     # Sort
     piv[start:count-1,step]=sort(piv[start:count-1,step])
 end
-
-file_out=open(string("/home/moogmt/PIV-",d0,"-",n,"-",m,".dat"),"w")
-for i=1:size(piv)[1]
-    print("Progress : ",i/size(piv)[1]*100,"%\n")
-    write(file_out,string(i," "))
-    for j=1:size(piv)[2]
-        write(file_out,string(piv[i,j]," "))
-    end
-    write(file_out,string("\n"))
-end
-close(file_out)
 
 distances=zeros(nb_structure,nb_structure)
 for step1=1:nb_structure
