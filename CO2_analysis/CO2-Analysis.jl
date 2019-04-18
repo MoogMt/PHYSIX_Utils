@@ -1,13 +1,15 @@
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 
+include(string(GPfolder,"contactmatrix.jl"))
+include(string(GPfolder,"geom.jl"))
+include(string(GPfolder,"utils.jl"))
 # Thermodynamical values
-Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8,10]
+Volumes=[8.6,8.82,9.0,9.2,9.3,9.35]
 Temperatures=[2000,2500,3000]
 Cut_Off=[1.75]
 
-folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
-stride=1
 unit=0.005
 
 for cut_off in Cut_Off
