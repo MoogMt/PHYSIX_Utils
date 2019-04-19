@@ -1,11 +1,15 @@
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+
+include(string(GPfolder,"contactmatrix.jl"))
+include(string(GPfolder,"geom.jl"))
+include(string(GPfolder,"utils.jl"))
 
 # Thermodynamical values
-Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8,10]
+Volumes=[8.6,8.82,9.0,9.2,9.3,9.35]
 Temperatures=[2000,2500,3000]
 Cut_Off=[1.75]
 
-folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
 for cut_off in Cut_Off
     for V in Volumes
@@ -27,7 +31,7 @@ for cut_off in Cut_Off
                 close(file_out)
 
                 file_out_co2=open(string(folder_local,"co2_ratio.dat"),"w")
-                write(file_out_co2,string( parse(Float64,split(lines[3])[3])/max, "\n" ) ) 
+                write(file_out_co2,string( parse(Float64,split(lines[3])[3])/max, "\n" ) )
                 close(file_out_co2)
             end
         end
