@@ -199,8 +199,8 @@ end
 
 print(dist1," ",dist3,"\n")
 
-alpha=[2,2,1,1,4]
-beta=[1,3,2,3,1]
+alpha=[1,2,3,3,2]
+beta=[2,1,3,0,5]
 delta=alpha-beta
 div_=1
 dist3=0
@@ -257,6 +257,8 @@ for i=1:nb_box
         end
     end
 end
+print(dist3,"\n")
+
 
 # Naive way to compute forces
 # distances=zeros(nb_structure,nb_structure)
