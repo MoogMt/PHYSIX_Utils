@@ -28,7 +28,7 @@ unit=0.005
 #     for T in Temperatures
 
 
-T=1750
+T=3000
 V=9.8
 
 folder_in=string(folder_base,V,"/",T,"K/")
@@ -46,7 +46,7 @@ cell=cell_mod.Cell_param(V,V,V)
 data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
 nb_types=size(types)[1]
 
-states, percent, state_matrix, type_states = assignDataToStates( data, nb_types, type_atoms )
+states, state_matrix, count = assignDataToStates( data, nb_types, type_atoms )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
 

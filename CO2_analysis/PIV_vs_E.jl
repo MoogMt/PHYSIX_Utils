@@ -8,13 +8,12 @@ include(string(GPfolder,"utils.jl"))
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
 
-T=2500
+T=3000
 V=8.82
 
 n_run=1
 
-d0=1.75
-n=2
+
 
 folder_in=string(folder_base,V,"/",T,"K/",n_run,"-run/")
 
@@ -22,7 +21,13 @@ print("Computing Data\n")
 traj=filexyz.readFastFile(string(folder_in,"TRAJEC.xyz"))
 cell=cell_mod.Cell_param(V,V,V)
 
-traj=traj[1:200]
+stride_=10
+stride_simu=5
+stride_e=Int(stride_*stride_simu)
+
+nb_steps=10000
+
+traj=traj[1:stride_:nb_steps]
 nb_structure=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 nbC=32
@@ -32,6 +37,10 @@ nbO=64
 for i=1:nb_structure
     cell_mod.wrap(traj[i],cell)
 end
+
+
+d0=2
+n=4
 
 # ComputePIV
 piv_element=Int(nb_atoms*(nb_atoms-1)/2)
@@ -80,31 +89,22 @@ for step1=1:nb_structure
 end
 
 
-file_energy=open(string(folder_in,"EKS_base"))
+file_energy=open(string(folder_in,"ENERGIES"))
 lines=readlines(file_energy)
 close(file_energy)
 
+count_local=1
 energy=zeros(nb_structure)
-for i=1:nb_structure
-    energy[i] = parse(Float64,split(lines[i])[3])
+for i=1:stride_e:nb_steps*stride_simu
+    energy[count_local] = parse(Float64,split(lines[i])[4])
+    global count_local+=1
 end
 
-file_out=open(string(folder_in,"PIV_1/results",d0,"-",n,".dat"),"w")
+file_out=open(string(folder_in,"results",d0,"-",n,".dat"),"w")
 for i=1:nb_structure
     print("Progress: ",i/nb_structure*100,"%\n")
     for j=i+1:nb_structure
         write(file_out,string(distances[i,j]," ",abs(energy[i]-energy[j])/32*13.605693,"\n"))
     end
-end
-close(file_out)
-
-file_out=open(string(folder_in,"PIV_1/piv-",d0,"-",n,".dat"),"w")
-for i=1:piv_element
-    print("Progress: ",i/piv_element*100,"%\n")
-    write(file_out,string(i," "))
-    for j=1:nb_structure
-        write(file_out,string(piv[i,j]," "))
-    end
-    write(file_out,string("\n"))
 end
 close(file_out)
