@@ -149,22 +149,24 @@ end
 # Distance 1-2
 dist3=0
 div_=(delta*delta)
-hist_cal=zeros(nb_box)
 for k=1:3
     delta=hist[1,:,k]-hist[2,:,k]
     for i=1:nb_box
+        if delta[i] == 0
+            continue
+        end
         if delta[i] > 0
             for j=i+1:nb_box
                 if hist[2,j,k] >= abs(delta[i])
                     hist[2,j,k] = hist[2,j,k] - abs(delta[i])
                     delta[j] = delta[j] + delta[i]
-                    global dist3 = dist3 + delta[i]*delta[i]*(j-i)*(j-i)*div_
-                    print("add: ", delta[i]*delta[i]*(j-i)*(j-i)*div_,"\n")
+                    global dist3 = dist3 + delta[i]*(j-i)*(j-i)*div_
+                    print("add: ", delta[i]*(j-i)*(j-i)*div_,"\n")
                     delta[i] = 0
                     break
                 else
-                    print("add2: ",hist[2,j,k]*hist[2,j,k]*(j-i)*(j-i)*div_," ",hist[2,j,k],"\n")
-                    global dist3 = dist3 + hist[2,j,k]*hist[2,j,k]*(j-i)*(j-i)*div_
+                    print("add2: ",hist[2,j,k]*(j-i)*(j-i)*div_," ",hist[2,j,k],"\n")
+                    global dist3 = dist3 + hist[2,j,k]*(j-i)*(j-i)*div_
                     delta[i] = delta[i] - hist[2,j,k]
                     hist[2,j,k] = 0
                 end
@@ -176,15 +178,15 @@ for k=1:3
             for j=i+1:nb_box
                 if hist[1,j,k] >= abs(delta[i])
                     hist[1,j,k] = hist[1,j,k] - abs(delta[i])
-                    delta[j] = delta[j] - delta[i]
-                    global dist3 = dist3 + delta[i]*delta[i]*(j-i)*(j-i)*div_
-                    print("add3: ", delta[i]*delta[i]*(j-i)*(j-i)*div_,"\n")
+                    delta[j] =    delta[j]    + delta[i]
+                    global dist3 = dist3      - delta[i]*(j-i)*(j-i)*div_
+                    print("add3: ", delta[i]*(j-i)*(j-i)*div_,"\n")
                     delta[i] = 0
                     break
                 else
-                    global dist3 = dist3 + hist[1,j,k]*hist[1,j,k]*(j-i)*(j-i)*div_
-                    print("add2: ",hist[1,j,k]*hist[1,j,k]*(j-i)*(j-i)*div_,"\n")
-                    delta[i] = delta[i] - hist[1,j,k]
+                    global dist3 = dist3 + hist[1,j,k]*(j-i)*(j-i)*div_
+                    print("add2: ",hist[1,j,k]*(j-i)*(j-i)*div_,"\n")
+                    delta[i] = delta[i] + hist[1,j,k]
                     hist[1,j,k] = 0
                 end
             end
@@ -221,7 +223,7 @@ for i=1:nb_box
                 break
             else
                 global dist3 = dist3 + beta[j]*(j-i)*(j-i)*div_
-                print("Add2: ",beta[j]*beta[j]*(j-i)*(j-i)*div_,"\n")
+                print("Add2: ",beta[j]*(j-i)*(j-i)*div_,"\n")
                 delta[i] = delta[i] - beta[j]
                 beta[j] = 0
             end
@@ -243,7 +245,7 @@ for i=1:nb_box
                 delta[i] = 0
                 break
             else
-                global dist3 = dist3 + alpha[j]*alpha[j]*(j-i)*(j-i)*div_
+                global dist3 = dist3 + alpha[j]*(j-i)*(j-i)*div_
                 print("Add5: ",beta[j]*(j-i)*(j-i)*div_,"\n")
                 delta[i] = delta[i] + alpha[j]
                 alpha[j] = 0
