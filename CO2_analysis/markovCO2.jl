@@ -275,7 +275,7 @@ function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, nb_ty
 
     return state_transition_matrix
 end
-function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Int }
+function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real }
     nb_states   = size(transition_matrix)[1]
     nb_lag_time = size(transition_matrix)[3]
     nb_lag_compare = Int(trunc(nb_lag_time/2))

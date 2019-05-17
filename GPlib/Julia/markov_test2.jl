@@ -26,16 +26,18 @@ d_lag=5
 unit=0.005
 
 
+V=9.8
+T=2000
 
-for V in Volumes
-    for T in Temperatures
+# for V in Volumes
+#     for T in Temperatures
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
-
-if ! isfile(file)
-    continue
-end
+#
+# if ! isfile(file)
+#     continue
+# end
 folder_out=string(folder_in,"Data/")
 
 print("Reading Trajectory\n")
@@ -65,5 +67,5 @@ for type=1:nb_types
     writeTransitionsMatrix(string(folder_out,"TransitionsMatrix-",types[type],"-CK.dat"),transitions_matrix_CK[type])
 end
 
-end
-end
+# end
+# end

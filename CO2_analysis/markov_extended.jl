@@ -10,13 +10,13 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 # Thermo data
 Volumes=[9.35,9.375,9.4,9.5,9.8,10.0]
 Temperatures=[1750,2000,2500,3000]
-Cut_Off=[1.75]
+Cut_Off=[1.6]
 
 # Number of atoms
 nbC=32
 nbO=nbC*2
 
-cut_off_bond = 1.75
+cut_off_bond = 1.6
 max_neigh=5
 
 min_lag=1
@@ -24,7 +24,7 @@ max_lag=5001
 d_lag=5
 unit=0.005
 
-# for V in Volumes
+# for V in Volume
 #     for T in Temperatures
 
 
@@ -46,7 +46,7 @@ cell=cell_mod.Cell_param(V,V,V)
 data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
 nb_types=size(types)[1]
 
-states, state_matrix, count = assignDataToStates( data, nb_types, type_atoms )
+states, state_matrix, count_ = assignDataToStates( data, nb_types, type_atoms )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
 
