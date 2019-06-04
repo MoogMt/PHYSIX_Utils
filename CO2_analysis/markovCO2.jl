@@ -19,7 +19,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                 found=true
             end
         end
-        if ! found
+        if ! found 
             push!(types,traj[1].names[i])
             push!(types_number,size(types)[1])
             push!(count_types,1)

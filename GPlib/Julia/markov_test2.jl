@@ -1,7 +1,7 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
-
+include(string(GPfolder,"clustering.jl"))
 include(string(CO2folder,"markovCO2.jl"))
 
 
@@ -26,8 +26,8 @@ d_lag=5
 unit=0.005
 
 
-V=9.8
-T=2000
+V=8.82
+T=3000
 
 # for V in Volumes
 #     for T in Temperatures
@@ -43,6 +43,42 @@ folder_out=string(folder_in,"Data/")
 print("Reading Trajectory\n")
 traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
+nb_steps=size(traj)[1]
+
+n_neighbor=4
+
+filed=open(string(folder_out,"massive_data.dat"),"w")
+for step=1:nb_steps
+    print("Progress: ",step/nb_steps*100,"%\n")
+    for carbon=1:nbC
+        if state_matrices[1][carbon,step] == 1
+            distances=zeros(nbO)
+            for oxygen=1:nbO
+                distances[oxygen] = cell_mod.distance(traj[step],cell,carbon,nbC+oxygen)
+            end
+            index_sort=sortperm(distances)
+            distances_2nd=ones(n_neighbor)*V
+            for index_=1:n_neighbor
+                for carbon2=1:nbC
+                    if carbon2 != carbon
+                        distanceOC=cell_mod.distance(traj[step],cell,carbon2,nbC+index_sort[index_])
+                        if distances_2nd[index_] > distanceOC
+                            distances_2nd[index_] = distanceOC
+                        end
+                    end
+                end
+            end
+            write(filed,string(carbon," "))
+            for k=1:4
+                write(filed,string(distances[index_sort[k]]," ",distances_2nd[k]," "))
+            end
+            write(filed,string("\n"))
+        end
+    end
+end
+close(filed)
+
+
 
 data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
 nb_types=size(types)[1]
@@ -53,6 +89,10 @@ for type=1:2
     writeStates( string(folder_out,"markov_intial_states-",types[type],"-",cut_off_bond,".dat"),states[type],counts_states[type],types)
     writeStateMatrix( string(folder_out,"initial_state_matrix-",types[type],"-",cut_off_bond,".dat"), state_matrices[type] )
 end
+
+
+# Basic analysis of states
+
 
 # Transition matrix study
 transitions_matrix=[transitionMatrix(states[1],state_matrices[1],nb_types,type_atoms,min_lag,max_lag,d_lag)]
