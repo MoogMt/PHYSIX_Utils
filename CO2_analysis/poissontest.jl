@@ -17,9 +17,12 @@ nbC=32
 nbO=nbC*2
 
 V=9.8
-T=2500
+T=3000
 
 print("V=",V," T=",T,"\n")
+
+
+for T in [2000,2500,3000]
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -40,6 +43,11 @@ data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_n
 nb_types=size(types)[1]
 states, state_matrices, counts = assignDataToStates( data, nb_types, type_atoms )
 
+writeStates(string(folder_out,"statesC-",cut_off_bond,".dat"),states[1],counts[1],types)
+writeStates(string(folder_out,"statesO-",cut_off_bond,".dat"),states[2],counts[2],types)
+writeStateMatrix(string(folder_out,"statesC-matrix-",cut_off_bond,".dat"),state_matrices[1])
+writeStateMatrix(string(folder_out,"statesO-matrix-",cut_off_bond,".dat"),state_matrices[2])
+
 unit=0.005
 
 lengths=[]
@@ -54,9 +62,14 @@ for carbon=1:nbC
                 check=false
                 for step_2=1:nb_steps
                     if state_matrices[1][carbon,step_2] == 1
-                        step=step_2
-                        check=true
-                        break
+                        # Anti-flickering measure:
+                        # We start counting ONLY if the event lasted more than 10 frames
+                        # so at least 50fs
+                        if step_2 - step > 10
+                            step=step_2
+                            check=true
+                            break
+                        end
                     end
                 end
                 # If we did not find it, we go to the next carbon
@@ -86,22 +99,24 @@ min_value=unit
 max_value=unit
 for i=1:size(lengths)[1]
     if max_value < lengths[i]
-        global max_value = lengths[i]
+        max_value = lengths[i]
     end
 end
 
 # Histogram
-nb_box=200
+nb_box=50
 delta=(max_value-min_value)/nb_box
 hist1D=zeros(Real,nb_box)
 for i=1:size(lengths)[1]
-    hist1D[ Int(trunc( lengths[i]/nb_box ))+1 ] += 1
+    hist1D[ Int(trunc( (lengths[i])/delta-min_value ))+1 ] += 1
 end
 hist1D/=sum(hist1D)
 
 # Writting data
 file_out=open(string(folder_out,"hist_poisson.dat"),"w")
 for i=1:nb_box
-    write(file_out,string(i*unit," ",hist1D[i],"\n"))
+    write(file_out,string( (i*delta+min_value)*unit," ",hist1D[i],"\n"))
 end
 close(file_out)
+
+end
