@@ -8,7 +8,7 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 #folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
-Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.6]
+Volumes=[10.0,9.8,9.5,9.4,9.375]
 Temperatures=[1750,2000,2500,3000]
 Cut_Off=[1.75]
 
@@ -22,7 +22,7 @@ T=3000
 print("V=",V," T=",T,"\n")
 
 
-for T in [2000,2500,3000]
+#for T in [2000,2500,3000]
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -61,7 +61,7 @@ for carbon=1:nbC
                 # We move at the end of the chain
                 check=false
                 for step_2=1:nb_steps
-                    if state_matrices[1][carbon,step_2] == 1
+                    if state_matrices[1][carbon,step_2] == 1 && step_2-step > 10
                         step=step_2
                         check=true
                         break
@@ -71,10 +71,6 @@ for carbon=1:nbC
                 if ! check
                     step=nb_steps+1
                 end
-                # Anti-flickering measure:
-                # We start counting ONLY if the event lasted more than 4 frames
-                # so at least 20fs
-
                 # And we start counting to the next event
                 counting = true
                 count_=1
@@ -98,16 +94,16 @@ min_value=unit
 max_value=unit
 for i=1:size(lengths)[1]
     if max_value < lengths[i]
-        max_value = lengths[i]
+        global max_value = lengths[i]
     end
 end
 
 # Histogram
-nb_box=200
+nb_box=50
 delta=(max_value-min_value)/nb_box
 hist1D=zeros(Real,nb_box)
 for i=1:size(lengths)[1]
-    hist1D[ Int(trunc( lengths[i]/nb_box ))+1 ] += 1
+    hist1D[ Int(trunc( lengths[i]/delta-min_value ))+1 ] += 1
 end
 hist1D/=sum(hist1D)
 
@@ -118,4 +114,4 @@ for i=1:nb_box
 end
 close(file_out)
 
-end
+#end

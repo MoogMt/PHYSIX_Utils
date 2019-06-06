@@ -7,8 +7,8 @@ include(string(GPfolder,"contactmatrix.jl"))
 
 func="PBE-MT"
 
-Volumes=[9.2,9.3,9.35]
-Temperatures=[2000,2500]
+Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.1,9.05,9.0,8.82,8.6]
+Temperatures=[1750,2000,2500,3000]
 
 for V in Volumes
     for T in Temperatures
@@ -91,6 +91,7 @@ for V in Volumes
 
         # BootStrap
         avg_P = 0
+        var_P = 0
         nb_boot = 1000
         for i=1:nb_boot
             avg_p_local=0
@@ -98,11 +99,13 @@ for V in Volumes
                 avg_p_local += pressure_inst[ Int(trunc(rand()*max_step)+1) ]
             end
             avg_P  += avg_p_local/max_step
+            var_P += avg_P
         end
         avg_P /= nb_boot
+        var_P /= nb_boot
 
         file_out=open(string(folder_output,"Avg_Pressure-BootStrap-nboot_",nb_boot,".dat"),"w")
-        write(file_out,string(V," ",avg_P,"\n"))
+        write(file_out,string(V," ",avg_P," ",var_P,"\n"))
         close(file_out)
 
         # Writting pertinent pressure in file
