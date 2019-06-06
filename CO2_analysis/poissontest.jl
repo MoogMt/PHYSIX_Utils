@@ -82,5 +82,10 @@ for carbon=1:nbC
     end
 end
 
-min=
-for i
+min_value=unit
+max_value=unit
+for i=1:size(lengths)[1]
+    if max_value < lengths[i]
+        global max_value = lengths[i]
+    end
+end
