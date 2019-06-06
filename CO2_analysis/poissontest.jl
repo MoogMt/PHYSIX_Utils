@@ -62,20 +62,19 @@ for carbon=1:nbC
                 check=false
                 for step_2=1:nb_steps
                     if state_matrices[1][carbon,step_2] == 1
-                        # Anti-flickering measure:
-                        # We start counting ONLY if the event lasted more than 10 frames
-                        # so at least 50fs
-                        if step_2 - step > 10
-                            step=step_2
-                            check=true
-                            break
-                        end
+                        step=step_2
+                        check=true
+                        break
                     end
                 end
                 # If we did not find it, we go to the next carbon
                 if ! check
                     step=nb_steps+1
                 end
+                # Anti-flickering measure:
+                # We start counting ONLY if the event lasted more than 4 frames
+                # so at least 20fs
+
                 # And we start counting to the next event
                 counting = true
                 count_=1
@@ -104,11 +103,11 @@ for i=1:size(lengths)[1]
 end
 
 # Histogram
-nb_box=50
+nb_box=200
 delta=(max_value-min_value)/nb_box
 hist1D=zeros(Real,nb_box)
 for i=1:size(lengths)[1]
-    hist1D[ Int(trunc( (lengths[i])/delta-min_value ))+1 ] += 1
+    hist1D[ Int(trunc( lengths[i]/nb_box ))+1 ] += 1
 end
 hist1D/=sum(hist1D)
 
