@@ -17,7 +17,7 @@ nbC=32
 nbO=nbC*2
 
 V=9.8
-T=3000
+T=2500
 
 print("V=",V," T=",T,"\n")
 
@@ -73,7 +73,7 @@ for carbon=1:nbC
                 count_ += 1
             else
                 if count_ > 1
-                    push!(lengths,count_*unit)
+                    push!(lengths,count_)
                 end
                 counting=false
                 count_=0
@@ -89,3 +89,19 @@ for i=1:size(lengths)[1]
         global max_value = lengths[i]
     end
 end
+
+# Histogram
+nb_box=200
+delta=(max_value-min_value)/nb_box
+hist1D=zeros(Real,nb_box)
+for i=1:size(lengths)[1]
+    hist1D[ Int(trunc( lengths[i]/nb_box ))+1 ] += 1
+end
+hist1D/=sum(hist1D)
+
+# Writting data
+file_out=open(string(folder_out,"hist_poisson.dat"),"w")
+for i=1:nb_box
+    write(file_out,string(i*unit," ",hist1D[i],"\n"))
+end
+close(file_out)
