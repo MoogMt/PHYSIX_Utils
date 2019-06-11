@@ -99,10 +99,10 @@ for V in Volumes
                 avg_p_local += pressure_inst[ Int(trunc(rand()*max_step)+1) ]
             end
             avg_P  += avg_p_local/max_step
-            var_P += avg_P
+            var_P += avg_p_local/max_step*avg_p_local/max_step
         end
         avg_P /= nb_boot
-        var_P /= nb_boot
+        var_P = var_P/nb_boot - avg_P*avg_P
 
         file_out=open(string(folder_output,"Avg_Pressure-BootStrap-nboot_",nb_boot,".dat"),"w")
         write(file_out,string(V," ",avg_P," ",var_P,"\n"))

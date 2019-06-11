@@ -24,100 +24,123 @@ Temperatures=[3000]
 
 print("V=",V," T=",T,"\n")
 
-file_out_map=open(string(folder_base,"map_poisson.dat"),"w")
-for T in Temperatures
-    for V in Volumes
+# file_out_map=open(string(folder_base,"map_poisson.dat"),"w")
+# for T in Temperatures
+#     for V in Volumes
+V=9.8
+T=3000
 
-        folder_in=string(folder_base,V,"/",T,"K/")
-        file=string(folder_in,"TRAJEC_wrapped.xyz")
-        folder_out=string(folder_in,"Data/")
+folder_in=string(folder_base,V,"/",T,"K/")
+file=string(folder_in,"TRAJEC_wrapped.xyz")
+folder_out=string(folder_in,"Data/")
 
-        if  ! isfile(file)
-            continue
+# if  ! isfile(file)
+#     continue
+# end
+
+print("Reading Trajectory\n")
+traj=filexyz.readFastFile(file)
+cell=cell_mod.Cell_param(V,V,V)
+
+nb_steps=size(traj)[1]
+nb_atoms=size(traj[1].names)[1]
+
+cut_off_bond = 1.75
+max_neigh=5
+
+data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
+nb_types=size(types)[1]
+states, state_matrices, counts = assignDataToStates( data, nb_types, type_atoms )
+
+state_target=[0, 0, 0, 0, 0, 2, 1, 1, 0, 0]
+target_number=-1
+for i=1:size(states[1])[1]
+    found=true
+    for j=1:size(states[1])[2]
+        if states[1][i,j] != state_target[j]
+            found=false
+            break
         end
-
-        print("Reading Trajectory\n")
-        traj=filexyz.readFastFile(file)
-        cell=cell_mod.Cell_param(V,V,V)
-
-        nb_steps=size(traj)[1]
-        nb_atoms=size(traj[1].names)[1]
-
-        cut_off_bond = 1.75
-        max_neigh=5
-
-        data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_neigh )
-        nb_types=size(types)[1]
-        states, state_matrices, counts = assignDataToStates( data, nb_types, type_atoms )
-
-        delta=200 # 200 steps = 1ps
-        occurences_nb=[]
-        for step_start=delta:delta:nb_steps-delta
-            print("Progress: ",step_start/(nb_steps-delta)*100,"%\n")
-            for carbon=1:nbC
-                occurence=0
-                for step=step_start:step_start+delta
-                    if state_matrices[1][carbon,step] != 1
-                        occurence += 1
-                        # Looking up next valid step
-                        for next=step+1:step_start+delta
-                            if state_matrices[1][carbon,next] == 1
-
-                                step = next-1 # it will get incremeted at end of loop
-                            end
-                        end
-                    end
-                end
-                push!(occurences_nb,occurence)
-            end
-        end
-
-
-        file_out=open(string(folder_out,string("poisson-",delta,".dat")),"w")
-        for i=1:size(occurences_nb)[1]
-            write(file_out,string(i," ",occurences_nb[i],"\n"))
-        end
-        close(file_out)
-
-        nb_=size(occurences_nb)[1]
-
-        lambda=sum(occurences_nb)/nb_
-
-        max_=0
-        for occ=1:nb_
-            if max_ < occurences_nb[occ]
-                max_ = occurences_nb[occ]
-            end
-        end
-
-        hist1D=zeros(Real,Int(max_)+1)
-        for occ=1:nb_
-            hist1D[occurences_nb[occ]+1] += 1
-        end
-        hist1D[1]=0
-        hist1D/=sum(hist1D)
-
-        file_out=open(string(folder_out,string("poisson-hist-",delta,".dat")),"w")
-        for i=1:Int(max_)
-            if i < 20
-                write(file_out,string(i," ",hist1D[i]," ",exp(-lambda)*lambda^i/factorial(i),"\n"))
-            else
-                write(file_out,string(i," ",hist1D[i]," ",0,"\n"))
-            end
-        end
-        close(file_out)
-
-        file_in_p=open(string(folder_out,"Avg_Pressure-BootStrap-nboot_1000.dat"))
-        lines=readlines(file_in_p)
-        close(file_in_p)
-
-        P=parse(Float64,split(lines[1])[2])
-
-        write(file_out_map,string(P," ",T," ",lambda,"\n"))
-
+    end
+    if found
+        global target_number=i
+        break
     end
 end
-close(file_out_map)
+
+delta=200 # 200 steps = 1ps
+d_delta=100
+occurences_nb=[]
+for step_start=delta:d_delta:nb_steps-delta
+    print("Progress: ",step_start/(nb_steps-delta)*100,"%\n")
+    for carbon=1:nbC
+        occurence=0
+        for step=step_start:step_start+delta
+            if state_matrices[1][carbon,step] == target_number
+                occurence += 1
+                # Looking up next valid step
+                for next=step+1:step_start+delta
+                    if state_matrices[1][carbon,next] != target_number
+                        step = next-1 # it will get incremeted at end of loop
+                    end
+                end
+            end
+        end
+        push!(occurences_nb,occurence)
+    end
+end
+
+
+file_out=open(string(folder_out,string("poisson-",delta,".dat")),"w")
+for i=1:size(occurences_nb)[1]
+    write(file_out,string(i," ",occurences_nb[i],"\n"))
+end
+close(file_out)
+
+nb_=size(occurences_nb)[1]
+
+lambda=sum(occurences_nb)/nb_
+
+max_=0
+for occ=1:nb_
+    if max_ < occurences_nb[occ]
+        global max_ = occurences_nb[occ]
+    end
+end
+
+hist1D=zeros(Real,Int(max_)+1)
+for occ=1:nb_
+    hist1D[occurences_nb[occ]+1] += 1
+end
+hist1D[1]=0
+hist1D/=sum(hist1D)
+
+lambda=0
+for i=1:size(hist1D)[1]
+    global lambda += hist1D[i]*i
+end
+
+file_out=open(string(folder_out,string("poisson-hist-",delta,".dat")),"w")
+for i=1:Int(max_)
+    if i < 20
+        write(file_out,string(i," ",hist1D[i]," ",exp(-lambda)*lambda^(i-1)/factorial(i-1),"\n"))
+    else
+        write(file_out,string(i," ",hist1D[i]," ",0,"\n"))
+    end
+end
+close(file_out)
+
+file_in_p=open(string(folder_out,"Avg_Pressure-BootStrap-nboot_1000.dat"))
+lines=readlines(file_in_p)
+close(file_in_p)
+
+P=parse(Float64,split(lines[1])[2])
+
+# write(file_out_map,string(P," ",T," ",lambda,"\n"))
+
+#     end
+# end
+# close(file_out_map)
 
 
 # unit=0.005
