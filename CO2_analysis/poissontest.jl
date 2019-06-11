@@ -51,12 +51,25 @@ writeStateMatrix(string(folder_out,"statesO-matrix-",cut_off_bond,".dat"),state_
 file_out=open(string(folder_base,"poisson_test.dat"),"w")
 for delta=1:500:1000
     # Count occurences for each delta
-    occurrence=0
     count_=0
+    avg_occ=0
+    var_occ=0
     for i=1:nb_steps-delta
+        occurrence_count=0
+        for j=i:i+delta
+            for carbon=1:nbC
+                if state_matrices[1][]
+
+                end
+            end
+        end
+        avg_occ += occurrence_count
+        var_occ += occurrence_count*occurrence_count
         count_+=1
     end
-    write(file_out,string("\n"))
+    avg_occ /= count_
+    var_occ = var_occ/count_ - avg_occ*avg_occ
+    write(file_out,string(delta," ",avg_occ," ",var_occ,"\n"))
 end
 close(file_out)
 
