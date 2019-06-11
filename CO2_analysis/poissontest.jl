@@ -35,7 +35,6 @@ cell=cell_mod.Cell_param(V,V,V)
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 
-
 cut_off_bond = 1.75
 max_neigh=5
 
@@ -43,116 +42,99 @@ data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_n
 nb_types=size(types)[1]
 states, state_matrices, counts = assignDataToStates( data, nb_types, type_atoms )
 
-writeStates(string(folder_out,"statesC-",cut_off_bond,".dat"),states[1],counts[1],types)
-writeStates(string(folder_out,"statesO-",cut_off_bond,".dat"),states[2],counts[2],types)
-writeStateMatrix(string(folder_out,"statesC-matrix-",cut_off_bond,".dat"),state_matrices[1])
-writeStateMatrix(string(folder_out,"statesO-matrix-",cut_off_bond,".dat"),state_matrices[2])
-
-max_delta=5000
-d_delta=100
-start_delta=100
-file_out=open(string(folder_base,"poisson_test.dat"),"w")
-for delta=start_delta:d_delta:max_delta
-    # Count occurences for each delta\
-    print(string("Working:",delta/max_delta*100," % \n"))
-    count_=0
-    avg_occ=0
-    var_occ=0
-    for i=1:nb_steps-delta
-        occurrence_count=0
-        for carbon=1:nbC
-            for j=i:i+delta
-                if state_matrices[1][carbon,i] != 1
-                    occurrence_count += 1
-                    # Moving to next 1 point
-                    found = false
-                    for k=j+1:i+delta
-                        if state_matrices[1][carbon] == 1
-                            j=k-1
-                            found=true
-                        end
-                    end
-                    if found
-                        break
-                    end
-                end
-            end
-        end
-        avg_occ += occurrence_count/(nbC*delta)
-        var_occ += occurrence_count*occurrence_count
-        count_+=1
-    end
-    avg_occ /= count_
-    var_occ = var_occ/count_ - avg_occ*avg_occ
-    write(file_out,string(delta," ",avg_occ," ",var_occ,"\n"))
-end
-close(file_out)
-
-unit=0.005
-
-lengths=[]
-for carbon=1:nbC
-    counting=false
-    count_=0
-    for step=1:nb_steps
-        if ! counting
-            # Found event
+delta=200 # 200 steps = 1ps
+occurences_nb=[]
+for step_start=1:nb_steps
+    for carbon=1:nbC
+        occurence=0
+        for step=step_start:step_start+delta
             if state_matrices[1][carbon,step] != 1
-                # We move at the end of the chain
-                check=false
-                for step_2=1:nb_steps
-                    if state_matrices[1][carbon,step_2] == 1 && step_2-step > 10
-                        step=step_2
-                        check=true
-                        break
+                # Looking up next valid step
+                for next=step+1:step_start+delta
+                    if state_matrices[1][carbon,next] == 1
+                        occurence += 1
+                        step = next-1 # it will get incremeted at end of loop
                     end
                 end
-                # If we did not find it, we go to the next carbon
-                if ! check
-                    step=nb_steps+1
-                end
-                # And we start counting to the next event
-                counting = true
-                count_=1
-            end
-        else
-            # Counting steps to next event
-            if state_matrices[1][carbon,step] == 1
-                count_ += 1
-            else
-                if count_ > 1
-                    push!(lengths,count_)
-                end
-                counting=false
-                count_=0
             end
         end
+        push!(occurences_nb,occurence)
     end
 end
-
-min_value=unit
-max_value=unit
-for i=1:size(lengths)[1]
-    if max_value < lengths[i]
-        global max_value = lengths[i]
-    end
-end
-
-# Histogram
-nb_box=50
-delta=(max_value-min_value)/nb_box
-hist1D=zeros(Real,nb_box)
-for i=1:size(lengths)[1]
-    hist1D[ Int(trunc( lengths[i]/delta-min_value ))+1 ] += 1
-end
-hist1D/=sum(hist1D)
-
-# Writting data
-file_out=open(string(folder_out,"hist_poisson.dat"),"w")
-for i=1:nb_box
-    write(file_out,string( (i*delta+min_value)*unit," ",hist1D[i],"\n"))
-end
+file_out=open(string(folder_out,string("poisson-",delta,".dat")),"w")
 close(file_out)
+
+
+
+
+
+
+
+# unit=0.005
+#
+# lengths=[]
+# for carbon=1:nbC
+#     counting=false
+#     count_=0
+#     for step=1:nb_steps
+#         if ! counting
+#             # Found event
+#             if state_matrices[1][carbon,step] != 1
+#                 # We move at the end of the chain
+#                 check=false
+#                 for step_2=1:nb_steps
+#                     if state_matrices[1][carbon,step_2] == 1 && step_2-step > 10
+#                         step=step_2
+#                         check=true
+#                         break
+#                     end
+#                 end
+#                 # If we did not find it, we go to the next carbon
+#                 if ! check
+#                     step=nb_steps+1
+#                 end
+#                 # And we start counting to the next event
+#                 counting = true
+#                 count_=1
+#             end
+#         else
+#             # Counting steps to next event
+#             if state_matrices[1][carbon,step] == 1
+#                 count_ += 1
+#             else
+#                 if count_ > 1
+#                     push!(lengths,count_)
+#                 end
+#                 counting=false
+#                 count_=0
+#             end
+#         end
+#     end
+# end
+
+# min_value=unit
+# max_value=unit
+# for i=1:size(lengths)[1]
+#     if max_value < lengths[i]
+#         global max_value = lengths[i]
+#     end
+# end
+#
+# # Histogram
+# nb_box=50
+# delta=(max_value-min_value)/nb_box
+# hist1D=zeros(Real,nb_box)
+# for i=1:size(lengths)[1]
+#     hist1D[ Int(trunc( lengths[i]/delta-min_value ))+1 ] += 1
+# end
+# hist1D/=sum(hist1D)
+#
+# # Writting data
+# file_out=open(string(folder_out,"hist_poisson.dat"),"w")
+# for i=1:nb_box
+#     write(file_out,string( (i*delta+min_value)*unit," ",hist1D[i],"\n"))
+# end
+# close(file_out)
 
 
 
