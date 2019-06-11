@@ -48,6 +48,18 @@ writeStates(string(folder_out,"statesO-",cut_off_bond,".dat"),states[2],counts[2
 writeStateMatrix(string(folder_out,"statesC-matrix-",cut_off_bond,".dat"),state_matrices[1])
 writeStateMatrix(string(folder_out,"statesO-matrix-",cut_off_bond,".dat"),state_matrices[2])
 
+file_out=open(string(folder_base,"poisson_test.dat"),"w")
+for delta=1:500:1000
+    # Count occurences for each delta
+    occurrence=0
+    count_=0
+    for i=1:nb_steps-delta
+        count_+=1
+    end
+    write(file_out,string("\n"))
+end
+close(file_out)
+
 unit=0.005
 
 lengths=[]
@@ -113,5 +125,8 @@ for i=1:nb_box
     write(file_out,string( (i*delta+min_value)*unit," ",hist1D[i],"\n"))
 end
 close(file_out)
+
+
+
 
 #end
