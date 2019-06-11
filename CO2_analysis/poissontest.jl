@@ -48,22 +48,37 @@ writeStates(string(folder_out,"statesO-",cut_off_bond,".dat"),states[2],counts[2
 writeStateMatrix(string(folder_out,"statesC-matrix-",cut_off_bond,".dat"),state_matrices[1])
 writeStateMatrix(string(folder_out,"statesO-matrix-",cut_off_bond,".dat"),state_matrices[2])
 
+max_delta=5000
+d_delta=100
+start_delta=100
 file_out=open(string(folder_base,"poisson_test.dat"),"w")
-for delta=1:500:1000
-    # Count occurences for each delta
+for delta=start_delta:d_delta:max_delta
+    # Count occurences for each delta\
+    print(string("Working:",delta/max_delta*100," % \n"))
     count_=0
     avg_occ=0
     var_occ=0
     for i=1:nb_steps-delta
         occurrence_count=0
-        for j=i:i+delta
-            for carbon=1:nbC
-                if state_matrices[1][]
-
+        for carbon=1:nbC
+            for j=i:i+delta
+                if state_matrices[1][carbon,i] != 1
+                    occurrence_count += 1
+                    # Moving to next 1 point
+                    found = false
+                    for k=j+1:i+delta
+                        if state_matrices[1][carbon] == 1
+                            j=k-1
+                            found=true
+                        end
+                    end
+                    if found
+                        break
+                    end
                 end
             end
         end
-        avg_occ += occurrence_count
+        avg_occ += occurrence_count/(nbC*delta)
         var_occ += occurrence_count*occurrence_count
         count_+=1
     end
