@@ -8,8 +8,8 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 #folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
-Volumes=[10.0,9.8,9.5,9.4,9.375]
-Temperatures=[1750,2000,2500,3000]
+Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3]
+Temperatures=[2000,2500,3000]
 Cut_Off=[1.75]
 
 
@@ -17,12 +17,14 @@ nbC=32
 nbO=nbC*2
 
 
-print("V=",V," T=",T,"\n")
 
-file_out_map=open(string(folder_base,"map_poisson.dat"),"w")
+
+file_out_map=open(string(folder_base,"map_avg.dat"),"w")
 for T in Temperatures
+    file_out_temp=open(string(folder_base,"avg_",T,"K.dat"),"w")
     for V in Volumes
 
+        print("V=",V," T=",T,"\n")
         folder_in=string(folder_base,V,"/",T,"K/")
         file=string(folder_in,"TRAJEC_wrapped.xyz")
         folder_out=string(folder_in,"Data/")
@@ -77,6 +79,11 @@ for T in Temperatures
         nb_=size(occurences_nb)[1]
 
         lambda=sum(occurences_nb)/nb_
+        var=0
+        for i=1:nb_
+            var += occurences_nb[i]*occurences_nb[i]
+        end
+        var = var/nb_ - lambda*lambda
 
         file_in_p=open(string(folder_out,"Avg_Pressure-BootStrap-nboot_1000.dat"))
         lines=readlines(file_in_p)
@@ -86,7 +93,8 @@ for T in Temperatures
 
 
         write(file_out_map,string(P," ",T," ",lambda,"\n"))
-
+        write(file_out_temp,string(P," ",lambda," ",sqrt(var),"\n"))
     end
+    close(file_out_temp)
 end
 close(file_out_map)

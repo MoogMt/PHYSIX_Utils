@@ -8,7 +8,7 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 #folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Thermo data
-Volumes=[10.0,9.8,9.5,9.4,9.375]
+Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325]
 Temperatures=[1750,2000,2500,3000]
 Cut_Off=[1.75]
 
@@ -69,7 +69,7 @@ for i=1:size(states[1])[1]
 end
 
 delta=200 # 200 steps = 1ps
-d_delta=100
+d_delta=50
 occurences_nb=[]
 for step_start=delta:d_delta:nb_steps-delta
     print("Progress: ",step_start/(nb_steps-delta)*100,"%\n")
@@ -81,7 +81,26 @@ for step_start=delta:d_delta:nb_steps-delta
                 # Looking up next valid step
                 for next=step+1:step_start+delta
                     if state_matrices[1][carbon,next] != target_number
-                        step = next-1 # it will get incremeted at end of loop
+                        check=true
+                        for check_filter=next+1:next+10
+                            if state_matrices[1][carbon,check_filter] == target_number
+                                found2=false
+                                for check_filter2=check_filter+1:step_start+delta
+                                    if state_matrices[1][carbon,check_filter2] != target_number
+                                        step=check_filter2
+                                        found2=true
+                                        break
+                                    end
+                                end
+                                if found2
+                                    check=false
+                                    break
+                                end
+                            end
+                        end
+                        if check
+                            step = next-1 # it will get incremeted at end of loop
+                        end
                     end
                 end
             end
@@ -112,13 +131,7 @@ hist1D=zeros(Real,Int(max_)+1)
 for occ=1:nb_
     hist1D[occurences_nb[occ]+1] += 1
 end
-hist1D[1]=0
 hist1D/=sum(hist1D)
-
-lambda=0
-for i=1:size(hist1D)[1]
-    global lambda += hist1D[i]*i
-end
 
 file_out=open(string(folder_out,string("poisson-hist-",delta,".dat")),"w")
 for i=1:Int(max_)
