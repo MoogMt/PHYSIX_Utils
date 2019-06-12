@@ -19,7 +19,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                 found=true
             end
         end
-        if ! found 
+        if ! found
             push!(types,traj[1].names[i])
             push!(types_number,size(types)[1])
             push!(count_types,1)
@@ -35,7 +35,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         end
     end
     # Actual computation of the coordination matrix
-    coord_matrix=zeros(nb_atoms,nb_steps,max_neigh*nb_type)
+    coord_matrix=zeros(nb_atoms,nb_steps,max_neighbour*nb_type)
     for step_sim=1:nb_steps
         print("Building Coordination Signal - Progress: ",step_sim/nb_steps*100,"%\n")
         # Bond Matrix
@@ -78,7 +78,7 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
         # Compute coord matrix
         for atom1=1:nb_atoms
             for type=1:nb_type
-                count_coord=(type-1)*max_neigh+1
+                count_coord=(type-1)*max_neighbour+1
                 for atom2=1:nb_atoms
                     if (atom1 == atom2) || (types[type] != traj[step_sim].names[atom2])
                         continue
@@ -87,14 +87,14 @@ function buildCoordinationMatrix( traj::Vector{T1}, cell::T2, cut_off_bond::T3, 
                         coord_matrix[atom1,step_sim,count_coord]=sum(bond_matrix[atom2,:])
                         count_coord += 1
                     end
-                    if count_coord == type*max_neigh
+                    if count_coord == type*max_neighbour
                         break
                     end
                 end
                 #sorting by type
-                for i=(type-1)*max_neigh+1:type*max_neigh-1
+                for i=(type-1)*max_neighbour+1:type*max_neighbour-1
                     #print("type = ",type,"; i = ",i)
-                    for j=i+1:type*max_neigh
+                    for j=i+1:type*max_neighbour
                         #print(" j = ",j," ")
                         if coord_matrix[atom1,step_sim,i] < coord_matrix[atom1,step_sim,j]
                             stock = coord_matrix[atom1,step_sim,j]
