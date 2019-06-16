@@ -1,6 +1,6 @@
-GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 include(string(CO2folder,"markovCO2.jl"))
 include(string(GPfolder,"cell.jl"))
 
