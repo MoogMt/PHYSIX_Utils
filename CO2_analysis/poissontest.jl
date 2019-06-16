@@ -69,7 +69,7 @@ for i=1:size(states[1])[1]
 end
 
 delta=200 # 200 steps = 1ps
-d_delta=50
+d_delta=500
 occurences_nb=[]
 for step_start=delta:d_delta:nb_steps-delta
     print("Progress: ",step_start/(nb_steps-delta)*100,"%\n")
@@ -83,6 +83,9 @@ for step_start=delta:d_delta:nb_steps-delta
                     if state_matrices[1][carbon,next] != target_number
                         check=true
                         for check_filter=next+1:next+10
+                            if check_filter > nb_steps
+                                break
+                            end
                             if state_matrices[1][carbon,check_filter] == target_number
                                 found2=false
                                 for check_filter2=check_filter+1:step_start+delta
@@ -120,6 +123,16 @@ nb_=size(occurences_nb)[1]
 
 lambda=sum(occurences_nb)/nb_
 
+lambda2=0
+count_=0
+for i=1:nb_
+    if occurences_nb[i] > 0
+        global lambda2 += occurences_nb[i]
+        global count_ += 1
+    end
+end
+lambda2 /= count_
+
 max_=0
 for occ=1:nb_
     if max_ < occurences_nb[occ]
@@ -131,14 +144,15 @@ hist1D=zeros(Real,Int(max_)+1)
 for occ=1:nb_
     hist1D[occurences_nb[occ]+1] += 1
 end
+hist1D[1]=exp(-lambda2)
 hist1D/=sum(hist1D)
 
 file_out=open(string(folder_out,string("poisson-hist-",delta,".dat")),"w")
 for i=1:Int(max_)
     if i < 20
-        write(file_out,string(i," ",hist1D[i]," ",exp(-lambda)*lambda^(i-1)/factorial(i-1),"\n"))
+        write(file_out,string(i-1," ",hist1D[i]," ",exp(-lambda)*lambda^(i-1)/factorial(i-1)," ",exp(-lambda2)*lambda2^(i-1)/factorial(i-1),"\n"))
     else
-        write(file_out,string(i," ",hist1D[i]," ",0,"\n"))
+        write(file_out,string(i-1," ",hist1D[i]," ",0," ",0,"\n"))
     end
 end
 close(file_out)
