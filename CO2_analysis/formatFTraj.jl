@@ -5,47 +5,35 @@ include(string(CO2folder,"markovCO2.jl"))
 include(string(GPfolder,"cell.jl"))
 
 # Folder for data
-#folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/home/moogmt/CO2/CO2_AIMD/"
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
+#folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Number of atoms
 nbC=32
 nbO=nbC*2
-
+nb_atoms=96
 V=8.82
 T=3000
-
-
-file_in=open(string(folder_base,V,"/",T,"K/FTRAJECTORY2"))
-folder_out=string(folder_base,V,"/",T,"K/")
-lines=readlines(file_in)
-close(file_in)
-
-
-nb_atoms=96
-
 cell=cell_mod.Cell_param(V,V,V)
 
-traj=filexyz.readFastFile(string(folder_base,V,"/",T,"K/TRAJEC.xyz"))
-positions=zeros(Real,nb_atoms,3)
-start_step=1
-nb_steps=Int(trunc(size(lines)[1]/96))
+folder_out=string(folder_base,V,"/",T,"K/")
 
+file_in=open(string(folder_base,V,"/",T,"K/1-run/FTRAJECTORY2"))
+lines=readlines(file_in)
+close(file_in)
+nb_steps=Int(trunc(size(lines)[1]/96))
 positions=zeros(Real,nb_steps,nb_atoms,3)
 forces=zeros(Real,nb_steps,nb_atoms,3)
-start_step=1
 for i=1:nb_steps
     for j=1:nb_atoms
         line=split(lines[(i-1)*nb_atoms+j])
         for k=1:3
             positions[i,j,k] = cell_mod.wrap(parse( Float64, line[k+1] ),cell.length[k])
-            forces[i,j,k]    = parse( Float64, line[k+7] )
         end
     end
 end
 
-
-file_energy=open(string(folder_base,V,"/",T,"K/ENERGIES"))
+file_energy=open(string(folder_base,V,"/",T,"K/1-run/ENERGIES"))
 lines=readlines(file_energy)
 close(file_energy)
 

@@ -1,36 +1,33 @@
-module histogram
 
-#-----------------------------------------------------------------------
-mutable struct Bin
-    begin_box::Real
-    end_box::Real
-    value::Real
-end
-
-mutable struct Histogram
-    begins_box::Vector{Real}
-    ends_box::Vector{Real}
-    values::Vector{Real}
-    function Histogram()
-        new( [],[],[] )
-    end
-    function Histogram{ T1 <: Real, T2 <: Int }( data::Vector{T1}, nb_box::T2 )
-        # Min and Max
-        min=min(data)
-        max=max(data)
-        # Size of boxes
-        delta=(max-min)/delta
-        # Construction of the boxes
-        begins=Vector{Real}(nb_box)
-        ends=Vector{Real}(nb_box)
-        for i=1:nb_box
-            begins[i]=min
-            ends[i]=
-            min +=delta
+function minMax( data::Vector{T1} ) where { T1 <: Real }
+    min_ = data[1]
+    max_ = data[1]
+    for i=1:size(data)
+        if min_ > data[i]
+            min_=data[i]
         end
-        new(begins,ends,value)
+        if max_ < data[i]
+            max_=data[i]
+        end
     end
+    return min_,max_
 end
-#-----------------------------------------------------------------------
 
+function histogram( data::Vector{T1}, nb_box::T2) where { T1 <: Real , T2 <: Int }
+    min_,max_ = minMax(data)
+    histogram = zeros( Int, size(data)[1] )
+    for i=1:size(data)[1]
+        histogram[ Int(trunc(data[i]/nb_box))+1 ]  += 1
+    end
+    return histogram
+end
+
+function histogramNormed( data::Vector{T1}, nb_box::T2) where { T1 <: Real , T2 <: Int }
+    min_,max_ = minMax(data)
+    histogram_normed = zeros( Real, size(data)[1] )
+    for i=1:size(data)[1]
+        histogram[ Int(trunc(data[i]/nb_box))+1 ]  += 1
+    end
+    histogram /= sum(histogram)
+    return histogram
 end
