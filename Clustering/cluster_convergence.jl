@@ -1,69 +1,47 @@
-include("clustering.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+
+include(string(GPfolder,"clustering.jl"))
 
 # TEST K-medoid
 #==============================================================================#
 # Definition of the points
-points=zeros(200,2)
-for i=1:50
-    points[i,:]=rand(2)
+
+centers=ones(2,2)
+centers[1,:]=zeros(2)
+
+points=clustering.createBlob([200,200],centers,[0.02,0.1])
+nb_points=size(points)[1]
+n_dim=size(points)[2]
+
+file_out=open(string("/home/moogmt/blobs.dat"),"w")
+for i=1:nb_points
+	for j=1:n_dim
+		write(file_out,string(points[i,j]," "))
+	end
+	write(file_out,string("\n"))
 end
-for i=51:100
-    points[i,:]=rand(2)
-end
-points[51:100,1] += 0.8
-for i=101:150
-    points[i,:]=rand(2)
-end
-points[101:150,2] += 0.8
-for i=151:200
-    points[i,:]=rand(2)
-end
-points[151:200,1] += 0.8
-points[151:200,2] += 0.8
+close(file_out)
+
 
 # Compute the distance between all points
-distance_matrix=computeDistanceMatrix( points )
+distance_matrix=clustering.computeDistanceMatrix( points )
 
 # Cluster parameters
-n_clusters=4
-precision=0.00000000000001
+n_clusters=2
+
+precision_kmenoid=0.00000000000001
 n_structures=size(points)[1]
-cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
-old_cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
+cluster_indexs, cluster_centers, cluster_sizes, assignments = clustering.kmedoidClustering( n_structures, distance_matrix, n_clusters, precision_kmenoid )
 
-points2=rand(2000,2)+0.4
-points2_assignment=voronoiAssign( points, n_clusters, cluster_centers, points2 )
+points2=rand(2000,2)+ones(2000,2)*0.4
+assignments2=clustering.voronoiAssign( points, n_clusters, cluster_centers, points2 )
 
-using PyPlot
+file_out=open(string("/home/moogmt/test-kmenoid.dat"),"w")
+for i=1:size(points)[1]
+	write(file_out,string(points[i,1]," ",points[i,2]," ",assignments2[i],"\n"))
+end
+close(file_out)
 
-figure(1)
-plot( points[cluster_centers[ 1 ] ,1 ] , points[cluster_centers[ 1 ],2] , "rd"  )
-plot( points[cluster_centers[ 2 ] ,1 ] , points[cluster_centers[ 2 ],2] , "bd"  )
-plot( points[cluster_centers[ 3 ] ,1 ] , points[cluster_centers[ 3 ],2] , "gd"  )
-plot( points[cluster_centers[ 4 ] ,1 ] , points[cluster_centers[ 4 ],2] , "kd"  )
-for i=1:size(points2)[1]
-	if points2_assignment[i] == 1
-		plot( points2[i,1] , points2[i,2] , "r."  )
-	elseif points2_assignment[i] == 2
-		plot( points2[i,1] , points2[i,2] , "b."  )
-	elseif points2_assignment[i] == 3
-		plot( points2[i,1] , points2[i,2] , "g."  )
-	elseif points2_assignment[i] == 4
-		plot( points2[i,1] , points2[i,2] , "k."  )
-	end
-end
-for j=1:cluster_sizes[ 1 ]
-    plot( points[ assignments[ 1, j ] , 1 ] , points[ assignments[ 1, j ] ,2 ] , "r."  )
-end
-for j=1:cluster_sizes[ 2 ]
-    plot( points[ assignments[ 2, j ] , 1 ] , points[ assignments[ 2, j ] ,2 ] , "b."  )
-end
-for j=1:cluster_sizes[ 3 ]
-    plot( points[ assignments[ 3, j ] , 1 ] , points[ assignments[ 3, j ] ,2 ] , "g."  )
-end
-for j=1:cluster_sizes[ 4 ]
-    plot( points[ assignments[ 4, j ] , 1 ] , points[ assignments[ 4, j ] ,2 ] , "k."  )
-end
 
 # TEST Daura
 #==============================================================================#

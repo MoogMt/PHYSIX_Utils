@@ -9,7 +9,26 @@ export kmedoidClustering, computeClusteringCoefficients
 export dauraClustering
 export gaussianKernel, maxArray, simpleSequence, maxVector
 export densityPeakClusteringTrain
+export createBlob
 
+function createBlob( n_points::Vector{T1} , centers::Array{T2,2}, spread::Vector{T3} ) where { T1 <: Int, T2 <: Real, T3 <: Real }
+	n_blobs=size(n_points)[1]
+	n_points_total=sum(n_points)
+	n_dim = size(centers)[2]
+	points=zeros(sum(n_points_total),n_dim)
+	spread_2 = spread.*spread
+	for i=1:n_blobs
+		start_count=sum(n_points[1:i-1])
+		for j=1:n_points[i]
+			try_ = (rand(n_dim).-0.5)*2*spread[i]
+			while sum(try_.*try_) > spread_2[i]
+				try_ = (rand(n_dim).-0.5)*2*spread[i]
+			end
+			points[start_count+j,:] = centers[i,:] .+ try_
+		end
+	end
+	return points
+end
 function computeDistance( data::Array{T1}, data_point::Vector{T2}, index::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Int }
 	return sum( ( data[ index, :  ] - data_point[:] ).*( data[ index, :  ] - data_point[:] ) )
 end
@@ -115,6 +134,33 @@ function initializeCenters( n_structures::T1 , distance_matrix::Array{T2,2}  , n
     end
 
     return cluster_centers
+end
+# Voronoi assignment of points
+function voronoiAssign( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_points::Array{T4} ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }
+	nb_data=size(data)[1]
+	dim_data=size(data)[2]
+	max=zeros(dim_data)
+	for i=1:dim_data
+		for j=1:nb_data
+			if max[i] < data[j,i]
+				max[i] = data[j,i]
+			end
+		end
+	end
+	min=max
+	for i=1:dim_data
+		for j=1:nb_data
+			if min[i] > data[j,i]
+				min[i] = data[j,i]
+			end
+		end
+	end
+	n_points=size(data_points)[1]
+	point_clusters=zeros(Int,n_points)
+	for i=1:n_points
+		point_clusters[i] = voronoiAssign( data, n_clusters, cluster_centers, data_points[i,:], max, min )
+	end
+	return point_clusters
 end
 function voronoiAssign( data::Array{T1}, n_clusters::T2 , cluster_centers::Vector{T3}, data_point::Vector{T4} , max::Vector{T5}, min::Vector{T6} ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Real , T5 <: Real, T6 <: Real }
 	index_cluster=1
