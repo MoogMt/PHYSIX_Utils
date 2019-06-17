@@ -31,12 +31,18 @@ n_clusters=2
 
 precision_kmenoid=0.00000000000001
 n_structures=size(points)[1]
-cluster_indexs, cluster_centers, cluster_sizes, assignments = clustering.kmedoidClustering( n_structures, distance_matrix, n_clusters, precision_kmenoid )
+cluster_indexs, cluster_centers, cluster_sizes = clustering.kmedoidClustering( n_structures, distance_matrix, n_clusters, precision_kmenoid )
+
+file_out=open(string("/home/moogmt/test-kmenoid-1.dat"),"w")
+for i=1:size(points)[1]
+	write(file_out,string(points[i,1]," ",points[i,2]," ",cluster_indexs[i],"\n"))
+end
+close(file_out)
 
 points2=rand(2000,2)+ones(2000,2)*0.4
 assignments2=clustering.voronoiAssign( points, n_clusters, cluster_centers, points2 )
 
-file_out=open(string("/home/moogmt/test-kmenoid.dat"),"w")
+file_out=open(string("/home/moogmt/test-kmenoid-2.dat"),"w")
 for i=1:size(points)[1]
 	write(file_out,string(points[i,1]," ",points[i,2]," ",assignments2[i],"\n"))
 end

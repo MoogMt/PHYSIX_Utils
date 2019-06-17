@@ -255,7 +255,7 @@ function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_c
         old_cost=cost
         updateCenters( distance_matrix, n_clusters, cluster_centers, cluster_sizes, assignments )
     end
-    return cluster_indexs, cluster_centers, cluster_sizes, assignments
+    return cluster_indexs, cluster_centers, cluster_sizes
 end
 function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4, n_repeat::T5 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: Int }
     # First Kmenoid
@@ -271,7 +271,7 @@ function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_c
             assignments_best = assignments
         end
     end
-    return cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best
+    return cluster_indexs_best, cluster_centers_best, cluster_sizes_best
 end
 function computeClusteringCoefficients( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes::Vector{T3} , assignments::Array{T4,2} , cut_off::T5 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Real }
     clustering_coefficients=zeros(n_clusters)
