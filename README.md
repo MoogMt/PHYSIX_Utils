@@ -7,7 +7,3 @@ Contains:
 - LAMMPS, GROMACS, QE, CPMD, PLUMED: Scripts that works as is in various languages (C++,Julia) allowing to do post-processing or input generation for the software in question.
 
 This project is its infancy, any input, correction or comment is welcome. 
-
-Current participants:
-- Fabio Pietrucci, Assistant Professor
-- Mathieu Moog aka "MoogMt" , 3rd year PhD student
