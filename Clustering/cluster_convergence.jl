@@ -9,7 +9,7 @@ include(string(GPfolder,"clustering.jl"))
 centers=ones(2,2)
 centers[1,:]=zeros(2)
 
-points=clustering.createBlob([200,200],centers,[0.02,0.1])
+points=clustering.createBlobs([200,200],centers,[0.02,0.1])
 nb_points=size(points)[1]
 n_dim=size(points)[2]
 

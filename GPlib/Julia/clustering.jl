@@ -11,7 +11,12 @@ export gaussianKernel, maxArray, simpleSequence, maxVector
 export densityPeakClusteringTrain
 export createBlob
 
-function createBlob( n_points::Vector{T1} , centers::Array{T2,2}, spread::Vector{T3} ) where { T1 <: Int, T2 <: Real, T3 <: Real }
+function createBlob( n_point::T1 ) where { T1 <: Int }
+	points=zeros(n_point)
+	return points
+end
+
+function createBlobs( n_points::Vector{T1} , centers::Array{T2,2}, spread::Vector{T3} ) where { T1 <: Int, T2 <: Real, T3 <: Real }
 	n_blobs=size(n_points)[1]
 	n_points_total=sum(n_points)
 	n_dim = size(centers)[2]
@@ -29,6 +34,30 @@ function createBlob( n_points::Vector{T1} , centers::Array{T2,2}, spread::Vector
 	end
 	return points
 end
+
+function createRing( n_points::T1, centers::Vector{T2}, small_radius::T3, width::T4 ) where { T1 <: Int, T2 <: Real, T3 <: Real, T4 <: Real }
+	n_dim=size(centers)[1]
+	points=zeros(Real, n_points,n_dim)
+	R=0
+	angles=ones(Real, n_dim-1)
+	for i=1:n_points
+		# Randomize a distnace to the center
+		R = small_radius+rand()*width
+		angles=rand(n_dim-1)*pi
+		angles[n_dim-1]=rand()*2*pi
+		for j=1:n_dim-1
+			points[i,j]=R*cos(angles[j])
+		end
+		points[i,n_dim]=R
+		for j=2:n_dim
+			for k=1:j-1
+				points[i,j] = points[i,j]*sin(angles[k])
+			end
+		end
+	end
+	return points
+end
+
 function computeDistance( data::Array{T1}, data_point::Vector{T2}, index::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Int }
 	return sum( ( data[ index, :  ] - data_point[:] ).*( data[ index, :  ] - data_point[:] ) )
 end
@@ -237,7 +266,7 @@ function updateCenters( distance_matrix::Array{T1,2} , n_clusters::T2, cluster_c
         cluster_centers[ cluster ] = new_center
     end
 end
-function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real }
+function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Int }
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
     # Assign all clusters
@@ -249,7 +278,7 @@ function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_c
     while true
         voronoiAssignAll( n_structures, distance_matrix, n_clusters, cluster_centers,cluster_indexs, cluster_sizes, assignments  )
         cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs)
-        if abs(cost-old_cost) < precision
+		if cost < old_cost
             break
         end
         old_cost=cost
@@ -257,12 +286,12 @@ function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_c
     end
     return cluster_indexs, cluster_centers, cluster_sizes
 end
-function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 , precision::T4, n_repeat::T5 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: Int }
+function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3, n_repeat::T4 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int }
     # First Kmenoid
-    cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
+    cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best = kmedoidClustering( n_structures, distance_matrix, n_clusters )
     old_cost=computeCost( n_structures, distance_matrix, cluster_centers_best, cluster_indexs_best )
     for i=2:n_repeat
-        cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters, precision )
+        cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters )
         cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
         if old_cost > cost
             cluster_indexs_best = cluster_indexs
