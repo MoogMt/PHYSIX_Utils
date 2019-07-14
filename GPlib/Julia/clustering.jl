@@ -334,79 +334,10 @@ end
 
 # Daura Clustering
 #==============================================================================#
-# function dauraClustering( n_elements::T1, distance_matrix::Array{T2,2} , cut_off::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Real }
-#     cluster_sizes=zeros(Int,n_elements)
-#     cluster_centers=zeros(Int,n_elements)
-#     used=zeros(Int,n_elements)
-#     n_element_left = n_elements
-#     n_clusters = 0
-#     while sum(used) < n_elements
-#         n_neighbours = 0
-#         index_center = 0
-#         # Choosing most connected unused point as cluster center
-#         for i=1:n_elements
-#             if used[i] != 1
-#                 n_local_neighbours = 0
-#                 for j=i+1:n_elements
-#                     if used[j] != 1
-#                         if distance_matrix[i,j] < cut_off
-#                             n_local_neighbours += 1
-#                         end
-#                     end
-#                 end
-#                 if n_local_neighbours > n_neighbours
-#                     n_neighbours = n_local_neighbours
-#                     index_center = i
-#                 end
-#             end
-#         end
-#         if n_neighbours != 0
-#             # We have a new cluster
-#             n_clusters += 1
-#             n_element_left -= 1
-#             used[ index_center ] = 1
-#             cluster_centers[ n_clusters ] = index_center
-#             cluster_sizes[ n_clusters ] = n_neighbours+1 # +1 because the center counts...
-#             # Removing the neighborhood of the chosen cluster
-#             for n=1:n_elements
-#                 if used[n] != 1 && distance_matrix[ index_center, n ] < cut_off
-#                     n_element_left -= 1
-#                     used[ n ] = 1
-#                 end
-#             end
-#         else
-#             # For elements that are aloooone
-#             n_clusters += 1
-#             n_element_left -= 1
-#             used[ n_clusters ] = index_center
-#             cluster_sizes[ n_clusters ] = 1
-#         end
-#     end
-#     # Removing useless memory slots
-#     cluster_centers = cluster_centers[1:n_clusters]
-#     cluster_sizes = cluster_sizes[1:n_clusters]
-#     used=[]
-#     # Voronoi assignements
-#     index_data = zeros(n_elements)
-#     for element=1:n_elements
-#         min_dist=100000000
-#         for i=1:n_clusters
-#             if cluster_centers[i] != element
-#                 dist = distance_matrix[ cluster_centers[i], element ]
-#                 if dist < min_dist
-#                     index_data[ element ] = i
-#                     min_dist=dist
-#                 end
-#             end
-#         end
-#     end
-#     # Voronoi assignement of the points
-#     return cluster_centers, cluster_sizes, index_data
-# end
 function dauraClustering( distance_matrix::Array{T2,2} , cut_off::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Real }
-    cluster_sizes=zeros(Int,n_elements)
+	n_elements=size(distance_matrix)[1]
     cluster_centers=zeros(Int,n_elements)
-	n_elements=size(distance_matrix[1]
+	index_data=zeros(Int,n_elements)
 
 	# Used
 	used=zeros(Int,n_elements)  # vector to
@@ -417,42 +348,70 @@ function dauraClustering( distance_matrix::Array{T2,2} , cut_off::T3 ) where { T
 		# Basic info
 		cluster_center=0
 		nb_neighbor_max=0
-		n_cluster += 1
+		n_clusters += 1
 
 		# Looking up
 		for i=1:n_elements
 			n_neighbor=0
+			if used[i] != 0
+				continue
+			end
 			for j=1:n_elements
-				if distance_matrix[i,j] < cut_off && used[i] == 0
+				if used[j] != 0 || i == j
+					continue
+				end
+				if distance_matrix[i,j] < cut_off
 					n_neighbor +=1
 				end
 			end
-			if n_neighbor_max < n_neighbor
-				n_neighbor_max = n_neighbor
+			if nb_neighbor_max < n_neighbor
+				nb_neighbor_max = n_neighbor
 				cluster_center = i
 			end
 		end
 
-		# Assign clusters
-		used[cluster_center] = 1
-		index_data[cluster_center] = n_cluster
-		for i=1:n_elements
-			if i != cluster_center && used[i] == 0
-				if distance_matrix[cluster_center,i] < cut_off
-					used[i] = 1
-					index_data[i] = n_cluster
+		if cluster_center != 0
+			# Assign clusters
+			used[cluster_center] = -n_clusters
+			index_data[cluster_center] = n_clusters
+			for i=1:n_elements
+				if i != cluster_center && used[i] == 0
+					if distance_matrix[cluster_center,i] < cut_off
+						used[i] = 1
+						index_data[i] = n_clusters
+					end
 				end
 			end
+		else
+			n_clusters -= 1
+			break
 		end
     end
+
+	# Cluster centers and cluster sizes
+	cluster_sizes=zeros(Int,n_clusters)
+	cluster_centers=zeros(Int,n_clusters)
+	count_cluster=1
+	for i=1:n_elements
+		if used[i] < 0
+			cluster_nb=Int(abs(used[i]))
+			cluster_centers[count_cluster] = i
+			for j=1:n_elements
+				if index_data[j]  == cluster_nb
+					cluster_sizes[count_cluster] += 1
+				end
+			end
+			count_cluster += 1
+		end
+	end
 
     # Return
     return cluster_centers, cluster_sizes, index_data
 end
 #==============================================================================#
 
-
-
+# Kernels
+#==============================================================================#
 function gaussianKernel( matrix_distance::Array{T1,2} , cut_off_distance::T2) where { T1 <: Real, T2 <: Real }
     nb_element=size(matrix_distance)[1]
     rho=zeros(nb_element)
@@ -465,6 +424,10 @@ function gaussianKernel( matrix_distance::Array{T1,2} , cut_off_distance::T2) wh
     end
     return rho
 end
+#==============================================================================#
+
+# MAX
+#==============================================================================#
 function maxArray( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_element=size(matrix)[1]
     max=0
@@ -486,6 +449,10 @@ function maxVector( vector::Vector{T1} ) where { T1 <: Real }
     end
     return max
 end
+#==============================================================================#
+
+# Sequence vector
+#==============================================================================#
 function simpleSequence( size_::T1 ) where { T1 <: Int }
     vector=zeros(Int, size_)
     for i=1:size_
@@ -493,6 +460,10 @@ function simpleSequence( size_::T1 ) where { T1 <: Int }
     end
     return vector
 end
+#==============================================================================#
+
+# Sort
+#==============================================================================#
 function sortMatrix( x::Vector{T1} ) where { T1 <: Real }
     sizex=size(x)[1]
     index_x=zeros(sizex)
@@ -545,6 +516,10 @@ function sortDescend( data::Array{T1,2}, index::T2 )  where { T1 <: Real , T2 <:
 	end
 	return
 end
+#==============================================================================#
+
+# Density Peak Clustering
+#==============================================================================#
 function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: Real, T2 <: Real }
 
 	# Size and dimension of the input data
@@ -949,5 +924,6 @@ function densityPeakClusteringSecondStep( rho::Vector{T1}, delta::Vector{T2}, mi
 
 	return cl, icl
 end
+#==============================================================================#
 
 end

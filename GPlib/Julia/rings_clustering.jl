@@ -41,14 +41,27 @@ for i=1:size(points)[1]
 end
 close(file_out)
 
-
-#=============================================================#
-cut_off=0.1
-
-cluster_centers, cluster_sizes, index_cluster = clustering.dauraClustering( size(points)[1] , distance_matrix , cut_off )
-
-file_out=open(string("/home/moogmt/kmenoid-ring-",n_clusters,".dat"),"w")
-for i=1:size(points)[1]
-	write(file_out,string(points[i,1]," ",points[i,2]," ",cluster_indexs[i],"\n"))
+file_out=open(string("/home/moogmt/kmenoid-ring-dc-",cut_off,"-centers.dat"),"w")
+for i=1:size(cluster_centers)[1]
+	write(file_out,string(points[cluster_centers[i],1]," ",points[cluster_centers[i],2],"\n"))
 end
 close(file_out)
+
+#=============================================================#
+cut_off=1.5
+
+cluster_centers, cluster_sizes, index_cluster = clustering.dauraClustering( distance_matrix , cut_off )
+
+file_out=open(string("/home/moogmt/daura-ring-dc-",cut_off,".dat"),"w")
+for i=1:size(points)[1]
+	write(file_out,string(points[i,1]," ",points[i,2]," ",index_cluster[i],"\n"))
+end
+close(file_out)
+
+file_out=open(string("/home/moogmt/daura-ring-dc-",cut_off,"-centers.dat"),"w")
+for i=1:size(cluster_centers)[1]
+	write(file_out,string(points[cluster_centers[i],1]," ",points[cluster_centers[i],2],"\n"))
+end
+close(file_out)
+
+#=============================================================#
