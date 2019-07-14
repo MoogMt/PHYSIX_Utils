@@ -266,6 +266,10 @@ function updateCenters( distance_matrix::Array{T1,2} , n_clusters::T2, cluster_c
         cluster_centers[ cluster ] = new_center
     end
 end
+
+
+# K-menoid
+#============================================================================#
 function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Int }
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
@@ -288,20 +292,23 @@ function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_c
 end
 function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3, n_repeat::T4 ) where { T1 <: Int, T2 <: Real, T3 <: Int, T4 <: Int }
     # First Kmenoid
-    cluster_indexs_best, cluster_centers_best, cluster_sizes_best, assignments_best = kmedoidClustering( n_structures, distance_matrix, n_clusters )
+    cluster_indexs_best, cluster_centers_best, cluster_sizes_best = kmedoidClustering( n_structures, distance_matrix, n_clusters )
     old_cost=computeCost( n_structures, distance_matrix, cluster_centers_best, cluster_indexs_best )
     for i=2:n_repeat
-        cluster_indexs, cluster_centers, cluster_sizes, assignments = kmedoidClustering( n_structures, distance_matrix, n_clusters )
+        cluster_indexs, cluster_centers, cluster_sizes = kmedoidClustering( n_structures, distance_matrix, n_clusters )
         cost=computeCost( n_structures, distance_matrix, cluster_centers, cluster_indexs )
         if old_cost > cost
             cluster_indexs_best = cluster_indexs
             cluster_centers_best = cluster_centers
             cluster_sizes_best = cluster_sizes
-            assignments_best = assignments
         end
     end
     return cluster_indexs_best, cluster_centers_best, cluster_sizes_best
 end
+#==============================================================================#
+
+
+
 function computeClusteringCoefficients( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes::Vector{T3} , assignments::Array{T4,2} , cut_off::T5 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Real }
     clustering_coefficients=zeros(n_clusters)
     if cut_off <= 0.0
@@ -324,75 +331,128 @@ function computeClusteringCoefficients( distance_matrix::Array{T1,2}, n_clusters
     end
     return clustering_coefficients
 end
-function dauraClustering( n_elements::T1, distance_matrix::Array{T2,2} , cut_off::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Real }
+
+# Daura Clustering
+#==============================================================================#
+# function dauraClustering( n_elements::T1, distance_matrix::Array{T2,2} , cut_off::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Real }
+#     cluster_sizes=zeros(Int,n_elements)
+#     cluster_centers=zeros(Int,n_elements)
+#     used=zeros(Int,n_elements)
+#     n_element_left = n_elements
+#     n_clusters = 0
+#     while sum(used) < n_elements
+#         n_neighbours = 0
+#         index_center = 0
+#         # Choosing most connected unused point as cluster center
+#         for i=1:n_elements
+#             if used[i] != 1
+#                 n_local_neighbours = 0
+#                 for j=i+1:n_elements
+#                     if used[j] != 1
+#                         if distance_matrix[i,j] < cut_off
+#                             n_local_neighbours += 1
+#                         end
+#                     end
+#                 end
+#                 if n_local_neighbours > n_neighbours
+#                     n_neighbours = n_local_neighbours
+#                     index_center = i
+#                 end
+#             end
+#         end
+#         if n_neighbours != 0
+#             # We have a new cluster
+#             n_clusters += 1
+#             n_element_left -= 1
+#             used[ index_center ] = 1
+#             cluster_centers[ n_clusters ] = index_center
+#             cluster_sizes[ n_clusters ] = n_neighbours+1 # +1 because the center counts...
+#             # Removing the neighborhood of the chosen cluster
+#             for n=1:n_elements
+#                 if used[n] != 1 && distance_matrix[ index_center, n ] < cut_off
+#                     n_element_left -= 1
+#                     used[ n ] = 1
+#                 end
+#             end
+#         else
+#             # For elements that are aloooone
+#             n_clusters += 1
+#             n_element_left -= 1
+#             used[ n_clusters ] = index_center
+#             cluster_sizes[ n_clusters ] = 1
+#         end
+#     end
+#     # Removing useless memory slots
+#     cluster_centers = cluster_centers[1:n_clusters]
+#     cluster_sizes = cluster_sizes[1:n_clusters]
+#     used=[]
+#     # Voronoi assignements
+#     index_data = zeros(n_elements)
+#     for element=1:n_elements
+#         min_dist=100000000
+#         for i=1:n_clusters
+#             if cluster_centers[i] != element
+#                 dist = distance_matrix[ cluster_centers[i], element ]
+#                 if dist < min_dist
+#                     index_data[ element ] = i
+#                     min_dist=dist
+#                 end
+#             end
+#         end
+#     end
+#     # Voronoi assignement of the points
+#     return cluster_centers, cluster_sizes, index_data
+# end
+function dauraClustering( distance_matrix::Array{T2,2} , cut_off::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Real }
     cluster_sizes=zeros(Int,n_elements)
     cluster_centers=zeros(Int,n_elements)
-    used=zeros(Int,n_elements)
-    n_element_left = n_elements
-    n_clusters = 0
-    while sum(used) < n_elements
-        n_neighbours = 0
-        index_center = 0
-        # Choosing most connected unused point as cluster center
-        for i=1:n_elements
-            if used[i] != 1
-                n_local_neighbours = 0
-                for j=i+1:n_elements
-                    if used[j] != 1
-                        if distance_matrix[i,j] < cut_off
-                            n_local_neighbours += 1
-                        end
-                    end
-                end
-                if n_local_neighbours > n_neighbours
-                    n_neighbours = n_local_neighbours
-                    index_center = i
-                end
-            end
-        end
-        if n_neighbours != 0
-            # We have a new cluster
-            n_clusters += 1
-            n_element_left -= 1
-            used[ index_center ] = 1
-            cluster_centers[ n_clusters ] = index_center
-            cluster_sizes[ n_clusters ] = n_neighbours+1 # +1 because the center counts...
-            # Removing the neighborhood of the chosen cluster
-            for n=1:n_elements
-                if used[n] != 1 && distance_matrix[ index_center, n ] < cut_off
-                    n_element_left -= 1
-                    used[ n ] = 1
-                end
-            end
-        else
-            # For elements that are aloooone
-            n_clusters += 1
-            n_element_left -= 1
-            used[ n_clusters ] = index_center
-            cluster_sizes[ n_clusters ] = 1
-        end
+	n_elements=size(distance_matrix[1]
+
+	# Used
+	used=zeros(Int,n_elements)  # vector to
+	n_element_left = n_elements # number of elements left to assign
+    n_clusters = 0              # number of clusters
+
+	while sum(used) < n_elements
+		# Basic info
+		cluster_center=0
+		nb_neighbor_max=0
+		n_cluster += 1
+
+		# Looking up
+		for i=1:n_elements
+			n_neighbor=0
+			for j=1:n_elements
+				if distance_matrix[i,j] < cut_off && used[i] == 0
+					n_neighbor +=1
+				end
+			end
+			if n_neighbor_max < n_neighbor
+				n_neighbor_max = n_neighbor
+				cluster_center = i
+			end
+		end
+
+		# Assign clusters
+		used[cluster_center] = 1
+		index_data[cluster_center] = n_cluster
+		for i=1:n_elements
+			if i != cluster_center && used[i] == 0
+				if distance_matrix[cluster_center,i] < cut_off
+					used[i] = 1
+					index_data[i] = n_cluster
+				end
+			end
+		end
     end
-    # Removing useless memory slots
-    cluster_centers = cluster_centers[1:n_clusters]
-    cluster_sizes = cluster_sizes[1:n_clusters]
-    used=[]
-    # Voronoi assignements
-    index_data = zeros(n_elements)
-    for element=1:n_elements
-        min_dist=100000000
-        for i=1:n_clusters
-            if cluster_centers[i] != element
-                dist = distance_matrix[ cluster_centers[i], element ]
-                if dist < min_dist
-                    index_data[ element ] = i
-                    min_dist=dist
-                end
-            end
-        end
-    end
-    # Voronoi assignement of the points
+
+    # Return
     return cluster_centers, cluster_sizes, index_data
 end
+#==============================================================================#
+
+
+
 function gaussianKernel( matrix_distance::Array{T1,2} , cut_off_distance::T2) where { T1 <: Real, T2 <: Real }
     nb_element=size(matrix_distance)[1]
     rho=zeros(nb_element)
@@ -405,13 +465,13 @@ function gaussianKernel( matrix_distance::Array{T1,2} , cut_off_distance::T2) wh
     end
     return rho
 end
-function maxArray( distance_matrix::Array{T1,2} ) where { T1 <: Real }
-    nb_element=size(distance_matrix)[1]
+function maxArray( matrix::Array{T1,2} ) where { T1 <: Real }
+    nb_element=size(matrix)[1]
     max=0
     for i=1:nb_element
         for j=i+1:nb_element
-            if distance_matrix[i,j] > max
-                max=distance_matrix[i,j]
+            if matrix[i,j] > max
+                max=matrix[i,j]
             end
         end
     end
