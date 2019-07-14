@@ -8,7 +8,7 @@ include(string(GPfolder,"clustering.jl"))
 
 n_dim=2
 center_ring=zeros(n_dim)
-n_points=5000
+n_points=10000
 radius=2
 width=0.2
 
@@ -28,6 +28,8 @@ end
 # Compute the distance between all points
 distance_matrix=clustering.computeDistanceMatrix( points )
 
+# K-Menoid
+#=============================================================#
 # Cluster parameters
 n_clusters=10
 
@@ -51,6 +53,7 @@ for n_clusters in n_clusters_list
 
 end
 
+# DAURA
 #=============================================================#
 cut_offs=[0.05,0.1,0.5,1.0,2.0]
 
@@ -73,13 +76,13 @@ for cut_off in cut_offs
 end
 #=============================================================#
 
-cut_off=1
+cut_off=0.1
 file_out=string("/home/moogmt/decision-diagram",cut_off,".dat")
 
 rho,delta,index,nearest_neighbor=clustering.densityPeakClusteringFirstStepDistanceMatrix( distance_matrix , cut_off, file_out )
 
-min_rho=400
-min_delta=0.7
+min_rho=180
+min_delta=3
 cluster_index,cluster_centers=clustering.densityPeakClusteringSecondStep( rho, delta, index, nearest_neighbor, min_rho, min_delta )
 
 file_out=open(string("/home/moogmt/DPC-ring-dc-",cut_off,".dat"),"w")
