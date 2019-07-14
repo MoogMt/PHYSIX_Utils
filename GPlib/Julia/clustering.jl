@@ -722,7 +722,7 @@ function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 , min_rho::T3, mi
 
 	return cl, icl
 end
-function densityPeakClusteringDistanceMatrix( distance_matrix::Array{T1,2}, dc::T2 , file::T3 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
+function densityPeakClusteringFirstStepDistanceMatrix( distance_matrix::Array{T1,2}, dc::T2 , file::T3 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
 
 	size_data=size(distance_matrix)[1]
 

@@ -76,7 +76,7 @@ end
 cut_off=1
 file_out=string("/home/moogmt/decision-diagram",cut_off,".dat")
 
-rho,delta,index,nearest_neighbor=clustering.densityPeakClusteringDistanceMatrix( distance_matrix , cut_off, file_out )
+rho,delta,index,nearest_neighbor=clustering.densityPeakClusteringFirstStepDistanceMatrix( distance_matrix , cut_off, file_out )
 
 min_rho=400
 min_delta=0.7
