@@ -18,9 +18,9 @@ radius=1
 width=0.3
 points[Int(n_points/2)+1:n_points,:]=clustering.createRing(Int(n_points/2),center_ring,radius,width)
 file_out=open(string("/home/moogmt/ring.dat"),"w")
-for i=1:n_points
 	for j=1:n_dim
 		write(file_out,string(points[i,j]," "))
+		for i=1:n_points
 	end
 	write(file_out,string("\n"))
 end
