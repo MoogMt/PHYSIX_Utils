@@ -92,7 +92,7 @@ end
 close(file_out)
 
 file_out=open(string("/home/moogmt/DPC-ring-dc-",cut_off,"-centers.dat"),"w")
-for i=1:size(icl)[1]
+for i=1:size(cluster_centers)[1]
 	write(file_out,string(points[cluster_centers[i],1]," ",points[cluster_centers[i],2],"\n"))
 end
 close(file_out)
