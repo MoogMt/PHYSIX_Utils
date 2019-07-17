@@ -8,7 +8,7 @@ include(string(GPfolder,"clustering.jl"))
 
 include(string(CO2folder,"markovCO2.jl"))
 
-folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"
 
 # Number of atoms
 nbC=32

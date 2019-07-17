@@ -1,5 +1,3 @@
-# TESTED AND FUNCTIONNALS
-#==============================================================================#
 module clustering
 
 export computeDistance, computeDistanceMatrix, computeDistanceMatrixAndMax, swap
