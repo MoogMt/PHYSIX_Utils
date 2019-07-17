@@ -12,10 +12,10 @@ nb_steps=1091
 
 nb_box_distance=50
 cut_off_distance=5
-min_distance=0.2
+min_distance=0.
 delta_distance=(cut_off_distance-min_distance)/nb_box_distance
 
-nb_box_elf=20
+nb_box_elf=25
 delta_elf=1/nb_box_elf
 
 hist2d=zeros(Int,nb_box_distance,nb_box_elf)
@@ -39,7 +39,7 @@ for step=1:10:nb_steps
 	atoms.positions=cell_mod.wrap(atoms.positions,cell)
 
 	for atom1=start_H:start_H+nbH
-		for atom2=start_N:start_N+nbN
+		for atom2=start_O:start_O+nbO
 			distance=cell_mod.distance(atoms.positions,cell, atom1 , atom2)
 			if distance < cut_off_distance && min_distance < distance
 				elf_value = cube_mod.dataInTheMiddleWME( atoms, cell , atom1, atom2, elf )
@@ -52,7 +52,7 @@ for step=1:10:nb_steps
 
 end
 
-file_out=open(string(folder_base,"histNH.dat"),"w")
+file_out=open(string(folder_base,"histOH.dat"),"w")
 for i=1:nb_box_distance
 	for j=1:nb_box_elf
 		write(file_out,string(i*delta_distance+min_distance," ",j*delta_elf," ",hist2d[i,j],"\n"))
