@@ -1,11 +1,12 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
+
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+
 CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
-
-include(string(GPfolder,"contactmatrix.jl"))
-include(string(GPfolder,"geom.jl"))
-include(string(GPfolder,"cubefile.jl"))
-include(string(GPfolder,"clustering.jl"))
-
 include(string(CO2folder,"markovCO2.jl"))
 
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"

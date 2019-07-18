@@ -6,6 +6,8 @@ using cell_mod
 using cube_mod
 using clustering
 
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"
+
 start_=1
 stride_=1
 nb_steps=100
@@ -23,8 +25,8 @@ hist2d=zeros(Int,nb_box,nb_elf)
 
 nb_points=50
 
-cut_off_distance=1.8
-min_distance=1.0
+cut_off_distance=2.8
+min_distance=2.0
 
 delta_distance=(cut_off_distance-min_distance)/nb_box
 delta_elf=1/nb_elf
@@ -35,8 +37,8 @@ for step=start_:stride_:nb_steps
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	atoms.positions=cell_mod.wrap(atoms.positions,cell)
 
-	for atom1=start_C:start_C+nbC
-		for atom2=start_O:start_O+nbO
+	for atom1=start_C:start_C+nbC-1
+		for atom2=start_O:start_O+nbO-1
 			distance=cell_mod.distance(atoms.positions,cell, atom1 , atom2)
 			if distance < cut_off_distance && min_distance < distance && atom1 != atom2
 				distances,elfs=traceLine( atom1, atom2, nb_points, elf, atoms, cell)
@@ -51,7 +53,7 @@ for step=start_:stride_:nb_steps
 
 end
 
-file_out=open(string(folder_base,"ELF_line.dat"),"w")
+file_out=open(string(folder_base,"ELF_lineCO_out.dat"),"w")
 for i=1:nb_elf
     for j=1:nb_points
         write(file_out,string(i/50," ",j*delta_elf," ",hist2d[i,j],"\n"))
