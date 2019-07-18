@@ -4,16 +4,17 @@ push!(LOAD_PATH, GPfolder)
 using atom_mod
 using cell_mod
 using cube_mod
+using clustering
 
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"
 
 start_=1
 stride_=1
-nb_steps=800
+nb_steps=950
 
 nb_box_distance=100
-cut_off_distance=3
-min_distance=0.8
+cut_off_distance=2.5
+min_distance=0.7
 delta_distance=(cut_off_distance-min_distance)/nb_box_distance
 
 nb_box_elf=100
@@ -51,11 +52,63 @@ end
 file_out=open(string(folder_base,"histCO.dat"),"w")
 for i=1:nb_box_distance
 	for j=1:nb_box_elf
-		write(file_out,string(i*delta_distance+min_distance*0.529177," ",j*delta_elf," ",hist2d[i,j],"\n"))
+		write(file_out,string(i*delta_distance+min_distance," ",j*delta_elf," ",hist2d[i,j],"\n"))
 	end
 	write(file_out,string("\n"))
 end
 close(file_out)
+
+#---------------------------------------------------------------------------
+
+start_=1
+stride_=1
+nb_steps=100
+
+neighbor=4
+
+
+start_C=1
+nbC=32
+start_O=33
+nbO=64
+
+
+file_out=open(string(folder_base,"1-4_ELF.dat"),"w")
+file_out2=open(string(folder_base,"1-4_distance.dat"),"w")
+for step=start_:stride_:nb_steps
+	print("Progress: ",step/nb_steps*100,"%\n")
+	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
+	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
+	atoms.positions=cell_mod.wrap(atoms.positions,cell)
+
+	for atom1=start_C:start_C+nbC-1
+		index_=clustering.simpleSequence(nbO).+nbC
+		distances=zeros(nbO)
+		for atom2=start_O:start_O+nbO-1
+			distances[atom2-nbC]=cell_mod.distance(atoms.positions,cell, atom1 , atom2)
+		end
+		for i=1:nbO
+			for j=i+1:nbO
+				if distances[i] > distances[j]
+					clustering.swap(distances,i,j)
+					clustering.swap(index_,i,j)
+				end
+			end
+		end
+		write(file_out,string(step," "))
+		write(file_out2,string(step," "))
+		for i=1:neighbor
+			write(file_out,string(cube_mod.dataInTheMiddleWME( atoms, cell , atom1, index_[i], elf )," "))
+			write(file_out2,string(distances[i]," "))
+		end
+		write(file_out,string("\n"))
+		write(file_out2,string("\n"))
+	end
+end
+close(file_out)
+close(file_out2)
+
+#---------------------------------------------------------------------------
 
 start_=1
 stride_=1
