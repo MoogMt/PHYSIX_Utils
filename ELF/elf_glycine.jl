@@ -11,14 +11,13 @@ nb_steps=1091
 
 
 nb_box_distance=50
-cut_off_distance=5
-min_distance=0.
+cut_off_distance=5.0
+min_distance=0.5
 delta_distance=(cut_off_distance-min_distance)/nb_box_distance
 
 nb_box_elf=25
 delta_elf=1/nb_box_elf
 
-hist2d=zeros(Int,nb_box_distance,nb_box_elf)
 
 
 start_C=1
@@ -32,16 +31,18 @@ nbN=1
 
 nb_atoms=nbC+nbO+nbN+nbH
 
+hist2d=zeros(Int,nb_box_distance,nb_box_elf)
+
 for step=1:10:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,"ELF_shoot1_",step,".cube") )
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	atoms.positions=cell_mod.wrap(atoms.positions,cell)
 
-	for atom1=start_H:start_H+nbH
-		for atom2=start_O:start_O+nbO
+	for atom1=start_C:start_C+nbC
+		for atom2=start_N:start_N+nbN
 			distance=cell_mod.distance(atoms.positions,cell, atom1 , atom2)
-			if distance < cut_off_distance && min_distance < distance
+			if distance > cut_off_distance && min_distance > distance
 				elf_value = cube_mod.dataInTheMiddleWME( atoms, cell , atom1, atom2, elf )
 				nx=Int(trunc((distance-min_distance)/delta_distance))+1
 				ny=Int(trunc(elf_value/delta_elf))+1
@@ -52,7 +53,7 @@ for step=1:10:nb_steps
 
 end
 
-file_out=open(string(folder_base,"histOH.dat"),"w")
+file_out=open(string(folder_base,"histCH.dat"),"w")
 for i=1:nb_box_distance
 	for j=1:nb_box_elf
 		write(file_out,string(i*delta_distance+min_distance," ",j*delta_elf," ",hist2d[i,j],"\n"))
