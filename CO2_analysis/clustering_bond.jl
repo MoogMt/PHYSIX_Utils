@@ -24,8 +24,8 @@ nb_point=size(lines)[1]
 
 for i=1:nb_point
 	for j=1:4
-		data_distance[i,j] = parse(Float64,split(lines2[i])[j])
-		data_elf[i,j] = parse(Float64,split(lines2[i])[j])
+		data_distance[i,j] = parse(Float64,split(lines2[i])[j+1])
+		data_elf[i,j] = parse(Float64,split(lines[i])[j+1])
 	end
 end
 
@@ -51,34 +51,39 @@ for i=1:nb_point
 end
 
 cut_off_elf=0.05
-cut_off_dist=0.05
+cut_off_dist=0.1
 cut_off_all=0.1
 
-file_elf=string(folder_base,"Clust_ELF_decision-diagram_elf-",cut_off_elf,".dat")
-file_dist=string(folder_base,"Clust_ELF_decision-diagram_dist-",cut_off_dist,".dat")
-file_all=string(folder_base,"Clust_ELF_decision-diagram_all-",cut_off_all,".dat")
+file_elf=string(folder_base,"Clust_ELF_decision-diagram-",cut_off_elf,".dat")
+file_dist=string(folder_base,"Clust_distance_decision-diagram-",cut_off_dist,".dat")
+file_all=string(folder_base,"Clust_all_decision-diagram-",cut_off_all,".dat")
 
 rho_elf,  delta_elf,  index_elf,  nearest_neighbor_elf  = clustering.densityPeakClusteringFirstStepDistanceMatrix( distance_matrix_elf , cut_off_elf, file_elf )
-rho_dist, delta_dist, index_dist, nearest_neighbor_dist = clustering.densityPeakClusteringFirstStepDistanceMatrix( distance_matrix_distance , cut_off_distance, file_dist )
+rho_dist, delta_dist, index_dist, nearest_neighbor_dist = clustering.densityPeakClusteringFirstStepDistanceMatrix( distance_matrix_distance , cut_off_dist, file_dist )
 rho_all,  delta_all,  index_all,  nearest_neighbor_all  = clustering.densityPeakClusteringFirstStepDistanceMatrix( distance_matrix_all , cut_off_all, file_all )
 
 
+min_rho_elf=10
+min_delta_elf=0.4
 
+min_rho_distance=10
+min_delta_distance=0.4
 
+cluster_index_elf, cluster_centers_elf = clustering.densityPeakClusteringSecondStep( rho_elf,  delta_elf,  index_elf,  nearest_neighbor_elf,  min_rho_elf,      min_delta_elf )
+cluster_index_distance, cluster_centers_distance = clustering.densityPeakClusteringSecondStep( rho_dist, delta_dist, index_dist, nearest_neighbor_dist, min_rho_distance, min_delta_distance )
 
-
-min_rho=180
-min_delta=3
-cluster_index,cluster_centers=clustering.densityPeakClusteringSecondStep( rho, delta, index, nearest_neighbor, min_rho, min_delta )
-
-file_out=open(string("/home/moogmt/DPC-ring-dc-",cut_off,".dat"),"w")
-for i=1:size(points)[1]
-	write(file_out,string(points[i,1]," ",points[i,2]," ",cluster_index[i],"\n"))
+file_out_elf=open(string(folder_base,"DPC-ELF-dc-",cut_off_elf,".dat"),"w")
+file_out_distance=open(string(folder_base,"DPC-distance-dc-",cut_off_distance,".dat"),"w")
+file_out_all=open(string(folder_base,"DPC-all-dc-",cut_off_distance,".dat"),"w")
+for i=1:nb_point
+	for j=1:4
+		write(file_out_elf,string(data_elf[i,j]," ") )
+		write(file_out_distance,string(data_distance[i,j]," ") )
+	end
+	write(file_out_elf,string(cluster_index_elf[i],"\n"))
+	write(file_out_distance,string(cluster_index_distance[i],"\n"))
+	write(file_out_all,string(cluster_index_elf[i]," ",cluster_index_distance[i],"\n"))
 end
-close(file_out)
-
-file_out=open(string("/home/moogmt/DPC-ring-dc-",cut_off,"-centers.dat"),"w")
-for i=1:size(cluster_centers)[1]
-	write(file_out,string(points[cluster_centers[i],1]," ",points[cluster_centers[i],2],"\n"))
-end
-close(file_out)
+close(file_out_elf)
+close(file_out_distance)
+close(fole_out_all)
