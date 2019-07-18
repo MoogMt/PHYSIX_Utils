@@ -79,6 +79,10 @@ for i=1:nb_point
 	for j=1:4
 		write(file_out_elf,string(data_elf[i,j]," ") )
 		write(file_out_distance,string(data_distance[i,j]," ") )
+		write(file_out_all,string(data_distance[i,j]," ") )
+	end
+	for j=1:4
+		write(file_out_all,string(data_elf[i,j]," ") )
 	end
 	write(file_out_elf,string(cluster_index_elf[i],"\n"))
 	write(file_out_distance,string(cluster_index_distance[i],"\n"))
@@ -86,4 +90,4 @@ for i=1:nb_point
 end
 close(file_out_elf)
 close(file_out_distance)
-close(fole_out_all)
+close(file_out_all)
