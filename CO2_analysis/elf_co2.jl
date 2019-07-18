@@ -9,14 +9,14 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Traject
 
 start_=1
 stride_=1
-nb_steps=900
+nb_steps=800
 
 nb_box_distance=100
-cut_off_distance=6
-min_distance=0.5
+cut_off_distance=3
+min_distance=0.8
 delta_distance=(cut_off_distance-min_distance)/nb_box_distance
 
-nb_box_elf=50
+nb_box_elf=100
 delta_elf=1/nb_box_elf
 
 hist2d=zeros(Int,nb_box_distance,nb_box_elf)
@@ -35,7 +35,7 @@ for step=start_:stride_:nb_steps
 	atoms.positions=cell_mod.wrap(atoms.positions,cell)
 
 	for atom1=start_C:start_C+nbC
-		for atom2=start_C:start_C+nbC
+		for atom2=start_O:start_O+nbO
 			distance=cell_mod.distance(atoms.positions,cell, atom1 , atom2)
 			if distance < cut_off_distance && min_distance < distance && atom1 != atom2
 				elf_value = cube_mod.dataInTheMiddleWME( atoms, cell , atom1, atom2, elf )
@@ -48,7 +48,7 @@ for step=start_:stride_:nb_steps
 
 end
 
-file_out=open(string(folder_base,"histCC.dat"),"w")
+file_out=open(string(folder_base,"histCO.dat"),"w")
 for i=1:nb_box_distance
 	for j=1:nb_box_elf
 		write(file_out,string(i*delta_distance+min_distance*0.529177," ",j*delta_elf," ",hist2d[i,j],"\n"))
@@ -57,18 +57,23 @@ for i=1:nb_box_distance
 end
 close(file_out)
 
-min_distance_test=2 #Bohr
-cut_off_distance_test=6
+start_=1
+stride_=1
 nb_steps=100
 
-nb_box_distance=100
-cut_off_distance=6
-delta_distance=(cut_off_distance_test-min_distance_test)/nb_box_distance
+nb_box_distance=50
+cut_off_distance=2.5 #bohr?
+min_distance=0 #Bohr?
+cut_histo=8
+delta_distance=(cut_histo)/nb_box_distance
 
-nb_box_elf=50
-delta_elf=1/nb_box_elf
+start_C=1
+nbC=32
+start_O=32
+nbO=64
 
-hist1d=zeros(Int,nb_box_distance,nb_box_elf)
+hist2d_1=zeros(Int,nb_box_distance,nb_box_distance)
+hist2d_2=zeros(Int,nb_box_distance,nb_box_distance)
 
 for step=start_:stride_:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
@@ -79,17 +84,36 @@ for step=start_:stride_:nb_steps
 	for atom1=start_C:start_C+nbC
 		for atom2=start_C:start_C+nbC
 			distance=cell_mod.distance(atoms.positions,cell, atom1 , atom2)
-			if distance > min_distance_test && cut_off_distance_test > distance && atom1 != atom2
+			if distance > min_distance && cut_off_distance > distance && atom1 != atom2
 				elf_value = cube_mod.dataInTheMiddleWME( atoms, cell , atom1, atom2, elf )
 				if elf_value > 0.5
-					dist=8.82/0.529177
+					dist=8.82
+					target=0
 					for oxygen=start_O:start_O+nbO
-						dist_local = cell_mod.distance()
+						middle=(atoms.positions[atom1,:].+atoms.positions[atom2,:]).*0.5
+						dist_local = cell_mod.distance(atoms.positions[oxygen,:],middle,cell.length[:])
 						if dist > dist_local
 							dist =  dist_local
+							target=oxygen
 						end
 					end
-					hist1d[ Int(trunc()) ] += 1
+					nx=Int(trunc(cell_mod.distance(atoms.positions,cell,atom1,target)/delta_distance))+1
+					ny=Int(trunc(cell_mod.distance(atoms.positions,cell,atom2,target)/delta_distance))+1
+					hist2d_1[ nx, ny ] += 1
+				else
+					dist=8.82
+					target=0
+					for oxygen=start_O:start_O+nbO
+						middle=(atoms.positions[atom1,:].+atoms.positions[atom2,:]).*0.5
+						dist_local = cell_mod.distance(atoms.positions[oxygen,:],middle,cell.length[:])
+						if dist > dist_local
+							dist =  dist_local
+							target=oxygen
+						end
+					end
+					nx=Int(trunc(cell_mod.distance(atoms.positions,cell,atom1,target)/delta_distance))+1
+					ny=Int(trunc(cell_mod.distance(atoms.positions,cell,atom2,target)/delta_distance))+1
+					hist2d_2[ nx, ny ] += 1
 				end
 			end
 		end
@@ -98,11 +122,15 @@ for step=start_:stride_:nb_steps
 end
 
 
-file_out=open(string(folder_base,"histCC_confirmation.dat"),"w")
+file_out_1=open(string(folder_base,"histCC_DistanceO_1.dat"),"w")
+file_out_2=open(string(folder_base,"histCC_DistanceO_2.dat"),"w")
 for i=1:nb_box_distance
-	for j=1:nb_box_elf
-		write(file_out,string((i*delta_distance+min_distance_test+min_distance_test)*0.529177," ",j*delta_elf," ",hist2d[i,j],"\n"))
+	for j=1:nb_box_distance
+		write(file_out_1,string(i*delta_distance," ",j*delta_distance," ",hist2d_1[i,j],"\n"))
+		write(file_out_2,string(i*delta_distance," ",j*delta_distance," ",hist2d_2[i,j],"\n"))
 	end
-	write(file_out,string("\n"))
+	write(file_out_1,string("\n"))
+	write(file_out_2,string("\n"))
 end
-close(file_out)
+close(file_out_1)
+close(file_out_2)

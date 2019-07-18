@@ -191,22 +191,27 @@ function dist1D( x1::T1, x2::T2, a::T3 ) where { T1 <: Real, T2 <: Real, T3 <: R
     end
     return dx*dx
 end
+function distance( v1::Vector{T1}, v2::Vector{T2}, cell::Vector{T3} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+    dist=0
+    for i=1:size(v1)[1]
+        dist += dist1D(v1[i],v2[i],cell[i])
+    end
+    return sqrt(dist)
+end
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 function distance( positions::Array{T1,2}, cell::T2, atom1::T3, atom2::T4 ) where { T1 <: Real,  T2 <: Cell_param, T3 <: Real, T4 <: Real }
     dist=0
     for i=1:3
-        temp = dist1D(positions[atom1,i],positions[atom2,i],cell.length[i])
-        dist += temp*temp
+        dist +=  dist1D(positions[atom1,i],positions[atom2,i],cell.length[i])
     end
     return sqrt(dist)
 end
 function distance( positions1::Vector{T1}, positions2::Vector{T2}, cell_length::Vector{T3} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
     dist=0
     for i=1:3
-        temp=dist1D(positions1[i],positions2[i],cell_length[i])
-        dist += temp*temp
+        dist += dist1D(positions1[i],positions2[i],cell_length[i])
     end
     return sqrt(dist)
 end
