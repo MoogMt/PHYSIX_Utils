@@ -2,8 +2,10 @@ module filexyz
 
 export getNbSteps, readFastFile, readStep, readEmpty, read, write
 
-import Main.atom_mod
-import Main.cell_mod
+using atom_mod
+using cell_mod
+using cube_mod
+
 
 #------------------------------------------------------------------------------
 # Counts the nb of steps contained in file
