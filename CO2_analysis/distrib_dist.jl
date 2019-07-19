@@ -16,15 +16,15 @@ file=string(folder_base,"TRAJEC_wrapped.xyz")
 traj = filexyz.readFastFile( file )
 cell=cell_mod.Cell_param(V,V,V)
 
-nb_box_distance=200
+nb_box_distance=100
 
-cut_off_distance_C=4.0
+cut_off_distance_C=3.2
 min_distance_C=1.0
-delta_distance_C=(cut_off_distance-min_distance)/nb_box_distance
+delta_distance_C=(cut_off_distance_C-min_distance_C)/nb_box_distance
 
 cut_off_distance_O=2.8
-min_distance_O=0.9
-delta_distance_O=(cut_off_distance-min_distance)/nb_box_distance
+min_distance_O=1.0
+delta_distance_O=(cut_off_distance_O-min_distance_O)/nb_box_distance
 
 hist1d1=zeros(Real,nb_box_distance)
 hist1d2=zeros(Real,nb_box_distance)
@@ -59,12 +59,19 @@ for step=1:nb_steps
 		n2=Int(trunc((distances[2]-min_distance_O)/delta_distance_O)+1)
 		n3=Int(trunc((distances[3]-min_distance_O)/delta_distance_O)+1)
 		n4=Int(trunc((distances[4]-min_distance_O)/delta_distance_O)+1)
-		hist1d1[n1] += 1
-		hist1d2[n2] += 1
-		hist1d3[n3] += 1
-		hist1d4[n4] += 1
+		if n1 > 0 && n1 < nb_box_distance
+			hist1d1[n1] += 1
+		end
+		if n2 > 0 && n2 < nb_box_distance
+			hist1d2[n2] += 1
+		end
+		if n3 > 0 && n3 < nb_box_distance
+			hist1d3[n3] += 1
+		end
+		if n4 > 0 && n4 < nb_box_distance
+			hist1d4[n4] += 1
+		end
 	end
-
 	for atom1=start_C:start_C+nbC-1
 		distances=zeros(nbC)
 		for atom2=start_C:start_C+nbC-1
@@ -77,11 +84,10 @@ for step=1:nb_steps
 				end
 			end
 		end
-		if distances[2] < min_distance  || distances[2] > cut_off_distance_C
-			continue
-		end
 		n1=Int(trunc((distances[2]-min_distance_C)/delta_distance_C)+1)
-		hist1dC[n1] += 1
+		if n1 > 0 && n1 < nb_box_distance
+			hist1dC[n1] += 1
+		end
 	end
 end
 
