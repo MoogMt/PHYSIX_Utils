@@ -1,4 +1,12 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
+
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using markov
+
 CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
 
 include(string(CO2folder,"markovCO2.jl"))

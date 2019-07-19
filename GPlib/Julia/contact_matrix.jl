@@ -1,9 +1,10 @@
 module contact_matrix
 
-export buildMatrix, readMatrix, getBonded, computeMatrix, writeMatrix
+export buildMatrix, readMatrix
+export getBonded, computeMatrix, writeMatrix
 
-import Main.atom_mod
-import Main.cell_mod
+using atom_mod
+using cell_mod
 
 #-------------------------------------------------------------------------------
 function buildMatrix( atoms::T1, cell::T2 ) where { T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param }
