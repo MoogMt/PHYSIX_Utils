@@ -6,10 +6,7 @@ using cell_mod
 using cube_mod
 using clustering
 using markov
-
-CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
-
-include(string(CO2folder,"markovCO2.jl"))
+using conversion
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
