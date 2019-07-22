@@ -49,17 +49,17 @@ for step=start_:stride_:nb_steps
 		end
 		write(file_out,string("\n"))
 	end
-	for hydrogen=nbC+nbO+1:nbC+nbO+nbH
-		write(file_out,string("H "))
-		for i=1:3
-			write(file_out,string(atoms.positions[hydrogen,i]," "))
-		end
-		write(file_out,string("\n"))
-	end
-	for nitrogen=nbC+nbO+nbH+1:nbC+nbO+nbH+nbN
+	for nitrogen=nbC+nbO+1:nbC+nbO+nbN
 		write(file_out,string("N "))
 		for i=1:3
 			write(file_out,string(atoms.positions[nitrogen,i]," "))
+		end
+		write(file_out,string("\n"))
+	end
+	for hydrogen=nbC+nbO+nbN+1:nbC+nbO+nbH+nbN
+		write(file_out,string("H "))
+		for i=1:3
+			write(file_out,string(atoms.positions[hydrogen,i]," "))
 		end
 		write(file_out,string("\n"))
 	end
