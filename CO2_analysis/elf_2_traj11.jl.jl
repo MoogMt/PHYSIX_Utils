@@ -27,10 +27,10 @@ nb_atoms=nbC+nbO+nbN+nbH
 file_out=open(string(folder_base,"TRAJEC_wrapped.xyz"),"w")
 for step=start_:stride_:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
-	if ! isfile( string(folder_base,"ELF_shoot2_"step,".cube") )
+	if ! isfile( string(folder_base,"ELF_shoot2_",step,".cube") )
 		continue
 	end
-	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,"ELF_shoot2_"step,".cube") )
+	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,"ELF_shoot2_",step,".cube") )
 	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
 	atoms.positions=cell_mod.wrap(atoms.positions,cell)
 	write(file_out,string(nb_atoms,"\n"))
@@ -59,7 +59,7 @@ for step=start_:stride_:nb_steps
 	for nitrogen=nbC+nbO+nbH+1:nbC+nbO+nbH+nbN
 		write(file_out,string("O "))
 		for i=1:3
-			write(file_out,string(atoms.positions[nitrogenn,i]," "))
+			write(file_out,string(atoms.positions[nitrogen,i]," "))
 		end
 		write(file_out,string("\n"))
 	end
