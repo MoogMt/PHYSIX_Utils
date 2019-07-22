@@ -19,10 +19,6 @@ nbO=64
 
 nb_atoms=nbC+nbO
 
-cut_off_distance=1.8
-
-delta_elf=1/nb_elf
-
 file_out=open(string(folder_base,"TRAJEC_wrapped.xyz"),"w")
 for step=start_:stride_:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
