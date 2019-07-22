@@ -10,7 +10,7 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/9.8/Trajecto
 
 start_=1002
 stride_=1
-nb_steps=49
+nb_steps=1050
 
 start_C=1
 nbC=32
@@ -22,7 +22,7 @@ nb_atoms=nbC+nbO
 file_out=open(string(folder_base,"TRAJEC_wrapped.xyz"),"w")
 for step=start_:stride_:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
-	if ! isfile( string(folder_base,step,"_elf.cube") )
+	if ! isfile( string(folder_base,step,"_elf.cube")   )
 		continue
 	end
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
