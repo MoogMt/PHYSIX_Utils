@@ -50,9 +50,9 @@ for i=1:nb_point
 	end
 end
 
-cut_off_elf=0.05
-cut_off_dist=0.1
-cut_off_all=0.1
+cut_off_elf=0.2
+cut_off_dist=0.08
+cut_off_all=0.05
 
 file_elf=string(folder_base,"Clust_ELF_decision-diagram-",cut_off_elf,".dat")
 file_dist=string(folder_base,"Clust_distance_decision-diagram-",cut_off_dist,".dat")
@@ -73,8 +73,8 @@ cluster_index_elf, cluster_centers_elf = clustering.densityPeakClusteringSecondS
 cluster_index_distance, cluster_centers_distance = clustering.densityPeakClusteringSecondStep( rho_dist, delta_dist, index_dist, nearest_neighbor_dist, min_rho_distance, min_delta_distance )
 
 file_out_elf=open(string(folder_base,"DPC-ELF-dc-",cut_off_elf,".dat"),"w")
-file_out_distance=open(string(folder_base,"DPC-distance-dc-",cut_off_distance,".dat"),"w")
-file_out_all=open(string(folder_base,"DPC-all-dc-",cut_off_distance,".dat"),"w")
+file_out_distance=open(string(folder_base,"DPC-distance-dc-",cut_off_dist,".dat"),"w")
+file_out_all=open(string(folder_base,"DPC-all-dc_dist-",cut_off_dist,"-dc_elf-",cut_off_elf,".dat"),"w")
 for i=1:nb_point
 	for j=1:4
 		write(file_out_elf,string(data_elf[i,j]," ") )
@@ -95,7 +95,9 @@ close(file_out_all)
 #==============================================================================#
 
 cut_off_dist=0.1
-file_in=open(string(folder_base,"DPC-distance-dc-",cut_off_dist,".dat"))
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"
+
+file_in=open(string(folder_base,"DPC-all-dc-",cut_off_dist,".dat"))
 lines=readlines(file_in)
 close(file_in)
 
@@ -118,16 +120,19 @@ nb_err_type2=0
 total_point=0
 for i=1:nb_lines
 	for j=1:4
-		if  data[i,j] > cut_off_elf && data[i,j+4] > cut_off_distance
-			nb_err_type1 += 1
-			nb_err_total += 1
-		elseif data[i,j] < cut_off_elf && data[i,j+4] < cut_off_distance
-			nb_err_type2 += 1
-			nb_err_total += 1
+		if data[i,j+4] > cut_off_elf && data[i,j] > cut_off_distance
+			global nb_err_type1 += 1
+			global nb_err_total += 1
+		elseif data[i,j+4] < cut_off_elf && data[i,j] < cut_off_distance
+			global nb_err_type2 += 1
+			global nb_err_total += 1
 		end
-		total_point += 1
+		global total_point += 1
 	end
 end
 
-file_out_err=open(string(folder_base,"DPC-distance-dc-",cut_off_dist,".dat"),"w")
+file_out_err=open(string(folder_base,"Errors-ELF.dat"),"w")
+write(file_out_err,string(nb_err_total/total_point*100," "))
+write(file_out_err,string(nb_err_type1/total_point*100," "))
+write(file_out_err,string(nb_err_type2/total_point*100," "))
 close(file_out_err)
