@@ -23,6 +23,9 @@ nb_box=50
 nb_elf=50
 
 hist2d_out_CC=zeros(Real,nb_box,nb_elf)
+hist2d_out_CC_clean=zeros(Real,nb_box,nb_elf)
+hist2d_out_CC_single=zeros(Real,nb_box,nb_elf)
+hist2d_out_CC_double=zeros(Real,nb_box,nb_elf)
 hist2d_in_CC=zeros(Real,nb_box,nb_elf)
 hist2d_out_CO=zeros(Real,nb_box,nb_elf)
 hist2d_in_CO=zeros(Real,nb_box,nb_elf)
@@ -50,9 +53,32 @@ for step=start_:stride_:nb_steps
 			if distance < cut_off_distance_out && min_distance_out < distance && atom1 != atom2
 				distances,elfs=traceLine( atom1, atom2, nb_points, elf, atoms, cell)
 				for i=1:nb_points
-					nx=i
 					ny=Int(trunc( elfs[i]/delta_elf )+1)
-					hist2d_out_CC[nx,ny] += 1
+					hist2d_out_CC[i,ny] += 1
+				end
+				for atom3=start_O:start_O+nbO-1
+					if ! (cell_mod.distance(atoms.positions,cell, atom1 , atom3) < cut_off_distance_in && cell_mod.distance(atoms.positions,cell, atom2 , atom3) < cut_off_distance_in )
+						for i=1:nb_points
+							ny=Int(trunc( elfs[i]/delta_elf )+1)
+							hist2d_out_CC_clean[i,ny] += 1
+						end
+					elseif
+						for atom3=start_O:start_O+nbO-1
+							if atom3 != atom4
+								if cell_mod.distance(atoms.positions,cell, atom1 , atom4) < cut_off_distance_in && cell_mod.distance(atoms.positions,cell, atom2 , atom4) < cut_off_distance_in
+									for i=1:nb_points
+										ny=Int(trunc( elfs[i]/delta_elf )+1)
+										hist2d_out_CC_double[i,ny] += 1
+									end
+								end
+							end
+						end
+					else
+						for i=1:nb_points
+							ny=Int(trunc( elfs[i]/delta_elf )+1)
+							hist2d_out_CC_single[i,ny] += 1
+						end
+					end
 				end
 			elseif distance < cut_off_distance_in && min_distance_in < distance && atom1 != atom2
 				distances,elfs=traceLine( atom1, atom2, nb_points, elf, atoms, cell)
@@ -84,30 +110,45 @@ for step=start_:stride_:nb_steps
 	end
 end
 
-for i=1:nb_points
-	sum_=sum(hist2d_out_CC[i,:])
-	for j=1:nb_elf
-		hist2d_out_CC[i,:]/=sum_
-	end
+# for i=1:nb_points
+# 	hist2d_out_CC[i,:] /= sum(hist2d_out_CC[i,:])
+# end
+# for i=1:nb_points
+#	hist2d_in_CC[i,:] /= sum(hist2d_in_CC[i,:])
+# end
+# for i=1:nb_points
+# 	hist2d_in_CO[i,:] /= sum(hist2d_in_CO[i,:])
+# end
+# for i=1:nb_points
+# 	hist2d_out_CO[i,:] /= sum(hist2d_out_CO[i,:])
+# end
+
+file_out=open(string(folder_base,"ELF_line_CC_clean.dat"),"w")
+for i=1:nb_elf
+    for j=1:nb_points
+        write(file_out,string(i/50," ",j*delta_elf," ",hist2d_out_CC_clean[i,j],"\n"))
+    end
+    write(file_out,"\n")
 end
-for i=1:nb_points
-	sum_=sum(hist2d_in_CC[i,:])
-	for j=1:nb_elf
-		hist2d_in_CC[i,:]/=sum_
-	end
+close(file_out)
+
+file_out=open(string(folder_base,"ELF_line_CC_single.dat"),"w")
+for i=1:nb_elf
+    for j=1:nb_points
+        write(file_out,string(i/50," ",j*delta_elf," ",hist2d_out_CC_single[i,j],"\n"))
+    end
+    write(file_out,"\n")
 end
-for i=1:nb_points
-	sum_=sum(hist2d_out_CO[i,:])
-	for j=1:nb_elf
-		hist2d_out_CO[i,:]/=sum_
-	end
+close(file_out)
+
+file_out=open(string(folder_base,"ELF_line_CC_double.dat"),"w")
+for i=1:nb_elf
+    for j=1:nb_points
+        write(file_out,string(i/50," ",j*delta_elf," ",hist2d_out_CC_double[i,j],"\n"))
+    end
+    write(file_out,"\n")
 end
-for i=1:nb_points
-	sum_=sum(hist2d_in_CO[i,:])
-	for j=1:nb_elf
-		hist2d_in_CO[i,:]/=sum_
-	end
-end
+close(file_out)
 
 file_out=open(string(folder_base,"ELF_line_CC_out.dat"),"w")
 for i=1:nb_elf
