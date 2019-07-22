@@ -50,7 +50,7 @@ for i=1:nb_point
 	end
 end
 
-cut_off_elf=0.2
+cut_off_elf=0.01
 cut_off_dist=0.08
 cut_off_all=0.05
 

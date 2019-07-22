@@ -10,7 +10,7 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Traject
 
 start_=1
 stride_=1
-nb_steps=100
+nb_steps=900
 
 start_C=1
 nbC=32
@@ -32,9 +32,15 @@ hist2d_in_CO=zeros(Real,nb_box,nb_elf)
 
 nb_points=50
 
+cut_off_distance_clean=1.6
+
 cut_off_distance_in=1.75
 min_distance_in=1.0
 delta_distance_in=(cut_off_distance_in-min_distance_in)/nb_box
+
+cut_off_distance_in_CC=1.8
+min_distance_in=1.0
+delta_distance_in_CC=(cut_off_distance_in_CC-min_distance_in)/nb_box
 
 cut_off_distance_out=2.8
 min_distance_out=2.0
@@ -50,37 +56,37 @@ for step=start_:stride_:nb_steps
 	for atom1=start_C:start_C+nbC-1
 		for atom2=start_C:start_C+nbC-1
 			distance=cell_mod.distance(atoms.positions,cell, atom1 , atom2)
-			if distance < cut_off_distance_out && min_distance_out < distance && atom1 != atom2
+			if distance < cut_off_distance_out && distance > min_distance_out  && atom1 != atom2
 				distances,elfs=traceLine( atom1, atom2, nb_points, elf, atoms, cell)
 				for i=1:nb_points
 					ny=Int(trunc( elfs[i]/delta_elf )+1)
 					hist2d_out_CC[i,ny] += 1
 				end
 				for atom3=start_O:start_O+nbO-1
-					if ! (cell_mod.distance(atoms.positions,cell, atom1 , atom3) < cut_off_distance_in && cell_mod.distance(atoms.positions,cell, atom2 , atom3) < cut_off_distance_in )
+					if cell_mod.distance(atoms.positions,cell, atom1 , atom3) > cut_off_distance_clean || cell_mod.distance(atoms.positions,cell, atom2 , atom3) > cut_off_distance_clean 
 						for i=1:nb_points
 							ny=Int(trunc( elfs[i]/delta_elf )+1)
 							hist2d_out_CC_clean[i,ny] += 1
 						end
-					elseif
-						for atom3=start_O:start_O+nbO-1
+					else
+						for atom4=start_O:start_O+nbO-1
 							if atom3 != atom4
-								if cell_mod.distance(atoms.positions,cell, atom1 , atom4) < cut_off_distance_in && cell_mod.distance(atoms.positions,cell, atom2 , atom4) < cut_off_distance_in
+								if cell_mod.distance(atoms.positions,cell, atom1 , atom4) < cut_off_distance_clean && cell_mod.distance(atoms.positions,cell, atom2 , atom4) < cut_off_distance_clean
 									for i=1:nb_points
 										ny=Int(trunc( elfs[i]/delta_elf )+1)
 										hist2d_out_CC_double[i,ny] += 1
 									end
+								else
+									for i=1:nb_points
+										ny=Int(trunc( elfs[i]/delta_elf )+1)
+										hist2d_out_CC_single[i,ny] += 1
+									end
 								end
 							end
 						end
-					else
-						for i=1:nb_points
-							ny=Int(trunc( elfs[i]/delta_elf )+1)
-							hist2d_out_CC_single[i,ny] += 1
-						end
 					end
 				end
-			elseif distance < cut_off_distance_in && min_distance_in < distance && atom1 != atom2
+			elseif distance < cut_off_distance_in_CC && min_distance_in < distance && atom1 != atom2
 				distances,elfs=traceLine( atom1, atom2, nb_points, elf, atoms, cell)
 				for i=1:nb_points
 					nx=i
@@ -110,18 +116,27 @@ for step=start_:stride_:nb_steps
 	end
 end
 
-# for i=1:nb_points
-# 	hist2d_out_CC[i,:] /= sum(hist2d_out_CC[i,:])
-# end
-# for i=1:nb_points
-#	hist2d_in_CC[i,:] /= sum(hist2d_in_CC[i,:])
-# end
-# for i=1:nb_points
-# 	hist2d_in_CO[i,:] /= sum(hist2d_in_CO[i,:])
-# end
-# for i=1:nb_points
-# 	hist2d_out_CO[i,:] /= sum(hist2d_out_CO[i,:])
-# end
+for i=1:nb_points
+	hist2d_out_CC[i,:] /= sum(hist2d_out_CC[i,:])
+end
+for i=1:nb_points
+	hist2d_out_CC_clean[i,:] /= sum(hist2d_out_CC_clean[i,:])
+end
+for i=1:nb_points
+	hist2d_out_CC_single[i,:] /= sum(hist2d_out_CC_single[i,:])
+end
+for i=1:nb_points
+	hist2d_out_CC_double[i,:] /= sum(hist2d_out_CC_double[i,:])
+end
+for i=1:nb_points
+	hist2d_in_CC[i,:] /= sum(hist2d_in_CC[i,:])
+end
+for i=1:nb_points
+	hist2d_in_CO[i,:] /= sum(hist2d_in_CO[i,:])
+end
+for i=1:nb_points
+	hist2d_out_CO[i,:] /= sum(hist2d_out_CO[i,:])
+end
 
 file_out=open(string(folder_base,"ELF_line_CC_clean.dat"),"w")
 for i=1:nb_elf
