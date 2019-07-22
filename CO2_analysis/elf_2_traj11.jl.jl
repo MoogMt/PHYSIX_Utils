@@ -12,14 +12,11 @@ start_=1
 stride_=10
 nb_steps=1351
 
-start_C=1
 nbC=2
-start_O=3
 nbO=80
-start_H=5
-nbH=164
-start_N=84
 nbN=1
+nbH=164
+
 
 nb_atoms=nbC+nbO+nbN+nbH
 
@@ -35,33 +32,41 @@ for step=start_:stride_:nb_steps
 	atoms.positions=cell_mod.wrap(atoms.positions,cell)
 	write(file_out,string(nb_atoms,"\n"))
 	write(file_out,string("STEP ",step,"\n"))
-	for carbon=1:nbC
-		write(file_out,string("C "))
-		for i=1:3
-			write(file_out,string(atoms.positions[carbon,i]," "))
+	for carbon=1:nb_atoms
+		if atoms.names[carbon] == "6"
+			write(file_out,string("C "))
+			for i=1:3
+				write(file_out,string(atoms.positions[carbon,i]," "))
+			end
+			write(file_out,string("\n"))
 		end
-		write(file_out,string("\n"))
 	end
-	for oxygen=nbC+1:nbC+nbO
-		write(file_out,string("O "))
-		for i=1:3
-			write(file_out,string(atoms.positions[oxygen,i]," "))
+	for oxygen=1:nb_atoms
+		if atoms.names[oxygen] == "8"
+			write(file_out,string("O "))
+			for i=1:3
+				write(file_out,string(atoms.positions[oxygen,i]," "))
+			end
+			write(file_out,string("\n"))
 		end
-		write(file_out,string("\n"))
 	end
-	for nitrogen=nbC+nbO+1:nbC+nbO+nbN
-		write(file_out,string("N "))
-		for i=1:3
-			write(file_out,string(atoms.positions[nitrogen,i]," "))
+	for nitrogen=1:nb_atoms
+		if atoms.names[nitrogen] == "7"
+			write(file_out,string("N "))
+			for i=1:3
+				write(file_out,string(atoms.positions[nitrogen,i]," "))
+			end
+			write(file_out,string("\n"))
 		end
-		write(file_out,string("\n"))
 	end
-	for hydrogen=nbC+nbO+nbN+1:nbC+nbO+nbN+nbH
-		write(file_out,string("H "))
-		for i=1:3
-			write(file_out,string(atoms.positions[hydrogen,i]," "))
+	for hydrogen=1:nb_atoms
+		if atoms.names[hydrogen] == "1"
+			write(file_out,string("H "))
+			for i=1:3
+				write(file_out,string(atoms.positions[hydrogen,i]," "))
+			end
+			write(file_out,string("\n"))
 		end
-		write(file_out,string("\n"))
 	end
 end
 close(file_out)
