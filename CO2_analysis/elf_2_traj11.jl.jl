@@ -24,7 +24,7 @@ nbN=1
 nb_atoms=nbC+nbO+nbN+nbH
 
 
-file_out=open(string(folder_base,"TRAJEC_wrapped.xyz"),"w")
+file_out=open(string(folder_base,"TRAJEC_wrapped_2.xyz"),"w")
 for step=start_:stride_:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
 	if ! isfile( string(folder_base,"ELF_shoot2_",step,".cube") )
@@ -50,14 +50,14 @@ for step=start_:stride_:nb_steps
 		write(file_out,string("\n"))
 	end
 	for hydrogen=nbC+nbO+1:nbC+nbO+nbH
-		write(file_out,string("O "))
+		write(file_out,string("H "))
 		for i=1:3
 			write(file_out,string(atoms.positions[hydrogen,i]," "))
 		end
 		write(file_out,string("\n"))
 	end
 	for nitrogen=nbC+nbO+nbH+1:nbC+nbO+nbH+nbN
-		write(file_out,string("O "))
+		write(file_out,string("N "))
 		for i=1:3
 			write(file_out,string(atoms.positions[nitrogen,i]," "))
 		end
