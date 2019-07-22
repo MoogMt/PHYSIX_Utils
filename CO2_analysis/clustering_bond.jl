@@ -91,3 +91,43 @@ end
 close(file_out_elf)
 close(file_out_distance)
 close(file_out_all)
+
+#==============================================================================#
+
+cut_off_dist=0.1
+file_in=open(string(folder_base,"DPC-distance-dc-",cut_off_dist,".dat"))
+lines=readlines(file_in)
+close(file_in)
+
+nb_lines=size(lines)[1]
+nb_dim=size(split(lines[1]))[1]
+
+data=zeros(nb_lines,nb_dim)
+for i=1:nb_lines
+	for j=1:nb_dim
+		data[i,j] = parse(Float64,split(lines[i])[j])
+	end
+end
+
+cut_off_elf=0.75
+cut_off_distance=1.75
+
+nb_err_total=0
+nb_err_type1=0
+nb_err_type2=0
+total_point=0
+for i=1:nb_lines
+	for j=1:4
+		if  data[i,j] > cut_off_elf && data[i,j+4] > cut_off_distance
+			nb_err_type1 += 1
+			nb_err_total += 1
+		elseif data[i,j] < cut_off_elf && data[i,j+4] < cut_off_distance
+			nb_err_type2 += 1
+			nb_err_total += 1
+		end
+		total_point += 1
+	end
+end
+
+file_out_err=open(string(folder_base,"DPC-distance-dc-",cut_off_dist,".dat"),"w")
+close(file_out_err)
