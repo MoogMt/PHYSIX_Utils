@@ -53,7 +53,7 @@ end
 sum_=sum(hist2D_[:,:])
 for i=1:nb_elf
 	for j=1:nb_box
-		hist2D_[i,j] /= sum_
+		hist2D_[j,i] /= sum_
 	end
 end
 
