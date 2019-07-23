@@ -23,7 +23,7 @@ nb_atoms=nbC+nbO
 nb_box=50
 nb_elf=50
 
-hist2D=zeros(Real,nb_box,nb_elf)
+hist2D_=zeros(Real,nb_box,nb_elf)
 
 cut_off_distance=2.8
 min_distance=1.0
@@ -34,25 +34,30 @@ delta_elf=1/nb_elf
 for step=start_:stride_:nb_steps
     print("Progress: ",step/nb_steps*100,"%\n")
 	atoms, cell_matrix, elf = cube_mod.readCube( string(folder_base,step,"_elf.cube") )
+	cell=cell_mod.Cell_param(cell_mod.cellMatrix2Params(cell_matrix))
+	atoms.positions=cell_mod.wrap(atoms.positions,cell)
 	for carbon=start_C:start_C+nbC-1
-		for oxygen=start_O:startO+nbO-1
+		for oxygen=start_O:start_O+nbO-1
 			distance=cell_mod.distance( atoms.positions, cell, carbon , oxygen )
-			elf=dataInTheMiddleWME( atoms, cell , carbon, oxygen, elf )
-			nx=Int(trunc(elf/delta_elf)+1)
+			if distance > cut_off_distance || distance < min_distance
+				continue
+			end
+			elf_value=dataInTheMiddleWME( atoms, cell , carbon, oxygen, elf )
+			nx=Int(trunc(elf_value/delta_elf)+1)
 			ny=Int(trunc((distance-min_distance)/delta_distance)+1)
-			hist2D[nx,ny] += 1
+			hist2D_[nx,ny] += 1
 		end
 	end
 end
 
 for i=1:nb_box
-	hist2D[i,:] /= sum(hist2D[i,:])
+	hist2D_[i,:] /= sum(hist2D[i,:])
 end
 
 file_out=open(string(folder_base,"elf_distance-",nb_steps,".dat"),"w")
 for i=1:nb_box
 	for j=1:nb_elf
-		write(file_out,string(i*delta_distance+min_distance," ",j*delta_elf," ",hist2D[i,j],"\n"))
+		write(file_out,string(i*delta_distance+min_distance," ",j*delta_elf," ",hist2D_[i,j],"\n"))
 	end
 	write(file_out,string("\n"))
 end
