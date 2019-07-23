@@ -50,10 +50,10 @@ for step=start_:stride_:nb_steps
 	end
 end
 
+sum_=sum(hist2D_[:,:])
 for i=1:nb_elf
-	sum_=sum(hist2D_[:,i])
-	if sum_ > 0
-		hist2D_[:,i] /= sum_
+	for j=1:nb_box
+		hist2D_[i,j] /= sum_
 	end
 end
 
