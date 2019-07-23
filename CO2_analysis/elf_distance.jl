@@ -11,7 +11,7 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Traject
 
 start_=1
 stride_=1
-nb_steps=100
+nb_steps=500
 
 start_C=1
 nbC=32
@@ -20,13 +20,13 @@ nbO=64
 
 nb_atoms=nbC+nbO
 
-nb_box=50
+nb_box=150
 nb_elf=50
 
 hist2D_=zeros(Real,nb_box,nb_elf)
 
 cut_off_distance=2.8
-min_distance=1.0
+min_distance=0.8
 
 delta_distance=(cut_off_distance-min_distance)/nb_box
 delta_elf=1/nb_elf
@@ -45,13 +45,16 @@ for step=start_:stride_:nb_steps
 			elf_value=dataInTheMiddleWME( atoms, cell , carbon, oxygen, elf )
 			nx=Int(trunc(elf_value/delta_elf)+1)
 			ny=Int(trunc((distance-min_distance)/delta_distance)+1)
-			hist2D_[nx,ny] += 1
+			hist2D_[ny,nx] += 1
 		end
 	end
 end
 
 for i=1:nb_box
-	hist2D_[i,:] /= sum(hist2D[i,:])
+	sum=sum(hist2D_[i,:])
+	if sum > 0
+		hist2D_[i,:] /= sum
+	end
 end
 
 file_out=open(string(folder_base,"elf_distance-",nb_steps,".dat"),"w")
