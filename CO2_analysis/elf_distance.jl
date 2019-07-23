@@ -11,7 +11,7 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Traject
 
 start_=1
 stride_=1
-nb_steps=500
+nb_steps=200
 
 start_C=1
 nbC=32
@@ -20,7 +20,7 @@ nbO=64
 
 nb_atoms=nbC+nbO
 
-nb_box=150
+nb_box=100
 nb_elf=50
 
 hist2D_=zeros(Real,nb_box,nb_elf)
@@ -51,9 +51,9 @@ for step=start_:stride_:nb_steps
 end
 
 for i=1:nb_box
-	sum=sum(hist2D_[i,:])
-	if sum > 0
-		hist2D_[i,:] /= sum
+	sum_=sum(hist2D_[:,i])
+	if sum_ > 0
+		hist2D_[:,i] /= sum_
 	end
 end
 
