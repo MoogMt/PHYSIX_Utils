@@ -31,7 +31,6 @@ hist1d2=zeros(Real,nb_box_distance)
 hist1d3=zeros(Real,nb_box_distance)
 hist1d4=zeros(Real,nb_box_distance)
 
-hist1dC=zeros(Real,nb_box_distance)
 
 start_C=1
 nbC=32
@@ -41,12 +40,14 @@ nbO=64
 nb_atoms=nbC+nbO
 nb_steps=size(traj)[1]
 
+hist1dC=zeros(Real,nb_box_distance)
+
 for step=1:nb_steps
 	print("Progress: ",step/nb_steps*100,"%\n")
-	for atom1=start_C:start_C+nbC-1
+	for carbon=start_C:start_C+nbC-1
 		distances=zeros(nbO)
-		for atom2=start_O:start_O+nbO-1
-			distances[atom2-nbC]=cell_mod.distance(traj[step].positions,cell, atom1 , atom2)
+		for oxygen=start_O:start_O+nbO-1
+			distances[oxygen-nbC]=cell_mod.distance(traj[step].positions,cell, carbon , oxygen)
 		end
 		for oxygen=1:nbO-1
 			for oxygen2=oxygen+1:nbO
@@ -72,15 +73,15 @@ for step=1:nb_steps
 			hist1d4[n4] += 1
 		end
 	end
-	for atom1=start_C:start_C+nbC-1
+	for carbon1=start_C:start_C+nbC-1
 		distances=zeros(nbC)
-		for atom2=start_C:start_C+nbC-1
-			distances[atom2]=cell_mod.distance(traj[step].positions,cell, atom1 , atom2)
+		for carbon2=start_C:start_C+nbC-1
+			distances[atom2]=cell_mod.distance(traj[step].positions,cell, carbon1 , carbon2)
 		end
-		for carbon=1:nbC-1
-			for carbon2=carbon+1:nbC
-				if distances[carbon] > distances[carbon2]
-					clustering.swap(distances,carbon,carbon2)
+		for carbon2=1:nbC-1
+			for carbon3=carbon2+1:nbC
+				if distances[carbon2] > distances[carbon3]
+					clustering.swap(distances,carbon2,carbon3)
 				end
 			end
 		end
@@ -97,8 +98,22 @@ hist1d3 /= sum(hist1d3)
 hist1d4 /= sum(hist1d4)
 hist1dC /= sum(hist1dC)
 
-file_out=open(string(folder_base,"histo_base.dat"),"w")
+file_out=open(string(folder_base,"histo_distance_CO.dat"),"w")
+for i=1:nb_box_distancest1d2[i]," ",hist1d3[i]," ",hist1d4[i]," ",delta_distance_C*i+min_distance_C," ",hist1dC[i],"\n"))
+end
+	Base.write(file_out,string(i*delta_distance_O+min_distance_O," ",hist1d1[i]," ",hist1d2[i]," ",hist1d3[i]," ",hist1d4[i]," ",delta_distance_C*i+min_distance_C," ",hist1dC[i],"\n"))
+endst1d2[i]," ",hist1d3[i]," ",hist1d4[i]," ",delta_distance_C*i+min_distance_C," ",hist1dC[i],"\n"))
+end
+close(file_out)
+
+file_out=open(string(folder_base,"histo_distance_CC.dat"),"w")
 for i=1:nb_box_distance
-	Base.write(file_out,string(i*delta_distance+min_distance," ",hist1d1[i]," ",hist1d2[i]," ",hist1d3[i]," ",hist1d4[i]," ",hist1dC[i],"\n"))
+	Base.write(file_out,string(delta_distance_C*i+min_distance_C," ",hist1dC[i],"\n"))
+end
+close(file_out)
+
+file_out=open(string(folder_base,"histo_distance_CC.dat"),"w")
+for i=1:nb_box_distance
+	Base.write(file_out,string(delta_distance_C*i+min_distance_C," ",hist1dC[i],"\n"))
 end
 close(file_out)
