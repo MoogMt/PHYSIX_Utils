@@ -1,9 +1,11 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
-CO2folder=string("/home/moogmt/PHYSIX_Utils/CO2_analysis/")
+push!(LOAD_PATH, GPfolder)
 
-include(string(GPfolder,"cpmd.jl"))
-include(string(GPfolder,"statistics.jl"))
-include(string(GPfolder,"contactmatrix.jl"))
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using contact_matrix
 
 func="PBE-MT"
 
