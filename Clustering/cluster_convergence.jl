@@ -34,9 +34,9 @@ distance_matrix=clustering.computeDistanceMatrix( points )
 # Cluster parameters
 n_clusters=2
 
-precision_kmenoid=0.00000000000001
+n_repeat=100
 n_structures=size(points)[1]
-cluster_indexs, cluster_centers, cluster_sizes = clustering.kmedoidClustering( n_structures, distance_matrix, n_clusters, precision_kmenoid )
+cluster_indexs, cluster_centers, cluster_sizes = clustering.kmedoidClustering( n_structures, distance_matrix, n_clusters, n_repeat )
 
 file_out=open(string("/home/moogmt/test-kmenoid-1.dat"),"w")
 for i=1:size(points)[1]
@@ -87,7 +87,6 @@ cut_off = 0.8
 # Cluster parameters
 n_structures=size(points)[1]
 cluster_centers, cluster_sizes, index_cluster = dauraClustering( size(points)[1] , distance_matrix , cut_off )
-
 n_clusters=size(cluster_centers)[1]
 
 n_test=200
