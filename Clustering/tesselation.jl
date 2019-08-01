@@ -30,8 +30,19 @@ close(file_out)
 distance_matrix=clustering.computeDistanceMatrix( points )
 
 # Cluster parameters
-n_clusters=10
 
+n_clusters=5
+n_repeat=10
+n_structures=size(points)[1]
+cluster_indexs, cluster_centers, cluster_sizes = clustering.kmedoidClustering( n_structures, distance_matrix, n_clusters, n_repeat )
+
+file_out=open(string("/home/moogmt/tesselation-kmenoid-",n_clusters,".dat"),"w")
+for i=1:size(points)[1]
+	write(file_out,string(points[i,1]," ",points[i,2]," ",cluster_indexs[i],"\n"))
+end
+close(file_out)
+
+n_clusters=10
 n_repeat=10
 n_structures=size(points)[1]
 cluster_indexs, cluster_centers, cluster_sizes = clustering.kmedoidClustering( n_structures, distance_matrix, n_clusters, n_repeat )
