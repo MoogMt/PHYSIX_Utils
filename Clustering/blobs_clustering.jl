@@ -75,7 +75,7 @@ close(file_out)
 
 distance_matrix=clustering.computeDistanceMatrix( points )
 
-cut_off=0.02
+cut_off=0.05
 file_out=string("/home/moogmt/decision-diagram-",cut_off,".dat")
 rho,delta,index,nearest_neighbor=clustering.densityPeakClusteringFirstStepDistanceMatrix( distance_matrix , cut_off, file_out )
 

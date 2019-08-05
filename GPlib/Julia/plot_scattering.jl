@@ -14,15 +14,8 @@ function computeCost( distance_matrix::Array{T1,2}, positions::Array{T2}, cost_c
     end
     return cost
 end
-
 # Folder where to find file
-folder="/home/moogmt/CO2_Classic/"
-
-# Convergence parameters
-n_iterations=100000
-k=0.02
-s=0.005
-kT=0.0000002
+folder="/home/moogmt/Data/Map/"
 
 # Reading file
 data=open(string(folder,"FRAME_TO_FRAME.MATRIX"))
@@ -36,17 +29,24 @@ for i=1:number_structure
     for j=i+1:number_structure
         distance_matrix[i,j]=parse(Float64,line[j])
         distance_matrix[j,i]=distance_matrix[i,j]
+        if distance_matrix[i,j] > dmax
+            global dmax=distance_matrix[i,j]
+        end
     end
 end
 close(data)
 
+# Convergence parameters
+n_iterations=1000000
+k=0.05
+s=0.00000005
+kT=0.00000001
+
 # Start with random positions
 x=rand(number_structure)
 y=rand(number_structure)
-
 # Compute Initial cost
 cost=computeCost(distance_matrix,[x y],k)
-
 for iteration=1:n_iterations
     # Moving randomly a single element
     global element= Int( trunc( rand()*number_structure+1 ) )
@@ -83,7 +83,7 @@ close(map_stuff)
 error_map=open(string(folder,"error_map.dat"),"w")
 for i=1:number_structure
     for j=i+1:number_structure
-        write(error_map, string(distance_matrix[i,j]," ",sqrt( ( x[i]-x[j] )*( x[i]-x[j] ) + ( y[i]-y[j] )*( y[i]-y[j] ) ) , "\n") )
+        write(error_map, string(distance_matrix[i,j]/dmax," ",sqrt( ( x[i]-x[j] )*( x[i]-x[j] ) + ( y[i]-y[j] )*( y[i]-y[j] ) ) , "\n") )
     end
 end
 close(error_map)
