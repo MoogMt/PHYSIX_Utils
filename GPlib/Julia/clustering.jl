@@ -268,6 +268,7 @@ end
 
 # K-menoid
 #============================================================================#
+# algorithm from H.S.Park and C.H.Jun, Expert Syst. Appl. 36, 3336, 2009.
 function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_clusters::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Int }
     # Initialization of centers
     cluster_centers=initializeCenters(n_structures, distance_matrix, n_clusters )
@@ -304,9 +305,9 @@ function kmedoidClustering( n_structures::T1 , distance_matrix::Array{T2,2}, n_c
     return cluster_indexs_best, cluster_centers_best, cluster_sizes_best
 end
 #==============================================================================#
-
-
-
+# Inspired by PIV_clustering
+# by G.A. Gallet and F. Pietrucci, 2014
+# J.Chem.Phys., 139 , 074101, 2013
 function computeClusteringCoefficients( distance_matrix::Array{T1,2}, n_clusters::T2 , cluster_sizes::Vector{T3} , assignments::Array{T4,2} , cut_off::T5 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int , T5 <: Real }
     clustering_coefficients=zeros(n_clusters)
     if cut_off <= 0.0
@@ -330,8 +331,11 @@ function computeClusteringCoefficients( distance_matrix::Array{T1,2}, n_clusters
     return clustering_coefficients
 end
 
+
+
 # Daura Clustering
 #==============================================================================#
+# algorithm from Daura et al, Angew. Chem. Int. Ed. 38, 236-240, 1999
 function dauraClustering( distance_matrix::Array{T2,2} , cut_off::T3 ) where { T1 <: Int, T2 <: Real, T3 <: Real }
 	n_elements=size(distance_matrix)[1]
     cluster_centers=zeros(Int,n_elements)
@@ -518,6 +522,7 @@ end
 
 # Density Peak Clustering
 #==============================================================================#
+# Algorithm from Rodriguez, Alex, and Alessandro Laio. "Clustering by fast search and find of density peaks." Science 344.6191 (2014): 1492-1496.
 function densityPeakClusteringTrain( data::Array{T1,2}, dc::T2 ) where { T1 <: Real, T2 <: Real }
 
 	# Size and dimension of the input data

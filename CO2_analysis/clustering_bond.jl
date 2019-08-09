@@ -136,3 +136,57 @@ write(file_out_err,string(nb_err_total/total_point*100," "))
 write(file_out_err,string(nb_err_type1/total_point*100," "))
 write(file_out_err,string(nb_err_type2/total_point*100," "))
 close(file_out_err)
+
+#==============================================================================#
+
+cut_off_dist=0.1
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/8.82/Trajectory_2/"
+
+file_in=open(string(folder_base,"DPC-all-dc-",cut_off_dist,".dat"))
+lines=readlines(file_in)
+close(file_in)
+
+nb_lines=size(lines)[1]
+nb_dim=size(split(lines[1]))[1]
+
+data=zeros(nb_lines,nb_dim)
+for i=1:nb_lines
+	for j=1:nb_dim
+		data[i,j] = parse(Float64,split(lines[i])[j])
+	end
+end
+
+cluster=ones(3)
+cluster[1] = 3
+cluster[2] = 2
+cluster[3] = 4
+
+cut_off_distance=1.75
+
+nb_err_total=0
+nb_err_type1=0
+nb_err_type2=0
+yay=0
+for i=1:nb_lines
+	count_ = 0
+	for j=1:4
+		if data[i,j] < cut_off_distance
+			count_ += 1
+		end
+	end
+	if count_ == cluster[Int(data[i,10])]
+		global yay += 1
+	elseif count_ < cluster[Int(data[i,10])]
+		global nb_err_type1 += 1
+	elseif count_ > cluster[Int(data[i,10])]
+		global nb_err_type2 += 1
+	end
+end
+
+nb_err_total = nb_err_type1 + nb_err_type2
+
+file_out_err=open(string(folder_base,"Errors-ELF_DPC-",cut_off_dist,".dat"),"w")
+write(file_out_err,string(nb_err_total/nb_lines*100," "))
+write(file_out_err,string(nb_err_type1/nb_lines*100," "))
+write(file_out_err,string(nb_err_type2/nb_lines*100," "))
+close(file_out_err)
