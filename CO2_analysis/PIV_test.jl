@@ -27,7 +27,7 @@ piv_element=Int(nbO*(nbO-1)/2)
 piv_I=zeros(piv_element)
 piv_III=zeros(piv_element)
 
-count=1
+count_=1
 for oxygen1=1:nb_atoms
     if phaseI.atom_names[oxygen1] != "O"
         continue
@@ -36,9 +36,9 @@ for oxygen1=1:nb_atoms
         if phaseI.atom_names[oxygen1] != "O"
             continue
         end
-        piv_I[count] = utils.switchingFunction(cell_mod.distance(traj[step],cell,oxygen1,oxygen2),d0,n)
-        piv_III[count] = utils.switchingFunction(cell_mod.distance(traj[step],cell,oxygen1,oxygen2),d0,n)
-        global count = count + 1
+        piv_I[count_] = utils.switchingFunction(cell_mod.distance(traj[step],cell,oxygen1,oxygen2),d0,n)
+        piv_III[count_] = utils.switchingFunction(cell_mod.distance(traj[step],cell,oxygen1,oxygen2),d0,n)
+        global count_ = count_ + 1
     end
 end
 # Sort

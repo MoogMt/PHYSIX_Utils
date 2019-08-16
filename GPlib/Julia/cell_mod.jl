@@ -6,6 +6,7 @@ export vec2matrix, wrap, dist1D, distance, compressParams, compressAtoms
 
 # Import all import module
 #----------------------------
+using LinearAlgebra
 using atom_mod
 #----------------------------
 
@@ -86,6 +87,8 @@ end
 Cell=Union{Cell_param, Cell_vec, Cell_matrix}
 #---------------------------------------------
 
+# Conversion
+#-------------------------------------------------------------------------------
 function cellMatrix2Params( cell_matrix::Array{T1,2} )  where { T1 <: Real }
     params=zeros(Real,3)
     for i=1:size(cell_matrix)[1]
@@ -96,9 +99,10 @@ function cellMatrix2Params( cell_matrix::Array{T1,2} )  where { T1 <: Real }
     end
     return params
 end
-
-#---------------------------------------------------------------------------\
-function vec2matrix( vectors::T1 ) where { T1 <: Cell_vec }
+function cellMatrix2Params( cell_matrix::T1 )  where { T1 <: Cell_matrix }
+    return cellMatrix2Params(cell_matrix.matrix)
+end
+function cellVector2Matrix( vectors::T1 ) where { T1 <: Cell_vec }
     matrix=Cell_matrix()
     for i=1:3
         matrix.matrix[i,1] = vectors.v1[i]
@@ -111,7 +115,28 @@ function vec2matrix( vectors::T1 ) where { T1 <: Cell_vec }
     end
     return matrix
 end
+function params2Matrix( cell_params::Cell_param )
+    matrix=zeros(3,3)
+    cell_params.length
+    matrix[]
+    return matrix
+end
+function cellParams2Matrix( cell_params::T1 ) where { T1 <: Cell_param }
+    return cell_matrix(params2Matrix(cell_params))
+end
 #---------------------------------------------------------------------------\
+
+#-------------------------------------------------------------------------------
+function getVolume( cell_matrix::Array{T1,2}) where { T1 <: Real }
+    return LinearAlgebra.det(cell_matrix)
+end
+function getVolume( cell_matrix::T1) where { T1 <: Cell_matrix }
+    return LinearAlgebra.det(cell_matrix.matrix)
+end
+function getVolume( cell_param::T1) where { T1 <: Cell_param }
+    return LinearAlgebra.det(params2Matrix(cell_param))
+end
+#-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 function wrap( position::T1, length::T2 ) where { T1 <: Real, T2 <: Real}
