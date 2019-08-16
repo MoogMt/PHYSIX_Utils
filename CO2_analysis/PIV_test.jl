@@ -46,8 +46,8 @@ for oxygen1=1:nb_atoms
     if phaseI.atom_names[oxygen1] == "O"
         for oxygen2=oxygen1+1:nb_atoms
             if phaseI.atom_names[oxygen2] == "O"
-                piv_I[count_] = utils.switchingFunction(0.989945*cell_mod.distance(phaseI.positions[oxygen1,:],phaseI.positions[oxygen2,:],cell_I),d0,n)
-                piv_III[count_] = utils.switchingFunction(0.989945*cell_mod.distance(phaseIII.positions[oxygen1,:],phaseIII.positions[oxygen2,:],cell_III),d0,n)
+                piv_I[count_] = utils.switchingFunction(cell_mod.distance(phaseI.positions[oxygen1,:],phaseI.positions[oxygen2,:],cell_I),d0,n)
+                piv_III[count_] = utils.switchingFunction(cell_mod.distance(phaseIII.positions[oxygen1,:],phaseIII.positions[oxygen2,:],cell_III),d0,n)
                 global count_ = count_ + 1
             end
         end
@@ -71,3 +71,53 @@ end
 d_PIV=sqrt(d_PIV)
 
 print("Distance PIV = ",d_PIV,"\n")
+
+
+nbC=864
+nbO=864*2
+nb_atoms=nbC+2*nbO
+
+# Folder for data
+folder_base="/home/moogmt/CO2_Classic/PIV_test/"
+
+phaseI, cell_I=pdb.readStep(string(folder_base,"I.pdb"))
+phaseIII, cell_III=pdb.readStep(string(folder_base,"III.pdb"))
+
+New_I=AtomMolList(nbO)
+
+count_=1
+for i=1:nb_atoms
+    if phaseI.atom_names[i] == "O"
+        New_I.positions[count_,:] = phaseI.positions[i,:]
+        New_I.atom_index[count_] = count_
+        New_I.mol_index[count_]= phaseI.mol_index[i]
+        New_I.mol_names[count_] = phaseI.mol_names[i]
+        New_I.atom_names[count_] = "O"
+        global count_ += 1
+    end
+end
+
+file_out=string(folder_base,"New_I2.pdb")
+pdb.write(New_I,cell_I,file_out)
+file_out=string(folder_base,"New_I_plu.pdb")
+pdb.writePLUMED(New_I,cell_I,file_out)
+
+
+New_III=AtomMolList(nbO)
+
+count_=1
+for i=1:nb_atoms
+    if phaseI.atom_names[i] == "O"
+        New_III.positions[count_,:] = phaseIII.positions[i,:]
+        New_III.atom_index[count_] = count_
+        New_III.mol_index[count_]= phaseIII.mol_index[i]
+        New_III.mol_names[count_] = phaseIII.mol_names[i]
+        New_III.atom_names[count_] = "O"
+        global count_ += 1
+    end
+end
+
+file_out=string(folder_base,"New_III2.pdb")
+pdb.write(New_III,cell_III,file_out)
+file_out=string(folder_base,"New_III_plu.pdb")
+pdb.writePLUMED(New_III,cell_III,file_out)
