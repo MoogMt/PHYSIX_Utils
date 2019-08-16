@@ -116,12 +116,12 @@ function cellVector2Matrix( vectors::T1 ) where { T1 <: Cell_vec }
     return matrix
 end
 function params2Matrix( cell_params::T1 ) where { T1 <: Cell_param }
-    matrix=ones(3,3)
+    matrix=zeros(3,3)
     lengths=cell_params.length
     for i=2:3
         lengths[i] /= lengths[1]
     end
-    tau=pi*2
+    tau=pi/180
     # COS of angles
     cos_ang=zeros(3)
     for i=1:3
@@ -129,12 +129,13 @@ function params2Matrix( cell_params::T1 ) where { T1 <: Cell_param }
     end
     temp=sqrt(1.0-cos_ang[3]*cos_ang[3])
     matrix[1,1] = lengths[1]
-    matrix[1,2] = lenghts[1]*lengths[2]*cos_ang[3]
+    matrix[1,2] = lengths[1]*lengths[2]*cos_ang[3]
     matrix[2,2] = lengths[1]*lengths[2]*temp
     matrix[3,1] = lengths[1]*lengths[3]*cos_ang[2]
-    matrix[3,2] = lengths[1]*lengths[3]*(cos_ang[1]-cos_ang[2]*cos[3])/temp
+    matrix[3,2] = lengths[1]*lengths[3]*(cos_ang[1]-cos_ang[2]*cos_ang[3])/temp
+
     temp=(1.0 + 2.0 *cos_ang[1]*cos_ang[2]*cos_ang[3] - cos_ang[1]*cos_ang[1] - cos_ang[2]*cos_ang[2] - cos_ang[3]*cos_ang[3])
-    matrix[3,3] = lengths[1]
+    matrix[3,3] = lengths[1]*lengths[3]*sqrt(temp/(1-cos_ang[3]*cos_ang[3]))
     return matrix
 end
 #---------------------------------------------------------------------------\
