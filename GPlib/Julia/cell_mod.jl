@@ -117,7 +117,7 @@ function cellVector2Matrix( vectors::T1 ) where { T1 <: Cell_vec }
 end
 function params2Matrix( cell_params::T1 ) where { T1 <: Cell_param }
     matrix=zeros(3,3)
-    lengths=cell_params.length
+    lengths=copy(cell_params.length)
     for i=2:3
         lengths[i] /= lengths[1]
     end
@@ -225,9 +225,11 @@ function scaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 
         return 0
     end
     cell_mat_inverse=LinearAlgebra.inv(cell_matrix)
-    vector2=copy(vector)
+    vector2=zeros(3)
     for i=1:3
-        vector2[i]=dot(cell_mat_inverse[i,:]*vector[:])
+        for j=1:3
+            vector2[i] += cell_mat_inverse[i,j]*vector[j]
+        end
     end
     return vector2
 end
@@ -257,23 +259,30 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell::Vector{T3} ) where { T1
 end
 function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
     scaled_v1=scaleVector(v1,cell_matrix)
+    print("v1 :",scaled_v1,"\n")
     scaled_v2=scaleVector(v2,cell_matrix)
+    print("v2 :",scaled_v2,"\n")
     ds=zeros(3)
     # Min Image Convention
     for i=1:3
-        ds[k] = scaled_v1[k]-scaled_v2[k]
-        ds[k] = ds[k] - int(trunc(ds[k]))
+        ds[i] = scaled_v1[i]-scaled_v2[i]
+        ds[i] = ds[i] - round(ds[i])
     end
     # Descaling
-    sum=0
-    for k=1:3
-        dx=0
+    vector=zeros(3)
+    for i=1:3
         for j=1:3
-            dx += cell_matrix[k,j]*ds[j]
+            vector[i] += cell_matrix[i,j]*ds[j]
         end
-        sum += dx*dx
     end
-    return sqrt(sum)
+    print("vec :",vector,"\n")
+    return sqrt(dot(vector,vector))
+end
+function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Cell_matrix }
+    return distance(v1,v2,cell_matrix.matrix)
+end
+function distance( v1::Vector{T1}, v2::Vector{T2}, cell_params::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Cell_param }
+    return distance(v1,v2,params2Matrix(cell_params))
 end
 #-------------------------------------------------------------------------------
 

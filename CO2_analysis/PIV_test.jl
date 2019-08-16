@@ -15,7 +15,10 @@ folder_base="/home/moogmt/CO2_Classic/PIV_test/"
 phaseI, cell_I=pdb.readStep(string(folder_base,"I.pdb"))
 phaseIII, cell_III=pdb.readStep(string(folder_base,"III.pdb"))
 
-cell_mod.getVolume(cell_I)
+Vol_I=cell_mod.getVolume(cell_I)
+
+dist=cell_mod.distance(phaseI.positions[1,:],phaseI.positions[2,:],cell_I)
+cal=sqrt( (27.080-27.77)^2 + (0.940-0.230)^2 + (30.6-29.99)^2 )
 
 d0=5
 n=4
