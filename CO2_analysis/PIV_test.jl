@@ -3,7 +3,7 @@ push!(LOAD_PATH, GPfolder)
 
 using utils
 using geom
-using contact_matrix
+#using contact_matrix
 using atom_mod
 using cell_mod
 using cube_mod
@@ -14,6 +14,8 @@ folder_base="/home/moogmt/CO2_Classic/PIV_test/"
 
 phaseI, cell_I=pdb.readStep(string(folder_base,"I.pdb"))
 phaseIII, cell_III=pdb.readStep(string(folder_base,"III.pdb"))
+
+cell_mod.getVolume(cell_I)
 
 d0=5
 n=4

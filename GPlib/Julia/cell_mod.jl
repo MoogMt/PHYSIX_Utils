@@ -115,9 +115,9 @@ function cellVector2Matrix( vectors::T1 ) where { T1 <: Cell_vec }
     end
     return matrix
 end
-function params2Matrix( cell_params::Cell_param )
+function params2Matrix( cell_params::T1 ) where { T1 <: Cell_param }
     matrix=ones(3,3)
-    lengths=cell.params.length
+    lengths=cell_params.length
     for i=2:3
         lengths[i] /= lengths[1]
     end
@@ -127,7 +127,7 @@ function params2Matrix( cell_params::Cell_param )
     for i=1:3
         cos_ang[i] = cos( cell_params.angles[i]*tau)
     end
-    temp=sqrt(1.0-angles[3]**2)
+    temp=sqrt(1.0-cos_ang[3]*cos_ang[3])
     matrix[1,1] = lengths[1]
     matrix[1,2] = lenghts[1]*lengths[2]*cos_ang[3]
     matrix[2,2] = lengths[1]*lengths[2]*temp
@@ -136,9 +136,6 @@ function params2Matrix( cell_params::Cell_param )
     temp=(1.0 + 2.0 *cos_ang[1]*cos_ang[2]*cos_ang[3] - cos_ang[1]*cos_ang[1] - cos_ang[2]*cos_ang[2] - cos_ang[3]*cos_ang[3])
     matrix[3,3] = lengths[1]
     return matrix
-end
-function cellParams2Matrix( cell_params::T1 ) where { T1 <: Cell_param }
-    return cell_matrix(params2Matrix(cell_params))
 end
 #---------------------------------------------------------------------------\
 
@@ -220,6 +217,19 @@ function wrap( positions::Vector{T1}, cell::T2 ) where { T1 <: Real, T2 <: Cell_
 end
 #-------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------
+function scaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 <: Real , T2 <: Real }
+    vector2=copy(vector)
+    for i=1:3
+        vector2[i]=dot(cell_matrix[i,:]*vector[:])
+    end
+    return vector2
+end
+function scaleVector( vector::Vector{T1}, cell_matrix::T2 ) where { T1 <: Real , T2 <: Cell_matrix }
+    return scaleVector(vector,cell_matrix.matrix)
+end
+#-------------------------------------------------------------------------------
+
 # Distance related functions
 #-------------------------------------------------------------------------------
 function dist1D( x1::T1, x2::T2, a::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
@@ -238,6 +248,26 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell::Vector{T3} ) where { T1
         dist += dist1D(v1[i],v2[i],cell[i])
     end
     return sqrt(dist)
+end
+function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+    scaled_v1=scaleVector(v1,cell_matrix)
+    scaled_v2=scaleVector(v2,cell_matrix)
+    ds=zeros(3)
+    # Min Image Convention
+    for i=1:3
+        ds[k] = scaled_v1[k]-scaled_v2[k]
+        ds[k] = ds[k] - int(trunc(ds[k]))
+    end
+    # Descaling
+    sum=0
+    for k=1:3
+        dx=0
+        for j=1:3
+            dx += cell_matrix[k,j]*ds[j]
+        end
+        sum += dx*dx
+    end
+    return sqrt(sum)
 end
 #-------------------------------------------------------------------------------
 
