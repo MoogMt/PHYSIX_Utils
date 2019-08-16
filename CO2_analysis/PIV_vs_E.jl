@@ -1,15 +1,19 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
 
-include(string(GPfolder,"contactmatrix.jl"))
-include(string(GPfolder,"geom.jl"))
-include(string(GPfolder,"utils.jl"))
+using utils
+using geom
+using contact_matrix
+using atom_mod
+using cell_mod
+using cube_mod
+using pdb
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 
-
-T=2000
-V=9.8
+T=3000
+V=8.82
 
 n_run=1
 

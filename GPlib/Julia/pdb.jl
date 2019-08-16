@@ -1,12 +1,10 @@
-include("cell.jl")
-
 module pdb
 
 export getNbSteps, readStep, write
 
-using Main.utils
-using Main.atom_mod
-using Main.cell_mod
+using utils
+using atom_mod
+using cell_mod
 
 function getNbSteps( file::T1 ) where { T1 <: AbstractString}
   count=0
@@ -68,8 +66,8 @@ function readStep( file::T1 ) where { T1 <: AbstractString }
       atoms.atom_names[count]=split(line)[3]
       atoms.atom_index[count]=parse(Float64,split(line)[2])
       atoms.mol_names[count]=split(line)[4]
-      atoms.mol_index[count]=parse(Float64,split(line)[5])
-      atoms.positions[count,:]=[ parse(Float64,split(line)[6]), parse(Float64,split(line)[7]), parse(Float64,split(line)[8]) ]
+      atoms.mol_index[count]=parse(Float64,split(line)[6])
+      atoms.positions[count,:]=[ parse(Float64,split(line)[7]), parse(Float64,split(line)[8]), parse(Float64,split(line)[9]) ]
       count+=1;
     end
   end
