@@ -220,9 +220,14 @@ end
 
 #-------------------------------------------------------------------------------
 function scaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 <: Real , T2 <: Real }
+    if LinearAlgebra.det(cell_matrix) == 0
+        print("MATRIX NOT INVERSIBLE!")
+        return 0
+    end
+    cell_mat_inverse=LinearAlgebra.inv(cell_matrix)
     vector2=copy(vector)
     for i=1:3
-        vector2[i]=dot(cell_matrix[i,:]*vector[:])
+        vector2[i]=dot(cell_mat_inverse[i,:]*vector[:])
     end
     return vector2
 end
