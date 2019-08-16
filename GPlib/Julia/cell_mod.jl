@@ -259,9 +259,7 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell::Vector{T3} ) where { T1
 end
 function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
     scaled_v1=scaleVector(v1,cell_matrix)
-    print("v1 :",scaled_v1,"\n")
     scaled_v2=scaleVector(v2,cell_matrix)
-    print("v2 :",scaled_v2,"\n")
     ds=zeros(3)
     # Min Image Convention
     for i=1:3
@@ -275,7 +273,6 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2} ) wh
             vector[i] += cell_matrix[i,j]*ds[j]
         end
     end
-    print("vec :",vector,"\n")
     return sqrt(dot(vector,vector))
 end
 function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Cell_matrix }
