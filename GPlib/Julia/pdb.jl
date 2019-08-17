@@ -164,8 +164,6 @@ function writePLUMED(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.Atom
   cryst1=string(cryst1,"\n")
   Base.write(out,cryst1)
 
-  Base.write(out,string("MODEL X\n"))
-
   nb_atoms = size(atoms.atom_names)[1]
   for i=1:nb_atoms
     atom="ATOM"
