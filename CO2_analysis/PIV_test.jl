@@ -26,13 +26,13 @@ nbC=864
 nbO=864*2
 nb_atoms=nbC+2*nbO
 
-# Scaling positions
-positions_I_scaled   = cell_mod.getScaleMatrix( phaseI.positions,   cell_I   )
-positions_III_scaled = cell_mod.getScaleMatrix( phaseIII.positions, cell_III )
-
 # Cell matrix
 cell_I_matrix   = cell_mod.params2Matrix( cell_I   )
 cell_III_matrix = cell_mod.params2Matrix( cell_III )
+
+# Scaling positions
+positions_I_scaled   = cell_mod.getScaleMatrix( phaseI.positions,   cell_I_matrix   )
+positions_III_scaled = cell_mod.getScaleMatrix( phaseIII.positions, cell_III_matrix )
 
 # ComputePIV
 piv_element=Int(nbO*(nbO-1)/2)
@@ -43,8 +43,8 @@ for oxygen1=1:nb_atoms
     if phaseI.atom_names[oxygen1] == "O"
         for oxygen2=oxygen1+1:nb_atoms
             if phaseI.atom_names[oxygen2] == "O"
-                piv_I[count_] = utils.switchingFunction(cell_mod.distanceScale(positions_I_scaled[oxygen1,:],positions_III_scaled[oxygen2,:],cell_I_matrix),d0,n)
-                piv_III[count_] = utils.switchingFunction(cell_mod.distance(positions_III_scaled[oxygen1,:],positions_III_scaled[oxygen2,:],cell_III_matrix),d0,n)
+                piv_I[count_]    = utils.switchingFunction( cell_mod.distanceScale( positions_I_scaled[oxygen1,:],   positions_III_scaled[oxygen2,:], cell_I_matrix   ), d0, n )
+                piv_III[count_]  = utils.switchingFunction( cell_mod.distanceScale( positions_III_scaled[oxygen1,:], positions_III_scaled[oxygen2,:], cell_III_matrix ), d0, n )
                 global count_ = count_ + 1
             end
         end
@@ -66,9 +66,6 @@ for i=1:piv_element
     global d_PIV += (piv_I[i]-piv_III[i])*(piv_I[i]-piv_III[i])
 end
 d_PIV=sqrt(d_PIV)
-
-print("Distance PIV = ",d_PIV,"\n")
-
 
 nbC=864
 nbO=864*2

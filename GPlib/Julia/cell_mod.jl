@@ -243,14 +243,22 @@ end
 function getScaledVector( vector::Vector{T1}, cell_matrix::T2 ) where { T1 <: Real , T2 <: Cell_matrix }
     return getScaledVector(vector,cell_matrix.matrix)
 end
-function getScaleVectorInv( vector::Vector{T1}, inv_cell_matrix::Array{T2,2} ) where { T1 <: Real, T2 <: Real}
+function getScaledVectorInv( vector::Vector{T1}, inv_cell_matrix::Array{T2,2} ) where { T1 <: Real, T2 <: Real}
     vector2=zeros(3)
     for i=1:3
         for j=1:3
-            vector2[i] += cell_mat_inverse[i,j]*vector[j]
+            vector2[i] += inv_cell_matrix[i,j]*vector[j]
         end
     end
     return vector2
+end
+function scaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2}, inv_cell_matrix::Array{T3,2} ) where { T1 <: Real , T2 <: Real, T3 <: Real }
+    for i=1:3
+        for j=1:3
+            vector[i] += inv_cell_matrix[i,j]*vector[j]
+        end
+    end
+    return
 end
 function scaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 <: Real , T2 <: Real }
     if LinearAlgebra.det(cell_matrix) == 0
@@ -273,7 +281,7 @@ function getScaleMatrix( target_matrix::Array{T1,2}, cell_matrix::Array{T2,2} ) 
     size_matrix=size(target_matrix)[1]
     scaled_matrix=copy(target_matrix)
     for i=1:size_matrix
-        scaleVector(scaled_matrix[i,:],cell_matrix)
+        scaled_matrix[i,:]=getScaledVectorInv(scaled_matrix[i,:],inv_cell_matrix)
     end
     return scaled_matrix
 end
@@ -347,7 +355,7 @@ function distanceScale( v1_scaled::Vector{T1}, v2_scaled::Vector{T2}, cell_matri
         ds[i] = ds[i] - round(ds[i])
     end
     # Descaling of distance vector
-    scaleVector(ds,cell_matrix)
+    deScaleVector(ds,cell_matrix)
     return sqrt(dot(ds,ds))
 end
 function distanceScale( v1_scaled::Vector{T1}, v2_scaled::Vector{T2}, cell_matrix::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Cell_matrix }
