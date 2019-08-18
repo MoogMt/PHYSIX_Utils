@@ -31,8 +31,8 @@ cell_I_matrix   = cell_mod.params2Matrix( cell_I   )
 cell_III_matrix = cell_mod.params2Matrix( cell_III )
 
 # Scaling positions
-positions_I_scaled   = cell_mod.getScaleMatrix( phaseI.positions,   cell_I_matrix   )
-positions_III_scaled = cell_mod.getScaleMatrix( phaseIII.positions, cell_III_matrix )
+positions_I_scaled   = cell_mod.getScalePosition( phaseI.positions,   cell_I_matrix   )
+positions_III_scaled = cell_mod.getScalePosition( phaseIII.positions, cell_III_matrix )
 
 # ComputePIV
 piv_element=Int(nbO*(nbO-1)/2)
@@ -43,7 +43,7 @@ for oxygen1=1:nb_atoms
     if phaseI.atom_names[oxygen1] == "O"
         for oxygen2=oxygen1+1:nb_atoms
             if phaseI.atom_names[oxygen2] == "O"
-                piv_I[count_]    = utils.switchingFunction( cell_mod.distanceScale( positions_I_scaled[oxygen1,:],   positions_III_scaled[oxygen2,:], cell_I_matrix   ), d0, n )
+                piv_I[count_]    = utils.switchingFunction( cell_mod.distanceScale( positions_I_scaled[oxygen1,:],   positions_I_scaled[oxygen2,:], cell_I_matrix   ),   d0, n )
                 piv_III[count_]  = utils.switchingFunction( cell_mod.distanceScale( positions_III_scaled[oxygen1,:], positions_III_scaled[oxygen2,:], cell_III_matrix ), d0, n )
                 global count_ = count_ + 1
             end
@@ -71,12 +71,10 @@ nbC=864
 nbO=864*2
 nb_atoms=nbC+2*nbO
 
-# Folder for data
-folder_base="/home/moogmt/CO2_Classic/PIV_test/"
+#==============================================================================#
 
 phaseI, cell_I = pdb.readStep( string( folder_base, "I.pdb") )
 phaseIII, cell_III = pdb.readStep( string( folder_base, "III.pdb") )
-phaseII, cell_II = pdb.readStep( string( folder_base, "II.pdb") )
 
 # I
 #==============================================================================#

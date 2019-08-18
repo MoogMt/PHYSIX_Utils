@@ -226,79 +226,45 @@ function invertCell( cell_matrix::Array{T1,2} ) where { T1 <: Real }
         return false
     end
 end
-function getScaledVector( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 <: Real , T2 <: Real }
-    if LinearAlgebra.det(cell_matrix) == 0
-        print("MATRIX NOT INVERSIBLE!")
-        return 0
-    end
-    cell_mat_inverse=LinearAlgebra.inv(cell_matrix)
-    vector2=zeros(3)
+function invertCell( cell_matrix::T1 ) where { T1 <: Cell_matrix }
+    return invertCell(cell_matrix.matrix)
+end
+function invertCell( cell_params::T1 ) where { T1 <: Cell_param }
+    return invertCell(params2Matrix(cell_matrix.matrix))
+end
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+function getTransformedPosition( target_vector::Vector{T1}, cell_matrix::Array{T2,2} ) where {T1 <: Real, T2 <: Real }
+    vector=zeros(3)
     for i=1:3
         for j=1:3
-            vector2[i] += cell_mat_inverse[i,j]*vector[j]
+            vector[i] += cell_matrix[i,j]*target_vector[j]
         end
     end
-    return vector2
+    return vector
 end
-function getScaledVector( vector::Vector{T1}, cell_matrix::T2 ) where { T1 <: Real , T2 <: Cell_matrix }
-    return getScaledVector(vector,cell_matrix.matrix)
+#-------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------
+function getScaledPosition( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 <: Real , T2 <: Real }
+    cell_mat_inverse=invertCell(cell_matrix)
+    return getTransformedPosition(vector,cell_mat_inverse)
 end
-function getScaledVectorInv( vector::Vector{T1}, inv_cell_matrix::Array{T2,2} ) where { T1 <: Real, T2 <: Real}
-    vector2=zeros(3)
-    for i=1:3
-        for j=1:3
-            vector2[i] += inv_cell_matrix[i,j]*vector[j]
-        end
+function getScaledPosition( vector::Vector{T1}, cell_matrix::T2 ) where { T1 <: Real , T2 <: Cell_matrix }
+    return getScaledPosition(vector,cell_matrix.matrix)
+end
+function getScalePosition( target_matrix::Array{T1,2}, cell_matrix::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
+    inv_cell_matrix=invertCell(cell_matrix)
+    nb_atoms=size(target_matrix)[1]
+    scaled_positions=copy(target_matrix)
+    for i=1:nb_atoms
+        scaled_positions[i,:]=getTransformedPosition(target_matrix[i,:],inv_cell_matrix)
     end
-    return vector2
+    return scaled_positions
 end
-function scaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2}, inv_cell_matrix::Array{T3,2} ) where { T1 <: Real , T2 <: Real, T3 <: Real }
-    for i=1:3
-        for j=1:3
-            vector[i] += inv_cell_matrix[i,j]*vector[j]
-        end
-    end
-    return
-end
-function scaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 <: Real , T2 <: Real }
-    if LinearAlgebra.det(cell_matrix) == 0
-        print("MATRIX NOT INVERSIBLE!")
-        return 0
-    end
-    cell_mat_inverse=LinearAlgebra.inv(cell_matrix)
-    for i=1:3
-        for j=1:3
-            vector[i] += cell_mat_inverse[i,j]*vector[j]
-        end
-    end
-    return
-end
-function scaleVector( vector::Vector{T1}, cell_matrix::T2 ) where { T1 <: Real , T2 <: Cell_matrix }
-    return scaleVector(vector,cell_matrix.matrix)
-end
-function getScaleMatrix( target_matrix::Array{T1,2}, cell_matrix::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
-    inv_cell_matrix=LinearAlgebra.inv(cell_matrix)
-    size_matrix=size(target_matrix)[1]
-    scaled_matrix=copy(target_matrix)
-    for i=1:size_matrix
-        scaled_matrix[i,:]=getScaledVectorInv(scaled_matrix[i,:],inv_cell_matrix)
-    end
-    return scaled_matrix
-end
-function getScaleMatrix( target_matrix::Array{T1,2}, cell_matrix::T2 ) where { T1 <: Real, T2 <: Cell_matrix }
-    return getScaleMatrix(target_matrix,cell_matrix.matrix)
-end
-function deScaleVector( vector::Vector{T1}, cell_matrix::Array{T2,2}  ) where { T1 <: Real , T2 <: Real }
-    vector2=zeros(3)
-    for i=1:3
-        for j=1:3
-            vector2[i] += cell_matrix[i,j]*vector[j]
-        end
-    end
-    return
-end
-function deScaleVector( vector::Vector{T1}, cell_matrix::T2 ) where { T1 <: Real , T2 <: Cell_matrix }
-    return deScaleVector(vector,cell_matrix.matrix)
+function getScalePosition( target_matrix::Array{T1,2}, cell_matrix::T2 ) where { T1 <: Real, T2 <: Cell_matrix }
+    return getScalePosition(target_matrix,cell_matrix.matrix)
 end
 #-------------------------------------------------------------------------------
 
@@ -322,8 +288,8 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell::Vector{T3} ) where { T1
     return sqrt(dist)
 end
 function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
-    v1_scaled=getScaledVector(v1,cell_matrix)
-    v2_scaled=getScaledVector(v2,cell_matrix)
+    v1_scaled=getScaledPosition(v1,cell_matrix)
+    v2_scaled=getScaledPosition(v2,cell_matrix)
     ds=zeros(3)
     # Distance + Min Image Convention
     for i=1:3
@@ -331,12 +297,12 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2} ) wh
         ds[i] = ds[i] - round(ds[i])
     end
     # Descaling of distance vector
-    deScaleVector(ds,cell_matrix)
+    ds=getTransformedPosition(ds,cell_matrix)
     return sqrt(dot(ds,ds))
 end
 function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2}, inv_cell_matrix::Array{T4,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
-    v1_scaled=getDeScaleVectorInv(v1,inv_cell_matrix)
-    v2_scaled=getDeScaleVectorInv(v2,inv_cell_matrix)
+    v1_scaled=getTransformedPosition(v1,inv_cell_matrix)
+    v2_scaled=getTransformedPosition(v2,inv_cell_matrix)
     ds=zeros(3)
     # Distance + Min Image Convention
     for i=1:3
@@ -344,7 +310,7 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2}, inv
         ds[i] = ds[i] - round(ds[i])
     end
     # Descaling of distance vector
-    scaleVector(ds,cell_matrix)
+    ds=getTransformedPosition(ds,cell_matrix)
     return sqrt(dot(ds,ds))
 end
 function distanceScale( v1_scaled::Vector{T1}, v2_scaled::Vector{T2}, cell_matrix::Array{T3,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
@@ -355,7 +321,7 @@ function distanceScale( v1_scaled::Vector{T1}, v2_scaled::Vector{T2}, cell_matri
         ds[i] = ds[i] - round(ds[i])
     end
     # Descaling of distance vector
-    deScaleVector(ds,cell_matrix)
+    ds=getTransformedPosition(ds,cell_matrix)
     return sqrt(dot(ds,ds))
 end
 function distanceScale( v1_scaled::Vector{T1}, v2_scaled::Vector{T2}, cell_matrix::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Cell_matrix }
