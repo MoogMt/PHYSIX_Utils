@@ -219,8 +219,12 @@ end
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
-function invertCell( cell_matrix::Array{T1,2} ) where { T1 < : Real }
-    return LinearAlgebra.inv(cell_matrix)
+function invertCell( cell_matrix::Array{T1,2} ) where { T1 <: Real }
+    if det(cell_matrix) != 0
+        return LinearAlgebra.inv(cell_matrix)
+    else
+        return false
+    end
 end
 function getScaledVector( vector::Vector{T1}, cell_matrix::Array{T2,2} ) where { T1 <: Real , T2 <: Real }
     if LinearAlgebra.det(cell_matrix) == 0
@@ -334,6 +338,20 @@ function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::Array{T3,2}, inv
     # Descaling of distance vector
     scaleVector(ds,cell_matrix)
     return sqrt(dot(ds,ds))
+end
+function distanceScale( v1_scaled::Vector{T1}, v2_scaled::Vector{T2}, cell_matrix::Array{T3,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+    ds=zeros(3)
+    # Distance + Min Image Convention
+    for i=1:3
+        ds[i] = v1_scaled[i]-v2_scaled[i]
+        ds[i] = ds[i] - round(ds[i])
+    end
+    # Descaling of distance vector
+    scaleVector(ds,cell_matrix)
+    return sqrt(dot(ds,ds))
+end
+function distanceScale( v1_scaled::Vector{T1}, v2_scaled::Vector{T2}, cell_matrix::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Cell_matrix }
+    return distanceScale( v1_scaled, v2_scaled, cell_matrix )
 end
 function distance( v1::Vector{T1}, v2::Vector{T2}, cell_matrix::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Cell_matrix }
     return distance(v1,v2,cell_matrix.matrix)
