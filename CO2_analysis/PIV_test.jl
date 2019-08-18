@@ -162,3 +162,7 @@ for i=1:3
         distances_matrix[i,j]=parse(Float64,split(lines[i+1])[j])*max_distance
     end
 end
+
+d_PIV_I_II_plu   = 40.88
+d_PIV_I_III_plu  = 39.47
+d_PIV_II_III_plu = 23.77
