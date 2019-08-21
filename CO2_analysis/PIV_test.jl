@@ -10,8 +10,8 @@ using cube_mod
 using pdb
 
 # Folder for data
-#folder_base="/home/moogmt/CO2_Classic/PIV_test/"
-folder_base="/home/moogmt/Data/PIV_test/"
+folder_base="/home/moogmt/CO2_Classic/PIV_test/"
+#folder_base="/home/moogmt/Data/PIV_test/"
 
 phaseI,   cell_I   = pdb.readStep(string(folder_base,"I.pdb"))
 phaseII,  cell_II  = pdb.readStep(string(folder_base,"II.pdb"))
@@ -48,9 +48,9 @@ for oxygen1=1:nb_atoms
     if phaseI.atom_names[oxygen1] == "O"
         for oxygen2=oxygen1+1:nb_atoms
             if phaseI.atom_names[oxygen2] == "O"
-                piv_I[count_]    = utils.switchingFunction( cell_mod.distanceScale( positions_I_scaled[oxygen1,:],   positions_I_scaled[oxygen2,:],   cell_I_matrix   ), d0, n )
-                piv_II[count_]   = utils.switchingFunction( cell_mod.distanceScale( positions_II_scaled[oxygen1,:],  positions_II_scaled[oxygen2,:],  cell_II_matrix  ), d0, n )
-                piv_III[count_]  = utils.switchingFunction( cell_mod.distanceScale( positions_III_scaled[oxygen1,:], positions_III_scaled[oxygen2,:], cell_III_matrix ), d0, n )
+                piv_I[count_]    = utils.switchingFunction( (Vol_I*0.001/28)^(0.33333)*cell_mod.distanceScale( positions_I_scaled[oxygen1,:],   positions_I_scaled[oxygen2,:],   cell_I_matrix   ), d0, n )
+                piv_II[count_]   = utils.switchingFunction( (Vol_I*0.001/28)^(0.33333)*cell_mod.distanceScale( positions_II_scaled[oxygen1,:],  positions_II_scaled[oxygen2,:],  cell_II_matrix  ), d0, n )
+                piv_III[count_]  = utils.switchingFunction( (Vol_I*0.001/28)^(0.33333)*cell_mod.distanceScale( positions_III_scaled[oxygen1,:], positions_III_scaled[oxygen2,:], cell_III_matrix ), d0, n )
                 global count_ = count_ + 1
             end
         end
