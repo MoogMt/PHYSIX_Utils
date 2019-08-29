@@ -25,7 +25,7 @@ nb_atoms=size(traj[1].names)[1]
 
 start_point=5000
 
-nb_train=4000
+nb_train=1000
 nb_test=500
 
 test_matrix=zeros(nb_test,nb_train)
@@ -36,7 +36,7 @@ train_piv=zeros(nb_piv_element,nb_train)
 test_piv=zeros(nb_piv_element,nb_test)
 
 d0=1.8
-n=5
+n=6
 
 nbC=32
 nbO=64
@@ -204,12 +204,15 @@ for i=1:nb_test
         sum_sig += sig
         energy_prediction[i] += sig*energy_train[j]
     end
-    energy_prediction[i] /= sum_sig
+    energy_prediction[i] = energy_prediction[i]/sum_sig
 end
 
 # Checking results
-file_out=open(string(folder_base,"test_ff-",nb_train,"-",nb_test,".dat"),"w")
+err=0
+file_out=open(string(folder_base,"test_ff-",nb_train,"-",nb_test,"-",param,".dat"),"w")
 for i=1:nb_test
     Base.write(file_out,string(i," ",energy_prediction[i]," ",energy_test[i],"\n"))
+    global err += (energy_prediction[i]-energy_test[i])*(energy_prediction[i]-energy_test[i])
 end
 close(file_out)
+print("erreur: ",err/nb_test,"\n")
