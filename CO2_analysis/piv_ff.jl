@@ -23,10 +23,10 @@ cell = cell_mod.Cell_param( V, V, V )
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
 
-start_point=5000
+start_point=2000
 
-nb_train=1000
-nb_test=500
+nb_train=8000
+nb_test=1000
 
 test_matrix=zeros(nb_test,nb_train)
 
@@ -35,8 +35,8 @@ nb_piv_element=Int(nb_atoms*(nb_atoms-1)/2)
 train_piv=zeros(nb_piv_element,nb_train)
 test_piv=zeros(nb_piv_element,nb_test)
 
-d0=1.8
-n=6
+d0=1.75
+n=5
 
 nbC=32
 nbO=64
@@ -144,9 +144,9 @@ for i=1:nb_test
     for j=1:nb_train
         dist=0
         for k=1:nb_piv_element
-            dist += (test_piv[k,i]-train_piv[k,j])*(test_piv[k,i]-train_piv[k,j])
+             @inbounds dist += (test_piv[k,i]-train_piv[k,j])*(test_piv[k,i]-train_piv[k,j])
         end
-        test_matrix[i,j]=sqrt(dist)
+         @inbounds test_matrix[i,j]=sqrt(dist)
     end
 end
 
@@ -207,12 +207,27 @@ for i=1:nb_test
     energy_prediction[i] = energy_prediction[i]/sum_sig
 end
 
+using conversion
+
+avg_test=0
+var_test=0
+min_test=0
+for i=1:nb_test
+    if min_test > energy_test[i]
+        global min_test=energy_test[i]
+    end
+    global avg_test += energy_test[i]
+    global var_test += energy_test[i]*energy_test[i]
+end
+avg_test /= nb_test
+var_test = sqrt(var_test/nb_test - avg_test*avg_test)
+
 # Checking results
 err=0
 file_out=open(string(folder_base,"test_ff-",nb_train,"-",nb_test,"-",param,".dat"),"w")
 for i=1:nb_test
-    Base.write(file_out,string(i," ",energy_prediction[i]," ",energy_test[i],"\n"))
-    global err += (energy_prediction[i]-energy_test[i])*(energy_prediction[i]-energy_test[i])
+    Base.write(file_out,string(i," ",(energy_prediction[i]-avg_test)*13.605693009/nbC," ",(energy_test[i]-avg_test)*13.605693009/nbC,"\n"))
+    global err += (energy_prediction[i]*13.605693009/nbC-energy_test[i]*13.605693009/nbC)*(energy_prediction[i]*13.605693009/nbC-energy_test[i]*13.605693009/nbC)
 end
 close(file_out)
-print("erreur: ",err/nb_test,"\n")
+print("erreur: ",err/nb_test*1000,"\n")
