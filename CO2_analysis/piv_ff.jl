@@ -25,11 +25,10 @@ nb_atoms=size(traj[1].names)[1]
 
 start_point=2000
 
-nb_train=8000
-nb_test=1000
+nb_train=12000
+nb_test=500
 
 test_matrix=zeros(nb_test,nb_train)
-
 nb_piv_element=Int(nb_atoms*(nb_atoms-1)/2)
 
 train_piv=zeros(nb_piv_element,nb_train)
@@ -152,7 +151,7 @@ end
 
 file_test=open(string(folder_base,"test_matrix-",nb_test,".dat"),"w")
 for i=1:nb_test
-    for j=1:nb_test
+    for j=1:nb_train
         Base.write(file_test,string(test_matrix[i,j]," "))
     end
     Base.write(file_test,"\n")
@@ -189,13 +188,13 @@ for i=1:nb_test
 end
 close(file_in)
 
-energy_prediction=zeros(nb_test)
 
 function sigfunction( distance::T1, param::T2 ) where {T1 <: Real, T2 <: Int }
     a=distance^param
     return 1/a
 end
 
+energy_prediction=zeros(nb_test)
 param=3
 for i=1:nb_test
     sum_sig=0
@@ -226,8 +225,19 @@ var_test = sqrt(var_test/nb_test - avg_test*avg_test)
 err=0
 file_out=open(string(folder_base,"test_ff-",nb_train,"-",nb_test,"-",param,".dat"),"w")
 for i=1:nb_test
-    Base.write(file_out,string(i," ",(energy_prediction[i]-avg_test)*13.605693009/nbC," ",(energy_test[i]-avg_test)*13.605693009/nbC,"\n"))
-    global err += (energy_prediction[i]*13.605693009/nbC-energy_test[i]*13.605693009/nbC)*(energy_prediction[i]*13.605693009/nbC-energy_test[i]*13.605693009/nbC)
+    Base.write(file_out,string(i," ",energy_prediction[i]," ",energy_test[i],"\n"))
 end
 close(file_out)
 print("erreur: ",err/nb_test*1000,"\n")
+cd
+
+file_out=open(string(folder_base,"energy_test_ff-",nb_train,"-",nb_test,"-",param,".dat"),"w")
+for i=1:nb_test
+    Base.write(file_out,string(i," ",energy_test[i],"\n"))
+end
+close(file_out)
+file_out=open(string(folder_base,"energy_train_ff-",nb_train,"-",nb_test,"-",param,".dat"),"w")
+for i=1:nb_train
+    Base.write(file_out,string(i," ",energy_train[i],"\n"))
+end
+close(file_out)

@@ -10,8 +10,8 @@ using markov
 using conversion
 
 # Folder for data
-#folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
+#folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # Number of atoms
 nbC=32
@@ -50,6 +50,8 @@ nb_types=size(types)[1]
 states, state_matrix, count_ = assignDataToStates( data, nb_types, type_atoms )
 writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
 writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
+
+
 
 percent_ = count_[1]/sum(count_[1])*100
 
