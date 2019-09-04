@@ -58,10 +58,6 @@ for tau=1:100
     transition_CO2=zeros(2,2)
     transition_CO2[1,1] = transitions_matrix[1][1,1,tau]
     transition_CO2[1,2] = 1 - transition_CO2[1,1]
-    t_2=0
-    for i=1:1000
-        t_2 += i*transitions_matrix[1][1,1,tau]^i
-    end
     Base.write(file_out,string(tau*d_lag*unit," ",1/(1-transition_CO2[1,1])," ",t_2*tau,"\n"))
 end
 close(file_out)
