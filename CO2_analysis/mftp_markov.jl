@@ -21,14 +21,14 @@ cut_off_bond = 1.75
 max_neigh=5
 
 min_lag=1
-max_lag=5001
-d_lag=5
+max_lag=50001
+d_lag=2
 unit=0.005
 
-Volumes=[8.6]
+Volumes=[8.82]
 
-for V in Volumes
-    T=2500
+V=8.82
+T=3000
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC_wrapped.xyz")
@@ -48,19 +48,13 @@ transitions_matrix=[transitionMatrix(states[1],state_matrix[1],nb_types,type_ato
 transitions_matrix_CK=[chappmanKormologov( transitions_matrix[1])]
 
 nb_states=size(states)[1]
-
+nb_tau=size(transitions_matrix[1])[3]
 # Lifetime of CO2:
 # - Reduce the transition matrix to CO2 and others
 # - Compute MFTP from CO2 to others -> lifetime of CO2
 # - Repeat for various tau to determine whether this change significantly
 file_out=open(string(folder_out,"lifetime_markov.dat"),"w")
-for tau=1:100
-    transition_CO2=zeros(2,2)
-    transition_CO2[1,1] = transitions_matrix[1][1,1,tau]
-    transition_CO2[1,2] = 1 - transition_CO2[1,1]
-    Base.write(file_out,string(tau*d_lag*unit," ",1/(1-transition_CO2[1,1])," ",t_2*tau,"\n"))
+for tau=1:nb_tau
+    Base.write(file_out,string(tau*unit*d_lag," ",1/(1-transitions_matrix[1][1,1,tau]),"\n"))
 end
 close(file_out)
-
-
-end

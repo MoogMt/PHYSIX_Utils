@@ -25,8 +25,8 @@ nb_atoms=size(traj[1].names)[1]
 
 start_point=2000
 
-nb_train=12000
-nb_test=500
+nb_train=3000
+nb_test=3000
 
 test_matrix=zeros(nb_test,nb_train)
 nb_piv_element=Int(nb_atoms*(nb_atoms-1)/2)

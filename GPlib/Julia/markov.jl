@@ -248,6 +248,38 @@ function isolateSignificantStates( old_states::Array{T1,2}, percent_states::Vect
     end
     return states_kept, types_states_kept
 end
+function transitionMatrix( states::Array{T1,2}, state_matrix::Vector{T2}, nb_type::T4, type_series::Vector{T5}, min_lag::T6, max_lag::T7, d_lag::T8) where { T1 <: Int, T2 <: Real, T4 <: Real, T5 <: Real, T6 <: Real, T7 <: Int, T8 <: Int }
+
+    nb_states=size(states)[1]
+    nb_steps=size(state_matrix)[1]
+    nb_lag_points=Int(trunc((max_lag-min_lag)/d_lag))
+
+    state_transition_matrix=zeros( nb_states, nb_states, nb_lag_points )
+    count_lag=1
+    for lag=min_lag:d_lag:max_lag-1
+        print("Computing Transition Matrix - Progress: ",lag/max_lag*100,"%\n")
+        for j=lag+1:nb_steps
+            if state_matrix[j-lag] == 0 || state_matrix[j] == 0
+                continue
+            end
+            state_transition_matrix[ state_matrix[j-lag], state_matrix[j], count_lag ] += 1
+        end
+        count_lag += 1
+    end
+
+    # Normalization
+    for lag=1:nb_lag_points
+        print("Normalizing Transition Matrix: ",lag/nb_lag_points*100,"%\n")
+        for i=1:nb_states
+            sum_transition=sum( state_transition_matrix[i,:,lag] )
+            if sum_transition != 0
+                state_transition_matrix[i,:,lag] /= sum_transition
+            end
+        end
+    end
+
+    return state_transition_matrix
+end
 function transitionMatrix( states::Array{T1,2}, state_matrix::Array{T2,2}, nb_type::T4, type_series::Vector{T5}, min_lag::T6, max_lag::T7, d_lag::T8) where { T1 <: Int, T2 <: Real, T4 <: Real, T5 <: Real, T6 <: Real, T7 <: Int, T8 <: Int }
 
     nb_states=size(states)[1]

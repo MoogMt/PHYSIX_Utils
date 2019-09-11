@@ -10,6 +10,8 @@ using markov
 using conversion
 
 # Folder for data
+
+
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 #folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
@@ -21,8 +23,8 @@ cut_off_bond = 1.75
 max_neigh=5
 
 min_lag=1
-max_lag=5001
-d_lag=5
+max_lag=1001
+d_lag=2
 unit=0.005
 
 # for V in Volume
@@ -48,8 +50,8 @@ data,types,type_atoms=buildCoordinationMatrix( traj , cell , cut_off_bond, max_n
 nb_types=size(types)[1]
 
 states, state_matrix, count_ = assignDataToStates( data, nb_types, type_atoms )
-writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
-writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
+#writeStates(string(folder_out,"markov_initial_states.dat"),states,percent,types,type_states)
+#writeStateMatrix( string(folder_out,"initial_state_matrix.dat"), state_matrix )
 
 
 
@@ -79,17 +81,31 @@ transitions_matrix=[transitionMatrix(states[1],state_matrix[1],nb_types,type_ato
 transitions_matrix_CK=[chappmanKormologov( transitions_matrix[1])]
 
 file_out=open(string(folder_out,"transition_saved.dat"),"w")
+file_out_CK=open(string(folder_out,"transition_saved_ck.dat"),"w")
+nb_states=size(transitions_matrix[1])[1]
+nb_time=size(transitions_matrix[1])[3]
+for tau=1:nb_time
+    write(file_out,string(tau*unit*d_lag," "))
+    write(file_out_CK,string(tau*2*unit*d_lag," "))
 for i=1:size(transitions_matrix[1])[1]
-    if check[i] > 0
+    #if check[i] > 0
         for j=1:size(transitions_matrix[1])[2]
-            if check[j] > 0
-                write(file_out,string(transitions_matrix[1][i,j,10]*100," "))
-            end
+            #if check[j] > 0
+                write(file_out,string(transitions_matrix[1][i,j,tau]," "))
+                if tau < nb_time/2
+                    write(file_out_CK,string(transitions_matrix_CK[1][i,j,tau]," "))
+                end
+            #end
         end
-        write(file_out,string("\n"))
-    end
+
+    #end
+end
+write(file_out,string("\n"))
+write(file_out_CK,string("\n"))
 end
 close(file_out)
+close(file_out_CK)
+
 
 stateO=[3,3,0,0,0,0,0,0,0,0]
 stateC=[0,0,0,0,0,2,2,0,0,0]
