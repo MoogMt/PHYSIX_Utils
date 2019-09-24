@@ -318,7 +318,7 @@ end
 function chappmanKormologov( transition_matrix::Array{T1,3} ) where { T1 <: Real }
     nb_states   = size(transition_matrix)[1]
     nb_lag_time = size(transition_matrix)[3]
-    nb_lag_compare = Int(trunc(nb_lag_time/2))
+    nb_lag_compare = Int(trunc(nb_lag_time))
     transition_matrix_kolmo= zeros(nb_states,nb_states,nb_lag_compare)
     for lag=1:nb_lag_compare
         print("Chappman Kolmogorov Test - ",lag/nb_lag_compare*100,"%\n")
