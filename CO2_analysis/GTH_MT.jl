@@ -12,7 +12,6 @@ using statistics
 using Statistics
 using Bootstrap
 
-
 folder_base=string("/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-Godecker/8.82/3000K/")
 
 file_in=open(string(folder_base,"presure_time.dat"))
@@ -43,7 +42,7 @@ pressure_boot=zeros(nb_boot)
 for i=1:nb_boot
     pressure=0
     for j=1:nb_point
-        pressure += pressure_gth[ Int(trunc(rand()*nb_point+1)) ] # Conversion kBar to GPa
+        pressure += pressure_gth[ Int(trunc(rand()*nb_point+1)) ]
     end
     pressure_boot[i] = pressure/nb_point
     global pressure_avg += pressure_boot[i]
@@ -68,7 +67,7 @@ end
 close(file_out)
 
 n_boot = 2000
-
+avg, std_err = statistics.bootStrap( pressure_gth, n_boot)
 
 #===================================#.
 
@@ -91,7 +90,7 @@ avg_p_mt /= nb_point
 print("average pressure: ",avg_p_mt)
 n_boot = 2000
 
-bs1 = bootstrap(Statistics.mean, pressure_mt, BalancedSampling(n_boot))
+bs1 = bootstrap(Statistics.mean, pressure_gth, BalancedSampling(n_boot))
 cil = 0.95;
 bci1 = confint(bs1, BasicConfInt(cil));
 bci2 = confint(bs1, PercentileConfInt(cil));

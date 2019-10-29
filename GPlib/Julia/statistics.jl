@@ -1,6 +1,7 @@
 module statistics
 
 using Statistics
+using Bootstrap
 
 function simpleMoment( data::Vector{T1}, n::T2) where {T1 <: Real, T2 <: Int}
     moment=0
@@ -43,8 +44,8 @@ function blockAverage( data::Vector{T1}, min_block_size::T2, max_block_size::T3,
 end
 
 function bootStrap( data::Vector{T1}, n_boot::T2) where { T1 <: Real, T2 <: Int }
-    bs1 = bootstrap(Statistics.mean, pressure_gth, BalancedSampling(n_boot))
-    return bs1.t0[1], stderror(bs1)
+    bs1 = bootstrap(Statistics.mean, data, Bootstrap.BalancedSampling(n_boot))
+    return bs1.t0[1], stderror(bs1)[1]
 end
 
 end
