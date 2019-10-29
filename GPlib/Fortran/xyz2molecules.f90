@@ -37,7 +37,7 @@ styp(1)="H"
 styp(2)="C"
 styp(3)="O"
 styp(4)="N"
-!!!!!!!!!!!!!!!!! PARSE 
+!!!!!!!!!!!!!!!!! PARSE
 open(30,file=filename,status="old")
 do
   read(30,'(a200)',end=333) line
@@ -51,12 +51,12 @@ do
       allocate(x(n,3),a(n,n),typ(n),used(n),try(n),nextry(n))
     endif
     write (*,'(A,I6,4X,$)') "STEP ",step
-  endif 
+  endif
   if (l.gt.2) then
     i=i+1
 !    write (*,*) "i ",i
     read(line,*) symb,x(i,1:3)
-    if     (symb.eq.'H') then 
+    if     (symb.eq.'H') then
       typ(i)=1
     elseif (symb.eq.'C') then
       typ(i)=2
@@ -72,7 +72,7 @@ do
       !!!!!!!!!!!!!!!! ANALYSIS
       ! build adjacency matrix
       a(:,:)=0
-      do j=1,n-1 
+      do j=1,n-1
         do k=j+1,n
           dd=0.D0
           do h=1,3
@@ -80,7 +80,7 @@ do
             if (dx> box(h)*0.5) dx=dx-box(h)
             if (dx<-box(h)*0.5) dx=dx+box(h)
             dd=dd+dx*dx
-          enddo  
+          enddo
           if (dd.le.cutoff2(typ(j),typ(k))) then
             a(j,k)=1
             a(k,j)=1
@@ -93,7 +93,7 @@ do
       ! find molecules
       ntotmol=0
       used(:)=0
-      do j=1,n 
+      do j=1,n
         if (used(j).eq.1) cycle
         ! start new molecule
         histotyp(:)=0
@@ -110,7 +110,7 @@ do
               if ((used(h).eq.0).and.(a(k,h).eq.1)) nextry(h)=1
             enddo
           enddo
-          try(:)=nextry(:)  
+          try(:)=nextry(:)
           if (sum(try(:)).eq.0) exit
         enddo
         ! store molecule
@@ -119,7 +119,7 @@ do
           if (sum((histotyp(:)-mol(h,:))**2).eq.0) then
             newmol=.false.
             nmol(h)=nmol(h)+1
-          endif 
+          endif
         enddo
         if (newmol) then
           ntotmol=ntotmol+1
