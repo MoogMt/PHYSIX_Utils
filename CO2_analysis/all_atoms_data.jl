@@ -1,10 +1,8 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
-# Counts the percent of C with at least three O neighbors
-# For all Temperatures and Volumes
-# Needs wrapped trajectory files with thermalization
-# steps removed
+# Computes the distances of the four nearest oxygen atoms to carbon atoms,
+# Along with their angles
 
 # Loading necessary stuff
 using atom_mod
@@ -53,17 +51,23 @@ for V in volumes
         # Loop over steps
         for step=1:nb_steps
             print("Progres: ",step/nb_steps*100,"%\n")
+            # Loop over carbons
             for carbon=1:nbC
+                # Keep distances of oxygen to carbon
                 distances = zeros(nbO)
                 for oxygen=1:nbO
                     distances[oxygen] = cell_mod.distance(traj[step],cell,carbon,oxygen+nbC)
                 end
+                # get the index of the oxygen sorted by distances
                 index=sortperm(distances)
-                sort!(distances)
+
+                # write distances to file
                 write(fileC, string(step*unit," ") )
                 for i=1:max_neigh
-                    write(fileC, string(distances[i]," ") )
+                    write(fileC, string(distances[index[i]]," ") )
                 end
+
+                # Computes and write the angles between the N nearest oxygen
                 for i=1:max_neigh-1
                     for j=i+1:max_neigh
                         a=cell_mod.distance(traj[step],cell,carbon,Int(index[i]+nbC))
@@ -72,6 +76,7 @@ for V in volumes
                         write(fileC,string(acosd((a*a+b*b-c*c)/(2*a*b))," "))
                     end
                 end
+
                 write(fileC,string("\n"))
             end
         end
