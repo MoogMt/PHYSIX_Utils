@@ -7,4 +7,6 @@
 
 *analyzeEnergy.jl*: Extract and write information from CPMD energy file
 
+*avg_time.jl*: counting the occurence of non-CO2 structures
+
 
