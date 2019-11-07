@@ -1,7 +1,7 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
-# Extract and write information from CPMD energy file
+# Occurence of CO2 units and
 
 using atom_mod
 using cell_mod
@@ -73,7 +73,7 @@ for cut_off in Cut_Off
             states, state_matrices, counts = assignDataToStates( data, nb_types, type_atoms )
 
             # State CO2
-            state_CO2=
+            state_dim=1
 
             # Counting occurences
             occurences_nb=[]
@@ -86,11 +86,11 @@ for cut_off in Cut_Off
                     occurence=0
                     for step=step_start:step_start+delta
                         # IF carbon is not a CO2
-                        if state_matrices[1][carbon,step] != state_CO2
+                        if state_matrices[1][carbon,step] == state_dim
                             occurence += 1
                             # Looking up next valid step
                             for next=step+1:step_start+delta
-                                if state_matrices[1][carbon,next] == 1
+                                if state_matrices[1][carbon,next] != state_dim
                                     step = next-1 # it will get incremeted at end of loop
                                 end
                             end
