@@ -7,6 +7,8 @@
 
 *analyzeEnergy.jl*: Extract and write information from CPMD energy file
 
-*avg_time.jl*: counting occurence of dimers and checking if events follow a poisson rule
+*avg_time.jl*: counting occurence of dimers and checking if events follow a poisson distribution
+
+
 
 
