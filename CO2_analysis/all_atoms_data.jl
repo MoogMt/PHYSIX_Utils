@@ -12,21 +12,26 @@ using clustering
 using contact_matrix
 using filexyz
 
+# Sim parameters to analyze
 volumes=[8.82]
 temperatures=[3000]
 
+# Max number of neighbors
 max_neigh=4
 
+# Time stuff
 ps2fs=0.001
 timestep=0.5
 stride = 1
 unit=ps2fs*timestep*stride
 
+# Number of atoms (and of each types)
 nbC=32
 nbO=64
 nb_atoms=nbC+nbO
 
 folder_base=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/")
+folder_base=string("/home/moogmt/Data/CO2/CO2_AIMD/")
 
 for V in volumes
     for T in temperatures
@@ -39,8 +44,8 @@ for V in volumes
         end
 
         # Reading trajectory
-        traj = filexyz.read(file,stride,start_step)
-        cell=cell_mod.Cell_param(V,V,V)
+        traj = filexyz.readFastFile(file)
+        cell = cell_mod.Cell_param(V,V,V)
 
         nb_steps=size(traj)[1]
 
