@@ -1,7 +1,7 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
-# Occurence of CO2 units and testing whether it is poisson or not
+# Counts the number of bonds (and averages over time windows)
 
 using atom_mod
 using cell_mod
