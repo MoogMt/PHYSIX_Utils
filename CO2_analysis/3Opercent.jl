@@ -54,19 +54,19 @@ for cutoff in cut_off
             cell  = cell_mod.Cell_param( V, V, V )
 
             # Nb of steps
-            nb_steps=size(atoms)[1]
+            nb_steps=size(traj)[1]
 
             # Open file
             file_out=open(string(folder,"3CO_count_",V,"_",T,"_",cutoff,".dat"),"w")
             # Loop over step
             for step=1:nb_steps
-                print("progress:",step/nb_steps*100,"%\n")
+                print("progress: ",step/nb_steps*100,"%\n")
                 count = 0
                 for carbon=1:nbC
                     # Compute all distances of target carbon
                     distances=zeros(nb_atoms-nbC)
                     for oxygen=nbC+1:nb_atoms
-                        distances[oxygen-nbC]=cell_mod.distance(atoms[step],cell,carbon,oxygen)
+                        distances[oxygen-nbC]=cell_mod.distance(traj[step],cell,carbon,oxygen)
                     end
                     # Sort distances
                     sort!(distances)
