@@ -4,19 +4,74 @@ contains
 ! ------------------------------------------------------------------------------
 ! Read and write XYZ files
 ! ------------------------------------------------------------------------------
+
+subroutine getnbatoms( file_path , str_len, nb_atoms )
+
+  implicit none
+
+  integer, intent(in) :: str_len
+  character(len=str_len), intent(in) :: file_path
+
+  integer, intent(out) :: nb_atoms
+
+  open(25,file=file_path,status="old")
+  read(25,*) nb_atoms
+  close(25)
+
+end subroutine getnbatoms
+
+subroutine getnbatomssteps( file_path, str_len, nb_atoms, nb_steps )
+
+  implicit none
+
+  integer, intent(in) :: str_len
+  character(len=str_len), intent(in) :: file_path
+
+  integer :: err
+
+  integer, intent(out) :: nb_steps
+  integer, intent(out) :: nb_atoms
+  integer :: sel
+
+  sel=1
+  nb_atoms=1
+  nb_steps=0
+
+  open(25,file=file_path,status="old",iostat=err)
+  read(25,*) nb_atoms ! Getting nb of atoms
+  rewind(25)
+  do while ( err == 0 )
+    if ( sel == 1  ) then
+      nb_steps = nb_steps + 1
+    elseif ( sel == nb_atoms + 2 ) then
+       sel = 0
+    endif
+    read(25,*,iostat=err)
+    sel=sel+1
+  enddo
+  close(25)
+
+  nb_steps=nb_steps-1
+
+  write(*,*) nb_atoms, nb_steps
+
+end subroutine getnbatomssteps
+
 subroutine readxyztraj( file_path, str_len, n_steps, n_atoms, traj )
 
   implicit none
 
-  integer,intent(in)::str_len
-  character(len=str_len),intent(in):: file_path
-  integer,intent(in):: n_steps
-  integer,intent(in):: n_atoms
+  integer,intent(in):: str_len
+  character(len=str_len), intent(in):: file_path
 
   integer:: atom, step
+
+  integer, intent(out) :: n_steps, n_atoms
   character(len=4) :: dummy_name
 
   double precision, dimension(:,:,:),allocatable,intent(out):: traj
+
+  call getnbatomssteps(file_path,str_len,n_atoms,n_steps)
 
   allocate( traj(n_steps, n_atoms, 3) )
 

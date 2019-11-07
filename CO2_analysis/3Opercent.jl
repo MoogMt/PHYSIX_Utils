@@ -1,66 +1,83 @@
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
 
-function sortmatrix( x )
-    sizex=size(x)[1]
-    for i=1:sizex
-        for j=i:sizex
-            if x[i] > x[j]
-                stock=x[i]
-                x[i]=x[j]
-                x[j]=stock
-            end
-        end
-    end
-    return x
-end
+# Counts the percent of C with at least three O neighbors
+# For all Temperatures and Volumes
+# Needs wrapped trajectory files with thermalization
+# steps removed
 
-temperature=[2000,2250,2500,3000]
-volume=[8.82,9.0,9.05,9.1,9.2,9.3,9.8]
+# Loading necessary stuff
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using contact_matrix
+using filexyz
 
-cut_off=[1.6,1.7,1.8]
+# Target simulations parameters
+Volume=[8.82]
+Temperature=[2000]
+# Analysis parameter
+cut_off=[1.75]
 
-stride_sim=5
-fs2ps=0.001
-time_sim=1 # in fs
-unit=time_sim*fs2ps*stride_sim# in ps
-stride_analysis=1
-start_time=0
+# Time units
+fs2ps=0.001  # conversion from fs to ps
+stride_sim=5 # stride of the units
+time_sim=1   # time step of the simulation
+unit=time_sim*fs2ps*stride_sim # actual length of analysis of simulation
 
+# Folder stuff
+folder_base=string("/home/moogmt/Data/CO2/CO2_AIMD/")
+
+nbC=32
+nbO=64
+nb_atoms=nbC+nbO
+
+# Loop over all cut-off to test
 for cutoff in cut_off
-    for T in temperature
-        for V in volume
+    # Loop over all temperature
+    for T in Temperature
+        # Loop over all volumes
+        for V in Volume
 
-            folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
-            file_in=string(folder,"TRAJEC_wrapped.xyz")
+            # Determining file path
+            folder=string(folder_base,V,"/",T,"K/")
+            file_target=string(folder,"TRAJEC_wrapped.xyz")
 
-            start_step=Int(start_time/(unit*stride_sim))
-
-            if ! isfile( file_in )
+            # Checking if file exists
+            if ! isfile( file_target )
                 break
             end
 
-            atoms = filexyz.read( file_in, stride_analysis, start_step )
+            # Reading trajectory
+            traj = filexyz.readFastFile(file_target)
             cell  = cell_mod.Cell_param( V, V, V )
 
+            # Nb of steps
             nb_steps=size(atoms)[1]
-            nb_atoms=size(atoms[1].names)[1]
 
-            out=open(string(folder,"3CO_count_",V,"_",T,"_",cutoff,".dat"),"w")
+            # Open file
+            file_out=open(string(folder,"3CO_count_",V,"_",T,"_",cutoff,".dat"),"w")
+            # Loop over step
             for step=1:nb_steps
                 print("progress:",step/nb_steps*100,"%\n")
                 count = 0
-                for carbon=1:32
-                    distances=zeros(nb_atoms-32)
-                    for oxygen=33:nb_atoms
-                        distances[oxygen-32]=cell_mod.distance(atoms[step],cell,carbon,oxygen)
+                for carbon=1:nbC
+                    # Compute all distances of target carbon
+                    distances=zeros(nb_atoms-nbC)
+                    for oxygen=nbC+1:nb_atoms
+                        distances[oxygen-nbC]=cell_mod.distance(atoms[step],cell,carbon,oxygen)
                     end
-                    if sortmatrix(distances)[3] < cutoff
+                    # Sort distances
+                    sort!(distances)
+                    # If the third neighbor is bonded, all atoms are bonded
+                    if distances[3] < cutoff
                         count+=1
                     end
                 end
-                write(out,string(step*unit," ",count/32,"\n"))
+                write(file_out,string(step*unit," ",count/nbC*100,"\n"))
             end
-            close(out)
+            close(file_out)
 
         end
     end
