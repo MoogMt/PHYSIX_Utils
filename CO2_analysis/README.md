@@ -15,6 +15,8 @@
 
 *cluster_markov.jl*: Density Peak Clustering on distances between carbon and their N-first nearest neighbors
 
+*vdos_compute.jl*: Compute the VDOS out of an XYZ trajectory
+
 *xyz2pdb.jl*: Transforms an xyz file to a pdb trajectory
 
 

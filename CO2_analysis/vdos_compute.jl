@@ -1,7 +1,7 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
-# Converting xyz trajectory to pdb trajectory
+# Compute VDOS of a trajectory
 
 using atom_mod
 using cell_mod
@@ -17,14 +17,15 @@ folder_base="/home/moogmt/CO2/CO2_AIMD/"
 
 # Number of atoms
 nbC=32
-nbO=nbC*2
+nbO=64
+nb_atoms=nbC+nbO
 
 T=3000
 V=9.8
 
-time_step=1.0
-stride_step=5
-dt=time_step*stride_step
+time_step=0.001
+unit_sim=0.5
+dt=time_step*stride_step*unit_sim
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC.xyz")
@@ -35,7 +36,6 @@ traj=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
 nb_step=size(traj)[1]
-nb_atoms=size(traj[1].names)[1]
 
 nb_step_velo=nb_step-1
 
@@ -49,6 +49,7 @@ for step=1:nb_step-1
     end
 end
 
+# Scalar product des vitesses
 velo_scal=zeros(nb_step_velo,nb_atoms)
 for atom=1:nb_atoms
     for step=1:nb_step_velo
