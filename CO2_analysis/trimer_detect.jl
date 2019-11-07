@@ -1,5 +1,14 @@
-# Loading file
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
+
+# Detect and compute the number of occurences of trimers in simulations
+
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using filexyz
+using pdb
 
 function sortIndex( indexes, x )
     sizex=size(x)[1]

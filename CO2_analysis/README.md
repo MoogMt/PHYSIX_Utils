@@ -17,6 +17,8 @@
 
 *vdos_compute.jl*: Compute the VDOS out of an XYZ trajectory
 
+*trimer_detect.jl*: Compute the number of occurences of trimers in the simulations
+
 *xyz2pdb.jl*: Transforms an xyz file to a pdb trajectory
 
 
