@@ -5,6 +5,6 @@
 
 *all_atoms_data.jl*: computes the distances of the N first nearest oxygen to carbon atoms, along with the angles between them
 
-*analyzeEnergy.jl*:
+*analyzeEnergy.jl*: Extract and write information from CPMD energy file
 
 

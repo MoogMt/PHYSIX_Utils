@@ -1,4 +1,4 @@
-module CPMD
+module cpmd
 
 export readEnergy, readPressure, readStress
 
