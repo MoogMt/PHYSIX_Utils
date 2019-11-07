@@ -72,6 +72,9 @@ for cut_off in Cut_Off
             # Building states
             states, state_matrices, counts = assignDataToStates( data, nb_types, type_atoms )
 
+            # State CO2
+            state_CO2=
+
             # Counting occurences
             occurences_nb=[]
             # Loop over steps
@@ -83,7 +86,7 @@ for cut_off in Cut_Off
                     occurence=0
                     for step=step_start:step_start+delta
                         # IF carbon is not a CO2
-                        if state_matrices[1][carbon,step] != 1
+                        if state_matrices[1][carbon,step] != state_CO2
                             occurence += 1
                             # Looking up next valid step
                             for next=step+1:step_start+delta
