@@ -36,8 +36,8 @@ folder_base=string("/home/moogmt/Data/CO2/CO2_AIMD/")
 for V in volumes
     for T in temperatures
 
-        folder=string(folder_base,V,"/",T,"K/")
-        file=string(folder,"TRAJEC_wrapped.xyz")
+        folder_in=string(folder_base,V,"/",T,"K/")
+        file=string(folder_in,"TRAJEC_wrapped.xyz")
 
         if ! isfile( string(file) )
             continue
@@ -50,7 +50,7 @@ for V in volumes
         nb_steps=size(traj)[1]
 
         # Folder for output data
-        folder_out=string(folder_base,"Data/")
+        folder_out=string(folder_in,"Data/")
 
         fileC=open(string(folder_out,"distanglesC-",V,"-",T,"K.dat"),"w")
         # Loop over steps
