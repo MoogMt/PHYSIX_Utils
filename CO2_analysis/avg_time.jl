@@ -1,7 +1,7 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
-# Occurence of CO2 units and
+# Occurence of CO2 units and testing whether it is poisson or not
 
 using atom_mod
 using cell_mod
@@ -9,8 +9,7 @@ using cube_mod
 using clustering
 using contact_matrix
 using cpmd
-
-include(string(GPfolder,"CO2_analysis/markovCO2.jl"))
+using markov
 
 func="PBE-MT"
 
@@ -32,7 +31,6 @@ Cut_Off=[1.75]
 nbC=32
 nbO=64
 nb_atoms=nbC+nbO
-
 
 # Loop over cut-off
 for cut_off in Cut_Off
