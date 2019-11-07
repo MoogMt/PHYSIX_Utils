@@ -9,6 +9,7 @@
 
 *avg_time.jl*: counting occurence of dimers and checking if events follow a poisson distribution
 
+*bound_counting*: counting the number of bonds in the simulation as a function of the time and average over time windows
 
 
 
