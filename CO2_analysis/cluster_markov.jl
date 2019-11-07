@@ -1,6 +1,8 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
+# Clustering DPC on the distances of O wrt to C
+
 using atom_mod
 using cell_mod
 using cube_mod

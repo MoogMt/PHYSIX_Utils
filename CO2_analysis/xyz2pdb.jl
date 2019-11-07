@@ -1,8 +1,14 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
 
-include(string(GPfolder,"contactmatrix.jl"))
-include(string(GPfolder,"xyz.jl"))
-include(string(GPfolder,"pdb.jl"))
+# Converting xyz trajectory to pdb trajectory
+
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using filexyz
+using pdb
 
 # Folder for data
 folder_base="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/"

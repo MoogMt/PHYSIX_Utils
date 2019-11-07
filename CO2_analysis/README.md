@@ -11,6 +11,12 @@
 
 *bound_counting*: counting the number of bonds in the simulation as a function of the time and average over time windows
 
+*CC_search.jl*: searching C-C bonds and associated distances, excluding C-O-C triangles
+
+*cluster_markov.jl*: Density Peak Clustering on distances between carbon and their N-first nearest neighbors
+
+*xyz2pdb.jl*: Transforms an xyz file to a pdb trajectory
+
 
 
 
