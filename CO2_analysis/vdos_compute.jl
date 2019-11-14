@@ -10,19 +10,7 @@ using clustering
 using filexyz
 using pdb
 using markov
-
-using FFTW
-
-x=range(0,stop=2*pi,step=0.001)
-y=sin.(x)
-z=dct(y)
-
-file_out=open(string("/home/moogmt/test.dat"),"w")
-for i=1:size(z)[1]
-    Base.write(file_out,string(i," ",z[i],"\n"))
-end
-close(file_out)
-
+using fftw
 
 function vdosFromPosition( file_traj, file_out, max_lag_step )
 
