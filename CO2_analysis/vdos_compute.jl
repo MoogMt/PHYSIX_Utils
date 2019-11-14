@@ -112,21 +112,27 @@ end
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-T=2000
-V=9.8
+Temperatures=[1750,2000,2500,3000]
+Volumes=[10,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.6]
 
 time_step=0.001
 stride_sim=5
 dt=time_step*stride_sim
 dx=0.1 #Angstrom to nm
 
-folder_in=string(folder_base,V,"/",T,"K/")
-file_in=string(folder_in,"TRAJEC.xyz")
+for V in Volumes
+    for T in Temperatures
 
-max_lag_frac=1.0
-to_nm=1
+        folder_in=string(folder_base,V,"/",T,"K/")
+        file_in=string(folder_in,"TRAJEC.xyz")
 
-folder_out=string(folder_in,"Data/")
-file_out=string(folder_out,"vdos-",max_lag_frac,".dat")
+        max_lag_frac=0.5
+        to_nm=1
 
-test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
+        folder_out=string(folder_in,"Data/")
+        file_out=string(folder_out,"vdos-",max_lag_frac,".dat")
+
+        test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
+
+    end
+end
