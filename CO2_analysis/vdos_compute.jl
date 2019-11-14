@@ -79,13 +79,21 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
     end
 
     max_lag=Int(trunc(nb_step*max_lag_frac))
+    print("max_lag:",max_lag,"\n")
 
     # Average correlation
-    autocorr_avg=zeros(max_lag)
-    for atom=1:nb_atoms
-        autocorr_avg += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
+    # autocorr_avg=zeros(max_lag)
+    # for atom=1:nb_atoms
+    #     autocorr_avg += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
+    # end
+    # autocorr_avg /= nb_atoms
+    autocorr_avg=correlation.autocorrNorm(velo_scal[:,1],max_lag)
+
+    file_o=open(string("/home/moogmt/test.dat"),"w")
+    for i=1:size(autocorr_avg)[1]
+        Base.write(file_o,string(i*dt," ",autocorr_avg[i],"\n"))
     end
-    autocorr_avg /= nb_atoms
+    close(file_o)
 
     # Fourrier Transform
     freq,vdos = fftw.doFourierTransformShift( autocorr_avg, dt )
@@ -118,7 +126,7 @@ file_in=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 file_out=string(folder_out,"vdos.dat")
 
-max_lag_frac=0.5
+max_lag_frac=0.4
 to_nm=0.1
 
-freq,vdos=vdosFromPosition( file_in, file_out , max_lag_frac, to_nm, dt)
+test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
