@@ -12,27 +12,95 @@ using pdb
 using markov
 using fftw
 
-function vdosFromPosition( file_traj, file_out, max_lag_step )
+function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 ) where { T1 <: AbstractString, T2 <: AbstractString, T3 <: Real, T4 <: Real, T5 <: Real }
 
+    # Reading Trajectory
     traj,cell,test=readFastFile(file_traj)
 
-    if ! sucess
-        return zeros(1,1), test
+    if ! test
+        return zeros(1,1), zeros(1,1), test
     end
 
+    # Computing velocities
+    velocity=cell_mod.velocityFromPosition(traj,dt,dx)
 
+    nb_atoms=size(velocity)[2]
+    nb_step=size(velocity)[1]
 
-    return vdos, success
+    # Compute scalar product
+    velo_scal=zeros(nb_step,nb_atoms)
+    for atom=1:nb_atom
+        for step=1:nb_step
+            for i=1:3
+                velo_scal[step,atom] += velocity[step,atom,i]*velocity[step,atom,i]
+            end
+        end
+    end
+
+    max_lag=Int(trunc(nb_step*max_lag_frac))
+
+    # Average correlation
+    autocorr_avg=zeros(max_lag)
+    for atom=1:nb_atom
+        autocorr += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
+    end
+    autocorr_avg /= nb_atom
+
+    # Fourrier Transform
+    freq,vdos = doFourierTransformShift( autocorr_avg, dt )
+
+    return freq, vdos, test
+end
+
+function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_nm::T4, dt::T5 ) where { T1 <: AbstractString, T2 <: AbstractString, T3 <: Real, T4 <: Real, T5 <: Real }
+
+    # Reading Trajectory
+    traj,cell,test=readFastFile(file_traj)
+
+    if ! test
+        return test
+    end
+
+    # Computing velocities
+    velocity=cell_mod.velocityFromPosition(traj,dt,dx)
+
+    nb_atoms=size(velocity)[2]
+    nb_step=size(velocity)[1]
+
+    # Compute scalar product
+    velo_scal=zeros(nb_step,nb_atoms)
+    for atom=1:nb_atom
+        for step=1:nb_step
+            for i=1:3
+                velo_scal[step,atom] += velocity[step,atom,i]*velocity[step,atom,i]
+            end
+        end
+    end
+
+    max_lag=Int(trunc(nb_step*max_lag_frac))
+
+    # Average correlation
+    autocorr_avg=zeros(max_lag)
+    for atom=1:nb_atom
+        autocorr += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
+    end
+    autocorr_avg /= nb_atom
+
+    # Fourrier Transform
+    freq,vdos = doFourierTransformShift( autocorr_avg, dt )
+
+    file_o=open(string(file_out),"w")
+    for i=1:size(vdos)[1]
+        write(file_o,string(freq[i]," ",vdos[i],"\n"))
+    end
+    close(file_o)
+
+    return test
 end
 
 # Folder for data
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
-
-# Number of atoms
-nbC=32
-nbO=64
-nb_atoms=nbC+nbO
 
 T=3000
 V=9.8
@@ -47,53 +115,4 @@ folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 
-traj,test=readFastFile(file)
-velocity=cell_mod.velocityFromPosition(traj,dt,dx)
-
-# Scalar product des vitesses
-velo_scal=zeros(nb_step_velo,nb_atoms)
-for atom=1:nb_atoms
-    for step=1:nb_step_velo
-        for i=1:3
-            velo_scal[step,atom] += velocities[step,atom,i]*velocities[step,atom,i]
-        end
-    end
-end
-
-max_lag=5000
-nb_step_velo=nb_step-1
-# Compute the autocorrelation
-autocor_v=zeros(nb_step-1,3)
-for atom=1:nb_atoms
-    print("Progress: ",atom/nb_atoms*100," %\n")
-    autocor_loc=zeros(nb_step_velo)
-    # Loop over tau
-    for step_lag=1:max_lag
-        for step=1:nb_step_velo-step_lag
-            autocor_loc[step_lag] += velo_scal[step,atom]*velo_scal[step+step_lag,atom]
-        end
-        autocor_loc[step_lag] /= (nb_step-step_lag)
-    end
-    for i=1:nb_step_velo
-        autocor_v[i] += autocor_loc[i]
-    end
-end
-autocor_v /= nb_atoms
-
-file_out=open(string(folder_base,"VDOS_test.dat"),"w")
-for tau=1:max_lag
-    write(file_out,string(tau," ",autocor_v[tau],"\n"))
-end
-close(file_out)
-
-using GR
-using FFTW
-
-autocor_v=autocor_v[1:max_lag]
-
-GR.xlabel("test")
-
-GR.plot(autocor_v[1:500],xlim=(1,500))
-
-
-GR.plot(dct(autocor_v[1:500])[1:20],"r-")
+freq,vdos=vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_nm::T4, dt::T5 )

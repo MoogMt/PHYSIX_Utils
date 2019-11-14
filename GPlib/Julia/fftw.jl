@@ -3,6 +3,10 @@ module fftw
 using FFTW
 
 function doFourierTransform( signal::Vector{T1}, dt ) where { T1 <: Real }
+    return fftfreq(size(signal)[1],1/dt), abs.(fft(signal) )
+end
+
+function doFourierTransformShift( signal::Vector{T1}, dt ) where { T1 <: Real }
     return fftfreq(size(signal)[1],1/dt) |> fftshift, abs.(fft(signal) |> fftshift )
 end
 
