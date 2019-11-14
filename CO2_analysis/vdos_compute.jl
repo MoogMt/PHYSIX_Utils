@@ -101,12 +101,11 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
     return test
 end
 
-
 # Folder for data
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-T=3000
+T=1750
 V=9.8
 
 time_step=0.001
@@ -121,7 +120,7 @@ file_in=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 file_out=string(folder_out,"vdos.dat")
 
-max_lag_frac=0.7
+max_lag_frac=0.8
 to_nm=0.1
 
 test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
