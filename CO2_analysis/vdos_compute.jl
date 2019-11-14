@@ -48,7 +48,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 
     autocorr_avg /= nb_atoms
 
     # Fourrier Transform
-    freq,vdos = doFourierTransformShift( autocorr_avg, dt )
+    freq,vdos = fftw.doFourierTransformShift( autocorr_avg, dt )
 
     return freq, vdos, test
 end
@@ -88,7 +88,7 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
     autocorr_avg /= nb_atoms
 
     # Fourrier Transform
-    freq,vdos = doFourierTransformShift( autocorr_avg, dt )
+    freq,vdos = fftw.doFourierTransformShift( autocorr_avg, dt )
 
     file_o=open(string(file_out),"w")
     for i=1:size(vdos)[1]
