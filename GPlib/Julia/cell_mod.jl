@@ -3,6 +3,7 @@ module cell_mod
 export Cell_param, Cell_vec, Cell_matrix
 export Cell
 export vec2matrix, wrap, dist1D, distance, compressParams, compressAtoms
+export velocityFromPosition
 
 # Import all import module
 #----------------------------
@@ -389,6 +390,22 @@ function compressAtoms( atoms::T1 , cell::T2, fracs::Vector{T3} ) where { T1 <: 
         end
     end
     return atoms
+end
+#---------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------
+function velocityFromPosition( traj::Vector{T1}, dt::T2, dx::T3 ) where { T1 <: atom_mod.AtomList, T2 <: Real, T3 <: Real }
+    nb_atoms=size(traj[1].names)[1]
+    nb_step=size(traj)[1]
+    velocities=zeros(nb_step-1,nb_atoms,3)
+    for step=1:nb_step-1
+        for atom=1:nb_atoms
+            for i=1:3
+                velocities[step,atom,i]=(traj[step].positions[atom,i]-traj[step+1].positions[atom,i])/dt*dx
+            end
+        end
+    end
+    return velocities
 end
 #---------------------------------------------------------------------------
 

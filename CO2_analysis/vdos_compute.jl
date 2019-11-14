@@ -11,6 +11,18 @@ using filexyz
 using pdb
 using markov
 
+using FFTW
+
+x=range(0,stop=2*pi,step=0.001)
+y=sin.(x)
+z=dct(y)
+
+file_out=open(string("/home/moogmt/test.dat"),"w")
+for i=1:size(z)[1]
+    Base.write(file_out,string(i," ",z[i],"\n"))
+end
+close(file_out)
+
 
 function vdosFromPosition( file_traj, file_out, max_lag_step )
 
@@ -27,7 +39,7 @@ end
 
 # Folder for data
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/home/moogmt/CO2/CO2_AIMD/"
+folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # Number of atoms
 nbC=32
@@ -39,28 +51,16 @@ V=9.8
 
 time_step=0.001
 unit_sim=0.5
+stride_step=5
 dt=time_step*stride_step*unit_sim
+dx=0.1 #Angstrom to nm
 
 folder_in=string(folder_base,V,"/",T,"K/")
 file=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 
-print("Reading Trajectory\n")
-
-
-nb_step=size(traj)[1]
-
-nb_step_velo=nb_step-1
-
-# compute the velocities
-velocities=zeros(nb_step_velo,nb_atoms,3)
-for step=1:nb_step-1
-    for atom=1:nb_atoms
-        for i=1:3
-            velocities[step,atom,i]=(traj[step].positions[atom,i]-traj[step+1].positions[atom,i])/dt
-        end
-    end
-end
+traj,test=readFastFile(file)
+velocity=cell_mod.velocityFromPosition(traj,dt,dx)
 
 # Scalar product des vitesses
 velo_scal=zeros(nb_step_velo,nb_atoms)
