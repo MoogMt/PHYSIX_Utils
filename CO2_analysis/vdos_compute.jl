@@ -123,14 +123,10 @@ dx=0.1 #Angstrom to nm
 folder_in=string(folder_base,V,"/",T,"K/")
 file_in=string(folder_in,"TRAJEC.xyz")
 
-lags=[0.2,0.5,0.8]
-
-for max_lag_frac in lags
+max_lag_frac=1.0
 to_nm=1
 
 folder_out=string(folder_in,"Data/")
 file_out=string(folder_out,"vdos-",max_lag_frac,".dat")
 
 test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
-
-end

@@ -1,7 +1,0 @@
-&input
-  dx = 0.05
-  rmin = 0.5
-  rmax = 10.0
-  deltar = 0.5
-  rdens = 2.5
-/
