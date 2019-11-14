@@ -28,6 +28,7 @@ function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 
 
     # Computing g_r
     for step=1:nb_step
+        print("G(r) Progress: ",step/nb_step*100,"\n")
         for atom2=1:nb_atoms
             for atom1=1:nb_atoms
                 dist=cell_mod.distance(traj[step],cell,atom1,atom2)
@@ -54,7 +55,7 @@ function computeGr( file_in::T1, file_out::T2, V::T3, rmin::T4, rmax::T5, dr::T6
     end
 
     file_o=open(file_out,"w")
-    for i=1:nb_box
+    for i=1:size(gr)[1]
         write(file_o,string(i*dr+rmin," ",gr[i],"\n"))
     end
     close(file_o)
