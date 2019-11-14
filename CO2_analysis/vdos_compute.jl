@@ -11,11 +11,12 @@ using filexyz
 using pdb
 using markov
 using fftw
+using correlation
 
 function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real }
 
     # Reading Trajectory
-    traj,cell,test=readFastFile(file_traj)
+    traj,test=readFastFile(file_traj)
 
     if ! test
         return zeros(1,1), zeros(1,1), test
@@ -29,7 +30,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 
 
     # Compute scalar product
     velo_scal=zeros(nb_step,nb_atoms)
-    for atom=1:nb_atom
+    for atom=1:nb_atoms
         for step=1:nb_step
             for i=1:3
                 velo_scal[step,atom] += velocity[step,atom,i]*velocity[step,atom,i]
@@ -41,10 +42,10 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 
 
     # Average correlation
     autocorr_avg=zeros(max_lag)
-    for atom=1:nb_atom
-        autocorr += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
+    for atom=1:nb_atoms
+        autocorr_avg += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
     end
-    autocorr_avg /= nb_atom
+    autocorr_avg /= nb_atoms
 
     # Fourrier Transform
     freq,vdos = doFourierTransformShift( autocorr_avg, dt )
@@ -55,7 +56,7 @@ end
 function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_nm::T4, dt::T5 ) where { T1 <: AbstractString, T2 <: AbstractString, T3 <: Real, T4 <: Real, T5 <: Real }
 
     # Reading Trajectory
-    traj,cell,test=readFastFile(file_traj)
+    traj,test=readFastFile(file_traj)
 
     if ! test
         return test
@@ -69,7 +70,7 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
 
     # Compute scalar product
     velo_scal=zeros(nb_step,nb_atoms)
-    for atom=1:nb_atom
+    for atom=1:nb_atoms
         for step=1:nb_step
             for i=1:3
                 velo_scal[step,atom] += velocity[step,atom,i]*velocity[step,atom,i]
@@ -81,10 +82,10 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
 
     # Average correlation
     autocorr_avg=zeros(max_lag)
-    for atom=1:nb_atom
-        autocorr += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
+    for atom=1:nb_atoms
+        autocorr_avg += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
     end
-    autocorr_avg /= nb_atom
+    autocorr_avg /= nb_atoms
 
     # Fourrier Transform
     freq,vdos = doFourierTransformShift( autocorr_avg, dt )
@@ -112,7 +113,12 @@ dt=time_step*stride_step*unit_sim
 dx=0.1 #Angstrom to nm
 
 folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC.xyz")
-folder_out=string(folder_in,"Data/")
+file_in=string(folder_in,"TRAJEC.xyz")
 
-freq,vdos=vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_nm::T4, dt::T5 )
+folder_out=string(folder_in,"Data/")
+file_out=string(folder_out,"vdos.dat")
+
+max_lag_frac=0.5
+to_nm=0.1
+
+freq,vdos=vdosFromPosition( file_in, file_out , max_lag_frac, to_nm, dt)
