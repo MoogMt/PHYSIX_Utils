@@ -103,8 +103,8 @@ end
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 
-Temperatures=[2000,3000]
-Volumes=[9.8,8.82]
+Temperatures=[3000]
+Volumes=[8.82]
 
 for V in Volumes
     for T in Temperatures
@@ -128,41 +128,3 @@ for V in Volumes
 
     end
 end
-#
-#
-# rho=2
-#
-# n_sk=1000
-# sk=ones(n_sk)
-# dk=0.05
-#
-# for i=1:n_sk
-#     int_=0
-#     for j=1:nb_box
-#         int_ += (j*dr+rmin)^2*gr[j]*sin((i*dk*(j*dr+rmin)))/((i*dk*(j*dr+rmin)))*dr
-#     end
-#     sk[i] += 4*pi*rho*int_
-# end
-#
-# file_out=open(string(folder_out,"sk_real.dat"),"w")
-# for i=1:nb_box
-#     write(file_out,string(i*dk," ",sk[i],"\n"))
-# end
-# close(file_out)
-#
-# y=zeros(20000)
-# x=zeros(20000)
-# dx=0.05
-#
-# for i=1:1000
-#     x[i] = i*dx
-#     y[i] =sin(i*dx)
-# end
-# ddx=dct(x)
-# ddy=dct(y)
-#
-# file_out=open(string(folder_out,"test_truc.dat"),"w")
-# for i=1:nb_box
-#     write(file_out,string(x[i]," ",y[i]," ",ddx[i]," ",ddy[i]," \n"))
-# end
-# close(file_out)
