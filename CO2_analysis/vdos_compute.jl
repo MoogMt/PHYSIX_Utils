@@ -92,7 +92,7 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
 
     file_o=open(string(file_out),"w")
     for i=1:size(vdos)[1]
-        write(file_o,string(freq[i]," ",vdos[i],"\n"))
+        Base.write(file_o,string(freq[i]," ",vdos[i],"\n"))
     end
     close(file_o)
 
