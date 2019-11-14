@@ -30,7 +30,16 @@ function getNbSteps( file::T1 ) where { T1 <: AbstractString }
 end
 
 # Reading file by not managing datas
+# - requires ability to load both all lines of the file
+#   and the array of position of all the trajectory simultaneously
+#   fastest implementation, but also more memory hungry
 function readFastFile( file::T1 ) where { T1 <: AbstractString }
+
+  # Checking file
+  if ! isfile(file)
+    return sim=Vector{ atom_mod.AtomList }( undef, 0 ), false
+  end
+
   #--------------
   # Reading file
   #----------------------
@@ -54,6 +63,8 @@ function readFastFile( file::T1 ) where { T1 <: AbstractString }
   nb_steps=Int(size(lines)[1]/(nb_atoms+2))
   #------------------------------------------
 
+  # Reading file into array
+  #------------------------------------------------
   sim=Vector{ atom_mod.AtomList }( undef, nb_steps )
   for step=1:nb_steps
       atom_list = atom_mod.AtomList( nb_atoms )
@@ -68,7 +79,9 @@ function readFastFile( file::T1 ) where { T1 <: AbstractString }
       end
       sim[step]=atom_list
   end
-  return sim
+  #------------------------------------------------
+
+  return sim, true
 end
 
 # Read a single step

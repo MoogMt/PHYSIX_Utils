@@ -1,7 +1,7 @@
 GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
-# Compute VDOS of a trajectory
+# Computes VDOS of a trajectory
 
 using atom_mod
 using cell_mod
@@ -10,6 +10,20 @@ using clustering
 using filexyz
 using pdb
 using markov
+
+
+function vdosFromPosition( file_traj, file_out, max_lag_step )
+
+    traj,cell,test=readFastFile(file_traj)
+
+    if ! sucess
+        return zeros(1,1), test
+    end
+
+
+
+    return vdos, success
+end
 
 # Folder for data
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
@@ -32,8 +46,7 @@ file=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 
 print("Reading Trajectory\n")
-traj=filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(V,V,V)
+
 
 nb_step=size(traj)[1]
 
