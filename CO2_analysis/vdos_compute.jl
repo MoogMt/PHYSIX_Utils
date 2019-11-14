@@ -92,12 +92,15 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
 
     file_o=open(string(file_out),"w")
     for i=1:size(vdos)[1]
-        Base.write(file_o,string(freq[i]," ",vdos[i],"\n"))
+        if freq[i] > 0 # Remove frequency 0 and symmetric
+            Base.write(file_o,string(freq[i]," ",vdos[i],"\n"))
+        end
     end
     close(file_o)
 
     return test
 end
+
 
 # Folder for data
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
@@ -118,7 +121,7 @@ file_in=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 file_out=string(folder_out,"vdos.dat")
 
-max_lag_frac=0.8
+max_lag_frac=0.7
 to_nm=0.1
 
 test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )

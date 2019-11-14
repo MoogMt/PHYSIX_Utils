@@ -10,6 +10,14 @@ function doFourierTransformShift( signal::Vector{T1}, dt ) where { T1 <: Real }
     return fftfreq(size(signal)[1],1/dt) |> fftshift, abs.(fft(signal) |> fftshift )
 end
 
+function doDCT( signal::Vector{T1}, dt ) where { T1 <: Real }
+    return fftfreq(size(signal)[1],1/dt), abs.(dct(signal))
+end
+
+function doDCTShift( signal::Vector{T1}, dt ) where { T1 <: Real }
+    return fftfreq(size(signal)[1],1/dt) |> fftshift, abs.(dct(signal)) |> fftshift
+end
+
 end
 
 #  Examples
