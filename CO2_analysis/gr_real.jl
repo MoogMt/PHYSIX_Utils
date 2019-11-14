@@ -24,15 +24,15 @@ function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 
     nb_atoms=size(traj[1].names)[1]
     nb_step=size(traj)[1]
     nb_box=Int((rmax-rmin)/dr)
-    gr=zeros(nb_box)
+    gr=zeros(nb_box+1)
 
     # Computing g_r
     for step=1:nb_step
-        for carbon=1:nbC
-            for oxygen=1:nbO
-                dist=cell_mod.distance(traj[step],cell,carbon,nbC+oxygen)
+        for atom2=1:nb_atoms
+            for atom1=1:nb_atoms
+                dist=cell_mod.distance(traj[step],cell,atom1,atom2)
                 if dist < rmax
-                    gr[ Int( trunc( (dist-rmin)/dr ) )  ] += 1
+                    gr[ Int( trunc( (dist-rmin)/dr ) )+1  ] += 1
                 end
             end
         end
