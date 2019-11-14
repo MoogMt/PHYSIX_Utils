@@ -64,20 +64,37 @@ function computeGr( file_in::T1, file_out::T2, V::T3, rmin::T4, rmax::T5, dr::T6
     return gr, test
 end
 
-function computeFQ( gr::Vector{T1}, dr::T2 ) where { T1 <: Real, T2 <: Real }
-    return doFourierTransformShift( gr, dr )
+function computeFQ( gr::Vector{T1}, rmin::T2, rmax::T3, dr::T4, rho::T5 ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real }
+    nb_box=2000
+    nb_box_int=(rmax-rmin)/dr
+    fq=zeros(nb_box)
+    q=zeros(nb_box)
+    dq=0.01
+    for i=1:nb_box
+        loc=0
+        q[i] = i*dq
+        for j=1:nb_box
+            r=j*dr+rmin
+            loc += sin(q[i]*r)*r*(gr[j]-1)*dr
+        end
+        loc *= 4*pi/q[i]*rho
+        fq[i] = 1 + loc
+    end
+    return q, fq
 end
 
-function computeFQ( file_out::T1, gr::Vector{T2}, dr::T3 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real }
-    freq,fq=doFourierTransformShift( gr, dr )
+function computeFQ( file_out::T1, gr::Vector{T2}, rmin::T3, rmax::T4, dr::T5, rho::T6 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real }
+    q,fq=computeFQ(gr,rmin,rmax,dr,rho)
 
     file_o=open(file_out,"w")
     for i=1:size(fq)[1]
-        Base.write(string(freq[i]," ",fq[i],"\n"))
+        if q[i] > 0
+            Base.write(file_o,string(q[i]," ",fq[i],"\n"))
+        end
     end
     close(file_o)
 
-    return freq,fq
+    return q,fq
 end
 
 # Folder for data
@@ -95,11 +112,14 @@ file_out_gr=string(folder_out,"gr.dat")
 
 rmin=0
 rmax=V/2
-dr=0.01
+dr=0.001
 gr,test=computeGr( file_in, file_out_gr, V, rmin, rmax, dr )
 
 file_out_fq=string(folder_out,"fq.dat")
-freq,fq=computeFQ(file_out,gr,dr)
+
+rho=96/V^3
+
+q,fq=computeFQ(file_out_fq,gr,rmin,rmax,dr,rho)
 
 #
 #
