@@ -13,7 +13,6 @@ using markov
 using fftw
 using correlation
 
-
 function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real }
 
     # Reading Trajectory
@@ -79,29 +78,14 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
         end
     end
 
-    file_o=open(string("/home/moogmt/vel.dat"),"w")
-    for i=1:size(velo_scal)[1]
-        Base.write(file_o,string(i," ",velo_scal[i,1],"\n"))
-    end
-    close(file_o)
-
-
     max_lag=Int(trunc(nb_step*max_lag_frac))
-    print("max_lag:",max_lag,"\n")
 
     # Average correlation
-    # autocorr_avg=zeros(max_lag)
-    # for atom=1:nb_atoms
-    #     autocorr_avg += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
-    # end
-    # autocorr_avg /= nb_atoms
-    autocorr_avg=correlation.autocorrNorm(velo_scal[:,1],max_lag)
-
-    file_o=open(string("/home/moogmt/test.dat"),"w")
-    for i=1:size(autocorr_avg)[1]
-        Base.write(file_o,string(i*dt," ",autocorr_avg[i],"\n"))
+    autocorr_avg=zeros(max_lag)
+    for atom=1:nb_atoms
+        autocorr_avg += correlation.autocorrNorm( velo_scal[:,atom] , max_lag )
     end
-    close(file_o)
+    autocorr_avg /= nb_atoms
 
     # Fourrier Transform
     freq,vdos = fftw.doFourierTransformShift( autocorr_avg, dt )
@@ -134,7 +118,7 @@ file_in=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 file_out=string(folder_out,"vdos.dat")
 
-max_lag_frac=0.4
+max_lag_frac=0.8
 to_nm=0.1
 
 test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
