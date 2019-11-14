@@ -8,6 +8,7 @@ using filexyz
 using clustering
 using markov
 using conversion
+using fftw
 
 function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real }
 
@@ -24,7 +25,7 @@ function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 
     nb_atoms=size(traj[1].names)[1]
     nb_step=size(traj)[1]
     nb_box=Int((rmax-rmin)/dr)
-    gr=zeros(nb_box+1)
+    gr=zeros(nb_box)
 
     # Computing g_r
     for step=1:nb_step
@@ -40,7 +41,7 @@ function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 
     end
     # Normalization
     for i=1:nb_box
-        gr[i] /= (4*pi*(i*dr+rmin)^2)
+        gr[i] = gr[i]*V^3/(nb_step*nb_atoms*(nb_atoms-1)/2)/(4*pi*dr*(i*dr+rmin)^2)
     end
 
     return gr,test
@@ -63,6 +64,22 @@ function computeGr( file_in::T1, file_out::T2, V::T3, rmin::T4, rmax::T5, dr::T6
     return gr, test
 end
 
+function computeFQ( gr::Vector{T1}, dr::T2 ) where { T1 <: Real, T2 <: Real }
+    return doFourierTransformShift( gr, dr )
+end
+
+function computeFQ( file_out::T1, gr::Vector{T2}, dr::T3 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real }
+    freq,fq=doFourierTransformShift( gr, dr )
+
+    file_o=open(file_out,"w")
+    for i=1:size(fq)[1]
+        Base.write(string(freq[i]," ",fq[i],"\n"))
+    end
+    close(file_o)
+
+    return freq,fq
+end
+
 # Folder for data
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
@@ -79,12 +96,10 @@ file_out_gr=string(folder_out,"gr.dat")
 rmin=0
 rmax=V/2
 dr=0.01
-
 gr,test=computeGr( file_in, file_out_gr, V, rmin, rmax, dr )
 
-
-
 file_out_fq=string(folder_out,"fq.dat")
+freq,fq=computeFQ(file_out,gr,dr)
 
 #
 #
