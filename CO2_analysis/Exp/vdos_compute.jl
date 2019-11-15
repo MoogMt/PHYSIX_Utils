@@ -20,7 +20,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 
         traj,test=readFastFile(file_traj)
 
         if ! test
-            return test
+            return zeros(1,1), zeros(1,1), test
         end
 
         # Computing velocities
@@ -79,8 +79,8 @@ end
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-Temperatures=[1750,2000,2500,3000]
-Volumes=[10,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.6]
+Temperatures=[2000]
+Volumes=[9.4]
 
 time_step=0.001
 stride_sim=5
@@ -99,7 +99,7 @@ for V in Volumes
         folder_out=string(folder_in,"Data/")
         file_out=string(folder_out,"vdos-",max_lag_frac,".dat")
 
-        test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
+        freq,vdos,test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
 
     end
 end
