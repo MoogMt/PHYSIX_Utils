@@ -41,7 +41,7 @@ for V in Volumes
         folder_out=string(folder_in,"Data/")
         file_out=string(folder_out,"vdos-",max_lag_frac,".dat")
 
-        freq,vdos,test=vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
+        freq,vdos,test=exp_data.vdosFromPosition( file_in, file_out, max_lag_frac, to_nm, dt )
 
     end
 end
