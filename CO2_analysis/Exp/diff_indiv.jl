@@ -40,10 +40,9 @@ function barycenter( positions::Array{T1,3}, types::Vector{T2}, types_names::Vec
     nb_types=size(types)[1]
     barycenter=zeros(nb_step)
     for type=1:nb_types
-        for step=1:nb_step
-
-        end
-        barycenter += nb_atoms_type*type_masses[type]*bary_type
+        index_types=getTypeIndex(types_names,type)
+        nb_atoms_type=size(index_types)[1]
+        barycenter += nb_atoms_type*type_masses[type]*barycenter(positions[:,index_types,:])
     end
     return barycenter/nb_atoms
 end
