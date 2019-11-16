@@ -14,31 +14,41 @@ using conversion
 using exp_data
 using LsqFit
 
+# Model for a linear fit
 @. model(x, p) = p[1]*x
+
+function barycenter( positions::Array{T1,2} ) where { T1 <: Real }
+    return barycenter
+end
+
+function barycenter( positions::Array{T1,2}, masses::Vector{T2} ) where { T1 <: Real, T2 <: Real }
+    return barycenter
+end
+
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
+folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8]
-Temperatures=[2000,2500,3000]
+Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+Temperatures=[1750,2000,2500,3000]
 
-# Cut-off distance for bonds
-cut_off_bond = 1.75
-nbC=32
-nbO=64
-nb_cut=10
-
-V=8.82
-T=3000
-
+Volumes=[10.0]
+Temperatures=[3000]
+#
 # for T in Temperatures
 #     for V in Volumes
+
+V=10.0
+T=3000
+
 folder_in=string(folder_base,V,"/",T,"K/")
-file=string(folder_in,"TRAJEC.xyz")
+
+file_traj=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 
 print(V," ",T,"\n")
-traj=filexyz.readFastFile(file)
+traj,test=filexyz.readFastFile(file)
 cell=cell_mod.Cell_param(V,V,V)
 
 nb_steps=size(traj)[1]
