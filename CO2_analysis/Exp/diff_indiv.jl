@@ -25,12 +25,33 @@ function barycenter( positions::Array{T1,2} ) where { T1 <: Real }
     return barycenter/nb_atoms
 end
 
+function barycenter( positions::Array{T1,2}, index_types::Vector{T2} ) where { T1 <: Real, T2 <: Int }
+    barycenter=zeros(3)
+    nb_atoms=size(positions[1])
+    for i=1:3
+        for atom in index_types
+            barycenter[i] += positions[atom,i]
+        end
+    end
+    return barycenter/nb_atoms
+end
+
 function barycenter( positions::Array{T1,3} ) where { T1 <: Real }
     nb_step=size(positions)[1]
     nb_atoms=size(positions)[2]
     barycenter=size(nb_step,3)
     for step=1:nb_step
         barycenter[i,:] = barycenter( positions[step,:,:] )
+    end
+    return barycenter/nb_atoms
+end
+
+function barycenter( positions::Array{T1,3}, index_types::Vector{T2} ) where { T1 <: Real, T2 <: Int }
+    nb_step=size(positions)[1]
+    nb_atoms=size(positions)[2]
+    barycenter=size(nb_step,3)
+    for step=1:nb_step
+        barycenter[i,:] = barycenter( positions[step,:,:], index_types )
     end
     return barycenter/nb_atoms
 end
@@ -43,7 +64,7 @@ function barycenter( positions::Array{T1,3}, types::Vector{T2}, types_names::Vec
     for type=1:nb_types
         index_types=atom_mod.getTypeIndex(types_names,types_names[type])
         nb_atoms_type=size(index_types)[1]
-        barycenter += nb_atoms_type*type_masses[type]*barycenter(positions[:,index_types,:])
+        barycenter += nb_atoms_type*type_masses[type]*barycenter(positions,index_types)
     end
     return barycenter/nb_atoms
 end
