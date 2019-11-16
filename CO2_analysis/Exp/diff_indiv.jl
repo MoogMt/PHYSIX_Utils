@@ -27,11 +27,12 @@ end
 
 function barycenter( positions::Array{T1,3} ) where { T1 <: Real }
     nb_step=size(positions)[1]
+    nb_atoms=size(positions)[2]
     barycenter=size(nb_step,3)
     for step=1:nb_step
-        barycenter[i,;] = barycenter( positions[step,:,:] )
+        barycenter[i,:] = barycenter( positions[step,:,:] )
     end
-    return barycenter
+    return barycenter/nb_atoms
 end
 
 function barycenter( positions::Array{T1,3}, types::Vector{T2}, types_names::Vector{T3}, type_masses::Vector{T4} ) where { T1 <: Real, T2 <: AbstractString, T3 <: AbstractString, T4 <: Real }
@@ -40,7 +41,7 @@ function barycenter( positions::Array{T1,3}, types::Vector{T2}, types_names::Vec
     nb_types=size(types)[1]
     barycenter=zeros(nb_step)
     for type=1:nb_types
-        index_types=getTypeIndex(types_names,type)
+        index_types=atom_mod.getTypeIndex(types_names,types_names[type])
         nb_atoms_type=size(index_types)[1]
         barycenter += nb_atoms_type*type_masses[type]*barycenter(positions[:,index_types,:])
     end
@@ -53,6 +54,7 @@ end
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
+
 
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
 Temperatures=[1750,2000,2500,3000]
@@ -71,6 +73,10 @@ folder_out=string(folder_in,"Data/")
 print(V," ",T,"\n")
 traj,test=filexyz.readFastFile(file_traj)
 cell=cell_mod.Cell_param(V,V,V)
+
+positions=atom_mod.getPositions(traj)
+
+barycenter=barycenter(positions,traj[1].names,["C","O"],[6.0,8.0])
 
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
