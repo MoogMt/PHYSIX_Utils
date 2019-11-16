@@ -47,7 +47,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 
         vdos /= nb_atoms
 
         # Conversion to cm-1
-        freq=freq.*conversion.Hz2cm
+        freq=freq.*conversion.THz2cm
 
     return freq, vdos, test
 end

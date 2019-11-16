@@ -3,11 +3,8 @@ module conversion
 AU2Pascal=2.9421912e13
 Pascal2AU=1/AU2Pascal
 
-THz2cm=0.0299792458
-cm2THz=1/0.0299792458
-
-Hz2cm=33.3565
-cm2Hz=1/33.3565
+THz2cm=33.3565
+cm2THz=1/33.3565
 
 hartree=4.35974417e-18;
 
