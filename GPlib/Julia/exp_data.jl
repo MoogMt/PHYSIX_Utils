@@ -74,7 +74,7 @@ end
 
 # Radial Distribution Function
 #==============================================================================#
-function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real }
+function computeGr( file_in::T1, a::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real }
 
     # Reading trajectory
     traj, test = filexyz.readFastFile(file_in)
@@ -83,7 +83,10 @@ function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 
     end
 
     #Building cell
-    cell=cell_mod.Cell_param(V,V,V)
+    cell=cell_mod.Cell_param(a,a,a)
+
+    # Volume
+    V=a^3
 
     # Getting nb atoms and steps
     nb_atoms=size(traj[1].names)[1]
@@ -105,7 +108,7 @@ function computeGr( file_in::T1, V::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 
     end
     # Normalization
     for i=1:nb_box
-        gr[i] = gr[i]*V^3/(nb_step*nb_atoms*(nb_atoms-1)/2)/(4*pi*dr*(i*dr+rmin)^2)
+        gr[i] = gr[i]*V/(nb_step*nb_atoms*(nb_atoms-1)/2)/(4*pi*dr*(i*dr+rmin)^2)
     end
 
     return gr,test
