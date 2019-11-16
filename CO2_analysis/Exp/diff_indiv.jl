@@ -14,9 +14,6 @@ using conversion
 using exp_data
 using LsqFit
 
-# Model for a linear fit
-@. model(x, p) = p[1]*x
-
 function barycenter( positions::Array{T1,2} ) where { T1 <: Real }
     barycenter=zeros(3)
     nb_atoms=size(positions[1])
@@ -37,10 +34,22 @@ function barycenter( positions::Array{T1,3} ) where { T1 <: Real }
     return barycenter
 end
 
-function barycenter( positions::Array{T1,2}, masses::Vector{T2} ) where { T1 <: Real, T2 <: Real }
-    return barycenter
+function barycenter( positions::Array{T1,3}, types::Vector{T2}, types_names::Vector{T3}, type_masses::Vector{T4} ) where { T1 <: Real, T2 <: AbstractString, T3 <: AbstractString, T4 <: Real }
+    nb_step=size(positions)[1]
+    nb_atoms=size(positions)[2]
+    nb_types=size(types)[1]
+    barycenter=zeros(nb_step)
+    for type=1:nb_types
+        for step=1:nb_step
+
+        end
+        barycenter += nb_atoms_type*type_masses[type]*bary_type
+    end
+    return barycenter/nb_atoms
 end
 
+# Model for a linear fit
+@. model(x, p) = p[1]*x
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
