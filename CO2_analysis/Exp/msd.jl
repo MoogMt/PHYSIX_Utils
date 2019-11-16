@@ -1,4 +1,17 @@
-include("contactmatrix.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
+
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using filexyz
+using pdb
+using markov
+using fftw
+using correlation
+using conversion
+using exp_data
 
 func="PBE-MT"
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.325,9.35,9.375,9.4,9.5,9.8,10.0]
