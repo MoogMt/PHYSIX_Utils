@@ -64,4 +64,14 @@ function move( atoms::T1 , move::Vector{T2} ) where { T1 <: atom_mod.AtomList, T
     return atoms
 end
 
+function getPositions( traj::Vector{T1} ) where { T1 <: Real }
+    nb_step=size(traj)[1]
+    nb_atoms=size(traj[1].names)[1]
+    positions=zeros(nb_step,nb_atoms,3)
+    for step=1:nb_step
+        positions[step,:,:] = traj[step].positions[:,:]
+    end
+    return positions
+end
+
 end

@@ -18,7 +18,22 @@ using LsqFit
 @. model(x, p) = p[1]*x
 
 function barycenter( positions::Array{T1,2} ) where { T1 <: Real }
+    barycenter=zeros(3)
+    nb_atoms=size(positions[1])
+    for i=1:3
+        for atom=1:nb_atoms
+            barycenter[i] += positions[atom,i]
+        end
+    end
+    return barycenter/nb_atoms
+end
 
+function barycenter( positions::Array{T1,3} ) where { T1 <: Real }
+    nb_step=size(positions)[1]
+    barycenter=size(nb_step,3)
+    for step=1:nb_step
+        barycenter[i,;] = barycenter( positions[step,:,:] )
+    end
     return barycenter
 end
 
@@ -33,9 +48,6 @@ folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
 Temperatures=[1750,2000,2500,3000]
-
-Volumes=[10.0]
-Temperatures=[3000]
 #
 # for T in Temperatures
 #     for V in Volumes
@@ -49,7 +61,7 @@ file_traj=string(folder_in,"TRAJEC.xyz")
 folder_out=string(folder_in,"Data/")
 
 print(V," ",T,"\n")
-traj,test=filexyz.readFastFile(file)
+traj,test=filexyz.readFastFile(file_traj)
 cell=cell_mod.Cell_param(V,V,V)
 
 nb_steps=size(traj)[1]
