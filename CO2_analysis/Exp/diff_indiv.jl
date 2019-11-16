@@ -18,6 +18,7 @@ using LsqFit
 @. model(x, p) = p[1]*x
 
 function barycenter( positions::Array{T1,2} ) where { T1 <: Real }
+
     return barycenter
 end
 
