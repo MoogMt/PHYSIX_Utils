@@ -74,11 +74,13 @@ function getPositions( traj::Vector{T1} ) where { T1 <: Real }
     return positions
 end
 
-function getTypeIndex( types_names::Vector{T1}, T2 <: AbstractString ) where { T1 <: AbstractString , T2 <: AbstractString }
+function getTypeIndex( types_names::Vector{T1}, name::T2 ) where { T1 <: AbstractString , T2 <: AbstractString }
     index_types=zeros(Int,0)
     nb_atoms=size(types_names)[1]
     for atom=1:nb_atoms
-        
+        if type_names[atom] == name
+            push!(index_types,atom)
+        end
     end
     return index_types
 end
