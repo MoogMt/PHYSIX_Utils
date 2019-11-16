@@ -1,6 +1,17 @@
-include("contactmatrix.jl")
-include("xyz.jl")
+GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+push!(LOAD_PATH, GPfolder)
 
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using filexyz
+using pdb
+using markov
+using fftw
+using correlation
+using conversion
+using exp_data
 volumes=[9.1,9.2,9.3,9.4]
 #temperatures=[2000,2500,3000]
 temperatures=[3000]
