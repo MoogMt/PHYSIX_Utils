@@ -3,19 +3,27 @@ module fftw
 using FFTW
 
 function doFourierTransform( signal::Vector{T1}, dt ) where { T1 <: Real }
-    return fftfreq(size(signal)[1],1/dt), abs.(fft(signal) )
+    freq=fftfreq(size(signal)[1],1/dt)
+    intensity= abs.(fft(signal))
+    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
 end
 
 function doFourierTransformShift( signal::Vector{T1}, dt ) where { T1 <: Real }
-    return fftfreq(size(signal)[1],1/dt) |> fftshift, abs.(fft(signal) |> fftshift )
+    freq=fftfreq(size(signal)[1],1/dt) |> fftshift
+    intensity= abs.(fft(signal)) |> fftshift
+    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
 end
 
 function doDCT( signal::Vector{T1}, dt ) where { T1 <: Real }
-    return fftfreq(size(signal)[1],1/dt), abs.(dct(signal))
+    freq=fftfreq(size(signal)[1],1/dt)
+    intensity=abs.(dct(signal))
+    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
 end
 
 function doDCTShift( signal::Vector{T1}, dt ) where { T1 <: Real }
-    return fftfreq(size(signal)[1],1/dt) |> fftshift, abs.(dct(signal)) |> fftshift
+    freq=fftfreq(size(signal)[1],1/dt) |> fftshift
+    intensity=abs.(dct(signal)) |> fftshift
+    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
 end
 
 end

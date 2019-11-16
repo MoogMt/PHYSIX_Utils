@@ -62,9 +62,7 @@ function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_
     # Writting data to file
     file_o=open(string(file_out),"w")
     for i=1:size(vdos)[1]
-        if freq[i] > 0 # Remove frequency 0 and symmetric
-            Base.write(file_o,string(freq[i]," ",vdos[i],"\n"))
-        end
+        Base.write(file_o,string(freq[i]," ",vdos[i],"\n"))
     end
     close(file_o)
 
