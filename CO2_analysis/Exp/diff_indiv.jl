@@ -74,6 +74,7 @@ function computeBarycenter( positions::Array{T1,3}, types::Vector{T2}, types_nam
     return barycenter_
 end
 
+
 # Model for a linear fit
 @. model(x, p) = p[1]*x
 
@@ -106,30 +107,6 @@ barycenter_global=computeBarycenter(positions,traj[1].names,["C","O"],[6.0,8.0])
 
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
-
-barycenter_C=zeros(nb_steps,3)
-barycenter_O=zeros(nb_steps,3)
-barycenter_all=zeros(nb_steps,3)
-for step=1:nb_steps
-    for carbon=1:nbC
-        for i=1:3
-            barycenter_C[step,i] += traj[step].positions[carbon,i]
-            barycenter_all[step,i] += traj[step].positions[carbon,i]
-        end
-    end
-    for oxygen=1:nbO
-        for i=1:3
-            barycenter_O[step,i] += traj[step].positions[nbC+oxygen,i]
-            barycenter_all[step,i] += traj[step].positions[nbC+oxygen,i]
-        end
-    end
-    for j=1:3
-        barycenter_C[step,j] = barycenter_C[step,j]/nbC
-        barycenter_O[step,j] = barycenter_O[step,j]/nbO
-        barycenter_all[step,j] = barycenter_all[step,j]/(nbC+nbO)
-    end
-end
-
 
 nb_delta=5000
 nb_space=50
