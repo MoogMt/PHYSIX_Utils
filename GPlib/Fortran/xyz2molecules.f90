@@ -27,17 +27,17 @@ l=0
 step=0
 cutoff2(1,1)=1.0D0**2  ! H-H
 do i=2,4
-  cutoff2(1,i)=1.2D0**2  ! heavy-H
-  cutoff2(i,1)=1.2D0**2  ! heavy-H
+  cutoff2(1,i)=1.0D0**2  ! heavy-H
+  cutoff2(i,1)=1.0D0**2  ! heavy-H
   do j=2,4
-    cutoff2(i,j)=1.7D0**2  ! heavy-heavy
+    cutoff2(i,j)=1.6D0**2  ! heavy-heavy
   enddo
 enddo
 styp(1)="H"
 styp(2)="C"
 styp(3)="O"
 styp(4)="N"
-!!!!!!!!!!!!!!!!! PARSE
+!!!!!!!!!!!!!!!!! PARSE 
 open(30,file=filename,status="old")
 do
   read(30,'(a200)',end=333) line
@@ -51,12 +51,12 @@ do
       allocate(x(n,3),a(n,n),typ(n),used(n),try(n),nextry(n))
     endif
     write (*,'(A,I6,4X,$)') "STEP ",step
-  endif
+  endif 
   if (l.gt.2) then
     i=i+1
 !    write (*,*) "i ",i
     read(line,*) symb,x(i,1:3)
-    if     (symb.eq.'H') then
+    if     (symb.eq.'H') then 
       typ(i)=1
     elseif (symb.eq.'C') then
       typ(i)=2
@@ -71,16 +71,16 @@ do
       l=0
       !!!!!!!!!!!!!!!! ANALYSIS
       ! build adjacency matrix
-      a(:,:)=0
-      do j=1,n-1
+      a(:,:)=0 ! All coefs to 0
+      do j=1,n-1  ! loop over all coefs
         do k=j+1,n
-          dd=0.D0
+          dd=0.D0 ! distance = 0
           do h=1,3
             dx=x(j,h)-x(k,h)
             if (dx> box(h)*0.5) dx=dx-box(h)
             if (dx<-box(h)*0.5) dx=dx+box(h)
             dd=dd+dx*dx
-          enddo
+          enddo  
           if (dd.le.cutoff2(typ(j),typ(k))) then
             a(j,k)=1
             a(k,j)=1
@@ -93,7 +93,7 @@ do
       ! find molecules
       ntotmol=0
       used(:)=0
-      do j=1,n
+      do j=1,n 
         if (used(j).eq.1) cycle
         ! start new molecule
         histotyp(:)=0
@@ -110,7 +110,7 @@ do
               if ((used(h).eq.0).and.(a(k,h).eq.1)) nextry(h)=1
             enddo
           enddo
-          try(:)=nextry(:)
+          try(:)=nextry(:)  
           if (sum(try(:)).eq.0) exit
         enddo
         ! store molecule
@@ -119,7 +119,7 @@ do
           if (sum((histotyp(:)-mol(h,:))**2).eq.0) then
             newmol=.false.
             nmol(h)=nmol(h)+1
-          endif
+          endif 
         enddo
         if (newmol) then
           ntotmol=ntotmol+1

@@ -1,5 +1,0 @@
-echo "20 0" | gmx energy -f npt.edr -o density.xvg 
-echo "22 0" | gmx energy -f npt.edr -o enthalpy.xvg 
-echo "19 0" | gmx energy -f npt.edr -o volume.xvg 
-
-
