@@ -1,0 +1,50 @@
+#!/bin/bash
+
+for (( i=0; i<=1000; i++ ))
+do
+    echo "progress: "$i
+    # Creating step folder and moving there
+    if [ ! -e $i"_structure" ]
+    then
+	mkdir $i"_structure"
+    fi
+    cd $i"_structure"
+
+    # Writting input
+    cat ../startin >> input
+
+    echo " "
+    echo "&ATOMS" >> input 
+    #==========================================
+    # CARBON ATOMS
+    #==========================================
+    echo "*C_MT_PBE.psp  KLEINMAN-BYLANDER" >> input
+    echo " LMAX=P" >> input 
+    echo " 32" >> input    
+    typeset -i line_num=0
+    for (( j=1; j<33; j++ ))
+    do
+	line_num=$( echo $i"*96+("$i"+1)*2+"$j | bc -l )
+	x=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f2) 
+	y=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f3)
+	z=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f4)
+	echo " "$x" "$y" "$z >> input 
+    done
+    #==========================================
+    # OXYGEN ATOMS
+    #==========================================
+    echo "*O_MT_PBE.psp  KLEINMAN-BYLANDER" >> input
+    echo " LMAX=P" >> input
+    echo " 64" >> input
+    for (( j=33; j<=97; j++ ))
+    do
+	line_num=$( echo $i"*96+("$i"+1)*2+"$j | bc -l )
+	x=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f2)
+	y=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f3)
+	z=$(echo $(sed $line_num'q;d' ../TRAJEC_wrapped_10fs_0-1000.xyz) | cut -d " " -f4)
+	echo " "$x" "$y" "$z >> input 
+    done
+    #==========================================
+    echo "&END" >> input
+    cd ..
+done

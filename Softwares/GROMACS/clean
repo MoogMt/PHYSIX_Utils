@@ -1,0 +1,3 @@
+#!/bin/bash
+
+rm *xvg *edr *log *cpt \#* *~ *xtc *trr *tpr mdout.mdp

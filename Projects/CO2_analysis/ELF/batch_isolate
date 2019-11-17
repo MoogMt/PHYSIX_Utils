@@ -1,0 +1,15 @@
+#!/bin/bash
+
+counter=0
+folder="ELF_8.82_10ps"
+
+mkdir $folder
+
+until [ $counter -gt 1000 ]; do
+    echo "deadling with "$counter
+    cd $counter"_structure/"
+    cp ELF.cube     "../"$folder"/"$counter"_elf.cube"
+    cp DENSITY.cube "../"$folder"/"$counter"_density.cube"
+    cd ..
+    let counter+=1
+done
