@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH -J D-8.82-3k
+#SBATCH --constraint=HSW24
+#SBATCH --nodes=32
+#SBATCH --ntasks=768
+#SBATCH --ntasks-per-node=24
+#SBATCH --threads-per-core=1
+#SBATCH --time=02:00:00
+#SBATCH --output test.out
+#SBATCH --error  test.err
+#SBATCH --mem=64GB                                                                                                                  
+
+set -x
+
+module purge
+module load intel 
+module load intelmpi/2018.1.163
+
+srun --mpi=pmi2 -K1 --resv-ports -n $SLURM_NTASKS ./occigen_cpmd4.1-plumed1.3.x input >> output
+
+sed "s/reSTART/RESTART/g" -i input
+
+sbatch run
