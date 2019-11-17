@@ -1,0 +1,29 @@
+#!/bin/bash
+
+typeset -i nb_cluster=5
+
+local="/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT"
+
+for V in 8.6 8.82 9.0 9.05 9.1 9.15 9.2 9.25 9.3 9.325 9.375 9.4 9.5 9.8 10.0
+do
+    for T in 1750 2000 2500 3000
+    do
+	folder_local=$local"/"$V"/"$T"K/cluster/"
+	if [ !  -e $folder_local"TRAJEC_cluster.pdb" ]
+	then
+	    continue
+	fi
+	cd $folder_local
+	echo "V-"$V" T-"$T"K"
+	echo $nb_cluster > "nb_cluster.dat"
+	# Clustering
+	mpirun -np 4 piv_clustering.x -filepdb TRAJEC_cluster.pdb -method 2 -coord1_range 1.6 1.8 -algorithm $nb_cluster
+	
+	for (( i=1; i < $nb_cluster ; i++))
+	do
+	    echo $i" in progress"
+	    grep member cluster1.xyz  | cut -d "f" -f2 | cut -d "g" -f1 | cut -d "e" -f2 > $i"_state.dat"
+	done
+	cd $local
+    done
+done
