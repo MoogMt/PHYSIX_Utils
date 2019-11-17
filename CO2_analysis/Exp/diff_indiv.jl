@@ -16,7 +16,7 @@ using LsqFit
 
 function computeBarycenter( positions::Array{T1,2} ) where { T1 <: Real }
     barycenter=zeros(3)
-    nb_atoms=size(positions[1])
+    nb_atoms=size(positions)[1]
     for i=1:3
         for atom=1:nb_atoms
             barycenter[i] += positions[atom,i]
@@ -28,7 +28,7 @@ end
 
 function computeBarycenter( positions::Array{T1,2}, index_types::Vector{T2} ) where { T1 <: Real, T2 <: Int }
     barycenter=zeros(3)
-    nb_atoms=size(positions[1])
+    nb_atoms=size(positions)[1]
     for i=1:3
         for atom in index_types
             barycenter[i] += positions[atom,i]
@@ -41,37 +41,37 @@ end
 function computeBarycenter( positions::Array{T1,3} ) where { T1 <: Real }
     nb_step=size(positions)[1]
     nb_atoms=size(positions)[2]
-    barycenter=size(nb_step,3)
+    barycenter=zeros(nb_step,3)
     for step=1:nb_step
-        barycenter[i,:] = computeBarycenter( positions[step,:,:] )
+        barycenter[step,:] = computeBarycenter( positions[step,:,:] )
     end
-    return barycenter/nb_atoms
+    barycenter /= nb_atoms
+    return barycenter
 end
 
 function computeBarycenter( positions::Array{T1,3}, index_types::Vector{T2} ) where { T1 <: Real, T2 <: Int }
     nb_step=size(positions)[1]
     nb_atoms=size(positions)[2]
-    barycenter=size(nb_step,3)
+    barycenter=zeros(nb_step,3)
     for step=1:nb_step
-        barycenter[i,:] = computeBarycenter( positions[step,:,:], index_types )
+        barycenter[step,:]=computeBarycenter( positions[step,:,:], index_types )
     end
-    return barycenter/nb_atoms
+    barycenter /= nb_atoms
+    return barycenter
 end
 
 function computeBarycenter( positions::Array{T1,3}, types::Vector{T2}, types_names::Vector{T3}, type_masses::Vector{T4} ) where { T1 <: Real, T2 <: AbstractString, T3 <: AbstractString, T4 <: Real }
     nb_step=size(positions)[1]
     nb_atoms=size(positions)[2]
-    nb_types=size(types)[1]
-    barycenter_=zeros(nb_step)
-    for type=1:nb_types
-        index_types=atom_mod.getTypeIndex(types_names,types_names[type])
+    nb_types=size(types_names)[1]
+    barycenter_ = zeros(nb_step,3)
+    for type_=1:nb_types
+        index_types=atom_mod.getTypeIndex(types,types_names[type_])
         nb_atoms_type=size(index_types)[1]
-        barycenter_local=computeBarycenter(positions,index_types)
-        for step=1:nb_step
-            barycenter_local[step] += type_masses[type]*nb_atoms_type*barycenter_local[step]
-        end
+        barycenter_ += type_masses[type_]*nb_atoms_type*computeBarycenter(positions,index_types)
     end
-    return barycenter/nb_atoms
+    barycenter_ /= nb_atoms
+    return barycenter_
 end
 
 # Model for a linear fit
@@ -102,7 +102,7 @@ cell=cell_mod.Cell_param(V,V,V)
 
 positions=atom_mod.getPositions(traj)
 
-barycenter=computeBarycenter(positions,traj[1].names,["C","O"],[6.0,8.0])
+barycenter_global=computeBarycenter(positions,traj[1].names,["C","O"],[6.0,8.0])
 
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
