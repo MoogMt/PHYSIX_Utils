@@ -20,20 +20,21 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=9.8
-T=3000
+V=8.82
+T=2500
 runs=[1,2,3,4]
+
+folder_local=string(folder_base,V,"/",T,"K/")
 
 for nbrun in runs
 
     # Input folder
-    folder_in=string(folder_base,V,"/",T,"K/",nbrun,"-run/")
-    file_input=string(folder_in,"input")
+    folder_in=string(folder_local,nbrun,"-run/")
 
+    file_input=string(folder_in,"input")
     if ! isfile(file_input)
         break
     end
-
     time_step=cpmd.readInputTimestep( file_input )
     stride_stress=cpmd.readIntputStrideStress( file_input )
     stride_traj=cpmd.readIntputStrideTraj(file_input)
@@ -72,8 +73,9 @@ for nbrun in runs
                 break
             end
         end
-        print("Connexion ",nbrun," ",nbrun-1," at : ",connexion_step,"\n")
-        print("That is ",size_traj2-connexion_step," step before last\n")
+        if size_traj2 - connexion_step > stride_traj
+            print("CHECK FOR CUT, V=",V," T=",T,"K runs:",nbrun-1,"-",nbrun,"\n")
+        end
     end
 
 end
