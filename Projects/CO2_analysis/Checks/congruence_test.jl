@@ -13,13 +13,14 @@ using correlation
 using conversion
 using cpmd
 using press_stress
+using std_analysis
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=10.0
+V=9.8
 T=3000
 runs=[1,2,3,4]
 
@@ -59,10 +60,20 @@ for nbrun in runs
     end
     size_traj=size(traj)[1]
 
-    for nbrun_2=1:nbrun-1
-        folder_in_2=string(folder_base,V,"/",T,"K/",nbrun_2,"-run/")
+    if nbrun > 1
+        folder_in_2=string(folder_base,V,"/",T,"K/",Int(nbrun-1),"-run/")
         file_traj_2=string(folder_in,"TRAJEC.xyz")
         traj_2,test=filexyz.readFastFile(file_traj_2)
+        size_traj2=size(traj_2)[1]
+        connexion_step=0
+        for step=size_traj:1
+            if std_analysis.computeRMSD(traj[step],traj_2[size_traj2]) < 0.001
+                connexion_step=step
+                break
+            end
+        end
+        print("Connexion ",nbrun," ",nbrun-1," at : ",connexion_step,"\n")
+        print("That is",size_traj2-step," step before last\n")
     end
 
 end
