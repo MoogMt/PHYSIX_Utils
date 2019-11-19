@@ -5,6 +5,8 @@ using conversion
 export readInputTimestep
 export readEnergy, readPressure, readStress
 
+# Read input
+#==============================================================================#
 function readInputTimestep( file_input_path::T1 ) where { T1 <: AbstractString }
     # Read input
     file_in=open(file_input_path)
@@ -26,7 +28,6 @@ function readInputTimestep( file_input_path::T1 ) where { T1 <: AbstractString }
     # Conversion to fs
     return conversion.hatime2fs*timestep
 end
-
 function readIntputStrideStress( file_input_path::T1 ) where { T1 <: AbstractString }
     # Readinput
     file_in=open(file_input_path)
@@ -47,7 +48,6 @@ function readIntputStrideStress( file_input_path::T1 ) where { T1 <: AbstractStr
 
     return stride_stress
 end
-
 function readIntputStrideTraj( file_input_path::T1 ) where { T1 <: AbstractString }
     # Readinput
     file_in=open(file_input_path)
@@ -60,7 +60,7 @@ function readIntputStrideTraj( file_input_path::T1 ) where { T1 <: AbstractStrin
     for line_nb=1:nb_lines
         keywords=split(lines[line_nb])
         if size(keywords)[1] > 0
-            if keywords[1] == "TRAJECTORY" 
+            if keywords[1] == "TRAJECTORY"
                 stride_traj = parse(Float64,split(lines[line_nb+1])[1])
             end
         end
@@ -68,7 +68,10 @@ function readIntputStrideTraj( file_input_path::T1 ) where { T1 <: AbstractStrin
 
     return stride_traj
 end
+#==============================================================================#
 
+# Read Files
+#==============================================================================#
 function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
     #--------------
     # Reading file
@@ -102,7 +105,6 @@ function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
 
     return  temperature, e_ks, e_class, msd, time
 end
-
 function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: AbstractString, T2 <: Bool, T3 <: Int }
     #--------------
     # Reading file
@@ -172,7 +174,6 @@ function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: Abs
 
     return pressure
 end
-
 function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
     #--------------
     # Reading file
@@ -198,5 +199,6 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
 
     return stress
 end
+#==============================================================================#
 
 end
