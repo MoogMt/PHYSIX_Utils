@@ -174,6 +174,27 @@ function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: Abs
 
     return pressure
 end
+function readStress( file_name::T1 ) where { T1 <: AbstractString, T2 <: Int }
+    # Reading file
+    file=open(file_name);
+    lines=readlines(file);
+    close(file);
+
+    # Le fichier est composés de blocs de 4 lignes:
+    # 1 ligne pour le time step
+    # 3 lignes pour le stress tensor
+    nb_stress_points=Int(trunc(size(lines)[1]/4))
+    stress=zeros(Real,nb_stress_points,3,3)
+    for i=1:nb_stres_points
+        for j=1:3
+            for k=1:3
+                stress[i,j] = parse(Float64,split(lines[1+4*(i-1)*stride+j])[k])
+            end
+        end
+    end
+
+    return stress
+end
 function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
     #--------------
     # Reading file
