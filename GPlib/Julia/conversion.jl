@@ -1,31 +1,29 @@
 module conversion
 
-AU2Pascal=2.9421912e13
-Pascal2AU=1/AU2Pascal
+# Pressure
+aU2Pascal=2.9421912*10^(13)
+pascal2AU=1/AU2Pascal
 
-THz2cm=33.3565
+# Frequency
+tHz2cm=33.3565
 cm2THz=1/33.3565
 
-hartree=4.35974417e-18;
+# Energy
+hartree2SI=4.35974417e-18;
+sI2hartree=1/hartree2SI
+ry2eV=13.605693009
+eV2Ry=1/ry2eV
 
-function ry2eV( energy::T ) where { T <: Real }
-  return energy*13.605693009
-end
+# Frequency
+hatime2fs=2.4188843265857*10^(-2)
+fs2hatime=1/Hatime2fs
 
-function ev2Ry( energy::T ) where { T <: Real }
-  return energy/13.605693009
-end
+# Time
+fs2ps=10^(-3)
+ps2fs=10^(3)
 
-function ha2eV( energy::T ) where { T <: Real }
-  return energy/27.2
-end
-
-function bohr2Ang( distance::T ) where { T <: Real }
-  return distance*0.5291772109
-end
-
-function Ang2Bohr( distance::T ) where { T <: Real }
-  return distance/0.5291772109
-end
+# Distance
+bohr2Ang=0.5291772109
+ang2Bohr=1/bohr2Ang
 
 end

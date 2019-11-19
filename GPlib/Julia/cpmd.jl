@@ -1,13 +1,17 @@
 module cpmd
 
+using conversion
+
 export readInputTimestep
 export readEnergy, readPressure, readStress
 
-function readInputTimestep( file_name::T1 ) where { T1 <: AbstractString }
-    file_in=open(file_name)
+function readInputTimestep( file_input_path::T1 ) where { T1 <: AbstractString }
+    # Read input
+    file_in=open(file_input_path)
     lines=readlines(file_in)
     close(file_in)
 
+    # Extract timestep
     timestep=0
     nb_lines=size(lines)[1]
     for line_nb=1:nb_lines
@@ -19,7 +23,29 @@ function readInputTimestep( file_name::T1 ) where { T1 <: AbstractString }
         end
     end
 
-    return timestep
+    # Conversion to fs
+    return conversion.Hatime2fs*timestep
+end
+
+function strideStress( file_input_path::T1 ) where { T1 <: AbstractString }
+    # Readinput
+    file_in=open(file_input_path)
+    lines=readlines(file_in)
+    close(file_in)
+
+    # Extract stride of STRESS tensor
+    stride_stress = 0
+    nb_lines=size(lines)[1]
+    for line_nb=1:nb_lines
+        keywords=split(lines[line_nb])
+        if size(keywords)[1] > 0
+            if keywords[1] == "STRESS TENSOR"
+                stride_stress = parse(Float64,split(lines[line_nb+1])[1])
+            end
+        end
+    end
+
+    return stride_stress
 end
 
 function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
