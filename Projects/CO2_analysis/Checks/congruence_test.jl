@@ -19,11 +19,13 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=9.8
+V=10.0
 T=3000
 
+nbrun=1
+
 # Input folder
-folder_in=string(folder_base,V,"/",T,"K/1-run/")
+folder_in=string(folder_base,V,"/",T,"K/",nbrun,"-run/")
 file_input=string(folder_in,"input")
 
 time_step=cpmd.readInputTimestep( file_input )
