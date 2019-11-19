@@ -72,7 +72,7 @@ end
 
 # Read Files
 #==============================================================================#
-function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
+function readEnergyFile( file_name::T1 ) where { T1 <: AbstractString }
     #--------------
     # Reading file
     #----------------------
@@ -105,6 +105,64 @@ function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
 
     return  temperature, e_ks, e_class, msd, time
 end
+
+function readStress( file_name::T1 ) where { T1 <: AbstractString, T2 <: Int }
+    # Reading file
+    file=open(file_name);
+    lines=readlines(file);
+    close(file);
+
+    # Le fichier est composés de blocs de 4 lignes:
+    # 1 ligne pour le time step
+    # 3 lignes pour le stress tensor
+    nb_stress_points=Int(trunc(size(lines)[1]/4))
+    stress=zeros(Real,nb_stress_points,3,3)
+    for step=1:nb_stress_points
+        for i=1:3
+            for j=1:3
+                keywords=split(lines[1+4*(step-1)+i])
+                if keywords[1] == "TOTAL"
+                    print("check ",step,"\n")
+                    return zeros(1,1), false
+                end
+                stress[step,i,j] = parse(Float64,keywords[j])
+            end
+        end
+    end
+
+    return stress, true
+end
+function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
+    #--------------
+    # Reading file
+    #----------------------
+    file=open(file_name);
+    lines=readlines(file);
+    close(file);
+    #-----------------------
+
+    # Creation de variables
+    #----------------------------------------------------------
+    nb_stress_points=Int(trunc(size(lines)[1]/(4*stride)))
+    stress=Array{Real}(nb_stress_points,3,3)
+    #----------------------------------------------------------
+    for step=1:nb_stress_points
+        for i=1:3
+            for j=1:3
+                keywords=split(lines[1+4*(step-1)*stride+i])
+                if keywords[1] == "TOTAL"
+                    print("check ",step,"\n")
+                    return zeros(1,1), false
+                end
+                stress[step,i,j] = parse(Float64,keywords[j])
+            end
+        end
+    end
+    #----------------------------------------------------------
+
+    return stress,true
+end
+
 function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: AbstractString, T2 <: Bool, T3 <: Int }
     #--------------
     # Reading file
@@ -173,52 +231,6 @@ function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: Abs
     end
 
     return pressure
-end
-function readStress( file_name::T1 ) where { T1 <: AbstractString, T2 <: Int }
-    # Reading file
-    file=open(file_name);
-    lines=readlines(file);
-    close(file);
-
-    # Le fichier est composés de blocs de 4 lignes:
-    # 1 ligne pour le time step
-    # 3 lignes pour le stress tensor
-    nb_stress_points=Int(trunc(size(lines)[1]/4))
-    stress=zeros(Real,nb_stress_points,3,3)
-    for i=1:nb_stres_points
-        for j=1:3
-            for k=1:3
-                stress[i,j] = parse(Float64,split(lines[1+4*(i-1)*stride+j])[k])
-            end
-        end
-    end
-
-    return stress
-end
-function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
-    #--------------
-    # Reading file
-    #----------------------
-    file=open(file_name);
-    lines=readlines(file);
-    close(file);
-    #-----------------------
-
-    # Creation de variables
-    #----------------------------------------------------------
-    nb_stress_points=Int(trunc(size(lines)[1]/(4*stride)))
-    stress=Array{Real}(nb_stress_points,6)
-    #----------------------------------------------------------
-    for i=1:nb_stres_points
-        for j=1:3
-            for k=1:3
-                stress[i,j] = parse(Float64,split(lines[1+4*(i-1)*stride+j])[k])
-            end
-        end
-    end
-    #----------------------------------------------------------
-
-    return stress
 end
 #==============================================================================#
 

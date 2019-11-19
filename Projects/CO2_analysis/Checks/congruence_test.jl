@@ -29,5 +29,5 @@ time_step=cpmd.readInputTimestep( file_input )
 stride_stress=cpmd.readIntputStrideStress( file_input )
 stride_traj=cpmd.readIntputStrideTraj(file_input)
 
-file_stres=string(folder_in,"STRESS")
-file_stress=cpmd.readStress()
+file_stress=string(folder_in,"STRESS")
+Stress=cpmd.readStress(file_stress)
