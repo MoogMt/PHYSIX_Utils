@@ -2,7 +2,7 @@ module cpmd
 
 using conversion
 
-export readInputTimestep
+export readInputTimestep, readIntputStrideStress, readIntputStrideTraj
 export readEnergy, readPressure, readStress
 
 # Read input
@@ -162,6 +162,7 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
 
     return stress,true
 end
+
 
 function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: AbstractString, T2 <: Bool, T3 <: Int }
     #--------------
