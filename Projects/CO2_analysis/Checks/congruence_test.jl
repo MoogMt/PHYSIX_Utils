@@ -67,13 +67,13 @@ for nbrun in runs
         size_traj2=size(traj_2)[1]
         connexion_step=0
         for step=size_traj:1
-            if std_analysis.computeRMSD(traj[step],traj_2[size_traj2]) < 0.001
+            if std_analysis.computeRMSD(traj[step],traj_2[size_traj2]) < 1
                 connexion_step=step
                 break
             end
         end
         print("Connexion ",nbrun," ",nbrun-1," at : ",connexion_step,"\n")
-        print("That is",size_traj2-step," step before last\n")
+        print("That is ",size_traj2-connexion_step," step before last\n")
     end
 
 end
