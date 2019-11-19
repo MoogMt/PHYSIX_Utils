@@ -32,5 +32,7 @@ stride_traj=cpmd.readIntputStrideTraj(file_input)
 
 file_stress=string(folder_in,"STRESS")
 stress,test=cpmd.readStress(file_stress)
-
 pressure=press_stress.computePressure(stress)
+
+file_energy=string(folder_in,"ENERGIES")
+temperature, e_pot,e_tot,msd,comp_time,test=cpmd.readEnergyFile( file_energy )
