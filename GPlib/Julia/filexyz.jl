@@ -1,6 +1,6 @@
 module filexyz
 
-export getNbSteps, readFastFile, readStep, readEmpty, read, write
+export getNbSteps, readFastFile, readStep, readEmpty, readXYZ, writeXYZ
 
 using atom_mod
 using cell_mod
@@ -119,7 +119,7 @@ function skipStep( file_hand::T1 ) where { T1 <: IO }
 end
 
 # Read a whole file with memory management
-function read( file::T1 ) where { T1 <: AbstractString }
+function readXYZ( file::T1 ) where { T1 <: AbstractString }
   nb_steps=getNbSteps(file)
   file_hand=open(file)
   atoms_sim=Vector{AtomList}(undef,nb_steps)
@@ -131,7 +131,7 @@ function read( file::T1 ) where { T1 <: AbstractString }
 end
 
 # Read a file with a given stride
-function read( file::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
+function readXYZ( file::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
   nb_steps=getNbSteps(file)
   file_hand=open(file)
   atoms_sim=Vector{AtomList}(Int(trunc(nb_steps/stride)))
@@ -148,7 +148,7 @@ function read( file::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
 end
 
 # read a whole file with a stride and starting at a specified steps
-function read( file::T1, stride::T2 , start_step::T3 ) where { T1 <: AbstractString, T2 <: Int , T3 <: Int }
+function readXYZ( file::T1, stride::T2 , start_step::T3 ) where { T1 <: AbstractString, T2 <: Int , T3 <: Int }
   nb_steps=getNbSteps(file)
   file_hand=open(file)
   atoms_sim=Vector{AtomList}(Int(trunc((nb_steps-start_step)/stride)))
@@ -170,7 +170,7 @@ end
 
 #---------------------------------------------------------------------------------
 # write a step using a file pointers
-function write( file_handle::T1, atoms::T2 ) where { T1 <: IO, T2 <: atom_mod.AtomList }
+function writeXYZ( file_handle::T1, atoms::T2 ) where { T1 <: IO, T2 <: atom_mod.AtomList }
   Base.write(file_handle,string(size(atoms.names)[1],"\n"))
   Base.write(file_handle,string("STEP: X\n"))
   for i=1:size( atoms.names )[1]
@@ -183,7 +183,7 @@ function write( file_handle::T1, atoms::T2 ) where { T1 <: IO, T2 <: atom_mod.At
 end
 
 # write the data into a new file
-function write( file::T1, atoms::T2 ) where { T1 <: AbstractString, T2 <: atom_mod.AtomList }
+function writeXYZ( file::T1, atoms::T2 ) where { T1 <: AbstractString, T2 <: atom_mod.AtomList }
   out=open(file,"w")
   Base.write(out,string(size(atoms.names)[1],"\n"))
   Base.write(out,string("STEP: X\n"))
@@ -198,7 +198,7 @@ function write( file::T1, atoms::T2 ) where { T1 <: AbstractString, T2 <: atom_m
 end
 
 # Write several stepss
-function write( file::T1, atoms_blocks::Vector{T2} ) where { T1 <: AbstractString, T2 <: atom_mod.AtomList }
+function writeXYZ( file::T1, atoms_blocks::Vector{T2} ) where { T1 <: AbstractString, T2 <: atom_mod.AtomList }
   f=open(file,"w")
   for atoms in atoms_blocks
     write(f,atoms)
