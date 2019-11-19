@@ -23,9 +23,8 @@ T=3000
 
 # Input folder
 folder_in=string(folder_base,V,"/",T,"K/1-run/")
-
 file_input=string(folder_in,"input")
 
 time_step=cpmd.readInputTimestep( file_input )
-
 stride_stress=cpmd.readIntputStrideStress( file_input )
+stride_traj=cpmd.readIntputStrideTraj(file_input)

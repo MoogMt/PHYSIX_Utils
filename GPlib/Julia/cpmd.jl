@@ -48,6 +48,27 @@ function readIntputStrideStress( file_input_path::T1 ) where { T1 <: AbstractStr
     return stride_stress
 end
 
+function readIntputStrideTraj( file_input_path::T1 ) where { T1 <: AbstractString }
+    # Readinput
+    file_in=open(file_input_path)
+    lines=readlines(file_in)
+    close(file_in)
+
+    # Extract stride of STRESS tensor
+    stride_traj = 0
+    nb_lines=size(lines)[1]
+    for line_nb=1:nb_lines
+        keywords=split(lines[line_nb])
+        if size(keywords)[1] > 0
+            if keywords[1] == "TRAJECTORY" 
+                stride_traj = parse(Float64,split(lines[line_nb+1])[1])
+            end
+        end
+    end
+
+    return stride_traj
+end
+
 function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
     #--------------
     # Reading file
