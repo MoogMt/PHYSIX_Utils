@@ -22,7 +22,7 @@ folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 # T,V
 V=9.8
 T=3000
-runs=[2]
+runs=[1,2,3,4]
 
 for nbrun in runs
 
