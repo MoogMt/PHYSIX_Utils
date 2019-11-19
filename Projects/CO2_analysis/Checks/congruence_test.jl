@@ -11,3 +11,19 @@ using markov
 using fftw
 using correlation
 using conversion
+using cpmd
+
+# Folder for data
+folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
+folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
+
+# T,V
+V=10.0
+T=3000
+
+# Input folder
+folder_in=string(folder_base,V,"/",T,"K/1-run/")
+
+file_input=string(folder_in,"input")
+
+time_step=cpmd.readInputTimestep( file_input )

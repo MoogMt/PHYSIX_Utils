@@ -1,10 +1,25 @@
 module cpmd
 
-export readInputTimeStride
+export readInputTimestep
 export readEnergy, readPressure, readStress
 
-function readInputTimeStride( file_name::T1 ) where { T1 <: AbstractString }
+function readInputTimestep( file_name::T1 ) where { T1 <: AbstractString }
+    file_in=open(file_name)
+    lines=readlines(file_in)
+    close(file_in)
 
+    timestep=0
+    nb_lines=size(lines)[1]
+    for line_nb=1:nb_lines
+        keywords=split(lines[line_nb])
+        if size(keywords)[1] > 0
+            if keywords[1] == "TIMESTEP"
+                timestep=parse(Float64,split(lines[line_nb+1])[1])
+            end
+        end
+    end
+
+    return timestep
 end
 
 function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
