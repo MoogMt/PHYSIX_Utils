@@ -66,8 +66,11 @@ for nbrun in runs
         traj_2,test=filexyz.readFastFile(file_traj_2)
         size_traj2=size(traj_2)[1]
         connexion_step=0
-        for step=size_traj:1
-            print("RMSD:",std_analysis.computeRMSD(traj[1],traj_2[step]),"\n")
+        for step=size_traj2:-1:1
+            if std_analysis.computeRMSD(traj[1],traj_2[step]) < 0.001
+                connexion_step=step
+                break
+            end
         end
         print("Connexion ",nbrun," ",nbrun-1," at : ",connexion_step,"\n")
         print("That is ",size_traj2-connexion_step," step before last\n")
