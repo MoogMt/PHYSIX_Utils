@@ -12,6 +12,7 @@ using fftw
 using correlation
 using conversion
 using cpmd
+using press_stress
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
@@ -31,3 +32,5 @@ stride_traj=cpmd.readIntputStrideTraj(file_input)
 
 file_stress=string(folder_in,"STRESS")
 stress,test=cpmd.readStress(file_stress)
+
+pressure_=pressure.computePressure(stress)
