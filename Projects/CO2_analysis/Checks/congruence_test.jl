@@ -18,7 +18,7 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=10.0
+V=9.8
 T=3000
 
 # Input folder
@@ -30,4 +30,4 @@ stride_stress=cpmd.readIntputStrideStress( file_input )
 stride_traj=cpmd.readIntputStrideTraj(file_input)
 
 file_stress=string(folder_in,"STRESS")
-Stress=cpmd.readStress(file_stress)
+stress=cpmd.readStress(file_stress)

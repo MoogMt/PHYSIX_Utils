@@ -117,13 +117,17 @@ function readStress( file_name::T1 ) where { T1 <: AbstractString, T2 <: Int }
     # 3 lignes pour le stress tensor
     nb_stress_points=Int(trunc(size(lines)[1]/4))
     stress=zeros(Real,nb_stress_points,3,3)
+    offset=0
     for step=1:nb_stress_points
         for i=1:3
             for j=1:3
-                keywords=split(lines[1+4*(step-1)+i])
+                keywords=split(lines[1+4*(step-1)+i+offset])
                 if keywords[1] == "TOTAL"
-                    print("check ",step,"\n")
-                    return zeros(1,1), false
+                    if offset == 1
+                        print("DOUBLE SIM SPOTTED at : ",step,"\n")
+                        return zeros(1,1), false
+                    end
+                    offset += 1
                 end
                 stress[step,i,j] = parse(Float64,keywords[j])
             end
@@ -145,14 +149,18 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
     #----------------------------------------------------------
     nb_stress_points=Int(trunc(size(lines)[1]/(4*stride)))
     stress=Array{Real}(nb_stress_points,3,3)
+    offset=0
     #----------------------------------------------------------
     for step=1:nb_stress_points
         for i=1:3
             for j=1:3
-                keywords=split(lines[1+4*(step-1)*stride+i])
+                keywords=split(lines[1+4*(step-1)*stride+i+offset])
                 if keywords[1] == "TOTAL"
-                    print("check ",step,"\n")
-                    return zeros(1,1), false
+                    if offset == 1
+                        print("DOUBLE SIM SPOTTED at : ",step,"\n")
+                        return zeros(1,1), false
+                    end
+                    offset+=1
                 end
                 stress[step,i,j] = parse(Float64,keywords[j])
             end
@@ -163,76 +171,6 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
     return stress,true
 end
 
-
-function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: AbstractString, T2 <: Bool, T3 <: Int }
-    #--------------
-    # Reading file
-    #----------------------
-    file=open(file_name);
-    lines=readlines(file);
-    close(file);
-    #-----------------------
-
-    nb_lines=size(lines)[1]
-    nb_pressure_points=Int(trunc(nb_lines/(4*stride)))
-    pressure=Vector{Real}(undef,nb_pressure_points)
-    for i=1:nb_pressure_points
-        pressure[i]=0
-    end
-    if ! diag
-        for i=1:nb_pressure_points
-            for j=1:3
-                if split(lines[1+4*(i-1)*stride+j])[j] == "TOTAL"
-                    print("Target is line ", 1+4*(i-1)*stride+j)
-                    print(" CHECK TOTAL\n")
-                    print("element=",j,"\n")
-                    print(lines[1+4*(i-1)*stride+j],"\n")
-                    quit()
-                end
-                if split(lines[1+4*(i-1)*stride+j])[j] == "STRESS"
-                    print("Target is line ", 1+4*(i-1)*stride+j)
-                    print(" CHECK STRESS\n")
-                    print("element=",j,"\n")
-                    print(lines[1+4*(i-1)*stride+j],"\n")
-                    quit()
-                end
-                if split(lines[1+4*(i-1)*stride+j])[j] == "STEP:"
-                    print("Target is line ", 1+4*(i-1)*stride+j)
-                    print(" CHECK STEP\n")
-                    print("element=",j,"\n")
-                    print(lines[1+4*(i-1)*stride+j],"\n")
-                    quit()
-                end
-                if split(lines[1+4*(i-1)*stride+j])[j] == "TENSOR"
-                    print("Target is line ", 1+4*(i-1)*stride+j)
-                    print(" CHECK TENSOR\n")
-                    print("element=",j,"\n")
-                    print(lines[1+4*(i-1)*stride+j],"\n")
-                    quit()
-                end
-                pressure[i] += parse(Float64,split(lines[1+4*(i-1)*stride+j])[j])
-            end
-            pressure[i] = pressure[i]/3.
-        end
-    else
-        pressure_matrix=zeros(3,3)
-        for i=1:nb_pressure_points
-            for j=1:3
-                line=split(lines[1+4*(i-1)*stride+j])
-                for k=1:3
-                    pressure_matrix[j,k]=parse(Float64,line[k])
-                end
-            end
-            eigen_press=eigvals(pressure_matrix)
-            for l=1:3
-                pressure[i] += eigen_press[l]
-            end
-            pressure[i] = pressure[i]/3.
-        end
-    end
-
-    return pressure
-end
 #==============================================================================#
 
 end
