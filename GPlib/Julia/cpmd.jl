@@ -24,10 +24,10 @@ function readInputTimestep( file_input_path::T1 ) where { T1 <: AbstractString }
     end
 
     # Conversion to fs
-    return conversion.Hatime2fs*timestep
+    return conversion.hatime2fs*timestep
 end
 
-function strideStress( file_input_path::T1 ) where { T1 <: AbstractString }
+function readIntputStrideStress( file_input_path::T1 ) where { T1 <: AbstractString }
     # Readinput
     file_in=open(file_input_path)
     lines=readlines(file_in)
@@ -39,7 +39,7 @@ function strideStress( file_input_path::T1 ) where { T1 <: AbstractString }
     for line_nb=1:nb_lines
         keywords=split(lines[line_nb])
         if size(keywords)[1] > 0
-            if keywords[1] == "STRESS TENSOR"
+            if keywords[1] == "STRESS" && keywords[2] == "TENSOR"
                 stride_stress = parse(Float64,split(lines[line_nb+1])[1])
             end
         end

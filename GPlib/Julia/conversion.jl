@@ -2,7 +2,7 @@ module conversion
 
 # Pressure
 aU2Pascal=2.9421912*10^(13)
-pascal2AU=1/AU2Pascal
+pascal2AU=1/aU2Pascal
 
 # Frequency
 tHz2cm=33.3565
@@ -16,7 +16,7 @@ eV2Ry=1/ry2eV
 
 # Frequency
 hatime2fs=2.4188843265857*10^(-2)
-fs2hatime=1/Hatime2fs
+fs2hatime=1/hatime2fs
 
 # Time
 fs2ps=10^(-3)
