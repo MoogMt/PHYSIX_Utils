@@ -67,8 +67,7 @@ for nbrun in runs
         size_traj2=size(traj2)[1]
         connexion_step=0
         for step=size_traj2:-1:1
-            print("test: ",traj2[step].names,"\n")
-            if std_analysis.computeRMSD(traj[1],traj2[step]) < 0.001
+            if std_analysis.computeRMSD(traj[1],traj2[step]) < 0.01
                 connexion_step=step
                 break
             end
