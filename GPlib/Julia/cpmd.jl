@@ -1,8 +1,13 @@
 module cpmd
 
+export readInputTimeStride
 export readEnergy, readPressure, readStress
 
-function readEnergy( file_name:: AbstractString )
+function readInputTimeStride( file_name::T1 ) where { T1 <: AbstractString }
+
+end
+
+function readEnergy( file_name::T1 ) where { T1 <: AbstractString }
     #--------------
     # Reading file
     #----------------------
@@ -36,7 +41,7 @@ function readEnergy( file_name:: AbstractString )
     return  temperature, e_ks, e_class, msd, time
 end
 
-function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
+function readPressure( file_name::T1 , diag::T2 , stride::T3 ) where { T1 <: AbstractString, T2 <: Bool, T3 <: Int }
     #--------------
     # Reading file
     #----------------------
@@ -106,7 +111,7 @@ function readPressure( file_name::AbstractString , diag::Bool , stride::Int)
     return pressure
 end
 
-function readStress( file_name::AbstractString, stride::Int )
+function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T2 <: Int }
     #--------------
     # Reading file
     #----------------------
