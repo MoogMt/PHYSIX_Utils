@@ -30,4 +30,4 @@ stride_stress=cpmd.readIntputStrideStress( file_input )
 stride_traj=cpmd.readIntputStrideTraj(file_input)
 
 file_stress=string(folder_in,"STRESS")
-stress=cpmd.readStress(file_stress)
+stress,test=cpmd.readStress(file_stress)

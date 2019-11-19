@@ -76,6 +76,10 @@ function readEnergyFile( file_name::T1 ) where { T1 <: AbstractString }
     #--------------
     # Reading file
     #----------------------
+    if !isfile(file_name)
+        return zeros(1,1),zeros(1,1),zeros(1,1),zeros(1,1),zeros(1,1),false
+    end
+
     file=open(file_name);
     lines=readlines(file);
     close(file);
@@ -103,9 +107,8 @@ function readEnergyFile( file_name::T1 ) where { T1 <: AbstractString }
     end
     #----------------------------------------------
 
-    return  temperature, e_ks, e_class, msd, time
+    return  temperature, e_ks, e_class, msd, time, true
 end
-
 function readStress( file_name::T1 ) where { T1 <: AbstractString, T2 <: Int }
     # Reading file
     file=open(file_name);
@@ -170,7 +173,6 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
 
     return stress,true
 end
-
 #==============================================================================#
 
 end
