@@ -64,10 +64,10 @@ for nbrun in runs
         folder_in_2=string(folder_base,V,"/",T,"K/",Int(nbrun-1),"-run/")
         file_traj_2=string(folder_in,"TRAJEC.xyz")
         traj2,test=filexyz.readFastFile(file_traj_2)
-        print("test: ",traj2,"\n")
-        size_traj2=size(traj_2)[1]
+        size_traj2=size(traj2)[1]
         connexion_step=0
         for step=size_traj2:-1:1
+            print("test: ",traj2[step],"\n")
             if std_analysis.computeRMSD(traj[1],traj2[step]) < 0.001
                 connexion_step=step
                 break
