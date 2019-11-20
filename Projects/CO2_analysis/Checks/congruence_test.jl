@@ -13,14 +13,14 @@ using correlation
 using conversion
 using cpmd
 using press_stress
-using std_analysis
+using exp_data
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=9.15
+V=9.2
 T=3000
 runs=[1,2,3,4]
 
