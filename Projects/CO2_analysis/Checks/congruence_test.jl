@@ -70,7 +70,7 @@ for nbrun in runs
         size_traj2=size(traj2)[1]
         connexion_step=-1
         for step=size_traj2:-1:1
-            if std_analysis.computeRMSD(traj[1],traj2[step]) < cut_off_rmsd
+            if exp_data.computeRMSD(traj[1],traj2[step]) < cut_off_rmsd
                 connexion_step=step
                 break
             end
