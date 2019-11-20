@@ -123,16 +123,18 @@ function readStress( file_name::T1 ) where { T1 <: AbstractString, T2 <: Int }
     offset=0
     for step=1:nb_stress_points
         for i=1:3
-            for j=1:3
-                keywords=split(lines[1+4*(step-1)+i+offset])
-                if keywords[1] == "TOTAL"
-                    if offset == 1
-                        print("DOUBLE SIM SPOTTED at : ",step,"\n")
-                        return zeros(1,1), false
-                    end
-                    offset += 1
+            keywords=split(lines[1+4*(step-1)+i+offset])
+            if keywords[1] == "TOTAL"
+                if offset == 1
+                    print("DOUBLE SIM SPOTTED at step : ",step,"\n")
+                    print("LINE: ",1+4*(step-1)+i+offset,"\n")
+                    return zeros(1,1), false
                 end
-                stress[step,i,j] = parse(Float64,keywords[j])
+                offset += 1
+            else
+                for j=1:3
+                    stress[step,i,j] = parse(Float64,keywords[j])
+                end
             end
         end
     end
