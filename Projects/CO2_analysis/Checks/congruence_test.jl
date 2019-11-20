@@ -20,11 +20,11 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=9.35
+V=10.0
 T=3000
 runs=[1,2,3,4]
 
-cut_off_rmsd=0.2
+cut_off_rmsd=0.1
 
 folder_local=string(folder_base,V,"/",T,"K/")
 
