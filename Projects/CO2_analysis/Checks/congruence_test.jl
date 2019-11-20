@@ -20,11 +20,11 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=10.0
-T=3000
+V=9.8
+T=1750
 runs=[1,2,3,4]
 
-cut_off_rmsd=0.1
+cut_off_rmsd=0.2
 
 folder_local=string(folder_base,V,"/",T,"K/")
 
@@ -78,6 +78,9 @@ for nbrun in runs
         if size_traj2 - connexion_step > stride_traj
             print("CHECK FOR CUT, V=",V," T=",T,"K runs:",nbrun-1,"-",nbrun,"\n")
             print("connexion step: ",connexion_step,"\n")
+            for step=size_traj2:-1:size_traj2-stride_traj
+                print("step: ",step," RMSD: ",exp_data.computeRMSD(traj[1],traj2[step]),"\n")
+            end
         end
     end
 
