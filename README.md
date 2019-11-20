@@ -1,9 +1,10 @@
 # PHYSIX_Utils
 
-Repository for all usefull scripts and codes for the PHYSIX team of IMPMC at Sorbonne University
+General utilitary repo for the PHYSIX team of IMPMC
 
 Contains:
-- GPlib: Set of functions or bits of codes in several languages (C++,Fortran,Julia,Python) that are used to build the other codes that are in the repository. Should be used to write scripts in order to avoid dealing with software-specific format and not rewrite already written code.
-- LAMMPS, GROMACS, QE, CPMD, PLUMED: Scripts that works as is in various languages (C++,Julia) allowing to do post-processing or input generation for the software in question.
+- GPlib: library containing general codes to make easy analysis of AI,MD,AIMD simulations written in several languages: Julia, Fortran, C++, Python (quality varies widely with languages)
+- Softwares: contains sets of useful codes for MD and AIMD softwares (GROMACS, CPMD, CP2K, QE, etc...) built with GPlib
+- Supercomputers: Examples of job scripts and compilation recipies and general advises for Supercomputers
 
 This project is its infancy, any input, correction or comment is welcome. 
