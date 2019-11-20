@@ -51,7 +51,6 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 
 
     return freq, vdos, test
 end
-
 function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , to_nm::T4, dt::T5 ) where { T1 <: AbstractString, T2 <: AbstractString, T3 <: Real, T4 <: Real, T5 <: Real }
 
     freq,vdos,test=vdosFromPosition( file_traj , max_lag_frac , to_nm, dt )
@@ -111,7 +110,6 @@ function computeGr( file_in::T1, a::T2, rmin::T3, rmax::T4, dr::T5 ) where { T1 
 
     return gr,test
 end
-
 function computeGr( file_in::T1, file_out::T2, V::T3, rmin::T4, rmax::T5, dr::T6 ) where { T1 <: AbstractString, T2 <: AbstractString, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real }
 
     gr,test=computeGr(file_in,V,rmin,rmax,dr)
@@ -151,7 +149,6 @@ function computeFQ( gr::Vector{T1}, rmin::T2, rmax::T3, dr::T4, rho::T5 ) where 
     end
     return q, fq
 end
-
 function computeFQ( file_out::T1, gr::Vector{T2}, rmin::T3, rmax::T4, dr::T5, rho::T6 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real, T6 <: Real }
     q,fq=computeFQ(gr,rmin,rmax,dr,rho)
 
@@ -164,6 +161,26 @@ function computeFQ( file_out::T1, gr::Vector{T2}, rmin::T3, rmax::T4, dr::T5, rh
     close(file_o)
 
     return q,fq
+end
+#==============================================================================#
+
+# RMSD
+#==============================================================================#
+function computeRMSD( structure1::T1, structure2::T2 ) where { T1 <: atom_mod.AtomList, T2 <: AtomList }
+    nb_atoms1=size(structure1.names)[1]
+    nb_atoms2=size(structure2.names)[1]
+    if nb_atoms1 != nb_atoms2
+        print("Comparing two structures with different number of atoms. Stopping now!")
+        return -1
+    end
+    rmsd=0
+    for atom=1:nb_atoms1
+        for i=1:3
+            dist=structure1.positions[atom,i]-structure2.positions[atom,i]
+            rmsd += dist*dist
+        end
+    end
+    return rmsd/nb_atoms1
 end
 #==============================================================================#
 
