@@ -17,7 +17,7 @@ function computeRMSD( structure1::T1, structure2::T2 ) where { T1 <: atom_mod.At
             rmsd += dist*dist
         end
     end
-    return rmsd
+    return rmsd/nb_atoms1
 end
 
 end
