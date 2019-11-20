@@ -20,8 +20,8 @@ folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
 # T,V
-V=9.05
-T=3000
+V=9.1
+T=2000
 runs=[1,2,3,4]
 
 cut_off_rmsd=0.2
