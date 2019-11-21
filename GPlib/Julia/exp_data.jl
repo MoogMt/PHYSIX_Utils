@@ -7,8 +7,8 @@ using pdb
 using fftw
 using correlation
 using conversion
-
 # Vibration Density of States
+
 #==============================================================================#
 function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , to_nm::T3, dt::T4 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real }
 
@@ -161,6 +161,42 @@ function computeFQ( file_out::T1, gr::Vector{T2}, rmin::T3, rmax::T4, dr::T5, rh
     close(file_o)
 
     return q,fq
+end
+#==============================================================================#
+
+# MSD
+#==============================================================================#
+function computeMSD( positions::Array{T1,2}, barycenter_global::Vector{T2} ) where { T1 <: Real, T2 <: Real }
+    nb_step=size(traj_atom)[1]
+    msd=zeros(nb_step)
+    for step=1:nb_step
+        dist=0
+        dist_bary=barycenter_global[step]*barycenter_global[step]
+        for i=1:3
+            dist_loc=(positions[step,i]-positions[1,i])
+            dist += dist_loc*dist_loc-dist_bary
+        end
+        msd[step] = dist
+    end
+    return msd
+end
+function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3} ) where { T1 <: AtomList, T2 <: AbstractString, T3 <: Real }
+    atom_name_list=traj[1].names
+    nb_step=size(traj)[1]
+    nb_atoms=size(traj[1].names)[1]
+    # Computing barycenter movement
+    barycenter_global=computeBarycenter(atom_mod.getPositions(traj),atom_name_list,names,masses)
+    for step=1:nb_step
+        barycenter_global[step,:] = barycenter_global[step,:] - barycenter_global[1,:]
+    end
+    # Extract positions
+    positions=atom_mod.getPositions(traj)
+    # Computing MSD
+    msd=zeros(nb_step)
+    for atom=1:nb_atoms
+        msd += computeMSD( positions[:,atom,:], barycenter_global )
+    end
+    return msd
 end
 #==============================================================================#
 

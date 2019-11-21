@@ -74,14 +74,12 @@ function computeBarycenter( positions::Array{T1,3}, types::Vector{T2}, types_nam
     return barycenter_
 end
 
-
 # Model for a linear fit
 @. model(x, p) = p[1]*x
 
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
-
 
 Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
 Temperatures=[1750,2000,2500,3000]
@@ -101,12 +99,44 @@ print(V," ",T,"\n")
 traj,test=filexyz.readFastFile(file_traj)
 cell=cell_mod.Cell_param(V,V,V)
 
-positions=atom_mod.getPositions(traj)
-
-barycenter_global=computeBarycenter(positions,traj[1].names,["C","O"],[6.0,8.0])
-
 nb_steps=size(traj)[1]
 nb_atoms=size(traj[1].names)[1]
+
+function computeMSD( positions::Array{T1,2}, barycenter_global::Vector{T2} ) where { T1 <: Real, T2 <: Real }
+    nb_step=size(traj_atom)[1]
+    msd=zeros(nb_step)
+    for step=1:nb_step
+        dist=0
+        dist_bary=barycenter_global[step]*barycenter_global[step]
+        for i=1:3
+            dist_loc=(positions[step,i]-positions[1,i])
+            dist += dist_loc*dist_loc-dist_bary
+        end
+        msd[step] = dist
+    end
+    return msd
+end
+
+function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3} ) where { T1 <: AtomList, T2 <: AbstractString, T3 <: Real }
+    atom_name_list=traj[1].names
+    nb_step=size(traj)[1]
+    nb_atoms=size(traj[1].names)[1]
+    # Computing barycenter movement
+    barycenter_global=computeBarycenter(atom_mod.getPositions(traj),atom_name_list,names,masses)
+    for step=1:nb_step
+        barycenter_global[step,:] = barycenter_global[step,:] - barycenter_global[1,:]
+    end
+    # Extract positions
+    positions=atom_mod.getPositions(traj)
+    # Computing MSD
+    msd=zeros(nb_step)
+    for atom=1:nb_atoms
+        msd += computeMSD( positions[:,atom,:], barycenter_global )
+    end
+    return msd
+end
+
+msd_global=computeMSD( traj )
 
 nb_delta=5000
 nb_space=50

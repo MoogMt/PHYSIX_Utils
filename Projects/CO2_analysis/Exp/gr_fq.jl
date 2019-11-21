@@ -15,7 +15,7 @@ using exp_data
 #folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-Temperatures=[3000]
+Temperatures=[2500]
 Volumes=[8.82]
 
 rmin=0
@@ -31,7 +31,7 @@ for V in Volumes
         folder_out=string(folder_in,"Data/")
 
         file_out_gr=string(folder_out,"gr.dat")
-        
+
         rmax=V/2
 
         gr,test=exp_data.computeGr( file_in, file_out_gr, V, rmin, rmax, dr )
