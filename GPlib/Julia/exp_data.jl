@@ -164,6 +164,65 @@ function computeFQ( file_out::T1, gr::Vector{T2}, rmin::T3, rmax::T4, dr::T5, rh
 end
 #==============================================================================#
 
+# Barycenter
+#==============================================================================#
+function computeBarycenter( positions::Array{T1,2} ) where { T1 <: Real }
+    barycenter=zeros(3)
+    nb_atoms=size(positions)[1]
+    for i=1:3
+        for atom=1:nb_atoms
+            barycenter[i] += positions[atom,i]
+        end
+    end
+    barycenter /= nb_atoms
+    return barycenter
+end
+function computeBarycenter( positions::Array{T1,2}, index_types::Vector{T2} ) where { T1 <: Real, T2 <: Int }
+    barycenter=zeros(3)
+    nb_atoms=size(positions)[1]
+    for i=1:3
+        for atom in index_types
+            barycenter[i] += positions[atom,i]
+        end
+    end
+    barycenter /= nb_atoms
+    return barycenter
+end
+function computeBarycenter( positions::Array{T1,3} ) where { T1 <: Real }
+    nb_step=size(positions)[1]
+    nb_atoms=size(positions)[2]
+    barycenter=zeros(nb_step,3)
+    for step=1:nb_step
+        barycenter[step,:] = computeBarycenter( positions[step,:,:] )
+    end
+    barycenter /= nb_atoms
+    return barycenter
+end
+function computeBarycenter( positions::Array{T1,3}, index_types::Vector{T2} ) where { T1 <: Real, T2 <: Int }
+    nb_step=size(positions)[1]
+    nb_atoms=size(positions)[2]
+    barycenter=zeros(nb_step,3)
+    for step=1:nb_step
+        barycenter[step,:]=computeBarycenter( positions[step,:,:], index_types )
+    end
+    barycenter /= nb_atoms
+    return barycenter
+end
+function computeBarycenter( positions::Array{T1,3}, types::Vector{T2}, types_names::Vector{T3}, type_masses::Vector{T4} ) where { T1 <: Real, T2 <: AbstractString, T3 <: AbstractString, T4 <: Real }
+    nb_step=size(positions)[1]
+    nb_atoms=size(positions)[2]
+    nb_types=size(types_names)[1]
+    barycenter_ = zeros(nb_step,3)
+    for type_=1:nb_types
+        index_types=atom_mod.getTypeIndex(types,types_names[type_])
+        nb_atoms_type=size(index_types)[1]
+        barycenter_ += type_masses[type_]*nb_atoms_type*computeBarycenter(positions,index_types)
+    end
+    barycenter_ /= nb_atoms
+    return barycenter_
+end
+#==============================================================================#
+
 # MSD
 #==============================================================================#
 function computeMSD( positions::Array{T1,2}, barycenter_global::Vector{T2} ) where { T1 <: Real, T2 <: Real }
