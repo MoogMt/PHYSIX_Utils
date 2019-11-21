@@ -98,20 +98,6 @@ for V in Volumes
             Base.write(file_o,string(i," ",msd_CO[i],"\n"))
         end
         close(file_o)
-        traj,test=filexyz.readFastFile(file_traj)
-        bary_C=exp_data.computeBarycenter(atom_mod.getPositions(traj),traj[1].names,["C"],[6.0])
-        bary_O=exp_data.computeBarycenter(atom_mod.getPositions(traj),traj[1].names,["O"],[8.0])
-        bary_all=exp_data.computeBarycenter(atom_mod.getPositions(traj),traj[1].names,["C","O"],[6.0,8.0])
-        file_o=open(string(folder_base,"/",V,"/",T,"K/Data/Bary.dat"),"w")
-        for i=1:size(bary_C)[1]
-            print("i:",i,"\n")
-            Base.write(file_o,string(i," "))
-            for j=1:3
-                Base.write(file_o,string(bary_C[i,j]," ",bary_O[i,j]," ",bary_all[i,j]," "))
-            end
-            Base.write(file_o,string("\n"))
-        end
-        close(file_o)
     end
 end
 
