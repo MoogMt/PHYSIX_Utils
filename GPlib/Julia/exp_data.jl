@@ -241,7 +241,6 @@ end
 function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3} ) where { T1 <: AtomList, T2 <: AbstractString, T3 <: Real }
     atom_name_list=traj[1].names
     nb_step=size(traj)[1]
-    nb_atoms=size(traj[1].names)[1]
     # Computing barycenter movement
     barycenter_global=computeBarycenter(atom_mod.getPositions(traj),atom_name_list,names,masses)
     for step=1:nb_step
@@ -251,8 +250,13 @@ function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3} ) w
     positions=atom_mod.getPositions(traj)
     # Computing MSD
     msd=zeros(nb_step)
-    for atom=1:nb_atoms
-        msd += computeMSD( positions[:,atom,:], barycenter_global )
+    nb_atoms=0
+    for type_=1:nb_types
+        index_types=atom_mod.getTypeIndex(types,types_names[type_])
+        nb_atoms += size(index_types)[1]
+        for atom in index_types
+            msd += computeMSD( positions[:,atom,:], barycenter_global )
+        end
     end
     return msd/nb_atoms
 end
