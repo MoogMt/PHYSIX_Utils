@@ -78,7 +78,7 @@ end
 
 #-------------------------------------------------------------------------------
 
-function write(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
+function writePDB(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
 
   out=open(file,"w")
 
@@ -139,7 +139,7 @@ function write(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomMolLis
   return
 end
 
-function writePLUMED(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
+function writePDBplumed(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomMolList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
 
   out=open(file,"w")
 
@@ -200,7 +200,7 @@ function writePLUMED(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.Atom
 end
 
 
-function write(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
+function writePDB(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: AbstractString }
 
   out=open(file,"w")
 
@@ -261,7 +261,7 @@ function write(atoms::T1, cell::T2, file::T3 ) where { T1 <: atom_mod.AtomList, 
   return
 end
 
-function write( atoms::T1, cell::T2, fileio::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: IO }
+function writePDB( atoms::T1, cell::T2, fileio::T3 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param, T3 <: IO }
 
   a,b,c = string(cell.length[1]), string(cell.length[2]), string(cell.length[3])
   alpha, beta, gamma = string(cell.angles[1]), string(cell.angles[2]), string(cell.angles[3])

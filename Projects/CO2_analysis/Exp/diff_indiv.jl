@@ -80,12 +80,12 @@ end
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-Volumes=[8.82]
+Volumes=[9.8]
 Temperatures=[3000]
 
 for V in Volumes
     for T in Temperatures
-        file_traj=string(folder_base,"/",V,"/",T,"K/1-run/TRAJEC.xyz")
+        file_traj=string(folder_base,"/",V,"/",T,"K/TRAJEC.xyz")
         file_out=string(folder_base,"/",V,"/",T,"K/Data/MSD.dat")
         msd,test=computingMSD(V,T,file_traj,file_out)
         file_outC=string(folder_base,"/",V,"/",T,"K/Data/MSD_C.dat")
@@ -96,6 +96,18 @@ for V in Volumes
         file_o=open(string(folder_base,"/",V,"/",T,"K/Data/MSD_CO.dat"),"w")
         for i=1:size(msd_C)[1]
             Base.write(file_o,string(i," ",msd_CO[i],"\n"))
+        end
+        close(file_o)
+        bary_C=exp_data.computeBarycenter(atom_mod.getPositions(traj),["C"],[6.0])
+        bary_O=exp_data.computeBarycenter(atom_mod.getPositions(traj),["O"],[8.0])
+        bary_all=exp_data.computeBarycenter(atom_mod.getPositions(traj),["C","O"],[6.0,8.0])
+        file_o=open(string(folder_base,"/",V,"/",T,"K/Data/Bary.dat"),"w")
+        for i=size(bary_C)[1]
+            Base.write(file_o,string(i," "))
+            for j=1:3
+                Base.write(file_o,string(bary_C[i,j]," ",bary_O[i,j]," ",bary_all[i,j]," "))
+            end
+            Base.write(file_o,string("\n"))
         end
         close(file_o)
     end
