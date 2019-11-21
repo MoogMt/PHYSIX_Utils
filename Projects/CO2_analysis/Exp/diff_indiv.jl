@@ -89,9 +89,9 @@ for V in Volumes
         file_out=string(folder_base,"/",V,"/",T,"K/Data/MSD.dat")
         msd,test=computingMSD(V,T,file_traj,file_out)
         file_outC=string(folder_base,"/",V,"/",T,"K/Data/MSD_C.dat")
-        msd_C,test=computeMSD(V,T,file_traj,file_outC,["C"],[6])
+        msd_C,test=computingMSD(V,T,file_traj,file_outC,["C"],[6])
         file_outO=string(folder_base,"/",V,"/",T,"K/Data/MSD_O.dat")
-        msd_O,test=computeMSD(V,T,file_traj,file_outO,["O"],[8])
+        msd_O,test=computingMSD(V,T,file_traj,file_outO,["O"],[8])
     end
 end
 
