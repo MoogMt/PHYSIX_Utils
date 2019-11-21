@@ -14,7 +14,7 @@ using conversion
 using exp_data
 using LsqFit
 
-function computingMSD( V::T1, T::T2, file_traj ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
+function computingMSD( V::T1, T::T2, file_traj::T3 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
 
     traj,test=filexyz.readFastFile(file_traj)
     if ! test
@@ -30,6 +30,35 @@ end
 function computingMSD( V::T1, T::T2, file_traj::T3, file_out::T4 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString, T4 <: AbstractString }
 
     msd,test=computingMSD(V,T,file_traj)
+    if ! test
+        return zeros(1,1), false
+    end
+
+    nb_step=size(msd)[1]
+    file_o=open(file_out,"w")
+    for step=1:nb_step
+        Base.write(file_o,string(step," ",msd[step],"\n"))
+    end
+    close(file_o)
+
+    return msd, true
+end
+function computingMSD( V::T1, T::T2, file_traj::T3, names::Vector{T4}, masses::Vector{T5} ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString, T4 <: AbstractString, T5 <: Real }
+
+    traj,test=filexyz.readFastFile(file_traj)
+    if ! test
+        return zeros(1,1), false
+    end
+
+    cell=cell_mod.Cell_param(V,V,V)
+
+    msd_global=exp_data.computeMSD( traj, names, masses )
+
+    return msd_global, true
+end
+function computingMSD( V::T1, T::T2, file_traj::T3, file_out::T4, names::Vector{T5}, masses::Vector{T6} ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString, T4 <: AbstractString, T5 <: AbstractString, T6 <: Real }
+
+    msd,test=computingMSD( V, T, file_traj, names, masses )
     if ! test
         return zeros(1,1), false
     end
@@ -59,6 +88,10 @@ for V in Volumes
         file_traj=string(folder_base,"/",V,"/",T,"K/1-run/TRAJEC.xyz")
         file_out=string(folder_base,"/",V,"/",T,"K/Data/MSD.dat")
         msd,test=computingMSD(V,T,file_traj,file_out)
+        file_outC=string(folder_base,"/",V,"/",T,"K/Data/MSD_C.dat")
+        msd_C,test=computeMSD(V,T,file_traj,file_outC,["C"],[6])
+        file_outO=string(folder_base,"/",V,"/",T,"K/Data/MSD_O.dat")
+        msd_O,test=computeMSD(V,T,file_traj,file_outO,["O"],[8])
     end
 end
 
