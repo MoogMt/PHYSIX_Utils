@@ -92,6 +92,12 @@ for V in Volumes
         msd_C,test=computingMSD(V,T,file_traj,file_outC,["C"],[6])
         file_outO=string(folder_base,"/",V,"/",T,"K/Data/MSD_O.dat")
         msd_O,test=computingMSD(V,T,file_traj,file_outO,["O"],[8])
+        msd_CO=msd_C-msd_O
+        file_o=open(string(folder_base,"/",V,"/",T,"K/Data/MSD_CO.dat"),"w")
+        for i=1:size(msd_C)[1]
+            Base.write(file_o,string(i," ",msd_CO[i],"\n"))
+        end
+        close(file_o)
     end
 end
 
