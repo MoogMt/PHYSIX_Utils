@@ -253,7 +253,7 @@ function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3} ) w
     nb_atoms=0
     nb_types=size(names)[1]
     for name in names
-        index_types=atom_mod.getTypeIndex( name, atom_name_list )
+        index_types=atom_mod.getTypeIndex( atom_name_list, name )
         nb_atoms += size(index_types)[1]
         for atom in index_types
             msd += computeMSD( positions[:,atom,:], barycenter_global )
