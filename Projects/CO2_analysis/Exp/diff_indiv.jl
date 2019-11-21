@@ -98,6 +98,7 @@ for V in Volumes
             Base.write(file_o,string(i," ",msd_CO[i],"\n"))
         end
         close(file_o)
+        traj=atom_mod.readFastFile(file_traj)
         bary_C=exp_data.computeBarycenter(atom_mod.getPositions(traj),["C"],[6.0])
         bary_O=exp_data.computeBarycenter(atom_mod.getPositions(traj),["O"],[8.0])
         bary_all=exp_data.computeBarycenter(atom_mod.getPositions(traj),["C","O"],[6.0,8.0])
