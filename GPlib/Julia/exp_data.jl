@@ -230,10 +230,9 @@ function computeMSD( positions::Array{T1,2}, barycenter_global::Array{T2,2} ) wh
     msd=zeros(nb_step)
     for step=1:nb_step
         dist=0
-        dist_bary=barycenter_global[step]*barycenter_global[step]
         for i=1:3
-            dist_loc=(positions[step,i]-positions[1,i])
-            dist += dist_loc*dist_loc-dist_bary
+            dist_loc=(positions[step,i]-positions[1,i])-barycenter_global[step]
+            dist += dist_loc*dist_loc
         end
         msd[step] = dist
     end
@@ -255,7 +254,7 @@ function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3} ) w
     for atom=1:nb_atoms
         msd += computeMSD( positions[:,atom,:], barycenter_global )
     end
-    return msd
+    return msd/nb_atoms
 end
 #==============================================================================#
 

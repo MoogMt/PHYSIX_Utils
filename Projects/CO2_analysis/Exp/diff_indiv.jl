@@ -51,12 +51,12 @@ end
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-Volumes=[9.8]
-Temperatures=[1750,2000,2500,3000]
+Volumes=[8.82]
+Temperatures=[3000]
 
 for V in Volumes
     for T in Temperatures
-        file_traj=string(folder_base,"/",V,"/",T,"K/TRAJEC.xyz")
+        file_traj=string(folder_base,"/",V,"/",T,"K/1-run/TRAJEC.xyz")
         file_out=string(folder_base,"/",V,"/",T,"K/Data/MSD.dat")
         msd,test=computingMSD(V,T,file_traj,file_out)
     end
