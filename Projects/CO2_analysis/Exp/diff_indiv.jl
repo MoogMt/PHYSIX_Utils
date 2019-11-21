@@ -14,6 +14,35 @@ using conversion
 using exp_data
 using LsqFit
 
+function computingMSD( V::T1, T::T2, file_traj ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
+
+    traj,test=filexyz.readFastFile(file_traj)
+    if ! test
+        return zeros(1,1), false
+    end
+
+    cell=cell_mod.Cell_param(V,V,V)
+
+    msd_global=exp_data.computeMSD( traj, ["C","O"],[6.0,8.0] )
+
+    return msd_global, true
+end
+function computingMSD( V::T1, T::T2, file_traj::T3, file_out::T4 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString, T4 <: AbstractString }
+
+    msd,test=computingMSD(V,T,file_traj)
+    if ! test
+        return zeros(1,1), false
+    end
+
+    nb_step=size(msd)[1]
+    file_o=open(file_out,"w")
+    for step=1:nb_step
+        Base.write(file_o,string(step," ",msd[step],"\n"))
+    end
+    close(file_o)
+
+    return msd, true
+end
 
 # Model for a linear fit
 @. model(x, p) = p[1]*x
@@ -22,21 +51,17 @@ using LsqFit
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
 
-Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+Volumes=[9.8]
 Temperatures=[1750,2000,2500,3000]
 
-V=10.0
-T=3000
+for V in Volumes
+    for T in Temperatures
+        file_traj=string(folder_base,"/",V,"/",T,"K/TRAJEC.xyz")
+        file_out=string(folder_base,"/",V,"/",T,"K/Data/MSD.dat")
+        msd,test=computingMSD(V,T,file_traj,file_out)
+    end
+end
 
-folder_in=string(folder_base,V,"/",T,"K/")
-
-file_traj=string(folder_in,"TRAJEC.xyz")
-folder_out=string(folder_in,"Data/")
-
-traj,test=filexyz.readFastFile(file_traj)
-cell=cell_mod.Cell_param(V,V,V)
-
-msd_global=exp_data.computeMSD( traj, ["C","O"],[6.0,8.0] )
 
 # D_avg=[]
 # for start_cut=1:nb_space:nb_steps-nb_delta

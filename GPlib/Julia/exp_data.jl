@@ -225,8 +225,8 @@ end
 
 # MSD
 #==============================================================================#
-function computeMSD( positions::Array{T1,2}, barycenter_global::Vector{T2} ) where { T1 <: Real, T2 <: Real }
-    nb_step=size(traj_atom)[1]
+function computeMSD( positions::Array{T1,2}, barycenter_global::Array{T2,2} ) where { T1 <: Real, T2 <: Real }
+    nb_step=size(positions)[1]
     msd=zeros(nb_step)
     for step=1:nb_step
         dist=0
