@@ -98,7 +98,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , dt::T3, nb_windows
                 end_win=window*nb_step
                 for step=start_win:end_win
                     for i=1:3
-                        velo_scal[step,atom] += velocity[step,atom,i]*velocity[1,atom,i]
+                        velo_scal[step,atom,window] += velocity[step,atom,i]*velocity[1,atom,i]
                     end
                 end
             end
