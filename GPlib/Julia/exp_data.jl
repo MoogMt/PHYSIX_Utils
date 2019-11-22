@@ -55,6 +55,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , dt::T3 ) where { T
 
     return freq, vdos, test
 end
+# Same thing but write the results in file_out
 function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , dt::T4 ) where { T1 <: AbstractString, T2 <: AbstractString, T3 <: Real, T4 <: Real }
 
     freq,vdos,test=vdosFromPosition( file_traj , max_lag_frac , dt )
@@ -93,8 +94,8 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , dt::T3, nb_windows
         velo_scal=zeros(nb_step,nb_atoms,nb_windows)
         for atom=1:nb_atoms
             for window=1:nb_windows
-                start_win=(i-1)*nb_step+1
-                end_win=i*nb_step
+                start_win=(window-1)*nb_step+1
+                end_win=window*nb_step
                 for step=start_win:end_win
                     for i=1:3
                         velo_scal[step,atom] += velocity[step,atom,i]*velocity[1,atom,i]
@@ -121,6 +122,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , dt::T3, nb_windows
 
     return freq, vdos, test
 end
+# Same thing but write the results in file_out
 function vdosFromPosition( file_traj::T1 , file_out::T2 , max_lag_frac::T3 , dt::T4, nb_windows::T5 ) where { T1 <: AbstractString, T2 <: AbstractString, T3 <: Real, T4 <: Real, T5 <: Int }
 
     freq,vdos,test=vdosFromPosition( file_traj , max_lag_frac , dt, nb_windows )

@@ -38,12 +38,11 @@ for V in Volumes
 
         folder_in=string(folder_base,V,"/",T,"K/")
         file_in=string(folder_in,"TRAJEC.xyz")
-        
+
         folder_out=string(folder_in,"Data/")
         file_out=string(folder_out,"vdos-frac_",max_lag_frac,"-nbwin_",nb_windows,".dat")
 
         freq,vdos,test=exp_data.vdosFromPosition( file_in, file_out, max_lag_frac, dt, nb_windows )
 
-        print(size(vdos)[1],"\n")
     end
 end
