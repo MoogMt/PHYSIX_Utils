@@ -101,30 +101,6 @@ for V in Volumes
     end
 end
 
-
-# D_avg=[]
-# for start_cut=1:nb_space:nb_steps-nb_delta
-#     print("Progress",start_cut/(nb_steps-nb_delta)*100,"%\n")
-#     MSD_local=zeros(nb_delta)
-#     for atom=1:nb_atoms
-#         positions=traj[start_cut].positions[atom,:]
-#         for step=1:nb_delta
-#             dist=0
-#             for i=1:3
-#                 dist += ( (traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i]) - (barycenter_all[step+start_cut,i]-barycenter_all[start_cut,i]) )*( (traj[step+start_cut].positions[atom,i]-traj[start_cut].positions[atom,i]) - (barycenter_all[step+start_cut,i]-barycenter_all[start_cut,i]) )
-#             end
-#             MSD_local[step] += dist
-#         end
-#     end
-#     MSD_local /= (nbC+nbO)
-#
-#     times_MSD=clustering.simpleSequence(nb_delta)*0.005
-#
-#     fit = curve_fit(model, times_MSD , MSD_local , [0.4] )
-#     push!(D_avg,coef(fit)[1])
-# end
-
-
 function blockAverage( data::Vector{T1}, max_block_size::T2 ) where { T1 <: Real, T2 <: Int }
     size_record=[]
     sigma_record=[]
