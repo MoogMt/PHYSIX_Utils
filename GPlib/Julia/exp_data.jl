@@ -51,7 +51,7 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , dt::T3 ) where { T
         vdos /= nb_atoms
 
         # Conversion to cm-1
-        freq=freq.*conversion.THz2cm
+        freq=freq.*conversion.tHz2cm
 
     return freq, vdos, test
 end
@@ -95,30 +95,31 @@ function vdosFromPosition( file_traj::T1 , max_lag_frac::T2 , dt::T3, nb_windows
         for atom=1:nb_atoms
             for window=1:nb_windows
                 start_win=(window-1)*nb_step+1
-                end_win=window*nb_step
+                end_win=window*nb_step-1
+                count_=1
                 for step=start_win:end_win
                     for i=1:3
-                        velo_scal[step,atom,window] += velocity[step,atom,i]*velocity[1,atom,i]
+                        velo_scal[count_,atom,window] += velocity[step,atom,i]*velocity[1,atom,i]
                     end
+                    count_+=1
                 end
             end
         end
         max_lag=Int(trunc(nb_step*max_lag_frac))
 
         # Average correlation
-        freq=zeros(max_lag)
-        vdos=zeros(max_lag)
+        freq=zeros(Int(trunc(max_lag*max_lag_frac))-1)
+        vdos=zeros(Int(trunc(max_lag*max_lag_frac))-1)
         for window=1:nb_windows
             for atom=1:nb_atoms
-                freq,vdos_loc=fftw.doFourierTransformShift( correlation.autocorrNorm( velo_scal[:,atom] , max_lag ), dt )
+                freq,vdos_loc=fftw.doFourierTransformShift( correlation.autocorrNorm( velo_scal[:,atom,window] , max_lag ), dt )
                 vdos += vdos_loc
             end
             vdos /= nb_atoms
         end
-        vdos /= nb_windows
 
         # Conversion to cm-1
-        freq=freq.*conversion.THz2cm
+        freq=freq.*conversion.tHz2cm
 
     return freq, vdos, test
 end

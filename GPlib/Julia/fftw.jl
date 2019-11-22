@@ -5,25 +5,25 @@ using FFTW
 function doFourierTransform( signal::Vector{T1}, dt::Real ) where { T1 <: Real, T2 <: Real }
     freq=fftfreq(size(signal)[1],1/dt)
     intensity= abs.(fft(signal))
-    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
+    return  freq[ freq .> 0 ], intensity[ freq .> 0 ]
 end
 
 function doFourierTransformShift( signal::Vector{T1}, dt::T2 ) where { T1 <: Real, T2 <: Real }
     freq=fftfreq(size(signal)[1],1/dt) |> fftshift
     intensity= abs.(fft(signal)) |> fftshift
-    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
+    return  freq[ freq .> 0 ], intensity[ freq .> 0 ]
 end
 
 function doDCT( signal::Vector{T1}, dt::T2 ) where { T1 <: Real, T2 <: Real }
     freq=fftfreq(size(signal)[1],1/dt)
     intensity=abs.(dct(signal))
-    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
+    return  freq[ freq .> 0 ], intensity[ freq .> 0 ]
 end
 
 function doDCTShift( signal::Vector{T1}, dt::T2 ) where { T1 <: Real, T2 <: Real }
     freq=fftfreq(size(signal)[1],1/dt) |> fftshift
     intensity=abs.(dct(signal)) |> fftshift
-    return  freq[ freq>.0 ], intensity[ freq .> 0 ]
+    return  freq[ freq .> 0 ], intensity[ freq .> 0 ]
 end
 
 end

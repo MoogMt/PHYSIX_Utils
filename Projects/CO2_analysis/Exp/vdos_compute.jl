@@ -28,8 +28,7 @@ stride_sim=5
 dt=time_step*stride_sim
 
 max_lag_frac=0.5
-nb_windows=10
-
+windows=[1,2,5,10,20,50,100]
 
 for V in Volumes
     for T in Temperatures
@@ -40,9 +39,9 @@ for V in Volumes
         file_in=string(folder_in,"TRAJEC.xyz")
 
         folder_out=string(folder_in,"Data/")
-        file_out=string(folder_out,"vdos-frac_",max_lag_frac,"-nbwin_",nb_windows,".dat")
+        file_out=string(folder_out,"vdos-frac_",max_lag_frac,"-nbwin_",nb_win,".dat")
 
-        freq,vdos,test=exp_data.vdosFromPosition( file_in, file_out, max_lag_frac, dt, nb_windows )
+        freq,vdos,test=exp_data.vdosFromPosition( file_in, file_out, max_lag_frac, dt, nb_win )
 
     end
 end
