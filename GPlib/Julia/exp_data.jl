@@ -286,12 +286,14 @@ function computeBarycenter( positions::Array{T1,3}, types::Vector{T2}, types_nam
     nb_atoms=size(positions)[2]
     nb_types=size(types_names)[1]
     barycenter_ = zeros(nb_step,3)
+    total_mass=0
     for type_=1:nb_types
         index_types=atom_mod.getTypeIndex(types,types_names[type_])
         nb_atoms_type=size(index_types)[1]
         barycenter_ += type_masses[type_]*nb_atoms_type*computeBarycenter(positions,index_types)
+        total_mass += type_masses[type_]*nb_atoms_type
     end
-    barycenter_ /= nb_atoms
+    barycenter_ /= (total_mass)
     return barycenter_
 end
 #==============================================================================#
@@ -312,6 +314,29 @@ function computeMSD( positions::Array{T1,2}, barycenter_global::Array{T2,2} ) wh
     return msd
 end
 function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3} ) where { T1 <: AtomList, T2 <: AbstractString, T3 <: Real }
+    atom_name_list=traj[1].names
+    nb_step=size(traj)[1]
+    # Computing barycenter movement
+    barycenter_global=computeBarycenter(atom_mod.getPositions(traj),atom_name_list,names,masses)
+    for step=1:nb_step
+        barycenter_global[step,:] = barycenter_global[step,:] - barycenter_global[1,:]
+    end
+    # Extract positions
+    positions=atom_mod.getPositions(traj)
+    # Computing MSD
+    msd=zeros(nb_step)
+    nb_atoms=0
+    nb_types=size(names)[1]
+    for name in names
+        index_types=atom_mod.getTypeIndex( atom_name_list, name )
+        nb_atoms += size(index_types)[1]
+        for atom in index_types
+            msd += computeMSD( positions[:,atom,:], barycenter_global )
+        end
+    end
+    return msd/nb_atoms
+end
+function computeMSD( traj::Vector{T1}, names::Vector{T2}, masses::Vector{T3},  nb_window::T4 ) where { T1 <: AtomList, T2 <: AbstractString, T3 <: Real, T4 <: Int }
     atom_name_list=traj[1].names
     nb_step=size(traj)[1]
     # Computing barycenter movement
