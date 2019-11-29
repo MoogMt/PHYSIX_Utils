@@ -3,7 +3,7 @@ module cpmd
 using conversion
 
 export readInputTimestep, readIntputStrideStress, readIntputStrideTraj
-export readEnergy, readPressure, readStress
+export readEnergy, readPressure, readStress, readTRAJ
 
 # Read input
 # Reads the input file of a CPMD simuation
@@ -213,13 +213,20 @@ function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
     # FTRAJECTORY extra:
     #   7-9: x,y,z cartesian forces [Ha / Bohr]
 
+    nb_step,nb_atoms=getNbStepAtoms( file_input )
+
     file_in=open( file_input )
     lines=readlines( file_in )
     close(file_in)
+    nb_lines=size(lines)[1]
+
+    # new_string: <<<<<<  NEW DATA  >>>>>>
+    check_new=string("<<<<<<")
 
     positions=zeros(nb_step,nb_atoms,3)
     velocity=zeros(nb_step,nb_atoms,3)
     forces=zeros(nb_step,nb_atoms,3)
+
 
     return positions,velocity,forces,atom_index,atom_types
 end
