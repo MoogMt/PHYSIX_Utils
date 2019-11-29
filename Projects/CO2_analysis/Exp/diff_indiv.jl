@@ -129,13 +129,6 @@ function blockAverage( data::Vector{T1}, max_block_size::T2 ) where { T1 <: Real
     return size_record,sigma_record
 end
 
-size_,sigma_=blockAverage(D2,140)
-
-file_out=open(string(folder_out,"D_",nb_delta,"-",nb_space,"-block.dat"),"w")
-for i=1:size(sigma_)[1]
-    write(file_out,string(size_[i]," ",sigma_[i],"\n"))
-end
-close(file_out)
 
 # end
 # end

@@ -28,4 +28,8 @@ function pointFromLine( point::Vector{T1}, line_vector::Vector{T2} , point_in_li
     return dist2line( point-point_in_line, line_vector )
 end
 
+function angleAlKash( a::T1 , b::T2, c::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Real }
+    return acosd((a*a+b*b-c*c)/(2*a*b))
+end
+
 end
