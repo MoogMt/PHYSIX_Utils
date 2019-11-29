@@ -6,6 +6,7 @@ export readInputTimestep, readIntputStrideStress, readIntputStrideTraj
 export readEnergy, readPressure, readStress
 
 # Read input
+# Reads the input file of a CPMD simuation
 #==============================================================================#
 function readInputTimestep( file_input_path::T1 ) where { T1 <: AbstractString }
     # Read input
@@ -70,8 +71,13 @@ function readIntputStrideTraj( file_input_path::T1 ) where { T1 <: AbstractStrin
 end
 #==============================================================================#
 
-# Read Files
+# Read Output files
 #==============================================================================#
+# Reading ENERGIES file
+# Contains: Temperature, Potential Energy, Total Energy, MSD and Computing time for each step
+# Structure:
+# 1 line per step, per column:
+# time, temperature, potential energy, total energy, MSD, Computing time
 function readEnergyFile( file_name::T1 ) where { T1 <: AbstractString }
     #--------------
     # Reading file
@@ -109,6 +115,15 @@ function readEnergyFile( file_name::T1 ) where { T1 <: AbstractString }
 
     return  temperature, e_ks, e_class, msd, time, true
 end
+# Reading STRESS file
+# Contains: Stress tensor for each step (with a possible stride)
+# Structure:
+# 4 lines per step
+# line 1: Comment (indicates step number)
+# line 2-4: stress tensor in matrix form
+# Sxx Sxy Sxz
+# Syx Syy Syz
+# Szx Szy Szz
 function readStress( file_name::T1 ) where { T1 <: AbstractString, T2 <: Int }
 
     # Checking file exists
@@ -183,6 +198,11 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
     return stress,true
 end
 # Read FTRAJECTORY file
+# Contains: positions, velocity and forces in atomic units for each step
+# Structure:
+# 1 line per atom per step
+# Per line:
+# atom_number x y z vx vy vz fx fy fz
 function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
 
     # cols (both files):
