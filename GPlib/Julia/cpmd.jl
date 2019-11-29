@@ -182,6 +182,27 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
 
     return stress,true
 end
+# Read FTRAJECTORY file
+function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
+
+    # cols (both files):
+    #   0:   natoms x nfi (natoms x 1, natoms x 2, ...)
+    #   1-3: x,y,z cartesian coords [Bohr]
+    #   4-6: x,y,z cartesian velocites [Bohr / thart ]
+    #        thart = Hartree time =  0.024189 fs
+    # FTRAJECTORY extra:
+    #   7-9: x,y,z cartesian forces [Ha / Bohr]
+
+    file_in=open( file_input )
+    lines=readlines( file_in )
+    close(file_in)
+
+    positions=zeros(nb_step,nb_atoms,3)
+    velocity=zeros(nb_step,nb_atoms,3)
+    forces=zeros(nb_step,nb_atoms,3)
+
+    return positions,velocity,forces,atom_index,atom_types
+end
 #==============================================================================#
 
 end

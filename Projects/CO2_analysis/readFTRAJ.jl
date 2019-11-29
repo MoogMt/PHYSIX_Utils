@@ -19,13 +19,6 @@ cut_off_bond = 1.75
 max_neigh=5
 
 
-# cols (both files):
-#   0:   natoms x nfi (natoms x 1, natoms x 2, ...)
-#   1-3: x,y,z cartesian coords [Bohr]
-#   4-6: x,y,z cartesian velocites [Bohr / thart ]
-#        thart = Hartree time =  0.024189 fs
-# FTRAJECTORY extra:
-#   7-9: x,y,z cartesian forces [Ha / Bohr]
 
 V=8.82
 T=3000
