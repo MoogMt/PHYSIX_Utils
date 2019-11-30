@@ -258,7 +258,11 @@ function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
             if line_element[1] == check_new
                 offset += 1
             else
-                
+                for i=1:3
+                    positions[step,atom,i] = parse(Float64, line_element[i+1] )
+                    velocity[step,atom,i]  = parse(Float64, line_element[i+4] )
+                    forces[step,atom,i]    = parse(Float64, line_element[i+7] )
+                end
             end
         end
     end
