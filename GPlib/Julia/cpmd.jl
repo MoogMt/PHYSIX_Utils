@@ -203,6 +203,30 @@ end
 # 1 line per atom per step
 # Per line:
 # atom_number x y z vx vy vz fx fy fz
+function getNbStepAtomsFTRAJ( file::T1 ) where { T1 <: AbstractString}
+
+    file_in=open(file)
+    lines=size(file_in)
+    close(file_in)
+
+    nb_lines=size(lines)[1]
+    nb_restart_lines=0
+
+    nb_atoms=0
+    while split(lines[nb_atoms])[1] == "1"
+        nb_atoms += 1
+    end
+
+    check_new=string("<<<<<<")
+    nb_step=nb_lines
+    for line=1:nb_lines
+        if split(lines[line])[1] == check_new
+            nb_step -= 1
+        end
+    end
+
+    return Int(nb_step/nb_atoms), nb_atoms
+end
 function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
 
     # cols (both files):
@@ -213,7 +237,7 @@ function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
     # FTRAJECTORY extra:
     #   7-9: x,y,z cartesian forces [Ha / Bohr]
 
-    nb_step,nb_atoms=getNbStepAtoms( file_input )
+    nb_step,nb_atoms=getNbStepAtomsFTRAJ( file_input )
 
     file_in=open( file_input )
     lines=readlines( file_in )
@@ -227,6 +251,17 @@ function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
     velocity=zeros(nb_step,nb_atoms,3)
     forces=zeros(nb_step,nb_atoms,3)
 
+    offset=0
+    for step=1:nb_step
+        for atom=1:nb_atoms
+            line_element=split(lines[(step-1)*nb_atoms+atom+offset])
+            if line_element[1] == check_new
+                offset += 1
+            else
+                
+            end
+        end
+    end
 
     return positions,velocity,forces,atom_index,atom_types
 end
