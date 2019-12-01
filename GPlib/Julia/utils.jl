@@ -8,7 +8,7 @@ module utils
 # VECTORS
 #==============================================================================#
 # - Checks whether vector is of dimension dim
-function check_dim_vec(vector::Vector{T1},dim::T2) where {T1 <: Real, T2 <: Int}
+function checkDimVec(vector::Vector{T1}, dim::T2) where {T1 <: Real, T2 <: Int}
   sizevec = size(vector)[1]
   if ( sizevec == dim )
     return true
@@ -17,9 +17,8 @@ function check_dim_vec(vector::Vector{T1},dim::T2) where {T1 <: Real, T2 <: Int}
     return false
   end
 end
-# check_mat_dim
 # - Checks whether matrix is of dimension xdim*ydim
-function check_mat_dim( matrix::Matrix{T1}, xdim::T2, ydim::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
+function checkMatDim( matrix::Matrix{T1}, xdim::T2, ydim::T3 ) where { T1 <: Real, T2 <: Int, T3 <: Int }
   sizematx=size(matrix)[1]
   sizematy=size(matrix)[2]
   if ( sizematx == xdim && sizematy == ydim )
@@ -28,37 +27,6 @@ function check_mat_dim( matrix::Matrix{T1}, xdim::T2, ydim::T3 ) where { T1 <: R
     error("Error! Wrong dimension for matrix!\n Got ($sizexmat,$sizeymat) instead of ($xdim,$ydim)")
     return false
   end
-end
-# Get the minimum value of array
-function getMin( array::Vector{T} ) where { T <: Real }
-  min=array[1]
-  for i=2:size(array)[1]
-    if array[i] < min
-      min=array[i]
-    end
-  end
-  return min
-end
-# Get the maximum value of array
-function getMax( array::Vector{T} ) where { T <: Real }
-  max=array[1]
-  for i=2:size(array)[1]
-    if array[i] > max
-      max=array[i]
-    end
-  end
-  return max
-end
-# Calculate the distance between two vectors
-function distance( vec1::Vector{T1}, vec2::Vector{T2} ) where { T1 <: Real , T2 <: Real }
-  if size(vec1)[1] != size(vec2)[1]
-    error(string("Size mismatch between the two vectors ",size(vec1)[1]," for first argument and",size(vec1)[2],"for second argument.\n"))
-  end
-  distance=0
-  for i=1:size(vec1)[1]
-    distance = distance + (vec1[i]-vec2[i])^2
-  end
-  return sqrt(distance)
 end
 function removeDuplicates( vector::Vector{T1} ) where { T1 <: Real }
   i=1; j=2;
@@ -77,46 +45,7 @@ function removeDuplicates( vector::Vector{T1} ) where { T1 <: Real }
 end
 #==============================================================================#
 
-# Distance Checkers
-function checkDistance( distance::T ) where { T <: Real }
-  if distance >= 0
-    return true
-  else
-    error("Distance must be positives.\n")
-    return false
-  end
-end
-function checkDistance( distances::Vector{T} ) where { T <: Real }
-  for i=1:size(distances)[1]
-    if !(checkDistance(distances[i]))
-      return false
-    end
-  end
-  return true
-end
-# Angles Checkers
-function checkAngle( angle::T ) where { T <: Real }
-  if angle < 180 && angle > 0
-    return true
-  else
-    error("Angles values must be between 0 and 180°\n")
-    return false
-  end
-end
-#
-function checkAngle( angles::Vector{T} ) where { T <: Real }
-  for i=1:size(angles)[1]
-    if !(checkAngle(angles[i]))
-      return false
-    end
-  end
-  return true
-end
-
-#========#
-# STRING #
-#========#
-
+# STRING
 #==============================================================================#
 # Parsing
 #--------------------------------------------------------------
@@ -167,7 +96,6 @@ function isIn( element, list )
   return false
 end
 #==============================================================================#
-
 function sequenceMatrixH( nb_element::T1 ) where { T1 <: Int }
   matrix=zeros(Int,nb_element,nb_element)
   for i=1:nb_element
@@ -177,13 +105,42 @@ function sequenceMatrixH( nb_element::T1 ) where { T1 <: Int }
   end
   return matrix
 end
+#==============================================================================#
 
+# Switching Functions
+#==============================================================================#
 function switchingFunction( x::T1, d::T2, n::T3, m::T4) where { T1 <: Real, T2 <: Real, T3 <: Int, T4 <: Int}
     return (1-(x/d)^n)/(1-(x/d)^m)
 end
-
 function switchingFunction( x::T1, d::T2, n::T3 ) where { T1 <: Real, T2 <: Real, T3 <: Int }
     return 1/(1+(x/d)^n)
 end
+#==============================================================================#
+
+# GAUSSIAN
+#==============================================================================#
+function gauss( amplitude::T1, position::Vector{T2}, width::T3,  x :: Vector{T4} ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
+    value=0
+    for i=1:size(position)[1]
+        value += (x[i]-position[i])*(x[i]-position[i])
+    end
+    return amplitude*exp( - (value)/(2*(width*width)) )
+end
+function gauss( amplitudes::Vector{T1}, positions::Array{T2,2}, widths::Vector{T3},  x :: Vector{T4} ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
+    value=0
+    for i=1:size(amplitudes)[1]
+        value += gauss(amplitudes[i],positions[i,:],widths[i],x)
+    end
+    return value
+end
+function gauss( amplitudes::Vector{T1}, positions::Array{T2,2}, widths::Vector{T3},  x :: Array{T4,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
+    nb_points=size(x)[1]
+    values=zeros(nb_points)
+    for i=1:nb_points
+        values[i] = gauss( amplitudes, positions,widths,x[i,:])
+    end
+    return values
+end
+#==============================================================================#
 
 end

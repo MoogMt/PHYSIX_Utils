@@ -1,5 +1,17 @@
 module geom
 
+# Calculate the distance between two vectors
+function distance( vec1::Vector{T1}, vec2::Vector{T2} ) where { T1 <: Real , T2 <: Real }
+  if size(vec1)[1] != size(vec2)[1]
+    error(string("Size mismatch between the two vectors ",size(vec1)[1]," for first argument and",size(vec1)[2],"for second argument.\n"))
+  end
+  distance=0
+  for i=1:size(vec1)[1]
+    distance = distance + (vec1[i]-vec2[i])^2
+  end
+  return sqrt(distance)
+end
+
 function norm( vector::Vector{T1} ) where { T1 <: Real }
     norm = 0;
     for i=1:size(vector)[1]
