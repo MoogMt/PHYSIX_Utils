@@ -206,7 +206,7 @@ end
 function getNbStepAtomsFTRAJ( file::T1 ) where { T1 <: AbstractString}
 
     file_in=open(file)
-    lines=size(file_in)
+    lines=readlines(file_in)
     close(file_in)
 
     nb_lines=size(lines)[1]
