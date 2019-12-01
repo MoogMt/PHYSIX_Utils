@@ -5,33 +5,10 @@ using atom_mod
 using cell_mod
 using cube_mod
 using clustering
+using geom
+using utils
 
 folder_base="/media/moogmt/Stock/Mathieu/Tests/"
-
-function gauss( amplitude::T1, position::Vector{T2}, width::T3,  x :: Vector{T4} ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
-    value=0
-    for i=1:size(position)[1]
-        value += (x[i]-position[i])*(x[i]-position[i])
-    end
-    return amplitude*exp( - (value)/(2*(width*width)) )
-end
-
-function gauss( amplitudes::Vector{T1}, positions::Array{T2,2}, widths::Vector{T3},  x :: Vector{T4} ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
-    value=0
-    for i=1:size(amplitudes)[1]
-        value += gauss(amplitudes[i],positions[i,:],widths[i],x)
-    end
-    return value
-end
-
-function gauss( amplitudes::Vector{T1}, positions::Array{T2,2}, widths::Vector{T3},  x :: Array{T4,2} ) where { T1 <: Real, T2 <: Real, T3 <: Real, T4 <: Real }
-    nb_points=size(x)[1]
-    values=zeros(nb_points)
-    for i=1:nb_points
-        values[i] = gauss( amplitudes, positions,widths,x[i,:])
-    end
-    return values
-end
 
 n_dim=2
 seed=trunc(rand()*100)
