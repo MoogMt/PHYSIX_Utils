@@ -3,15 +3,41 @@ module statistics
 using Statistics
 using Bootstrap
 
-function simpleMoment( data::Vector{T1}, n::T2) where {T1 <: Real, T2 <: Int}
-    moment=0
-    momentn=0
-    size_data=size(data)[1]
-    for i=1:size_data
-        moment += data[i]
-        momentn += data[i]^n
+function average( data::Vector{T1} ) where { T1 <: Real }
+    average=0
+    nb_point=size(data)[1]
+    for i=1:nb_point
+        average += data[i]
     end
-    return momentn/size_data - (moment/size_data)^n
+    return average/nb_point
+end
+
+function variance( data::Vector{T1} ) where { T1 <: Real }
+    variance=0
+    average=0
+    nb_point=size(data)[1]
+    for i=1:nb_point
+        average += data[i]
+        variance += data[i]*data[i]
+    end
+    average /= nb_point
+    return variance/nb_point - average*average
+end
+
+function averageVariance( data::Vector{T1} ) where { T1 <: Real }
+    variance=0
+    average=0
+    nb_point=size(data)[1]
+    for i=1:nb_point
+        average += data[i]
+        variance += data[i]*data[i]
+    end
+    average /= nb_point
+    return average, variance/nb_point - average*average
+end
+
+function blockAverage( data::Vector{T1}, size_block::T2 ) where { T1 <: Real, T2 <: Int }
+    
 end
 
 function blockAverage( data::Vector{T1}, min_block_size::T2, max_block_size::T3, stride_block::T4 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int }
