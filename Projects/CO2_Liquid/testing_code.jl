@@ -11,4 +11,4 @@ folder_in=string("/media/moogmt/Elements/CO2/8.82/3000K/1-run/")
 
 file=string(folder_in,"FTRAJECTORY")
 
-cpmd.getNbStepAtomsFTRAJ(file)
+positions,velocity,forces=cpmd.readFTRAJ(file)
