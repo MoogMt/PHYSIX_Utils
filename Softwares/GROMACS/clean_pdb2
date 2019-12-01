@@ -1,1 +1,0 @@
-sed "s/C   CO/C  CO/g" -i I.pdb
