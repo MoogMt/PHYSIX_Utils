@@ -3,69 +3,32 @@ module statistics
 using Statistics
 using Bootstrap
 
-function average( data::Vector{T1} ) where { T1 <: Real }
-    average=0
-    nb_point=size(data)[1]
-    for i=1:nb_point
-        average += data[i]
-    end
-    return average/nb_point
-end
-
-function variance( data::Vector{T1} ) where { T1 <: Real }
-    variance=0
-    average=0
-    nb_point=size(data)[1]
-    for i=1:nb_point
-        average += data[i]
-        variance += data[i]*data[i]
-    end
-    average /= nb_point
-    return variance/nb_point - average*average
-end
-
-function averageVariance( data::Vector{T1} ) where { T1 <: Real }
-    variance=0
-    average=0
-    nb_point=size(data)[1]
-    for i=1:nb_point
-        average += data[i]
-        variance += data[i]*data[i]
-    end
-    average /= nb_point
-    return average, variance/nb_point - average*average
-end
-
 function blockAverage( data::Vector{T1}, size_block::T2 ) where { T1 <: Real, T2 <: Int }
-    
+    nb_point=size(data)[1]
+    nb_block=Int(trunc(nb_point/size_block))
+    averages_block=zeros(nb_block)
+    for block=1:nb_block-1
+        averages_block[block] = Statistics.mean(data[(block-1)*size_block+1:block*size_block])
+    end
+    return Statistics.mean(averages_block), Statistics.var(observation_block)/(n_block-1)
 end
 
 function blockAverage( data::Vector{T1}, min_block_size::T2, max_block_size::T3, stride_block::T4 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int }
     nb_point=size(data)[1]
 
-    if min_block_size <= 1
-        return zeros(nb_point),zeros(nb_point),zeros(nb_point)
-    end
+    nb_blocks=Int((max_block_size-min_block_size)/stride_block)+1
 
-    blocks_number=Int((max_block_size-min_block_size)/stride_block)+1
-
-    meanBlocks=zeros(blocks_number)
-    varBlocks=zeros(blocks_number)
-    blocks=zeros(blocks_number)
+    meanBlocks=zeros(block_nb)
+    varBlocks=zeros(block_nb)
+    blocks=zeros(block_nb)
 
     block_ctrl=1
     for block_size=min_block_size:stride_block:max_block_size
-        n_block=Int(floor(nb_point/block_size))
-        observation_block=zeros(n_block)
-        for i=1:n_block
-            beg=(i-1)*block_size+1
-            observation_block[i]=Statistics.mean(data[beg:beg+block_size-1])
-        end
-        meanBlocks[block_ctrl] = Statistics.mean(observation_block)
-        varBlocks[block_ctrl] = Statistics.var(observation_block)/(n_block-1)
-        blocks[block_ctrl]=block_size
+        meanBlocks[block_ctrl], varBlocks[block_ctrl] = blockAverage(data,block_size)
+        blocks[block_ctrl] = block_size
         block_ctrl += 1
     end
+
     return blocks, meanBlocks, varBlocks
 end
 
