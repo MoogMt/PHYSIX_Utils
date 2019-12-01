@@ -64,19 +64,16 @@ end
 
 function histogram( data::Vector{T1}, nb_box::T2) where { T1 <: Real , T2 <: Int }
     min_,max_ = minMax(data)
-    histogram = zeros( Int, size(data)[1] )
+    histogram = zeros( nb_box )
+    delta_box=(max_-min_)/nb_box
     for i=1:size(data)[1]
-        histogram[ Int(trunc(data[i]/nb_box))+1 ]  += 1
+        histogram[ Int(trunc((data[i]-min_)/delta_box))+1 ]  += 1
     end
     return histogram
 end
 
 function histogramNormed( data::Vector{T1}, nb_box::T2) where { T1 <: Real , T2 <: Int }
-    min_,max_ = minMax(data)
-    histogram_normed = zeros( Real, size(data)[1] )
-    for i=1:size(data)[1]
-        histogram[ Int(trunc(data[i]/nb_box))+1 ]  += 1
-    end
+    histogram = histogram( data, nb_box )
     histogram /= sum(histogram)
     return histogram
 end

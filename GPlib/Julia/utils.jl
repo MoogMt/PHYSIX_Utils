@@ -4,7 +4,6 @@ module utils
 #  List of useful random functions that I could not fit elsewhere
 #-------------------------------------------------------------------------------
 
-#=========#
 # VECTORS
 #==============================================================================#
 # - Checks whether vector is of dimension dim
@@ -28,6 +27,7 @@ function checkMatDim( matrix::Matrix{T1}, xdim::T2, ydim::T3 ) where { T1 <: Rea
     return false
   end
 end
+# - Removes the duplicate elements in a vector
 function removeDuplicates( vector::Vector{T1} ) where { T1 <: Real }
   i=1; j=2;
   while i < size(vector)[1]
