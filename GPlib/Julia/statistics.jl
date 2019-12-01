@@ -72,10 +72,35 @@ function histogram( data::Vector{T1}, nb_box::T2) where { T1 <: Real , T2 <: Int
     return histogram
 end
 
+function histogram( data::Vector{T1}, nb_box::T2, min_::T3, max_::T4 ) where { T1 <: Real , T2 <: Int, T3 <: Real, T4 <: Real }
+    histogram = zeros( nb_box )
+    delta_box=(max_-min_)/nb_box
+    for i=1:size(data)[1]
+        histogram[ Int(trunc((data[i]-min_)/delta_box))+1 ]  += 1
+    end
+    return histogram
+end
+
 function histogramNormed( data::Vector{T1}, nb_box::T2) where { T1 <: Real , T2 <: Int }
     histogram = histogram( data, nb_box )
     histogram /= sum(histogram)
     return histogram
+end
+
+function histogramNormed( data::Vector{T1}, nb_box::T2, min_::T3, max_::T4 ) where { T1 <: Real , T2 <: Int, T3 <: Real, T4 <: Real }
+    histogram = histogram( data, nb_box, min_, max_ )
+    histogram /= sum(histogram)
+    return histogram
+end
+
+function writeHistogram( file_out::T1, histogram::Vector{T2}, nb_box::T3, min_::T4, max::T5 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Int, T4 <: Real, T5 <: Real }
+    delta_box=(max_-min_)/nb_box
+    file_o = open(file_out, "w")
+    for box=1:nb_box
+        Base.write(file_o,string(box*delta_box+min_," ",histogram[box],"\n"))
+    end
+    close(file_o)
+    return
 end
 
 end
