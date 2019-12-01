@@ -268,7 +268,7 @@ function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
     end
 
     return positions,velocity,forces,atom_index,atom_types
+
 end
 #==============================================================================#
-
 end
