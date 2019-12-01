@@ -213,7 +213,7 @@ function getNbStepAtomsFTRAJ( file::T1 ) where { T1 <: AbstractString}
     nb_restart_lines=0
 
     nb_atoms=0
-    while split(lines[nb_atoms])[1] == "1"
+    while split(lines[nb_atoms+1])[1] == "1"
         nb_atoms += 1
     end
 
