@@ -4,6 +4,7 @@ using geom
 using utils
 
 export searchGroupMember, groupsFromMatrix, getSizeTree
+export getGroupMember, getGroupMemberAll, getGroupsFromMatrix
 
 function searchGroupMember( matrix::Array{T1}, list::Vector{T2}, index::T3 , group_nb::T4 ) where { T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }
     for i=1:size(matrix)[1]
@@ -48,7 +49,7 @@ function getGroupMemberAll( nb_tree::T1, vertex_index::Vector{T2} ) where { T1 <
     return members_all
 end
 
-function getGroupsFromMatrix( matrix::Vector{T1} ) where { T1 <: Int }
+function getGroupsFromMatrix( matrix::Vector{T1} ) where { T1 <: Real }
     nb_tree, vertex_index = groupsFromMatrix( matrix )
     return getGroupsMemberAll( nb_tree, vertex_index ), nb_tree
 end
