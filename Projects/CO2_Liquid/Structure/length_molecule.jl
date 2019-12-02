@@ -21,4 +21,4 @@ cell = cell_mod.Cell_param(V,V,V)
 cut_off=1.75
 
 matrix = contact_matrix.buildMatrix( traj[10], cell, cut_off )
-nb_molecule, mol_index = graph.groupsFromMatrix( matrix, 96 )
+members, nb_molecules = graph.getGroupsFromMatrix( matrix )

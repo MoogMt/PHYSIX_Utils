@@ -17,8 +17,9 @@ function searchGroupMember( matrix::Array{T1}, list::Vector{T2}, index::T3 , gro
     return list
 end
 
-function groupsFromMatrix( matrix::Array{T1},  nb_vertex::T2 ) where { T1 <: Real, T2 <: Int }
+function groupsFromMatrix( matrix::Array{T1} ) where { T1 <: Real }
     nb_tree=0
+    nb_vertex=size(matrix)[1]
     vertex_index=zeros(nb_vertex)
     for i=1:nb_vertex
         if vertex_index[i] == 0
@@ -27,6 +28,29 @@ function groupsFromMatrix( matrix::Array{T1},  nb_vertex::T2 ) where { T1 <: Rea
         end
     end
     return nb_tree, vertex_index
+end
+
+function getGroupMember( target_index::T1, vertex_index::Vector{T2} ) where { T1 <: Int, T2 <: Int }
+    members=zeros(Int,0)
+    for i=1:vertex_index
+        if target_index == vertex_index[i]
+            push!(members,i)
+        end
+    end
+    return members
+end
+
+function getGroupMemberAll( nb_tree::T1, vertex_index::Vector{T2} ) where { T1 <: Int, T2 <: Int }
+    members_all=[]
+    for tree=1:nb_tree
+        push!( members_all, getGroupMember(tree,vertex_index) )
+    end
+    return members_all
+end
+
+function getGroupsFromMatrix( matrix::Vector{T1} ) where { T1 <: Int }
+    nb_tree, vertex_index = groupsFromMatrix( matrix )
+    return getGroupsMemberAll( nb_tree, vertex_index ), nb_tree
 end
 
 function getSizeTrees( vertex_index::Vector{T1} ) where { T1 <: Int }
