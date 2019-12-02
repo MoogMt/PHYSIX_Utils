@@ -6,6 +6,7 @@ export getBonded, computeMatrix, writeMatrix
 using atom_mod
 using cell_mod
 
+# Building Matrix
 #-------------------------------------------------------------------------------
 function buildMatrix( atoms::T1, cell::T2 ) where { T1 <: atom_mod.AtomList , T2 <: cell_mod.Cell_param }
   nb_atoms=size(atoms.names)[1]
@@ -34,7 +35,8 @@ function buildMatrix( atoms::T1 , cell::T2, cut_off::T3 ) where { T1 <: atom_mod
 end
 #-------------------------------------------------------------------------------
 
-#----------------
+# Getting bonds
+#-------------------------------------------------------------------------------
 function getBonded( atoms::T1, cell::T2, index::T3 , cut_off::T4 ) where { T1 <: atom_mod.AtomList, T2 <: cell_mod.Cell_param , T3 <: Int , T4 <: Real }
   nb_atoms=size(atoms.names)[1]
   for i=1:nb_atoms
@@ -45,7 +47,7 @@ function getBonded( atoms::T1, cell::T2, index::T3 , cut_off::T4 ) where { T1 <:
   end
   return
 end
-#----------------------------------
+#-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 function readMatrix( input::T1 , nb_atoms::T2) where { T1 <: IO, T2 <: Int }
@@ -93,6 +95,7 @@ function readMatrix( file::T1, step::T2 ) where { T1<: AbstractString, T2<: Int 
   close(file)
   return matrix
 end
+#-------------------------------------------------------------------------------
 
 #--------------------------
 function writeMatrix( file::T1, matrix::Array{T2} ) where { T1 <: IO , T2 <: Real }
