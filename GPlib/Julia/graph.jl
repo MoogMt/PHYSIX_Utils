@@ -1,4 +1,7 @@
-module graph_mod
+module graph
+
+using geom
+using utils
 
 export searchGroupMember, groupsFromMatrix, getSizeTree
 
