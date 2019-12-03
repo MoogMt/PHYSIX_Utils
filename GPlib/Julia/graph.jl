@@ -5,7 +5,11 @@ using utils
 
 export searchGroupMember, groupsFromMatrix, getSizeTree
 export getGroupMember, getGroupMemberAll, getGroupsFromMatrix
+export getAdjacent2Vertex, getAllAdjacentVertex 
+export extractMatrixForTree, extractAllMatrixForTrees
 
+# Computing Groups
+#==============================================================================#
 function searchGroupMember( matrix::Array{T1,2}, list::Vector{T2}, index::T3 , group_nb::T4 ) where { T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }
     for i=1:size(matrix)[1]
         if matrix[index,i] > 0
@@ -17,7 +21,6 @@ function searchGroupMember( matrix::Array{T1,2}, list::Vector{T2}, index::T3 , g
     end
     return list
 end
-
 function groupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_tree=0
     nb_vertex=size(matrix)[1]
@@ -30,7 +33,6 @@ function groupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     end
     return nb_tree, vertex_index
 end
-
 function getGroupMember( target_index::T1, vertex_index::Vector{T2} ) where { T1 <: Int, T2 <: Int }
     members=zeros(Int,0)
     size_ = size(vertex_index)[1]
@@ -41,7 +43,6 @@ function getGroupMember( target_index::T1, vertex_index::Vector{T2} ) where { T1
     end
     return members
 end
-
 function getGroupMemberAll( nb_tree::T1, vertex_index::Vector{T2} ) where { T1 <: Int, T2 <: Int }
     members_all=[]
     for tree=1:nb_tree
@@ -49,12 +50,14 @@ function getGroupMemberAll( nb_tree::T1, vertex_index::Vector{T2} ) where { T1 <
     end
     return members_all
 end
-
 function getGroupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_tree, vertex_index = groupsFromMatrix( matrix )
     return getGroupMemberAll( nb_tree, vertex_index )
 end
+#==============================================================================#
 
+# Computing size of trees
+#==============================================================================#
 function getSizeTrees( vertex_index::Vector{T1} ) where { T1 <: Int }
     sizes=[]
     max=0
@@ -73,7 +76,10 @@ function getSizeTrees( vertex_index::Vector{T1} ) where { T1 <: Int }
     end
     return sizes, max
 end
+#==============================================================================#
 
+# Get Adjacency for Vertices
+#==============================================================================#
 function getAdjacent2Vertex( index::T1, matrix::Array{T2,2} ) where { T1 <: Int, T2 <: Real }
     adjacent_vertex=zeros(Int,0)
     nb_vertex=size(matrix)[1]
@@ -84,7 +90,6 @@ function getAdjacent2Vertex( index::T1, matrix::Array{T2,2} ) where { T1 <: Int,
     end
     return adjacent_vertex
 end
-
 function getAllAdjacentVertex( matrix::Array{T1,2} ) where { T1 <: Real }
     adjacent_vertex = []
     nb_matrix = size(matrix)[1]
@@ -93,7 +98,10 @@ function getAllAdjacentVertex( matrix::Array{T1,2} ) where { T1 <: Real }
     end
     return adjacent_vertex
 end
+#==============================================================================#
 
+# Extract Matrix from Trees
+#==============================================================================#
 function extractMatrixForTree( matrix::Array{T1,2}, tree::Vector{T2} ) where { T1 <: Real, T2 <: Int }
     size_tree=size(tree)[1]
     matrix_local=zeros(Int,size_tree,size_tree)
@@ -105,7 +113,6 @@ function extractMatrixForTree( matrix::Array{T1,2}, tree::Vector{T2} ) where { T
     end
     return matrix_local
 end
-
 function extractAllMatrixForTrees( matrix::Array{T1,2}, trees::Vector{T2} ) where { T1 <: Real, T2 <: Any }
     matrices=[]
     nb_tree=size(trees)[1]
@@ -114,5 +121,6 @@ function extractAllMatrixForTrees( matrix::Array{T1,2}, trees::Vector{T2} ) wher
     end
     return matrices
 end
+#==============================================================================#
 
 end
