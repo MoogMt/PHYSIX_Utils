@@ -5,6 +5,7 @@ export getBonded, computeMatrix, writeMatrix
 
 using atom_mod
 using cell_mod
+using graph
 
 # Building Matrix
 #-------------------------------------------------------------------------------
