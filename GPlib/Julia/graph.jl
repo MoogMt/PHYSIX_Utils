@@ -21,7 +21,7 @@ end
 function groupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_tree=0
     nb_vertex=size(matrix)[1]
-    vertex_index=zeros(nb_vertex)
+    vertex_index=zeros(Int,nb_vertex)
     for i=1:nb_vertex
         if vertex_index[i] == 0
             nb_tree += 1
@@ -51,7 +51,7 @@ end
 
 function getGroupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_tree, vertex_index = groupsFromMatrix( matrix )
-    return getGroupMemberAll( nb_tree, vertex_index ), nb_tree
+    return getGroupMemberAll( nb_tree, vertex_index )
 end
 
 function getSizeTrees( vertex_index::Vector{T1} ) where { T1 <: Int }
