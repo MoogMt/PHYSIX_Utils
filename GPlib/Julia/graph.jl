@@ -6,7 +6,7 @@ using utils
 export searchGroupMember, groupsFromMatrix, getSizeTree
 export getGroupMember, getGroupMemberAll, getGroupsFromMatrix
 
-function searchGroupMember( matrix::Array{T1}, list::Vector{T2}, index::T3 , group_nb::T4 ) where { T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }
+function searchGroupMember( matrix::Array{T1,2}, list::Vector{T2}, index::T3 , group_nb::T4 ) where { T1 <: Real , T2 <: Real , T3 <: Int , T4 <: Int }
     for i=1:size(matrix)[1]
         if matrix[index,i] > 0
             if list[i] == 0
@@ -18,7 +18,7 @@ function searchGroupMember( matrix::Array{T1}, list::Vector{T2}, index::T3 , gro
     return list
 end
 
-function groupsFromMatrix( matrix::Array{T1} ) where { T1 <: Real }
+function groupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_tree=0
     nb_vertex=size(matrix)[1]
     vertex_index=zeros(nb_vertex)
@@ -49,7 +49,7 @@ function getGroupMemberAll( nb_tree::T1, vertex_index::Vector{T2} ) where { T1 <
     return members_all
 end
 
-function getGroupsFromMatrix( matrix::Vector{T1} ) where { T1 <: Real }
+function getGroupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_tree, vertex_index = groupsFromMatrix( matrix )
     return getGroupsMemberAll( nb_tree, vertex_index ), nb_tree
 end
