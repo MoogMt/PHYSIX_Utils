@@ -24,7 +24,7 @@ function buildMatrix( atoms::T1 , cell::T2, cut_off::T3 ) where { T1 <: atom_mod
   nb_atoms=size(atoms.names)[1]
   matrix=zeros(nb_atoms,nb_atoms)
   for i=1:nb_atoms
-    for j=1:nb_atoms
+    for j=i+1:nb_atoms
       if cell_mod.distance(atoms,cell,i,j) <= cut_off
         matrix[i,j]=1
         matrix[j,i]=1
