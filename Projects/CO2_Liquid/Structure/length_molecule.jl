@@ -23,4 +23,4 @@ cut_off=1.75
 matrix = contact_matrix.buildMatrix( traj[10], cell, cut_off )
 molecules=getGroupsFromMatrix(matrix)
 nb_molecules=size(molecules)[1]
-adjacents=getAllAdjacentVertex(matrix)
+adjacents=graph.getAllAdjacentVertex(matrix)

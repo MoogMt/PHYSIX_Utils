@@ -94,4 +94,25 @@ function getAllAdjacentVertex( matrix::Array{T1,2} ) where { T1 <: Real }
     return adjacent_vertex
 end
 
+function extractMatrixForTree( matrix::Array{T1,2}, tree::Vector{T2} ) where { T1 <: Real, T2 <: Int }
+    size_tree=size(tree)[1]
+    matrix_local=zeros(Int,size_tree,size_tree)
+    for i=1:size_tree
+        for j=i+1:size_tree
+            matrix_local[i,j] = matrix[ tree[i], tree[j] ]
+            matrix_local[j,i] = matrix_local[i,j]
+        end
+    end
+    return matrix_local
+end
+
+function extractAllMatrixForTrees( matrix::Array{T1,2}, trees::Vector{T2} ) where { T1 <: Real, T2 <: Any }
+    matrices=[]
+    nb_tree=size(trees)[1]
+    for tree=1:nb_tree
+        push!( matrices, extractMatrixForTree(matrix, trees[tree] ) )
+    end
+    return matrices
+end
+
 end
