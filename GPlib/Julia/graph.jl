@@ -33,7 +33,8 @@ end
 
 function getGroupMember( target_index::T1, vertex_index::Vector{T2} ) where { T1 <: Int, T2 <: Int }
     members=zeros(Int,0)
-    for i=1:vertex_index
+    size_ = size(vertex_index)[1]
+    for i=1:size_
         if target_index == vertex_index[i]
             push!(members,i)
         end
