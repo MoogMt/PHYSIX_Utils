@@ -21,5 +21,5 @@ cell = cell_mod.Cell_param(V,V,V)
 cut_off=1.75
 
 matrix = contact_matrix.buildMatrix( traj[10], cell, cut_off )
-
-b=getGroupsFromMatrix(matrix)
+molecules=getGroupsFromMatrix(matrix)
+nb_molecules=size(molecules)[1]
