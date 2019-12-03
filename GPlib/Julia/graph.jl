@@ -74,4 +74,24 @@ function getSizeTrees( vertex_index::Vector{T1} ) where { T1 <: Int }
     return sizes, max
 end
 
+function getAdjacent2Vertex( index::T1, matrix::Array{T2,2} ) where { T1 <: Int, T2 <: Real }
+    adjacent_vertex=zeros(Int,0)
+    nb_vertex=size(matrix)[1]
+    for i=1:nb_vertex
+        if matrix[index,i] == 1
+            push!(adjacent_vertex,i)
+        end
+    end
+    return adjacent_vertex
+end
+
+function getAllAdjacentVertex( matrix::Array{T1,2} ) where { T1 <: Real }
+    adjacent_vertex = []
+    nb_matrix = size(matrix)[1]
+    for i=1:nb_matrix
+        push!( adjacent_vertex, getAdjacent2Vertex( i, matrix ) )
+    end
+    return adjacent_vertex
+end
+
 end
