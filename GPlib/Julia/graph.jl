@@ -51,7 +51,7 @@ end
 
 function getGroupsFromMatrix( matrix::Array{T1,2} ) where { T1 <: Real }
     nb_tree, vertex_index = groupsFromMatrix( matrix )
-    return getGroupsMemberAll( nb_tree, vertex_index ), nb_tree
+    return getGroupMemberAll( nb_tree, vertex_index ), nb_tree
 end
 
 function getSizeTrees( vertex_index::Vector{T1} ) where { T1 <: Int }
