@@ -26,7 +26,6 @@ matrix = contact_matrix.buildMatrix( traj[1], cell, cut_off )
 molecules=graph.getGroupsFromMatrix(matrix)
 nb_molecules=size(molecules)[1]
 matrices=graph.extractAllMatrixForTrees( matrix, molecules )
-
 adjacent_molecule=getAllAdjacentVertex(matrices[1])
 
 start=moleculs[1][1]
@@ -34,7 +33,7 @@ start=moleculs[1][1]
 nb_atoms=size(molecules[1])[1]
 visited=zeros(Int,nb_atoms)
 
-function unWrap!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4  ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Cell_param }
+function unWrapOrtho!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4  ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Cell_param }
     for i=1:3
         dx=positions[origin,i]-positions[target,i]
         if abs(dx) > cell.length[i]*0.5
@@ -51,7 +50,7 @@ function recursiveExplorativeUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, a
     nb_neighbor=size(adjacency_table[target])[1]
     for neigh=1:nb_neighbor
         if visited[neigh] == 0
-            unWrap!( positions, index_atoms[target], index_atoms[neigh] )
+            unWrapOrtho!( positions, index_atoms[target], index_atoms[neigh], cell )
             test=recursiveExplorativeUnWrap(visited,matrix,adjacency_table,positions,cell,neigh,target,index_atoms)
             # If infinite molecule is spotted, we stop
             if ! test
