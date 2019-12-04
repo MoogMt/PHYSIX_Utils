@@ -34,8 +34,16 @@ start=moleculs[1][1]
 nb_atoms=size(molecules[1])[1]
 visited=zeros(Int,nb_atoms)
 
-function unWrap!( positions::Array{T1,2}, origin::T2, target::T3  ) where { T1 <: Real, T2 <: Int, T3 <: Int }
-
+function unWrap!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4  ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Cell_param }
+    for i=1:3
+        dx=positions[origin,i]-positions[target,i]
+        if abs(dx) > cell.length[i]*0.5
+            signed_n = Int(trunc(dx/abs(dx)))
+            n = floor(abs(dx/V))+1
+            positions[target,i] += signed_n*n
+        end
+    end
+    return
 end
 
 function recursiveExplorativeUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 ) where { T1 <: Int, T2 <: Real, T3 <: Any, T4 <: Real, T5 <: cell_mod.Cell_param, T6 <: Int, T7::Int, T8 <: Real }
