@@ -30,11 +30,11 @@ adjacent_molecule=getAllAdjacentVertex(matrices[1])
 
 function unWrapOrtho!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4  ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Cell_param }
     for i=1:3
-        dx=positions[origin,i]-positions[target,i]
-        if abs(dx) > cell.length[i]*0.5
-            signed_n = Int(trunc(dx/abs(dx)))
-            n = floor(abs(dx/V))+1
-            positions[target,i] += signed_n*n
+        dist=(positions[origin,i]-positions[target,i])
+        if dist > cell.length[i]*0.5
+            positions[target,i] += cell.length[i]
+        elseif dist < -cell.length[i]*0.5
+            positions[target,i] -= cell.length[i]
         end
     end
     return
@@ -45,27 +45,60 @@ function recursiveExplorativeUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, a
     visited[target]=1
     nb_neighbor=size(adjacency_table[target])[1]
     for neigh=1:nb_neighbor
-        if visited[neigh] == 0
+        if visited[adjacency_table[target][neigh]] == 0
+            #print("Parcours_:",index_atoms[target]," ",index_atoms[adjacency_table[target][neigh]],"\n")
             unWrapOrtho!( positions, index_atoms[target], index_atoms[ adjacency_table[target][neigh] ], cell )
-            test=recursiveExplorativeUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
+            if geom.distance( positions[ index_atoms[target], : ], positions[ index_atoms[ adjacency_table[target][neigh] ] , : ] ) > cut_off
+                print("Err_:",index_atoms[target]," ",index_atoms[adjacency_table[target][neigh]],"\n")
+                print("distance: ",geom.distance( positions[ index_atoms[target], : ], positions[ index_atoms[ adjacency_table[target][neigh] ] , : ] ),"\n")
+                return -2
+            end
+            test = recursiveExplorativeUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
             # If infinite molecule is spotted, we stop
-            if test == -1
-                return -1
+            if test < 0
+                return test
             end
         elseif geom.distance(positions[index_atoms[target],:],positions[ index_atoms[adjacency_table[target][neigh]] ,: ] ) > cut_off
             # Spotted infinite loop; stops the search
             return -1
         end
     end
-    return
+    return 1
 end
 
 start=molecules[1][1]
-nb_atoms=size(molecules[1])[1]
 visited=zeros(Int,nb_atoms)
-positions_local=traj[1].positions
+positions_local=copy(traj[1].positions)
+
+nb_atoms=size(traj[1].names)[1]
 
 test=recursiveExplorativeUnWrap(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
+
+folder_out=string(folder_in)
+file_out=string(folder_out,"test.xyz")
+f_o=open(file_out,"w")
+Base.write(f_o,string(nb_atoms,"\nTEST\n"))
+for i=1:nb_atoms
+    Base.write(f_o,string("N "))
+    for j=1:3
+        Base.write(f_o,string(positions_local[ i, j ]," "))
+    end
+    Base.write(f_o,string("\n"))
+end
+close(f_o)
+
+folder_out=string(folder_in)
+file_out=string(folder_out,"compare.xyz")
+f_o=open(file_out,"w")
+Base.write(f_o,string(nb_atoms,"\nTEST\n"))
+for i=1:nb_atoms
+    Base.write(f_o,string("O "))
+    for j=1:3
+        Base.write(f_o,string(traj[1].positions[ i, j ]," "))
+    end
+    Base.write(f_o,string("\n"))
+end
+close(f_o)
 
 for molecule=1:nb_molecules
 end
