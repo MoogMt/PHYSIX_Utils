@@ -70,7 +70,6 @@ function isInfiniteChain( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_ta
     return false, true
 end
 
-
 function recursiveExplorativeUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 ) where { T1 <: Int, T2 <: Real, T3 <: Any, T4 <: Real, T5 <: cell_mod.Cell_param, T6 <: Int, T7 <: Int, T8 <: Real }
     print(index_atoms[target],"\n")
     visited[target]=1
@@ -103,7 +102,7 @@ positions_local=copy(traj[1].positions)
 
 nb_atoms=size(traj[1].names)[1]
 
-test=recursiveExplorativeUnWrap(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
+test=isInfiniteChain(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
 
 folder_out=string(folder_in)
 file_out=string(folder_out,"test.xyz")
