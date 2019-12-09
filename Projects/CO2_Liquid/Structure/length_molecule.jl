@@ -93,10 +93,11 @@ nb_molecules=size(molecules)[1]
 matrices=graph.extractAllMatrixForTrees( matrix, molecules )
 
 for molecule=1:nb_molecules
-    adjacent_molecule=getAllAdjacentVertex(matrices[i])
-    nb_atoms_molecule=size(molecules)[1]
+    adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
+    nb_atoms_molecule=size(molecules)[molecule]
     visited=zeros(Int,nb_atoms_molecule)
-    isinf=checkInfinityAndUnWrap(visited,matrices[i],adjacent_molecule,positions_local,cell,molecules[i][1],molecules[i],cut_off)
+    start=molecules[molecule][1]
+    isinf=checkInfinityAndUnWrap(visited,matrices[molecule],adjacent_molecule,positions_local,cell,start,molecules[molecule],cut_off)
 end
 
 nb_atoms=size(traj[1].names)[1]
