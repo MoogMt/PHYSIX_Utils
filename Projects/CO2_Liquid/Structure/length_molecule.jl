@@ -28,6 +28,7 @@ nb_molecules=size(molecules)[1]
 matrices=graph.extractAllMatrixForTrees( matrix, molecules )
 adjacent_molecule=getAllAdjacentVertex(matrices[1])
 
+# Unwrap locally
 function unWrapOrtho!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4  ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Cell_param }
     for i=1:3
         dist=(positions[origin,i]-positions[target,i])
@@ -40,7 +41,6 @@ function unWrapOrtho!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4 
     return
 end
 
-
 # Return two bools:
 # - Is the molecule an infinite chain?
 # - Was the chain exploration went ok?
@@ -49,7 +49,6 @@ function isInfiniteChain( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_ta
     nb_neighbor=size(adjacency_table[target])[1]
     for neigh=1:nb_neighbor
         if visited[adjacency_table[target][neigh]] == 0
-            #print("Parcours_:",index_atoms[target]," ",index_atoms[adjacency_table[target][neigh]],"\n")
             unWrapOrtho!( positions, index_atoms[target], index_atoms[ adjacency_table[target][neigh] ], cell )
             if geom.distance( positions[ index_atoms[target], : ], positions[ index_atoms[ adjacency_table[target][neigh] ] , : ] ) > cut_off
                 return false, false
@@ -70,30 +69,31 @@ function isInfiniteChain( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_ta
     return false, true
 end
 
-function recursiveExplorativeUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 ) where { T1 <: Int, T2 <: Real, T3 <: Any, T4 <: Real, T5 <: cell_mod.Cell_param, T6 <: Int, T7 <: Int, T8 <: Real }
-    print(index_atoms[target],"\n")
+# Return two bools:
+# - Is the molecule an infinite chain?
+# - Was the chain exploration went ok?
+# Unwraps the molecule, even if infinite for visualisation purposes
+function checkInfinityAndUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 ) where { T1 <: Int, T2 <: Real, T3 <: Any, T4 <: Real, T5 <: cell_mod.Cell_param, T6 <: Int, T7 <: Int, T8 <: Real }
     visited[target]=1
+    isinf=false
     nb_neighbor=size(adjacency_table[target])[1]
     for neigh=1:nb_neighbor
         if visited[adjacency_table[target][neigh]] == 0
-            #print("Parcours_:",index_atoms[target]," ",index_atoms[adjacency_table[target][neigh]],"\n")
             unWrapOrtho!( positions, index_atoms[target], index_atoms[ adjacency_table[target][neigh] ], cell )
             if geom.distance( positions[ index_atoms[target], : ], positions[ index_atoms[ adjacency_table[target][neigh] ] , : ] ) > cut_off
-                print("Err_:",index_atoms[target]," ",index_atoms[adjacency_table[target][neigh]],"\n")
-                print("distance: ",geom.distance( positions[ index_atoms[target], : ], positions[ index_atoms[ adjacency_table[target][neigh] ] , : ] ),"\n")
-                return -2
+                return isinf, false
             end
-            test = recursiveExplorativeUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
+            isinf, isok = checkInfinityAndUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
             # If infinite molecule is spotted, we stop
-            if test < 0
-                return test
+            if ! isok
+                return isinf, false
             end
         elseif geom.distance(positions[index_atoms[target],:],positions[ index_atoms[adjacency_table[target][neigh]] ,: ] ) > cut_off
             # Spotted infinite loop; stops the search
-            return -1
+            isinf=true
         end
     end
-    return 1
+    return isinf, true
 end
 
 start=molecules[1][1]
@@ -102,7 +102,9 @@ positions_local=copy(traj[1].positions)
 
 nb_atoms=size(traj[1].names)[1]
 
-test=isInfiniteChain(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
+#isinf,isok=isInfiniteChain(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
+isinf,isok=checkInfinityAndUnWrap(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
+
 
 folder_out=string(folder_in)
 file_out=string(folder_out,"test.xyz")
