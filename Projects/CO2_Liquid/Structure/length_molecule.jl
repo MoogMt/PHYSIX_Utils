@@ -113,16 +113,3 @@ for i=1:nb_atoms
     Base.write(f_o,string("\n"))
 end
 close(f_o)
-
-folder_out=string(folder_in)
-file_out=string(folder_out,"compare.xyz")
-f_o=open(file_out,"w")
-Base.write(f_o,string(nb_atoms,"\nTEST\n"))
-for i=1:nb_atoms
-    Base.write(f_o,string("O "))
-    for j=1:3
-        Base.write(f_o,string(traj[1].positions[ i, j ]," "))
-    end
-    Base.write(f_o,string("\n"))
-end
-close(f_o)
