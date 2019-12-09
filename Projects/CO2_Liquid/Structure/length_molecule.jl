@@ -12,23 +12,9 @@ using graph
 using exp_data
 using geom
 
-V=9.1
-T=3000
-
-folder_in = string("/media/moogmt/Elements/CO2/",V,"/",T,"K/")
-file_traj = string(folder_in,"TRAJEC_wrapped.xyz")
-
-traj,test = filexyz.readFastFile(file_traj)
-cell = cell_mod.Cell_param(V,V,V)
-cut_off=1.75
-
-matrix = contact_matrix.buildMatrix( traj[1], cell, cut_off )
-molecules=graph.getGroupsFromMatrix(matrix)
-nb_molecules=size(molecules)[1]
-matrices=graph.extractAllMatrixForTrees( matrix, molecules )
-adjacent_molecule=getAllAdjacentVertex(matrices[1])
-
-# Unwrap locally
+# Unwrap atoms target with regard to atom origin, using the cell information
+# about the PBC
+# The modifications are effected on the position Array and nothing is returned
 function unWrapOrtho!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4  ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Cell_param }
     for i=1:3
         dist=(positions[origin,i]-positions[target,i])
@@ -80,31 +66,40 @@ function checkInfinityAndUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjac
     for neigh=1:nb_neighbor
         if visited[adjacency_table[target][neigh]] == 0
             unWrapOrtho!( positions, index_atoms[target], index_atoms[ adjacency_table[target][neigh] ], cell )
-            if geom.distance( positions[ index_atoms[target], : ], positions[ index_atoms[ adjacency_table[target][neigh] ] , : ] ) > cut_off
-                return isinf, false
-            end
-            isinf, isok = checkInfinityAndUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
-            # If infinite molecule is spotted, we stop
-            if ! isok
-                return isinf, false
-            end
+            isinf = checkInfinityAndUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
         elseif geom.distance(positions[index_atoms[target],:],positions[ index_atoms[adjacency_table[target][neigh]] ,: ] ) > cut_off
             # Spotted infinite loop; stops the search
             isinf=true
+            return isinf, true
         end
     end
-    return isinf, true
+    return isinf
 end
 
-start=molecules[1][1]
-visited=zeros(Int,nb_atoms)
+V=9.1
+T=3000
+
+folder_in = string("/media/moogmt/Elements/CO2/",V,"/",T,"K/")
+file_traj = string(folder_in,"TRAJEC_wrapped.xyz")
+
+traj,test = filexyz.readFastFile(file_traj)
+cell = cell_mod.Cell_param(V,V,V)
+cut_off=1.75
+
 positions_local=copy(traj[1].positions)
+matrix = contact_matrix.buildMatrix( traj[1], cell, cut_off )
+molecules=graph.getGroupsFromMatrix(matrix)
+nb_molecules=size(molecules)[1]
+matrices=graph.extractAllMatrixForTrees( matrix, molecules )
+
+for molecule=1:nb_molecules
+    adjacent_molecule=getAllAdjacentVertex(matrices[i])
+    nb_atoms_molecule=size(molecules)[1]
+    visited=zeros(Int,nb_atoms_molecule)
+    isinf=checkInfinityAndUnWrap(visited,matrices[i],adjacent_molecule,positions_local,cell,molecules[i][1],molecules[i],cut_off)
+end
 
 nb_atoms=size(traj[1].names)[1]
-
-#isinf,isok=isInfiniteChain(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
-isinf,isok=checkInfinityAndUnWrap(visited,matrices[1],adjacent_molecule,positions_local,cell,1,molecules[1],cut_off)
-
 
 folder_out=string(folder_in)
 file_out=string(folder_out,"test.xyz")
@@ -131,9 +126,3 @@ for i=1:nb_atoms
     Base.write(f_o,string("\n"))
 end
 close(f_o)
-
-for molecule=1:nb_molecules
-end
-
-
-matrices=graph.extractAllMatrixForTrees(matrix,molecules)
