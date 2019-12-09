@@ -40,6 +40,37 @@ function unWrapOrtho!( positions::Array{T1,2}, origin::T2, target::T3, cell::T4 
     return
 end
 
+
+# Return two bools:
+# - Is the molecule an infinite chain?
+# - Was the chain exploration went ok?
+function isInfiniteChain( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 ) where { T1 <: Int, T2 <: Real, T3 <: Any, T4 <: Real, T5 <: cell_mod.Cell_param, T6 <: Int, T7 <: Int, T8 <: Real }
+    visited[target]=1
+    nb_neighbor=size(adjacency_table[target])[1]
+    for neigh=1:nb_neighbor
+        if visited[adjacency_table[target][neigh]] == 0
+            #print("Parcours_:",index_atoms[target]," ",index_atoms[adjacency_table[target][neigh]],"\n")
+            unWrapOrtho!( positions, index_atoms[target], index_atoms[ adjacency_table[target][neigh] ], cell )
+            if geom.distance( positions[ index_atoms[target], : ], positions[ index_atoms[ adjacency_table[target][neigh] ] , : ] ) > cut_off
+                return false, false
+            end
+            isinf, isok = isInfiniteChain(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
+            # If infinite molecule is spotted, we stop
+            if ! isok
+                return true, false
+            end
+            if ! isinf
+                return true, true
+            end
+        elseif geom.distance(positions[index_atoms[target],:],positions[ index_atoms[adjacency_table[target][neigh]] ,: ] ) > cut_off
+            # Spotted infinite loop; stops the search
+            return true, true
+        end
+    end
+    return false, true
+end
+
+
 function recursiveExplorativeUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 ) where { T1 <: Int, T2 <: Real, T3 <: Any, T4 <: Real, T5 <: cell_mod.Cell_param, T6 <: Int, T7 <: Int, T8 <: Real }
     print(index_atoms[target],"\n")
     visited[target]=1
