@@ -61,20 +61,16 @@ end
 # Unwraps the molecule, even if infinite for visualisation purposes
 function checkInfinityAndUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 ) where { T1 <: Int, T2 <: Real, T3 <: Any, T4 <: Real, T5 <: cell_mod.Cell_param, T6 <: Int, T7 <: Int, T8 <: Real }
     visited[target]=1
-    isinf=false
     nb_neighbor=size(adjacency_table[target])[1]
     for neigh=1:nb_neighbor
         if visited[adjacency_table[target][neigh]] == 0
             unWrapOrtho!( positions, index_atoms[target], index_atoms[ adjacency_table[target][neigh] ], cell )
-            isinf = checkInfinityAndUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
-        elseif geom.distance(positions[index_atoms[target],:],positions[ index_atoms[adjacency_table[target][neigh]] ,: ] ) > cut_off
-            # Spotted infinite loop; stops the search
-            isinf=true
-            return isinf, true
+            checkInfinityAndUnWrap(visited,matrix,adjacency_table,positions,cell,adjacency_table[target][neigh],index_atoms,cut_off)
         end
     end
-    return isinf
+    return
 end
+
 
 V=9.1
 T=3000
@@ -86,30 +82,29 @@ traj,test = filexyz.readFastFile(file_traj)
 cell = cell_mod.Cell_param(V,V,V)
 cut_off=1.75
 
-positions_local=copy(traj[1].positions)
-matrix = contact_matrix.buildMatrix( traj[1], cell, cut_off )
-molecules=graph.getGroupsFromMatrix(matrix)
-nb_molecules=size(molecules)[1]
-matrices=graph.extractAllMatrixForTrees( matrix, molecules )
+nb_step=size(traj)[1]
 
-nb_atoms=size(traj[1].names)[1]
-visited=zeros(Int,nb_atoms)
+for step=1:nb_step
 
-for molecule=1:nb_molecules
-    print("molecule:",molecule,"\n")
-    adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
-    isinf=checkInfinityAndUnWrap(visited,matrices[molecule],adjacent_molecule,positions_local,cell,1,molecules[molecule],cut_off)
-end
+    positions_local=copy(traj[step].positions)
+    matrix = contact_matrix.buildMatrix( traj[step], cell, cut_off )
+    molecules=graph.getGroupsFromMatrix(matrix)
+    nb_molecules=size(molecules)[1]
+    matrices=graph.extractAllMatrixForTrees( matrix, molecules )
 
-folder_out=string(folder_in)
-file_out=string(folder_out,"test.xyz")
-f_o=open(file_out,"w")
-Base.write(f_o,string(nb_atoms,"\nTEST\n"))
-for i=1:nb_atoms
-    Base.write(f_o,string("N "))
-    for j=1:3
-        Base.write(f_o,string(positions_local[ i, j ]," "))
+    nb_atoms=size(traj[1].names)[1]
+    visited=zeros(Int,nb_atoms)
+
+    for molecule=1:nb_molecules
+        print("molecule:",molecule,"\n")
+        adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
+        visited=zeros(Int,size(molecules[molecule]))
+        checkInfinityAndUnWrap(visited,matrices[molecule],adjacent_molecule,positions_local,cell,1,molecules[molecule],cut_off)
     end
-    Base.write(f_o,string("\n"))
+
+    traj[step].positions=positions_local
+
 end
-close(f_o)
+
+file_out=string(folder_out,"test.xyz")
+filexyz.writeXYZ(file_out,traj[step].positions)
