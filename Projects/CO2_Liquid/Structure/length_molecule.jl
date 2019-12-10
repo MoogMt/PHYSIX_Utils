@@ -96,7 +96,9 @@ for step=1:nb_step
     visited=zeros(Int,nb_atoms)
 
     for molecule=1:nb_molecules
-        print("molecule:",molecule,"\n")
+        if size(molecules[molecule])[1] <= 1
+            continue
+        end
         adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
         visited=zeros(Int,size(molecules[molecule]))
         checkInfinityAndUnWrap(visited,matrices[molecule],adjacent_molecule,positions_local,cell,1,molecules[molecule],cut_off)
@@ -107,4 +109,4 @@ for step=1:nb_step
 end
 
 file_out=string(folder_out,"test.xyz")
-filexyz.writeXYZ(file_out,traj[step].positions)
+filexyz.writeXYZ(file_out,traj)

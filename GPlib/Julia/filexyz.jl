@@ -170,7 +170,7 @@ end
 
 #---------------------------------------------------------------------------------
 # write a step using a file pointers
-function writeXYZ( file_handle::T1, atoms::T2 ) where { T1 <: IO, T2 <: atom_mod.AtomList }
+function writeXYZ( file_handle::T1, atoms::T2 ) where { T1 <: IOStream, T2 <: atom_mod.AtomList }
   Base.write(file_handle,string(size(atoms.names)[1],"\n"))
   Base.write(file_handle,string("STEP: X\n"))
   for i=1:size( atoms.names )[1]
@@ -198,10 +198,11 @@ function writeXYZ( file::T1, atoms::T2 ) where { T1 <: AbstractString, T2 <: ato
 end
 
 # Write several stepss
-function writeXYZ( file::T1, atoms_blocks::Vector{T2} ) where { T1 <: AbstractString, T2 <: atom_mod.AtomList }
+function writeXYZ( file::T1, traj::Vector{T2} ) where { T1 <: AbstractString, T2 <: atom_mod.AtomList }
   f=open(file,"w")
-  for atoms in atoms_blocks
-    write(f,atoms)
+  nb_step=size(traj)[1]
+  for step=1:nb_step
+    write(f,traj[step])
   end
   close(file)
 end
