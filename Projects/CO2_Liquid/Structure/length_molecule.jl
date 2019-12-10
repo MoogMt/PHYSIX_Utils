@@ -92,15 +92,14 @@ molecules=graph.getGroupsFromMatrix(matrix)
 nb_molecules=size(molecules)[1]
 matrices=graph.extractAllMatrixForTrees( matrix, molecules )
 
-for molecule=1:nb_molecules
-    adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
-    nb_atoms_molecule=size(molecules)[molecule]
-    visited=zeros(Int,nb_atoms_molecule)
-    start=molecules[molecule][1]
-    isinf=checkInfinityAndUnWrap(visited,matrices[molecule],adjacent_molecule,positions_local,cell,start,molecules[molecule],cut_off)
-end
-
 nb_atoms=size(traj[1].names)[1]
+visited=zeros(Int,nb_atoms)
+
+for molecule=1:nb_molecules
+    print("molecule:",molecule,"\n")
+    adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
+    isinf=checkInfinityAndUnWrap(visited,matrices[molecule],adjacent_molecule,positions_local,cell,1,molecules[molecule],cut_off)
+end
 
 folder_out=string(folder_in)
 file_out=string(folder_out,"test.xyz")
