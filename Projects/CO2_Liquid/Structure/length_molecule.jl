@@ -108,5 +108,6 @@ for step=1:nb_step
 
 end
 
+folder_out=string("/media/moogmt/Elements/CO2/9.1/3000K/")
 file_out=string(folder_out,"test.xyz")
 filexyz.writeXYZ(file_out,traj)
