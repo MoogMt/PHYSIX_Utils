@@ -72,11 +72,12 @@ function checkInfinityAndUnWrap( visited::Vector{T1}, matrix::Array{T2,2}, adjac
 end
 
 
-V=9.1
+V=8.82
 T=3000
 
-folder_in = string("/media/moogmt/Elements/CO2/",V,"/",T,"K/")
-file_traj = string(folder_in,"TRAJEC_wrapped.xyz")
+folder_base=string("/media/moogmt/Elements/CO2/",V,"/",T,"K/")
+
+file_traj = string(folder_base,"TRAJEC_wrapped.xyz")
 
 traj,test = filexyz.readFastFile(file_traj)
 cell = cell_mod.Cell_param(V,V,V)
@@ -105,9 +106,8 @@ for step=1:nb_step
     end
 
     traj[step].positions=positions_local
-
 end
 
-folder_out=string("/media/moogmt/Elements/CO2/9.1/3000K/")
+folder_out=string(folder_base,"/Data/")
 file_out=string(folder_out,"test.xyz")
 filexyz.writeXYZ(file_out,traj)

@@ -204,7 +204,7 @@ function writeXYZ( file::T1, traj::Vector{T2} ) where { T1 <: AbstractString, T2
   for step=1:nb_step
     writeXYZ(f,traj[step])
   end
-  close(file)
+  close(f)
 end
 #---------------------------------------------------------------------------------
 
