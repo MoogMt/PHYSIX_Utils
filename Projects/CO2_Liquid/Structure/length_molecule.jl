@@ -13,7 +13,7 @@ using exp_data
 using geom
 
 V=8.82
-T=3000
+T=2000
 
 folder_base=string("/media/moogmt/Elements/CO2/",V,"/",T,"K/")
 
@@ -25,8 +25,8 @@ cut_off=1.75
 
 nb_step=size(traj)[1]
 
-# for step=1:nb_step
-step=1
+for step=1:nb_step
+
 positions_local=copy(traj[step].positions)
 matrix = contact_matrix.buildMatrix( traj[step], cell, cut_off )
 molecules=graph.getGroupsFromMatrix(matrix)
@@ -46,7 +46,7 @@ for molecule=1:nb_molecules
 end
 
 traj[step].positions=positions_local
-# end
+end
 
 folder_out=string(folder_base,"/Data/")
 file_out=string(folder_out,"test.xyz")
