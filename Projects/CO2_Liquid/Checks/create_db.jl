@@ -19,8 +19,6 @@ Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82]
 Temperatures=[2000,2500,3000]
 runs=[1,2,3,4]
 
-ref_timestep=0.4837768653171401
-
 function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
 
     file_input=string(folder_target,"input")
@@ -66,9 +64,11 @@ end
 
 for V in Volumes
     for T in Temperatures
-        folder_target=string(folder_base,V,"/",T,"K/")
-        if ! buildingDB( folder_target )
-            print("Problem at "V," ",T,"K!\n")
+        for n_run in runs
+            folder_target=string(folder_base,V,"/",T,"K/")
+            if ! buildingDB( folder_target )
+                print("Problem at "V," ",T,"K ",n_run," !\n")
+            end
         end
     end
 end
