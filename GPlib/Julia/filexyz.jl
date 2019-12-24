@@ -180,6 +180,15 @@ function writeXYZ( file_handle::T1, atoms::T2 ) where { T1 <: IOStream, T2 <: at
     end
     Base.write( file_handle, "\n" )
   end
+  return
+end
+
+# write a step using a file pointers
+function writeXYZ( file_handle::T1, traj::Vector{T2} ) where { T1 <: IOStream, T2 <: atom_mod.AtomList }
+  nb_step=size(traj)[1]
+  for step=1:nb_step
+    writeXYZ( file_handle, traj[1] )
+  end
 end
 
 # write the data into a new file

@@ -82,7 +82,7 @@ for V in Volumes
                     print("CHECK FOR CUT, V=",V," T=",T,"K runs:",nbrun-1,"-",nbrun,"\n")
                     print("connexion step: ",connexion_step,"\n")
                     for step=size_traj2:-1:size_traj2-stride_traj
-                        print("step: ",step," RMSD: ",exp_data.computeRMSD(traj[1],traj2[step]),"\n")
+                        print("step: ",step," RMSD: ",exp_data.computeRMSD(traj[1],traj2[Int(step)]),"\n")
                     end
                 end
             end

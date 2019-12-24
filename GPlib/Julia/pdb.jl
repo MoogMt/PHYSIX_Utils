@@ -1,6 +1,6 @@
 module pdb
 
-export getNbSteps, readStep, write
+export getNbSteps, readStep, writePDB, writePDBplumed
 
 using utils
 using atom_mod
