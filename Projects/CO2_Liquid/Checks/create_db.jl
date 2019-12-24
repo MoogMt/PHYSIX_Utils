@@ -25,9 +25,11 @@ function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
     file_stress=string(folder_target,"STRESS")
     file_traj=string(folder_target,"TRAJEC.xyz")
 
-    time_step=cpmd.readInputTimestep( file_input )
     stride_stress=cpmd.readIntputStrideStress( file_input )
     stride_traj=cpmd.readIntputStrideTraj(file_input)
+
+    stride_real_stress=round(Int,stride_traj/stride_stress)
+    stride_real_
 
     stress,test=cpmd.readStress(file_stress)
     if ! test
