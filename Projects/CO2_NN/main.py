@@ -9,6 +9,8 @@ Created on Thu Dec 26 07:50:29 2019
 import numpy as np
 import pandas as pd
 import metadata as mtd
+import datahand as dth
+
 from ase.build import molecule
 from dscribe.descriptors import SOAP
 from ase.io import read
@@ -29,7 +31,9 @@ for i in range(len(traj)):
     traj[i].set_cell([volume, volume, volume])
 
 n_atoms=np.shape(traj[0])[0]
-metadata=mtd.buildMetaData(folder_in,folder_out,volume,temperature,n_atoms)
+metadata=mtd.buildMetaData("TRAJEC.xyz","ENERGIES",folder_out, temperature)
+
+dth.readData(metadata)
 
 # Setting SOAP
 species = ["C", "O"]

@@ -26,6 +26,7 @@ def energy_predictor_dropout(data,metadata):
         
     N_part, N_features = data["descriptor"][0].shape
     
+    # Masks
     x_train = (data.loc[data['is_train']==True])['descriptor']
     y_train = (data.loc[data['is_train']==True])['energy']
     x_test = (data.loc[data['is_train']==False])['descriptor']
