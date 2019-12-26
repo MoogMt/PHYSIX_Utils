@@ -6,36 +6,47 @@ Created on Thu Dec 26 07:50:29 2019
 @author: moogmt
 """
 
-from import_data import import_data_and_after
-import descriptors
-from predictors import energy_predictor, energy_predictor_dropout
-from graphics import make_report
-
-import sys
-import os
 import numpy as np
 import pandas as pd
-
 import metadata as mtd
+from ase.build import molecule
+from dscribe.descriptors import SOAP
+from ase.io import read
+
+data_base  = "/media/moogmt/Elements/CO2/"
+
+volume=8.82
+temperature=3000 
+run_nb=1
+
+folder_in = data_base + str(volume) + "/" + str(temperature) + "K/" + str(run_nb) + "-run/"
+folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
+
+# Reading trajectory
+file_traj = folder_in + "TRAJEC.xyz"
+traj = read(file_traj,index=':')
+for i in range(len(traj)):
+    traj[i].set_cell([volume, volume, volume])
+
+n_atoms=np.shape(traj[0])[0]
+metadata=mtd.buildMetaData(folder_in,folder_out,volume,temperature,n_atoms)
+
+# Setting SOAP
+species = ["C", "O"]
+rcut = 3.0
+nmax = 3
+lmax = 3
+
+# Setting up the SOAP descriptor
+soap = SOAP(
+    species=species,
+    periodic=True,
+    rcut=rcut,
+    nmax=nmax,
+    lmax=lmax,
+)
+
+soap_co2= soap.create(traj[0], positions=[[2.0,10,15]],n_jobs=8)
 
 
-metadata=mtd.buildMetaData(2,3,4,5,6)
-
-#Importing data
-if metadata['test_data']:
-    data = pd.read_pickle("/home/julienh/Desktop/data/coupled_cluster/10_000_at_100K.pkl")
-else:
-    data = import_data_and_after(metadata)
-#Choice of descriptor
-data, metadata = getattr(descriptors, 'create_data_'+metadata['descriptor_type'])(data,metadata)
-
-metadata["N_feature"]=data["descriptor"][0].shape[1]
-
-#data, metadata["model"], metadata['mean_error'] = energy_predictor(data,metadata)
-data, metadata["model"], metadata['mean_error'] = energy_predictor_dropout(data,metadata)
-
-
-make_report(data, metadata)
-
-np.save(metadata['path_to_output']+metadata['datetime']+'/metadata',metadata)
 
