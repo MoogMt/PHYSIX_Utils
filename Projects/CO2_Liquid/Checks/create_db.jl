@@ -29,7 +29,19 @@ function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
     stride_traj=cpmd.readIntputStrideTraj(file_input)
 
     stride_real_stress=round(Int,stride_traj/stride_stress)
-    stride_real_
+    stride_real_data=round(Int,stride_traj)
+
+    file_energy=string(folder_in,"ENERGIES")
+    temperature, e_pot,e_tot,msd,comp_time,test=cpmd.readEnergyFile( file_energy )
+    if ! test
+        return false
+    end
+    size_data_base=size(temperature)[1]
+    temperature=temperature[1:stride_real_data:size_data_base]
+    e_pot=e_pot[1:stride_real_data:size_data_base]
+    e_tot=e_tot[1:stride_real_data:size_data_base]
+    msd=msd[1:stride_real_data:size_data_base]
+    comp_time=comp_time[1:stride_real_data:size_data_base]
 
     stress,test=cpmd.readStress(file_stress)
     if ! test
@@ -37,13 +49,8 @@ function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
     end
     pressure=press_stress.computePressure(stress)
     size_pressure=size(pressure)[1]
-
-    file_energy=string(folder_in,"ENERGIES")
-    temperature, e_pot,e_tot,msd,comp_time,test=cpmd.readEnergyFile( file_energy )
-    if ! test
-        return false
-    end
-    size_energy=size(temperature)[1]
+    pressure=pressure[1:stride_real_stress:size_pressure]
+    size_pressure_actual=size(pressure)[1]
 
     file_traj=string(folder_in,"TRAJEC.xyz")
     traj,test=filexyz.readFastFile(file_traj)
@@ -51,6 +58,8 @@ function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
         return false
     end
     size_traj=size(traj)[1]
+
+
 
     file_out=open(folder_target,"All_data.dat")
     for i=1:nb_step
