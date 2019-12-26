@@ -6,6 +6,8 @@ Created on Thu Dec 26 10:11:28 2019
 @author: moogmt
 """
 
+import sys
+import os
 import numpy as np
 
 # Default Descriptors parameters
@@ -29,6 +31,7 @@ default_patience = 100 # ??
 # Default I/O settings
 default_replace = False
 default_import = None
+default_prefix = ""
 
 def buildMetaData( input_folder, output_folder, volume, temperature, n_atoms ):
     
@@ -62,8 +65,20 @@ def buildMetaData( input_folder, output_folder, volume, temperature, n_atoms ):
             # I/O            
             'replace': default_replace,
             "import_from": default_import,         #To import from precedent NN, give datetime, or None
-            "path_to_output": output_folder,
-            'directory_to_input_data': input_folder
+            "output_folder": output_folder,
+            'input_folder': input_folder,
+            'prefix_files': default_prefix,
 
             }
     return metadata
+
+def checkMetaDataIO( metadata, verbose ):
+    if not os.path.isdir(metadata['input_folder']) :
+        if verbose:
+            print("Input folder does not exists!")
+        return False
+    elif not os.path.isdir(metadata['output_folder'] ) : 
+        if verbose:
+            print("Output folder does not exists, creating it.")
+        os.mkdir(metadata['output_folder'])
+    return True
