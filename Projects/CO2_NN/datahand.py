@@ -17,7 +17,7 @@ import ase
 cpmd_temperature_col=2
 cpmd_pot_energy_col=3
 cpmd_tot_energy_col=4
-cpmd_msd=6
+cpmd_msd_col=6
 cpmd_scf_comptime=7
 
 def getNbLineEnergiesCPMD(file_path):
@@ -32,11 +32,11 @@ def readPotEnergyCPMD(file_path):
     energies=np.zeros(nb_point)
     f=open(file_path,"r")
     for i in range (nb_point):
-        energies[i] = f.readline().split()[cpmd_energy_col] # Read Kohn-Sham energies (in Ry)
+        energies[i] = f.readline().split()[cpmd_pot_energy_col] # Read Kohn-Sham energies (in Ry)
     f.close()
     return energies
 
-def readEnergyFileCPMD(file_path):
+def readEnergiesFile(file_path):
     nb_point=getNbLineEnergiesCPMD(file_path)
     data=np.zeros(nb_point,7)
     f=open(file_path,"r")
@@ -45,8 +45,20 @@ def readEnergyFileCPMD(file_path):
     f.close()
     return data
 
-def extractPotentialEnergyCPMD(data):
-    return data[:,cpmd_energy_col-1]
+def extractTemperature(data):
+    return data[:,cpmd_tot_energy_col-1]
+
+def extractPotentialEnergy(data):
+    return data[:,cpmd_pot_energy_col-1]
+
+def extractTotalEnergy(data):
+    return data[:,cpmd_tot_energy_col-1]
+
+def extractMSD(data):
+    return data[:,cpmd_msd_col-1]
+
+def extractSCFcomputationTime(data):
+    return data[:,cpmd_scf_comptime-1]
 
 def readData(metadata):
     directory,tot_time,particles,size_file,replace,LJ_pot = [metadata[x] for x in ['directory_to_input_data','total_time','particles','time_of_file','replace','LJ_pot']]
