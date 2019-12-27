@@ -4,32 +4,25 @@
 Created on Sat Mar 30 22:03:09 2019
 
 @author: moogmt
+
+Functions that deals with XYZ file 
+Mostly built-in function in the ASE library 
+# Remember to add proper ASE citations...
 """
 
-#==================
-# XYZ files
-#========================================================
-# Count the number of step of a given file
-def countXYZstep( filepath_ , nb_atoms_ ):
-    count = 0; 
-    read = True;
-    with open( filepath_, "r" ) as fp:
-        while( read ): 
-            for i in range(nb_atoms_+2):
-                line=fp.readline();
-                if line == "":
-                    read = False;
-                    break;
-                else: count += 1;
-    return count/(nb_atoms_+2);
-def readXYZstep( file_pointer , nb_atoms , r_ ):
-    for i in range(nb_atoms+2):
-        line = file_pointer.readline();
-        line_part = (line.rstrip("\n")).split()
-        if line == "":
-            return False
-        if i >= 2:
-            for j in range(3):
-                r_[i-2,j] = line_part[j+1];
-    return True
-#========================================================
+import ase
+import numpy as np
+
+
+def getNbStep( file_path ):
+    return len(ase.io.read(file_path),index=':')
+
+def read( file_path ):
+    return ase.io.read(file_path,index=':')
+
+def readAsArray( file_path ):
+    traj=ase.io.read(file_path,index=':')
+    traj_ = np.zeros( len(traj),3)
+    for i in range( len(traj)):
+        traj_[i,:] = traj[0].positions
+    return 

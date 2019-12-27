@@ -12,58 +12,13 @@ import numpy as np
 import tqdm 
 import pandas as pd
 import ase
-
-# Column code for ENERGIES file
-cpmd_temperature_col=2
-cpmd_pot_energy_col=3
-cpmd_tot_energy_col=4
-cpmd_msd_col=6
-cpmd_scf_comptime=7
-
-def getNbLineEnergiesCPMD(file_path):
-    nb_line=0
-    with open(file_path,"r") as f:
-        f.readline()
-        nb_line += 1
-    return nb_line
-
-def readPotEnergyCPMD(file_path):
-    nb_point=getNbLineEnergiesCPMD(file_path)
-    energies=np.zeros(nb_point)
-    f=open(file_path,"r")
-    for i in range (nb_point):
-        energies[i] = f.readline().split()[cpmd_pot_energy_col] # Read Kohn-Sham energies (in Ry)
-    f.close()
-    return energies
-
-def readEnergiesFile(file_path):
-    nb_point=getNbLineEnergiesCPMD(file_path)
-    data=np.zeros(nb_point,7)
-    f=open(file_path,"r")
-    for i in range (nb_point):
-        data[i,:] = f.readline().split()[1:] # Read all data except first column (time)
-    f.close()
-    return data
-
-def extractTemperature(data):
-    return data[:,cpmd_tot_energy_col-1]
-
-def extractPotentialEnergy(data):
-    return data[:,cpmd_pot_energy_col-1]
-
-def extractTotalEnergy(data):
-    return data[:,cpmd_tot_energy_col-1]
-
-def extractMSD(data):
-    return data[:,cpmd_msd_col-1]
-
-def extractSCFcomputationTime(data):
-    return data[:,cpmd_scf_comptime-1]
+import filexyz
+import cpmd
 
 def readData(metadata):
     directory,tot_time,particles,size_file,replace,LJ_pot = [metadata[x] for x in ['directory_to_input_data','total_time','particles','time_of_file','replace','LJ_pot']]
 
-    traj = ase.io.read(file_input,index=':')
+    traj = filexyz.read(metadata['file_input'],index=':')
     
     N_part = len(particles)
     all_positions = np.empty((size_file,N_part,3))
