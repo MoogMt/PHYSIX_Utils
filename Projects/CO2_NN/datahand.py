@@ -9,40 +9,23 @@ Contains functions for handling data
 """
 
 import numpy as np
-import tqdm 
 import pandas as pd
 import ase
-import filexyz
-import cpmd
 
-def readData(metadata):
-    directory,tot_time,particles,size_file,replace,LJ_pot = [metadata[x] for x in ['directory_to_input_data','total_time','particles','time_of_file','replace','LJ_pot']]
+def choseTrainDataByIndex(metadata,structures,energies,chosen_index):    
+    structures = structures[chosen_index]
+    energies = energies[chosen_index]
+    if type(structures[0]) == ase.atoms.Atoms :
+        structuresAtoms=np.empty(metadata['size_train_set'],dtype=ase.atoms.Atoms)
+        for i in range(metadata['size_train_set']) :
+            structuresAtoms[i] = ase.atoms.Atoms(numbers=metadata['n_atoms'], positions=structures[i,:] )   
+        return pd.DataFrame({"energy":energies,'structure':structuresAtoms})
+    return pd.DataFrame({"energy":energies,'structure':structures})
 
-    traj = filexyz.read(metadata['file_input'],index=':')
-    
-    N_part = len(particles)
-    all_positions = np.empty((size_file,N_part,3))
-    all_energies = np.empty(size_file)
 
+# 
+def choseTrainDataRandom(metadata,structures,energies):    
+    total_size_set=len(energies)
+    chosen_index = np.random.choice(total_size_set,size=metadata['size_train_set'],replace=metadata['replace'])
+    return choseTrainDataByIndex(metadata,structures,energies,chosen_index)
 
-    with open(directory+'zundel.xyz', "r") as file_pos, open(directory+'energy.out',"r") as file_energies :
-
-        file_energies.readline()
-
-        for i_time in tqdm.tqdm(range(size_file)):
-            file_pos.readline()
-            file_pos.readline()
-            for i_atom in range(N_part):
-                all_positions[i_time,i_atom] = file_pos.readline().split()[1:]
-                
-            all_energies[i_time] = file_energies.readline().split()[4]
-    
-    molecs = np.empty(tot_time,dtype=Atoms)
-    chosen_times = np.random.choice(size_file,size=tot_time,replace=replace)
-    positions = all_positions[chosen_times]
-    energies = all_energies[chosen_times]
-    for i_time in tqdm.tqdm(range(tot_time)):
-        molecs[i_time] = Atoms(numbers=particles, positions=positions[i_time])   
-            
-    data = pd.DataFrame({"energy":energies,'molec':molecs})
-    return data

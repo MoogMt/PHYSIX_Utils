@@ -47,6 +47,7 @@ default_prefix = ""
 
 def buildMetaData( traj_file, energy_file, output_folder, 
                   pbc=default_pbc, 
+                  n_atoms=default_n_atoms,
                   masses=default_masses, 
                   descriptor=default_descriptor, 
                   scale=default_scale, 
@@ -76,6 +77,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
             
             # Physics
             'pbc': pbc,
+            'n_atoms':n_atoms,
             'masses': masses,   
 
              #Descriptor
