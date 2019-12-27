@@ -63,12 +63,11 @@ def energy_predictor_dropout(data,metadata):
         for i_part in range(N_part):
             if particles[i_part] == 8:
                 all_input_layers.append(keras.layers.Input(shape=(N_features,),name="O_input"+str(count_O)))
-                count_O+=1
                 all_subnet.append(O_subnet(all_input_layers[i_part]))
+                count_O+=1
             elif particles[i_part] == 1:
                 all_input_layers.append(keras.layers.Input(shape=(N_features,),name="H_input"+str(count_H)))
                 all_subnet.append(H_subnet(all_input_layers[i_part]))
-
                 count_H+=1
                 
         #Add the subnets together

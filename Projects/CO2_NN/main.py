@@ -33,7 +33,12 @@ for i in range(len(traj)):
 n_atoms=np.shape(traj[0])[0]
 metadata=mtd.buildMetaData("TRAJEC.xyz","ENERGIES",folder_out, temperature)
 
-dth.readData(metadata)
+data = dth.readData(metadata)
+data, metadata = desc.createDescriptors(metadata)
+network,metadata = nn.build_network(metadata)
+network,metadata = nn.train_network(metadata)
+output, metadata = nn.test_network(metadata)
+io.write_output(metadata,output)
 
 # Setting SOAP
 species = ["C", "O"]

@@ -6,12 +6,12 @@ Created on Thu Dec 26 10:11:28 2019
 @author: moogmt
 """
 
-import sys
 import os
 import numpy as np
 
 # Default physics params
 default_n_atoms = 1
+default_n_species = 1
 default_masses=np.zeros(default_n_atoms)
 default_pbc=None
 
@@ -37,7 +37,8 @@ default_n_epoch = 1000 # Number of epoch for optimization?
 default_patience = 100 # ??
 default_n_nodes_per_layer= 80
 default_n_hidden_layer=2
-default_n_nodes_structure=np.ones((default_n_atoms,default_n_hidden_layer))*default_n_nodes_per_layer
+default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer
+default_dropout_coef=np.zeros((default_n_hidden_layer+1,default_n_species))
 
 # Default I/O settingss
 default_path_to_import_model = ""
@@ -65,6 +66,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   n_nodes_per_layer=default_n_nodes_per_layer,
                   n_hidden_layer=default_n_hidden_layer,
                   n_nodes_structure=default_n_nodes_structure,
+                  dropout_coef=default_dropout_coef,
                   path_to_import_model=default_path_to_import_model,
                   prefix=default_prefix
                   ):
@@ -101,6 +103,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'n_nodes_per_layer': n_nodes_per_layer,
             'n_hidden_layer': n_hidden_layer,
             'n_nodes_structure': n_nodes_structure,
+            'dropout_coef': dropout_coef,
 
             # I/O        
             'traj_file': traj_file,
