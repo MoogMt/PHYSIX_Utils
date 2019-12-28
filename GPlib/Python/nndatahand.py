@@ -12,6 +12,9 @@ import numpy as np
 import pandas as pd
 import ase
 
+from sklearn.preprocessing import StandardScaler  
+from sklearn.decomposition import PCA
+
 # 
 def choseTrainDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['train_index'] = chosen_index
