@@ -10,6 +10,7 @@ import nnmetadata as mtd
 import nndatahand as dth
 import filexyz as xyz
 import cpmd 
+import descriptors as desc
 
 from dscribe.descriptors import SOAP
 
@@ -25,6 +26,8 @@ folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
 file_traj = folder_in + "TRAJEC.xyz"
 file_energies = folder_in + "ENERGIES"
 
+# EXTRACTING DATA
+#=============================================================================#
 metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
 if not mtd.checkMetaDataIO(metadata,True):
     exit
@@ -37,32 +40,23 @@ energies=cpmd.readPotEnergy( file_energies )
 # Homogenizing with stride
 stride_energies=5
 energies=energies[1:len(energies):stride_energies]
+#=============================================================================#
 
+# TRAINING NETWORK
+#=============================================================================#
+# Creating training set
 metadata['total_size_set'] = len(energies)
 metadata['train_fraction'] = 0.2
+metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
+# Transform positions into descriptor
+data_train, metadata = desc.createDescriptors(data_train,metadata)
+#=============================================================================#
 
-data_train = dth.choseTrainDataRandom(metadata,traj,energies)
-
-data, metadata = desc.createDescriptors(metadata)
 network,metadata = nn.build_network(metadata)
 network,metadata = nn.train_network(metadata)
 output, metadata = nn.test_network(metadata)
 io.write_output(metadata,output)
 
-# Setting SOAP
-species = ["C", "O"]
-rcut = 3.0
-nmax = 3
-lmax = 3
-
-# Setting up the SOAP descriptor
-soap = SOAP(
-    species=species,
-    periodic=True,
-    rcut=rcut,
-    nmax=nmax,
-    lmax=lmax,
-)
 
 soap_co2= soap.create(traj[0], positions=[[2.0,10,15]],n_jobs=8)
 

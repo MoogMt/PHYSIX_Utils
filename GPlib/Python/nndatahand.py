@@ -27,10 +27,9 @@ def choseTrainDataByIndex(metadata,structures,energies,chosen_index):
         for i in range(metadata['size_train_set']):
             structures_train[i] = structures[chosen_index[i]]
             energies_train = energies[chosen_index[i]]          
-    return pd.DataFrame({"energy":energies_train,'structures':structures_train})
+    return metadata, pd.DataFrame({"energy":energies_train,'structures':structures_train})
 
 # 
 def choseTrainDataRandom(metadata,structures,energies):    
     chosen_index = np.random.choice(metadata['total_size_set'],size=int(metadata['train_fraction']*metadata['total_size_set']),replace=metadata['replace'])
-    print("chosen: ",chosen_index,"\n")
     return choseTrainDataByIndex(metadata,structures,energies,chosen_index)
