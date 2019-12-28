@@ -9,11 +9,11 @@ Created on Fri Dec 27 15:34:48 2019
 import numpy as np
 
 # Column code for ENERGIES file
-cpmd_temperature_col=2
-cpmd_pot_energy_col=3
-cpmd_tot_energy_col=4
-cpmd_msd_col=6
-cpmd_scf_comptime=7
+cpmd_temperature_col=3
+cpmd_pot_energy_col=4
+cpmd_tot_energy_col=5
+cpmd_msd_col=7
+cpmd_scf_comptime=8
 
 def getNbLineEnergiesCPMD(file_path):
     nb_line=0

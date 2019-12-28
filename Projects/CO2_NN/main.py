@@ -9,6 +9,8 @@ Created on Thu Dec 26 07:50:29 2019
 import numpy as np
 import nnmetadata as mtd
 import nndatahand as dth
+import filexyz as xyz
+import cpmd 
 
 from dscribe.descriptors import SOAP
 from ase.io import read
@@ -30,12 +32,9 @@ if not mtd.checkMetaDataIO(metadata,True):
     exit
 
 # Reading trajectory
-traj = read(file_traj,index=':')
-for i in range(len(traj)):
-    traj[i].set_cell([volume, volume, volume])
-
+traj = xyz.readPbcCubic( file_traj, volume )
 # Reading ENERGIES file
-
+energies=cpmd.readPotEnergyCPMD
 
 metadata['train_fraction'] = 0.2
 
