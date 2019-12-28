@@ -22,6 +22,7 @@ def read( file_path ):
 def readPbcCubic( file_path, a ):
     traj=read( file_path )
     for i in range(len(traj)):
+        traj[i].pbc=True
         traj[i].set_cell([a, a, a])
     return traj
 

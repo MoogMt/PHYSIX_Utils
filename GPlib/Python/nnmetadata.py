@@ -30,6 +30,7 @@ default_neigh_lim=np.zeros((1,1))
 
 # Neural Net default parameters
 default_train_fraction = 0.1 # Fraction of total dataset, if chosing data randomly from total set
+default_train_set_size = 0   # Size of the training set
 default_replace = False   # Whether or not we can select several times the same data point in the training set
 default_activation_fct = 'tanh'  # Activation function in the dense hidden layers
 default_loss_fct = 'mean_squared_error' # Loss function in the NN
@@ -62,6 +63,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   neigh_lim=default_neigh_lim,
                   pCA=default_PCA,
                   train_fraction=default_train_fraction,
+                  train_set_size=default_train_set_size,
                   replace=default_replace,
                   activation_fct=default_activation_fct,
                   loss_fct=default_loss_fct,
@@ -102,6 +104,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
                         
             #Neural Net
             'train_fraction': train_fraction,
+            'size_train_set': train_set_size,
             'replace': replace,       # Choose whether you can pick twice the same data point in the train set at random
             'activation_function': activation_fct,
             'loss_function': loss_fct,

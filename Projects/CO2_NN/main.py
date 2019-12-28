@@ -5,7 +5,6 @@ Created on Thu Dec 26 07:50:29 2019
 
 @author: moogmt
 """
-
 import numpy as np
 import nnmetadata as mtd
 import nndatahand as dth
@@ -30,11 +29,16 @@ metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
 if not mtd.checkMetaDataIO(metadata,True):
     exit
 
+nb_step=cpmd.getNbLineEnergies(file_energies)
 # Reading trajectory
 traj = xyz.readPbcCubic( file_traj, volume )
 # Reading ENERGIES file
-energies=cpmd.readPotEnergyCPMD( file_energies )
+energies=cpmd.readPotEnergy( file_energies )
+# Homogenizing with stride
+stride_energies=5
+energies=energies[1:len(energies):stride_energies]
 
+metadata['total_size_set'] = len(energies)
 metadata['train_fraction'] = 0.2
 
 data_train = dth.choseTrainDataRandom(metadata,traj,energies)
