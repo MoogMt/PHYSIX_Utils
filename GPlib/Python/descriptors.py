@@ -49,23 +49,15 @@ def scale_descriptors(data,descriptors):
 
     return descriptors, scaler
 
-def create_data_SOAP(data, metadata):
-    particles, scaler, test_size,rcut, nmax, lmax,N_PCA,sigma_SOAP = [metadata[x] for x in ['particles','scaler','test_size','rcut','nmax','lmax','N_PCA','sigma_SOAP']]
-                     
-                     
-    soap = SOAP( species=np.unique(metadata['n_atoms']), sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=rcut,
-        nmax=nmax,
-        lmax=lmax,
-        sparse=False,
-        #rbf='polynomial'
-    )
-    
+def create_data_SOAP(data, metadata):   
+    # Prepping SOAP structure
+    soap = SOAP( species=np.unique(metadata['n_atoms']), sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax'], lmax=metadata['lmax'],sparse=metadata['sparse_SOAP'])
     metadata['n_features'] = soap.get_number_of_features()
     
-    descriptors = pd.np.empty((data.index.max()+1,len(particles),nb_features))
-    
-    for i_time in tqdm.tqdm(range(data.index.max()+1)):
-        descriptors[i_time] = soap.create(data['molec'][i_time],positions=np.arange(len(particles)))
+    # Creating descriptors
+    descriptors = pd.np.empty((metadata['total_set_size'],metadata['n_atoms'],metadata['n_features']))
+    for index in tqdm.tqdm(range(metadata['total_set_size'])):
+        descriptors[index] = soap.create(data['structures'][index],positions=np.arange(metadata['n_atoms']))
     
     #selecting best params
     if metadata['n_PCA']:
