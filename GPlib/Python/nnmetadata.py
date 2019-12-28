@@ -19,7 +19,6 @@ default_total_size_set = 0
 # Default Descriptors parameters
 default_descriptor = 'SOAP'
 # - SOAP
-default_scale = False
 default_sigma_SOAP = 0.
 default_cutoff_SOAP = 0. # Angstroms
 default_nmax_SOAP = 0
@@ -32,9 +31,10 @@ default_n_acsf = 0                                # Number of ACSF functions per
 default_g2_params = np.zeros((default_n_acsf,2))  # Parameters for the g2 functions for the ACSF functions
 default_g3_params = np.zeros((default_n_acsf,3))  # Parameters for the g3 functions for the ACSF functions
 
-# PCA
+# Data treatment
 default_PCA = False
 default_pca_N = 0 
+default_scale = False
 
 # Neural Net default parameters
 default_train_fraction = 0.1 # Fraction of total dataset, if chosing data randomly from total set
@@ -63,16 +63,18 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   pbc=default_pbc, 
                   total_size_set = default_total_size_set,
                   descriptor=default_descriptor, 
-                  scale=default_scale, 
                   sigma_SOAP=default_sigma_SOAP, 
                   cutoff_SOAP=default_cutoff_SOAP, 
                   nmax_SOAP=default_nmax_SOAP, 
                   lmax_SOAP=default_lmax_SOAP,
                   cutoff_ACSF=default_cutoff_ACSF,
                   n_acsf=default_n_acsf,
+                  g2_params=default_g2_params,
+                  g3_params=default_g3_params,
  #                 neigh_lim=default_neigh_lim,
-                  pCA=default_PCA,
+                  pca=default_PCA,
                   pca_n=default_pca_N,
+                  scale=default_scale, 
                   train_fraction=default_train_fraction,
                   train_set_size=default_train_set_size,
                   replace=default_replace,
@@ -103,7 +105,6 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'descriptor_type': descriptor,    #Choice of descriptor
             'n_features': 1,
             # - SOAP
-            'scaler': scale,             #False if no scaling, None if scaling
             'sigma_SOAP': sigma_SOAP,
             'rcut': cutoff_SOAP, 
             'nmax': nmax_SOAP,
@@ -113,7 +114,9 @@ def buildMetaData( traj_file, energy_file, output_folder,
             # - ACSF
             
             # PCA or not PCA
-            'N_PCA': pCA,             #False if no PCA, a number if PCA to select N first axis
+            'pca_check': pca,             #False if no PCA, a number if PCA to select N first axis
+            'pca_n': pca_n,
+            'scaler': scale,             #False if no scaling, None if scaling
                         
             #Neural Net
             'train_fraction': train_fraction,
