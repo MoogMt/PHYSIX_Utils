@@ -26,7 +26,6 @@ def choseTrainDataByIndex(metadata,structures,energies,chosen_index):
 
 # 
 def choseTrainDataRandom(metadata,structures,energies):    
-    total_size_set=len(energies)
-    chosen_index = np.random.choice(total_size_set,size=metadata['size_train_set'],replace=metadata['replace'])
+    chosen_index = np.random.choice(metadata['total_size_set'],size=int(metadata['train_fraction']*metadata['total_size_set']),replace=metadata['replace'])
     return choseTrainDataByIndex(metadata,structures,energies,chosen_index)
 

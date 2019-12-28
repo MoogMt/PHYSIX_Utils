@@ -13,7 +13,6 @@ import filexyz as xyz
 import cpmd 
 
 from dscribe.descriptors import SOAP
-from ase.io import read
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -34,11 +33,11 @@ if not mtd.checkMetaDataIO(metadata,True):
 # Reading trajectory
 traj = xyz.readPbcCubic( file_traj, volume )
 # Reading ENERGIES file
-energies=cpmd.readPotEnergyCPMD
+energies=cpmd.readPotEnergyCPMD( file_energies )
 
 metadata['train_fraction'] = 0.2
 
-data_train = choseTrainDataRandom(metadata,traj,energies)
+data_train = dth.choseTrainDataRandom(metadata,traj,energies)
 
 data, metadata = desc.createDescriptors(metadata)
 network,metadata = nn.build_network(metadata)

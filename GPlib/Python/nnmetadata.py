@@ -14,6 +14,7 @@ default_n_atoms = 1
 default_n_species = 1
 default_masses=np.zeros(default_n_atoms)
 default_pbc=None
+default_total_size_set = 0
 
 # Default Descriptors parameters
 default_descriptor = 'SOAP'
@@ -51,6 +52,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   n_species=default_n_species,
                   masses=default_masses, 
                   pbc=default_pbc, 
+                  total_size_set = default_total_size_set,
                   descriptor=default_descriptor, 
                   scale=default_scale, 
                   sigma_SOAP=default_sigma_SOAP, 
@@ -77,12 +79,12 @@ def buildMetaData( traj_file, energy_file, output_folder,
     
     # Building Metadata Dic
     metadata={
-            
             # Physics
-            'pbc': pbc,
             'n_atoms':n_atoms,
             'n_species':n_species,
             'masses': masses,   
+            'pbc': pbc,
+            'total_size_set': total_size_set,
 
              #Descriptor
             'descriptor_type': descriptor,    #Choice of descriptor
