@@ -17,15 +17,17 @@ def choseTrainDataByIndex(metadata,structures,energies,chosen_index):
     metadata['train_index'] = chosen_index
     if metadata['size_train_set'] == 0 :    
         metadata['size_train_set']=len(chosen_index)
-    structuresAtoms=np.empty(metadata['size_train_set'],dtype=ase.atoms.Atoms)
-
+    structures_train = np.empty(metadata['size_train_set'],dtype=ase.atoms.Atoms)
+    energies_train = np.empty(metadata['size_train_set'],dtype=float)
     if type(structures[0]) != ase.atoms.Atoms :
         for i in range(metadata['size_train_set']) :
-            structuresAtoms[i] = ase.atoms.Atoms(numbers=metadata['n_atoms'], positions=structures[i,:] )   
-        return pd.DataFrame({"energy":energies,'structure':structuresAtoms})
-    else
-    energies = energies[chosen_index]
-    return pd.DataFrame({"energy":energies,'structure':structures})
+            structures_train[i] = ase.atoms.Atoms(numbers=metadata['n_atoms'], positions=structures[chosen_index[i],:] )   
+            energies_train = energies[chosen_index[i]]
+    else:
+        for i in range(metadata['size_train_set']):
+            structures_train[i] = structures[chosen_index[i]]
+            energies_train = energies[chosen_index[i]]          
+    return pd.DataFrame({"energy":energies_train,'structures':structures_train})
 
 # 
 def choseTrainDataRandom(metadata,structures,energies):    
