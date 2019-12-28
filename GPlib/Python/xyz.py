@@ -13,7 +13,6 @@ Mostly built-in function in the ASE library
 import ase
 import numpy as np
 
-
 def getNbStep( file_path ):
     return len(ase.io.read(file_path),index=':')
 

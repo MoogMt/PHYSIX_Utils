@@ -15,6 +15,7 @@ import ase
 def choseTrainDataByIndex(metadata,structures,energies,chosen_index):    
     structures = structures[chosen_index]
     energies = energies[chosen_index]
+    metadata['train_index'] = chosen_index
     if type(structures[0]) == ase.atoms.Atoms :
         structuresAtoms=np.empty(metadata['size_train_set'],dtype=ase.atoms.Atoms)
         for i in range(metadata['size_train_set']) :

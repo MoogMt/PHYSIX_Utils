@@ -7,11 +7,9 @@ Created on Thu Dec 26 07:50:29 2019
 """
 
 import numpy as np
-import pandas as pd
-import metadata as mtd
-import datahand as dth
+import nnmetadata as mtd
+import nndatahand as dth
 
-from ase.build import molecule
 from dscribe.descriptors import SOAP
 from ase.io import read
 
@@ -24,16 +22,25 @@ run_nb=1
 folder_in = data_base + str(volume) + "/" + str(temperature) + "K/" + str(run_nb) + "-run/"
 folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
 
-# Reading trajectory
 file_traj = folder_in + "TRAJEC.xyz"
+file_energies = folder_in + "ENERGIES"
+
+metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
+if not mtd.checkMetaDataIO(metadata,True):
+    exit
+
+# Reading trajectory
 traj = read(file_traj,index=':')
 for i in range(len(traj)):
     traj[i].set_cell([volume, volume, volume])
 
-n_atoms=np.shape(traj[0])[0]
-metadata=mtd.buildMetaData("TRAJEC.xyz","ENERGIES",folder_out, temperature)
+# Reading ENERGIES file
 
-data = dth.readData(metadata)
+
+metadata['train_fraction'] = 0.2
+
+data_train = choseTrainDataRandom(metadata,traj,energies)
+
 data, metadata = desc.createDescriptors(metadata)
 network,metadata = nn.build_network(metadata)
 network,metadata = nn.train_network(metadata)
