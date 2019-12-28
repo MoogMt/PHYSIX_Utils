@@ -18,15 +18,23 @@ default_total_size_set = 0
 
 # Default Descriptors parameters
 default_descriptor = 'SOAP'
-default_PCA = False
 # - SOAP
 default_scale = False
-default_sigma_SOAP = 0.8
-default_cutoff_SOAP = 3.5 # Angstroms
-default_nmax_SOAP = 3
-default_lmax_SOAP = 2
+default_sigma_SOAP = 0.
+default_cutoff_SOAP = 0. # Angstroms
+default_nmax_SOAP = 0
+default_lmax_SOAP = 0
 # - NN
-default_neigh_lim=np.zeros((1,1))
+#default_neigh_lim=np.zeros((1,1))
+# - ACSF
+default_cutoff_ACSF = 0.                          # Cut-off for the ACSF function
+default_n_acsf = 0                                # Number of ACSF functions per atoms
+default_g2_params = np.zeros((default_n_acsf,2))  # Parameters for the g2 functions for the ACSF functions
+default_g3_params = np.zeros((default_n_acsf,3))  # Parameters for the g3 functions for the ACSF functions
+
+# PCA
+default_PCA = False
+default_pca_N = 0 
 
 # Neural Net default parameters
 default_train_fraction = 0.1 # Fraction of total dataset, if chosing data randomly from total set
@@ -60,8 +68,11 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   cutoff_SOAP=default_cutoff_SOAP, 
                   nmax_SOAP=default_nmax_SOAP, 
                   lmax_SOAP=default_lmax_SOAP,
-                  neigh_lim=default_neigh_lim,
+                  cutoff_ACSF=default_cutoff_ACSF,
+                  n_acsf=default_n_acsf,
+ #                 neigh_lim=default_neigh_lim,
                   pCA=default_PCA,
+                  pca_n=default_pca_N,
                   train_fraction=default_train_fraction,
                   train_set_size=default_train_set_size,
                   replace=default_replace,
@@ -91,14 +102,16 @@ def buildMetaData( traj_file, energy_file, output_folder,
              #Descriptor
             'descriptor_type': descriptor,    #Choice of descriptor
             'n_features': 1,
-            #SOAP
+            # - SOAP
             'scaler': scale,             #False if no scaling, None if scaling
             'sigma_SOAP': sigma_SOAP,
             'rcut': cutoff_SOAP, 
             'nmax': nmax_SOAP,
             'lmax': lmax_SOAP,
-            # Local PIV
-            'nearest_neigh': neigh_lim,
+            # - NN
+ #           'nearest_neigh': neigh_lim,
+            # - ACSF
+            
             # PCA or not PCA
             'N_PCA': pCA,             #False if no PCA, a number if PCA to select N first axis
                         
