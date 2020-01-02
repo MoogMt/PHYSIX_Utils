@@ -10,7 +10,7 @@ Mostly built-in function in the ASE library
 # Remember to add proper ASE citations...
 """
 
-import ase
+import ase.io
 import numpy as np
 
 def getNbStep( file_path ):

@@ -5,16 +5,18 @@ Created on Thu Dec 26 07:50:29 2019
 
 @author: moogmt
 """
-import numpy as np
+
 import nnmetadata as mtd
 import nndatahand as dth
 import filexyz as xyz
 import cpmd 
 import descriptors as desc
 
-from dscribe.descriptors import SOAP
-
 data_base  = "/media/moogmt/Elements/CO2/"
+
+verbose_check=True # Whether we want error messages 
+debug = False # Debug mode: verbose descriptions are written in a debug file
+# in order to check everything
 
 volume=8.82
 temperature=3000 
@@ -26,10 +28,11 @@ folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
 file_traj = folder_in + "TRAJEC.xyz"
 file_energies = folder_in + "ENERGIES"
 
+
 # EXTRACTING DATA
 #=============================================================================#
 metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
-if not mtd.checkMetaDataIO(metadata,True):
+if not mtd.checkMetaDataIO(metadata,verbose_check):
     exit
 
 nb_step=cpmd.getNbLineEnergies(file_energies)
@@ -38,8 +41,9 @@ traj = xyz.readPbcCubic( file_traj, volume )
 # Reading ENERGIES file
 energies=cpmd.readPotEnergy( file_energies )
 # Homogenizing with stride
-stride_energies=5
-energies=energies[1:len(energies):stride_energies]
+stride_energies=5 # Improve by reading the stride in the input file and making adjustements.
+energies=energies[0:len(energies):stride_energies]
+# add a check to verify congruence of sizes...
 #=============================================================================#
 
 # TRAINING NETWORK
@@ -49,7 +53,8 @@ metadata['total_size_set'] = len(energies)
 metadata['train_fraction'] = 0.2
 metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
 # Transform positions into descriptor
-data_train, metadata = desc.createDescriptors(data_train,metadata)
+metadata['periodic'] = True
+data_train, metadata = desc.createDescriptorsSOAP(data_train,metadata)
 #=============================================================================#
 
 network,metadata = nn.build_network(metadata)

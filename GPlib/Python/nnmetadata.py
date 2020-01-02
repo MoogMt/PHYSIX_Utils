@@ -14,6 +14,7 @@ default_n_atoms = 1
 default_n_species = 1
 default_masses=np.zeros(default_n_atoms)
 default_pbc=None
+default_periodic=False
 default_total_size_set = 0
 
 # Default Descriptors parameters
@@ -23,6 +24,7 @@ default_sigma_SOAP = 0.
 default_cutoff_SOAP = 0. # Angstroms
 default_nmax_SOAP = 0
 default_lmax_SOAP = 0
+default_sparse_SOAP = False
 # - NN
 #default_neigh_lim=np.zeros((1,1))
 # - ACSF
@@ -61,12 +63,14 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   n_species=default_n_species,
                   masses=default_masses, 
                   pbc=default_pbc, 
+                  periodic=default_periodic,
                   total_size_set = default_total_size_set,
                   descriptor=default_descriptor, 
                   sigma_SOAP=default_sigma_SOAP, 
                   cutoff_SOAP=default_cutoff_SOAP, 
                   nmax_SOAP=default_nmax_SOAP, 
                   lmax_SOAP=default_lmax_SOAP,
+                  sparse_SOAP=default_sparse_SOAP,
                   cutoff_ACSF=default_cutoff_ACSF,
                   n_acsf=default_n_acsf,
                   g2_params=default_g2_params,
@@ -99,6 +103,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'n_species':n_species,
             'masses': masses,   
             'pbc': pbc,
+            'periodic': periodic,
             'total_size_set': total_size_set,
 
              #Descriptor
@@ -109,6 +114,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'rcut': cutoff_SOAP, 
             'nmax': nmax_SOAP,
             'lmax': lmax_SOAP,
+            'sparse_SOAP': sparse_SOAP,
             # - NN
  #           'nearest_neigh': neigh_lim,
             # - ACSF

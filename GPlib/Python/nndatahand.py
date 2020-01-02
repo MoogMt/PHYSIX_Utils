@@ -24,12 +24,12 @@ def choseTrainDataByIndex(metadata,structures,energies,chosen_index):
     energies_train = np.empty(metadata['size_train_set'],dtype=float)
     if type(structures[0]) != ase.atoms.Atoms :
         for i in range(metadata['size_train_set']) :
+            energies_train[i] = energies[chosen_index[i]]
             structures_train[i] = ase.atoms.Atoms(numbers=metadata['n_atoms'], positions=structures[chosen_index[i],:] )   
-            energies_train = energies[chosen_index[i]]
     else:
         for i in range(metadata['size_train_set']):
+            energies_train[i] = energies[chosen_index[i]]          
             structures_train[i] = structures[chosen_index[i]]
-            energies_train = energies[chosen_index[i]]          
     return metadata, pd.DataFrame({"energy":energies_train,'structures':structures_train})
 
 # 
