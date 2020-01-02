@@ -109,15 +109,20 @@ def buildMetaData( traj_file, energy_file, output_folder,
              #Descriptor
             'descriptor_type': descriptor,    #Choice of descriptor
             'n_features': 1,
+            # Ideally here we'd want to load different dictionnaries, because each
+            # descriptor has its parameters, so it doesn't make sense to make a HUGE metadata 
+            # variable with many parameters that will not come in hand...
             # - SOAP
             'sigma_SOAP': sigma_SOAP,
-            'rcut': cutoff_SOAP, 
-            'nmax': nmax_SOAP,
-            'lmax': lmax_SOAP,
+            'cutoff_SOAP': cutoff_SOAP, 
+            'nmax_SOAP': nmax_SOAP,
+            'lmax_SOAP': lmax_SOAP,
             'sparse_SOAP': sparse_SOAP,
             # - NN
+            # TO BE DONE BECAUSE LAZYNESS
  #           'nearest_neigh': neigh_lim,
             # - ACSF
+            # TO BE DONE BECAUSE LAZYNESS
             
             # PCA or not PCA
             'pca_check': pca,             #False if no PCA, a number if PCA to select N first axis

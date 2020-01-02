@@ -38,6 +38,7 @@ if not mtd.checkMetaDataIO(metadata,verbose_check):
 nb_step=cpmd.getNbLineEnergies(file_energies)
 # Reading trajectory
 traj = xyz.readPbcCubic( file_traj, volume )
+metadata['periodic'] = True
 # Reading ENERGIES file
 energies=cpmd.readPotEnergy( file_energies )
 # Homogenizing with stride
@@ -52,8 +53,7 @@ energies=energies[0:len(energies):stride_energies]
 metadata['total_size_set'] = len(energies)
 metadata['train_fraction'] = 0.2
 metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
-# Transform positions into descriptor
-metadata['periodic'] = True
+# Build descriptors from positions (train set only)
 data_train, metadata = desc.createDescriptorsSOAP(data_train,metadata)
 #=============================================================================#
 

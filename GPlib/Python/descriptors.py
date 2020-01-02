@@ -20,11 +20,10 @@ import pandas as pd
 from dscribe.descriptors import SOAP
 from dscribe.descriptors import ACSF
 
-from scipy.spatial.distance import cdist
 
 def createDescriptorsSOAP(data, metadata):   
     # Prepping SOAP descriptor structure
-    soap = SOAP( species=np.unique(metadata['n_atoms']), sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax'], lmax=metadata['lmax'],sparse=metadata['sparse_SOAP'] )
+    soap = SOAP( species=np.unique(metadata['n_atoms']), sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax_SOAP'], lmax=metadata['lmax_SOAP'],sparse=metadata['sparse_SOAP'] )
     metadata['n_features'] = soap.get_number_of_features()    
     # Computing descriptors
     descriptors = pd.np.empty((metadata['total_set_size'],metadata['n_atoms'],metadata['n_features']))
@@ -42,6 +41,8 @@ def createDescriptorsACSF(data, metadata):
         descriptors[i_time] = acsf.create(data['molec'][i_time],positions=np.arange(metadata['n_atoms']))
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
     
+#from scipy.spatial.distance import cdist
+
 #def create_data_NN(data,metadata):
 #    local_dist_mat = np.empty((metadata['total_set_size'],metadata['n_atoms'],metadata['n_nearest_neigh']))
 #    metadata['n_features'] = metadata['n_nearest_neigh']
