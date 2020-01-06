@@ -72,6 +72,10 @@ default_path_to_import_model = ""        # If taking over from previous model, p
 default_prefix = ""                      # prefix for the output files
 default_suffix = ""                      # suffix for the output files
 
+# Verbose
+default_verbose = False
+default_n_jobs=1
+
 
 def buildMetaData( traj_file, energy_file, output_folder, 
                   n_atoms=default_n_atoms,
@@ -100,7 +104,9 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   dropout_coef=default_dropout_coef,
                   path_to_import_model=default_path_to_import_model,
                   prefix=default_prefix,
-                  suffix=default_suffix
+                  suffix=default_suffix,
+                  verbose=default_verbose,
+                  n_jobs=default_n_jobs,
                   ):
     
     # Building Metadata Dic
@@ -144,6 +150,10 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'prefix_out': prefix,
             'suffix_out': suffix,
             "output_folder": output_folder,
+
+            # Verbose
+            'verbose': verbose,
+            'n_jobs': n_jobs,
 
             }
     return metadata

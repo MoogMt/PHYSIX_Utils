@@ -34,23 +34,29 @@ def choseTrainDataByIndex(metadata,structures,energies,chosen_index):
 
 # 
 def choseTrainDataRandom(metadata,structures,energies):    
-    chosen_index = np.random.choice(metadata['total_size_set'],size=int(metadata['train_fraction']*metadata['total_size_set']),replace=metadata['replace'])
+    if metadata['train_set_size'] == 0 :
+        if metadata['train_fraction'] < 1:
+            print("Invalid train_faction in metadata","\n")
+            return False, False
+        if metadata['total_size_set'] < 1 :
+            print("Invalid total_size_set in metadata","\n")
+        metadata['train_set_size'] = int(metadata['train_fraction']*metadata['total_size_set'])
+    chosen_index = np.random.choice(metadata['total_size_set'],size=metadata['train_set_size'],replace=metadata['replace'])
     return choseTrainDataByIndex(metadata,structures,energies,chosen_index)
 
-def pcaSelectBestParams(descriptors,nb_features,N_PCA):
-    pca_O = PCA(n_components=N_PCA).fit(descriptors[:,:2,:].reshape(descriptors[:,:2,:].shape[0]*2,nb_features))
-    pca_H = PCA(n_components=N_PCA).fit(descriptors[:,2:,:].reshape(descriptors[:,2:,:].shape[0]*5,nb_features))
-    print("Precision of new features [O,H] = ",[np.cumsum(pca_O.explained_variance_ratio_)[-1],np.cumsum(pca_H.explained_variance_ratio_)[-1]])        
-    return [pca_O, pca_H]
-    
-def scale_descriptors(data,descriptors):
-    is_train = data['is_train']
-    nb_features = descriptors.shape[2]
+def scaleDescriptors(data,descriptors,metadata):
     scaler = []
-    scaler.append(StandardScaler())
-    scaler[0].fit(descriptors[is_train][:,0:2,:].reshape(int(is_train.sum()*2),nb_features))    
-    descriptors[:,0:2,:] = scaler[0].transform(descriptors[:,0:2,:].reshape(descriptors[:,0:2,:].shape[0]*2,nb_features)).reshape(descriptors.shape[0],2,nb_features)
-    scaler.append(StandardScaler())
-    scaler[1].fit(descriptors[is_train][:,2:,:].reshape(int(is_train.sum()*5),nb_features))    
-    descriptors[:,2:,:] = scaler[1].transform(descriptors[:,2:,:].reshape(descriptors[:,2:,:].shape[0]*5,nb_features)).reshape(descriptors.shape[0],5,nb_features)
+    for specie in range(len(metadata["species"])):
+        scaler.append(StandardScaler())        
+        scaler[specie].fit(descriptors[:,0:2,:].reshape(int(metadata['train_set_size']*metadata['n_specie'][specie]),metadata['n_features']))    
+        descriptors[:,0:2,:] = scaler[specie].transform(descriptors[:,0:2,:].reshape(descriptors[:,0:2,:].shape[0]*2,metadata["n_features"])).reshape(descriptors.shape[0],2,metadata["n_features"])
     return descriptors, scaler
+
+def pcaSelectBestParams(descriptors,metadata):
+    pca=[]
+    for specie in range(len(metadata["species"])):
+        pca.append(PCA(n_components=metadata["pca_n"]).fit(descriptors[:,:2,:].reshape(descriptors[:,:2,:].shape[0]*2,metadata["n_features"])))
+        if metadata['verbose']: 
+            print("Precision of new features ",metadata["species"][specie]," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
+    return pca
+    

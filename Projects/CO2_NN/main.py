@@ -34,7 +34,6 @@ file_energies = folder_in + "ENERGIES"
 metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
 if not mtd.checkMetaDataIO(metadata,verbose_check):
     exit
-
 nb_step=cpmd.getNbLineEnergies(file_energies)
 # Reading trajectory
 traj = xyz.readPbcCubic( file_traj, volume )
@@ -51,21 +50,31 @@ metadata['species'] = mtd.getSpecies(traj[0])
 metadata['n_species'] = len(metadata['species'])
 #=============================================================================#
 
-# TRAINING NETWORK
+# CREATING DESCRIPTORS
 #=============================================================================#
 # Creating training set
+metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
+metadata['train_set_size'] = 400
 metadata['total_size_set'] = len(energies)
-metadata['train_fraction'] = 0.2
 metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
 # Build descriptors from positions (train set only)
-metadata, data_train = desc.createDescriptorsSOAP(data_train,metadata)
+sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
+cutoff_ = 3.5 # cut_off SOAP, 
+nmax_   = 2 
+lmax_   = 2
+metadata, data_train = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
 #=============================================================================#
 
+# BUILDING & TRAINING NETWORK
+#=============================================================================#
 network,metadata = nn.build_network(metadata)
 network,metadata = nn.train_network(metadata)
+#=============================================================================#
+
+#=============================================================================#
 output, metadata = nn.test_network(metadata)
 io.write_output(metadata,output)
-
+#=============================================================================#
 
 soap_co2= soap.create(traj[0], positions=[[2.0,10,15]],n_jobs=8)
 

@@ -23,11 +23,13 @@ from dscribe.descriptors import ACSF
 
 # - SOAP
 #=============================================================================#
+
 default_sigma_SOAP  = 0.05  # Sigma for the gaussian density
 default_cutoff_SOAP = 1.001 # Angstroms
-default_nmax_SOAP   = 1 
-default_lmax_SOAP   = 0
-default_sparse_SOAP = False
+default_nmax_SOAP   = 1     # nmax for the radial expansion
+default_lmax_SOAP   = 0     # lmax for the angular expansion
+default_sparse_SOAP = False # Sparse, avoid 0
+
 def checkSOAPParams( metadata, verbose ):
     if metadata['sigma_SOAP'] < 0:
         if verbose:
@@ -60,7 +62,7 @@ def createDescriptorsSOAP(data, metadata,
     metadata['nmax_SOAP']   = nmax_SOAP
     metadata['lmax_SOAP']   = lmax_SOAP
     metadata['sparse_SOAP'] = sparse_SOAP
-    if not checkSOAPParams( metadata ): 
+    if not checkSOAPParams( metadata, metadata['verbose']): 
         return False, False
     # Prepping SOAP descriptor structure
     soap = SOAP( species=metadata['species'], sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax_SOAP'], lmax=metadata['lmax_SOAP'],sparse=metadata['sparse_SOAP'] )
@@ -69,7 +71,7 @@ def createDescriptorsSOAP(data, metadata,
     descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))
     for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
         for index_atom in range(metadata['n_atoms']):
-            descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom])
+            descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom],)
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
 #=============================================================================#
 
