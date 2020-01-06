@@ -28,7 +28,7 @@ def createDescriptorsSOAP(data, metadata):
     # Computing descriptors
     descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))
     for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
-        for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
+        for index_atom in range(metadata['n_atoms']):
             descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom])
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
 

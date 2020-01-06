@@ -46,6 +46,7 @@ stride_energies=5 # Improve by reading the stride in the input file and making a
 energies=energies[0:len(energies):stride_energies]
 # add a check to verify congruence of sizes...
 # Getting species present in the simulation
+metadata['n_atoms'] = len(traj[0])
 metadata['species'] = mtd.getSpecies(traj[0])
 metadata['n_species'] = len(metadata['species'])
 #=============================================================================#
