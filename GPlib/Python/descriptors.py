@@ -27,8 +27,9 @@ def createDescriptorsSOAP(data, metadata):
     metadata['n_features'] = soap.get_number_of_features()    
     # Computing descriptors
     descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))
-    for index in tqdm.tqdm(range(metadata['train_set_size'])):
-        descriptors[index] = soap.create(data['structures'][index],positions=data.structures[1].positions[index,:])
+    for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
+        for index_atom in tqdm.tqdm(range(metadata['train_set_size'])):
+            descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom])
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
 
 def createDescriptorsACSF(data, metadata):         
@@ -37,8 +38,9 @@ def createDescriptorsACSF(data, metadata):
     metadata['n_features'] = acsf.get_number_of_features()    
     # Computing descriptors
     descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))    
-    for index in tqdm.tqdm(range(metadata['train_set_size'])):
-        descriptors[index] = acsf.create(data['structures'][index],positions=data.structures[1].positions[index,:])
+    for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
+        for index_atom in tqdm.tqdm(range(metadata['train_set_size'])):
+            descriptors[index_structure,index_atom,:] = acsf.create(data['structures'][index_structure],positions=[index_atom])
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
     
 #from scipy.spatial.distance import cdist
