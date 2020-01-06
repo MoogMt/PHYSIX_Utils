@@ -36,6 +36,20 @@ def getSpecies( atoms ):
             types_=np.append(types_,pT.z2Names(atoms.numbers[atom]))
     return types_
 
+def getNbAtomsPerSpecies( atoms, metadata):
+    if type(atoms) == list:
+        atoms=atoms[0]
+    metadata["nb_per_species"]=np.zeros(( len(metadata["n_species"]) ))
+    for specie in range( len(metadata["n_species"]) ):
+        for atom in range( len(atoms) ):
+            if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
+                metadata["nb_per_species"][specie] += 1
+    return metadata
+
+def getStartSpecies( atoms, metadata ):
+    
+    return metadata
+
 # Default physics params
 default_n_atoms        = 1
 default_n_species      = 1

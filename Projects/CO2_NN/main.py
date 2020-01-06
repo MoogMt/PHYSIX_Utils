@@ -63,6 +63,7 @@ cutoff_ = 3.5 # cut_off SOAP,
 nmax_   = 2 
 lmax_   = 2
 metadata, data_train = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
+data_train, scalers = dth.scaleData(data_train,metadata)
 #=============================================================================#
 
 # BUILDING & TRAINING NETWORK
