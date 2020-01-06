@@ -58,7 +58,7 @@ metadata['total_size_set'] = len(energies)
 metadata['train_fraction'] = 0.2
 metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
 # Build descriptors from positions (train set only)
-data_train, metadata = desc.createDescriptorsSOAP(data_train,metadata)
+metadata, data_train = desc.createDescriptorsSOAP(data_train,metadata)
 #=============================================================================#
 
 network,metadata = nn.build_network(metadata)

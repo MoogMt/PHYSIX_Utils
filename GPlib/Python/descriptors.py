@@ -16,12 +16,52 @@ Created on Sat Apr 20 14:49:53 2019
 
 import tqdm
 import pandas as pd
+import numpy as np
 
 from dscribe.descriptors import SOAP
 from dscribe.descriptors import ACSF
 
+# - SOAP
+#=============================================================================#
+default_sigma_SOAP  = 0.05  # Sigma for the gaussian density
+default_cutoff_SOAP = 1.001 # Angstroms
+default_nmax_SOAP   = 1 
+default_lmax_SOAP   = 0
+default_sparse_SOAP = False
+def checkSOAPParams( metadata, verbose ):
+    if metadata['sigma_SOAP'] < 0:
+        if verbose:
+            print("Invalid value of the sigma for SOAP: sigma=",metadata['sigma_SOAP'],"\n")
+        return False
+    if metadata['cutoff_SOAP'] < 1.0 :
+        if verbose:
+            print("Invalue value of the cut_off for SOAP: cut off = ",metadata['cutoff_SOAP'],"\n")
+        return False
+    if metadata['nmax_SOAP'] < 1.0 :
+        if verbose:
+            print("Invalue value of the cut_off for SOAP: nmax = ",metadata['cutoff_SOAP'],"\n")
+        return False
+    if metadata['lmax_SOAP'] < 0. or metadata['lmax_SOAP'] > metadata['nmax_SOAP'] : 
+        if verbose: 
+            print("Invalue value of the cut_off for SOAP: lmax = ",metadata['lmax_SOAP'],"\n")
+        return False
+    return True
 
-def createDescriptorsSOAP(data, metadata):   
+def createDescriptorsSOAP(data, metadata,
+                          sigma_SOAP=default_sigma_SOAP, 
+                          cutoff_SOAP=default_cutoff_SOAP, 
+                          nmax_SOAP=default_nmax_SOAP, 
+                          lmax_SOAP=default_lmax_SOAP,
+                          sparse_SOAP=default_sparse_SOAP,
+                          ):
+    # Updating metadata
+    metadata['sigma_SOAP']  = sigma_SOAP
+    metadata['cutoff_SOAP'] = cutoff_SOAP
+    metadata['nmax_SOAP']   = nmax_SOAP
+    metadata['lmax_SOAP']   = lmax_SOAP
+    metadata['sparse_SOAP'] = sparse_SOAP
+    if not checkSOAPParams( metadata ): 
+        return False, False
     # Prepping SOAP descriptor structure
     soap = SOAP( species=metadata['species'], sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax_SOAP'], lmax=metadata['lmax_SOAP'],sparse=metadata['sparse_SOAP'] )
     metadata['n_features'] = soap.get_number_of_features()    
@@ -31,8 +71,22 @@ def createDescriptorsSOAP(data, metadata):
         for index_atom in range(metadata['n_atoms']):
             descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom])
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
+#=============================================================================#
 
-def createDescriptorsACSF(data, metadata):         
+# ACSF
+# TO BE REDONE AT A LATER POINT
+#=============================================================================#
+default_cutoff_ACSF = 0.                          # Cut-off for the ACSF function
+default_n_acsf = 0                                # Number of ACSF functions per atoms
+default_g2_params = np.zeros((default_n_acsf,2))  # Parameters for the g2 functions for the ACSF functions
+default_g3_params = np.zeros((default_n_acsf,3))  # Parameters for the g3 functions for the ACSF functions
+def createDescriptorsACSF(data, metadata,
+                          cutoff_ACSF=default_cutoff_ACSF,
+                          g2_params=default_g2_params,
+                          g3_params=default_g3_params,
+                          ):   
+    # Updating metadata      
+    
     # Prepping ACSF descriptor structure
     acsf = ACSF(species=metadata['species'],rcut=metadata['cutoff_acsf'],g2_params=metadata['g2_params'],g4_params=metadata['g3_params'])
     metadata['n_features'] = acsf.get_number_of_features()    
@@ -42,7 +96,8 @@ def createDescriptorsACSF(data, metadata):
         for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
             descriptors[index_structure,index_atom,:] = acsf.create(data['structures'][index_structure],positions=[index_atom])
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
-    
+#=============================================================================#    
+
 #from scipy.spatial.distance import cdist
 
 #def create_data_NN(data,metadata):

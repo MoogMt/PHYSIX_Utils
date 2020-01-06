@@ -46,20 +46,7 @@ default_periodic       = False
 default_total_size_set = 0
 
 # Default Descriptors parameters
-default_descriptor   = 'SOAP'
-# - SOAP
-default_sigma_SOAP  = 0.05
-default_cutoff_SOAP = 1.05 # Angstroms
-default_nmax_SOAP   = 1
-default_lmax_SOAP   = 0
-default_sparse_SOAP = False
-# - NN
-#default_neigh_lim=np.zeros((1,1))
-# - ACSF
-default_cutoff_ACSF = 0.                          # Cut-off for the ACSF function
-default_n_acsf = 0                                # Number of ACSF functions per atoms
-default_g2_params = np.zeros((default_n_acsf,2))  # Parameters for the g2 functions for the ACSF functions
-default_g3_params = np.zeros((default_n_acsf,3))  # Parameters for the g3 functions for the ACSF functions
+default_descriptor   = 'None'
 
 # Data treatment
 default_PCA = False
@@ -95,15 +82,6 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   periodic=default_periodic,
                   total_size_set = default_total_size_set,
                   descriptor=default_descriptor, 
-                  sigma_SOAP=default_sigma_SOAP, 
-                  cutoff_SOAP=default_cutoff_SOAP, 
-                  nmax_SOAP=default_nmax_SOAP, 
-                  lmax_SOAP=default_lmax_SOAP,
-                  sparse_SOAP=default_sparse_SOAP,
-                  cutoff_ACSF=default_cutoff_ACSF,
-                  n_acsf=default_n_acsf,
-                  g2_params=default_g2_params,
-                  g3_params=default_g3_params,
  #                 neigh_lim=default_neigh_lim,
                   pca=default_PCA,
                   pca_n=default_pca_N,
@@ -139,20 +117,6 @@ def buildMetaData( traj_file, energy_file, output_folder,
              #Descriptor
             'descriptor_type': descriptor,    #Choice of descriptor
             'n_features': 1,
-            # Ideally here we'd want to load different dictionnaries, because each
-            # descriptor has its parameters, so it doesn't make sense to make a HUGE metadata 
-            # variable with many parameters that will not come in hand...
-            # - SOAP
-            'sigma_SOAP': sigma_SOAP,
-            'cutoff_SOAP': cutoff_SOAP, 
-            'nmax_SOAP': nmax_SOAP,
-            'lmax_SOAP': lmax_SOAP,
-            'sparse_SOAP': sparse_SOAP,
-            # - NN
-            # TO BE DONE BECAUSE LAZYNESS
- #           'nearest_neigh': neigh_lim,
-            # - ACSF
-            # TO BE DONE BECAUSE LAZYNESS
             
             # PCA or not PCA
             'pca_check': pca,             #False if no PCA, a number if PCA to select N first axis
