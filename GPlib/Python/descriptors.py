@@ -13,7 +13,7 @@ Created on Sat Apr 20 14:49:53 2019
 
 @author: julienh
 """
-import numpy as np
+
 import tqdm
 import pandas as pd
 
@@ -28,7 +28,7 @@ def createDescriptorsSOAP(data, metadata):
     # Computing descriptors
     descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))
     for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
-        for index_atom in tqdm.tqdm(range(metadata['train_set_size'])):
+        for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
             descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom])
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
 
@@ -39,7 +39,7 @@ def createDescriptorsACSF(data, metadata):
     # Computing descriptors
     descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))    
     for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
-        for index_atom in tqdm.tqdm(range(metadata['train_set_size'])):
+        for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
             descriptors[index_structure,index_atom,:] = acsf.create(data['structures'][index_structure],positions=[index_atom])
     return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
     
