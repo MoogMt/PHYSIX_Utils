@@ -7,23 +7,51 @@ Created on Thu Dec 26 10:11:28 2019
 """
 
 import os
+import ase
 import numpy as np
+import periodicTable as pT
+
+def getNbAtoms( atoms ):
+    if type(atoms) == ase.atoms.Atoms :
+        return len(atoms)
+    elif type(atoms) == np.ndarray :
+        return len(atoms)
+    elif type(atoms) == list :
+        if type(atoms[0]) == ase.atoms.Atoms :
+            return len(atoms[0])
+        elif type(atoms[0]) == np.ndarray :
+            return len(atoms)
+
+def getSpecies( atoms ):
+    if type(atoms) == list:
+        atoms=atoms[0]
+    types_=[]
+    types_=np.append(types_,pT.z2Names(atoms.numbers[0]))
+    for atom in range(getNbAtoms(atoms)):
+        check = True
+        for type_ in range(len(types_)):
+            if pT.z2Names(atoms.numbers[atom]) == types_[type_]:
+                check = False
+        if check :
+            types_=np.append(types_,pT.z2Names(atoms.numbers[atom]))
+    return types_
 
 # Default physics params
-default_n_atoms = 1
-default_n_species = 1
-default_masses=np.zeros(default_n_atoms)
-default_pbc=None
-default_periodic=False
+default_n_atoms        = 1
+default_n_species      = 1
+default_species        = []
+default_masses         = np.zeros(default_n_atoms)
+default_pbc            = None
+default_periodic       = False
 default_total_size_set = 0
 
 # Default Descriptors parameters
-default_descriptor = 'SOAP'
+default_descriptor   = 'SOAP'
 # - SOAP
-default_sigma_SOAP = 0.
-default_cutoff_SOAP = 0. # Angstroms
-default_nmax_SOAP = 0
-default_lmax_SOAP = 0
+default_sigma_SOAP  = 0.05
+default_cutoff_SOAP = 1.05 # Angstroms
+default_nmax_SOAP   = 1
+default_lmax_SOAP   = 0
 default_sparse_SOAP = False
 # - NN
 #default_neigh_lim=np.zeros((1,1))
@@ -61,7 +89,8 @@ default_suffix = ""                      # suffix for the output files
 def buildMetaData( traj_file, energy_file, output_folder, 
                   n_atoms=default_n_atoms,
                   n_species=default_n_species,
-                  masses=default_masses, 
+                  species=default_species,
+                  masses=default_masses,
                   pbc=default_pbc, 
                   periodic=default_periodic,
                   total_size_set = default_total_size_set,
@@ -101,6 +130,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
             # Physics
             'n_atoms':n_atoms,
             'n_species':n_species,
+            'species':species,
             'masses': masses,   
             'pbc': pbc,
             'periodic': periodic,
@@ -131,7 +161,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
                         
             #Neural Net
             'train_fraction': train_fraction,
-            'size_train_set': train_set_size,
+            'train_set_size': train_set_size,
             'replace': replace,       # Choose whether you can pick twice the same data point in the train set at random
             'activation_function': activation_fct,
             'loss_function': loss_fct,
