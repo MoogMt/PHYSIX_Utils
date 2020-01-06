@@ -57,7 +57,8 @@ metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 400
 metadata['total_size_set'] = len(energies)
 metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
-traj=mtd.sortAtomsSpecie(traj)
+#traj=mtd.sortAtomsSpecie(traj) # Use if you need to sort the atoms per type, current implementation is *very* slow
+metadata["species_sorted"]=True
 metadata=mtd.getStartSpecies(traj,metadata)
 metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 # Build descriptors from positions (train set only)

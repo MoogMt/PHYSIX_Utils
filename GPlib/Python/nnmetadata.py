@@ -39,11 +39,11 @@ def getSpecies( atoms ):
 def getNbAtomsPerSpecies( atoms, metadata):
     if type(atoms) == list:
         atoms=atoms[0]
-    metadata["nb_per_species"]=np.zeros(len(metadata["n_species"]),dtype=int)
+    metadata["nb_element_species"]=np.zeros(len(metadata["n_species"]),dtype=int)
     for specie in range( len(metadata["n_species"]) ):
         for atom in range( len(atoms) ):
             if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
-                metadata["nb_per_species"][specie] += 1
+                metadata["nb_element_species"][specie] += 1
     return metadata
 
 def sortAtomsUniq( atoms ):
@@ -64,7 +64,7 @@ def sortAtomsUniq( atoms ):
 
 def sortAtomsSpecie( atoms ) :
     if type(atoms) == list:
-        for index in len(atoms):
+        for index in range(len(atoms)):
             atoms[index] = sortAtomsUniq(atoms[index])
         return atoms
     else:
@@ -73,6 +73,7 @@ def sortAtomsSpecie( atoms ) :
 def getStartSpecies( atoms, metadata ):
     if not metadata["species_sorted"] :
         atoms=sortAtomsSpecie(atoms)
+        metadata["species_sorted"] = True
     metadata["start_species"] = np.zeros(len(metadata["n_species"]),dtype=int)
     for specie in range( len(metadata["n_species"]) ):
         for atom in range( len(atoms) ):
@@ -89,6 +90,9 @@ default_masses         = np.zeros(default_n_atoms)
 default_pbc            = None
 default_periodic       = False
 default_total_size_set = 0
+default_start_species  = np.zeros(default_n_atoms,dtype=int)
+default_nb_element_species = np.zeros(default_n_atoms,dtype=int)
+default_species_sorted = False
 
 # Default Descriptors parameters
 default_descriptor   = 'None'
@@ -130,6 +134,9 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   pbc=default_pbc, 
                   periodic=default_periodic,
                   total_size_set = default_total_size_set,
+                  start_species=default_start_species,
+                  nb_element_species=default_nb_element_species,
+                  species_sorted=default_species_sorted,
                   descriptor=default_descriptor, 
  #                 neigh_lim=default_neigh_lim,
                   pca=default_PCA,
@@ -164,6 +171,9 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'pbc': pbc,
             'periodic': periodic,
             'total_size_set': total_size_set,
+            'start_species': start_species,
+            'nb_element_species': nb_element_species,
+            'species_sorted': species_sorted,
 
              #Descriptor
             'descriptor_type': descriptor,    #Choice of descriptor
