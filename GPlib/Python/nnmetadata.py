@@ -39,8 +39,8 @@ def getSpecies( atoms ):
 def getNbAtomsPerSpecies( atoms, metadata):
     if type(atoms) == list:
         atoms=atoms[0]
-    metadata["nb_element_species"]=np.zeros(len(metadata["n_species"]),dtype=int)
-    for specie in range( len(metadata["n_species"]) ):
+    metadata["nb_element_species"]=np.zeros(metadata["n_species"],dtype=int)
+    for specie in range( metadata["n_species"] ):
         for atom in range( len(atoms) ):
             if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
                 metadata["nb_element_species"][specie] += 1
@@ -74,7 +74,9 @@ def getStartSpecies( atoms, metadata ):
     if not metadata["species_sorted"] :
         atoms=sortAtomsSpecie(atoms)
         metadata["species_sorted"] = True
-    metadata["start_species"] = np.zeros(len(metadata["n_species"]),dtype=int)
+    if type(atoms) == list: 
+        atoms=atoms[0]
+    metadata["start_species"] = np.zeros(metadata["n_species"],dtype=int)
     for specie in range( metadata["n_species"] ):
         for atom in range( len(atoms) ):
             if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
