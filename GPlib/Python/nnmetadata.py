@@ -39,15 +39,46 @@ def getSpecies( atoms ):
 def getNbAtomsPerSpecies( atoms, metadata):
     if type(atoms) == list:
         atoms=atoms[0]
-    metadata["nb_per_species"]=np.zeros(( len(metadata["n_species"]) ))
+    metadata["nb_per_species"]=np.zeros(len(metadata["n_species"]),dtype=int)
     for specie in range( len(metadata["n_species"]) ):
         for atom in range( len(atoms) ):
             if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
                 metadata["nb_per_species"][specie] += 1
     return metadata
 
+def sortAtomsUniq( atoms ):
+    # Sorting by decreasing Z 
+    # BEHOLD THE BUBLE SORT OF DEATH - Y a probablement plus efficace
+    # Mais sachant qu'on fera *jamais* plus de tableaux de 10^4 elements,
+    # et que c'est pas qqchose qu'on va faire régulièrement, ça va...
+    for i in range(len(atoms)):
+        for j in range(i+1,len(atoms)):
+            if atoms.numbers[i] < atoms.numbers[j]:
+                store_z = atoms.numbers[i]
+                store_positions = atoms.positions[i,:]
+                atoms.numbers[i] = atoms.numbers[j]
+                atoms.positions[i,:] = atoms.positions[j,:]
+                atoms.numbers[j] = store_z
+                atoms.positions[j,:] = store_positions
+    return atoms
+
+def sortAtomsSpecie( atoms ) :
+    if type(atoms) == list:
+        for index in len(atoms):
+            atoms[index] = sortAtomsUniq(atoms[index])
+        return atoms
+    else:
+        return sortAtomsUniq(atoms)
+
 def getStartSpecies( atoms, metadata ):
-    
+    if not metadata["species_sorted"] :
+        atoms=sortAtomsSpecie(atoms)
+    metadata["start_species"] = np.zeros(len(metadata["n_species"]),dtype=int)
+    for specie in range( len(metadata["n_species"]) ):
+        for atom in range( len(atoms) ):
+            if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
+                metadata["start_species"] = atom
+                break
     return metadata
 
 # Default physics params

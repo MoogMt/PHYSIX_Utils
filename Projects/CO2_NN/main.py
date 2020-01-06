@@ -57,6 +57,9 @@ metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 400
 metadata['total_size_set'] = len(energies)
 metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
+traj=mtd.sortAtomsSpecie(traj)
+metadata=mtd.getStartSpecies(traj,metadata)
+metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.5 # cut_off SOAP, 
