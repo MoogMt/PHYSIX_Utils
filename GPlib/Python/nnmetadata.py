@@ -75,7 +75,7 @@ def getStartSpecies( atoms, metadata ):
         atoms=sortAtomsSpecie(atoms)
         metadata["species_sorted"] = True
     metadata["start_species"] = np.zeros(len(metadata["n_species"]),dtype=int)
-    for specie in range( len(metadata["n_species"]) ):
+    for specie in range( metadata["n_species"] ):
         for atom in range( len(atoms) ):
             if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
                 metadata["start_species"] = atom
