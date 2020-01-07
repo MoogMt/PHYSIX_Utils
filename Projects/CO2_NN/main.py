@@ -11,6 +11,7 @@ import nndatahand as dth
 import filexyz as xyz
 import cpmd 
 import descriptors as desc
+import pandas as pd
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -66,8 +67,9 @@ sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.5 # cut_off SOAP, 
 nmax_   = 2 
 lmax_   = 2
-metadata, data_train = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
-data_train, scalers = dth.scaleData(data_train,metadata)
+metadata, descriptors = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
+descriptors, scalers = dth.scaleData(descriptors,metadata)
+data_train=data_train.join(pd.DataFrame({'descriptor':list(descriptors)}))
 #=============================================================================#
 
 # BUILDING & TRAINING NETWORK
@@ -84,4 +86,4 @@ io.write_output(metadata,output)
 soap_co2= soap.create(traj[0], positions=[[2.0,10,15]],n_jobs=8)
 
 
-
+scaler[specie].fit(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(int(metadata['train_set_size']*metadata['n_specie'][specie]),metadata['n_features']))
