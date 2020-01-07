@@ -12,6 +12,8 @@ import filexyz as xyz
 import cpmd 
 import descriptors as desc
 import pandas as pd
+import behler
+import keras
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -49,6 +51,10 @@ energies=energies[0:len(energies):stride_energies]
 metadata['n_atoms'] = len(traj[0])
 metadata['species'] = mtd.getSpecies(traj[0])
 metadata['n_species'] = len(metadata['species'])
+#traj=mtd.sortAtomsSpecie(traj) # Use if you need to sort the atoms per type, current implementation is *very* slow
+metadata["species_sorted"]=True
+metadata=mtd.getStartSpecies(traj,metadata)
+metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 
 # CREATING DESCRIPTORS
@@ -58,10 +64,8 @@ metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 400
 metadata['total_size_set'] = len(energies)
 metadata,data_train = dth.choseTrainDataRandom(metadata,traj,energies)
-#traj=mtd.sortAtomsSpecie(traj) # Use if you need to sort the atoms per type, current implementation is *very* slow
-metadata["species_sorted"]=True
-metadata=mtd.getStartSpecies(traj,metadata)
-metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
+# Creating testing set
+metadata["test_set_size"] = 500
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.5 # cut_off SOAP, 
@@ -72,18 +76,20 @@ descriptors, scalers = dth.scaleData(descriptors,metadata)
 data_train=data_train.join(pd.DataFrame({'descriptor':list(descriptors)}))
 #=============================================================================#
 
-# BUILDING & TRAINING NETWORK
+# BUILDING NETWORK
 #=============================================================================#
-network,metadata = nn.build_network(metadata)
-network,metadata = nn.train_network(metadata)
-#=============================================================================#
-
-#=============================================================================#
-output, metadata = nn.test_network(metadata)
-io.write_output(metadata,output)
+model=behler.buildNetwork(metadata)
+model.compile(loss=metadata["loss_func"], optimizer=metadata["optimizer"], metrics=['accuracy'])
+if metadata["plot_network"]:
+    keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
 #=============================================================================#
 
-soap_co2= soap.create(traj[0], positions=[[2.0,10,15]],n_jobs=8)
+# TRAINING NETWORK
+#=============================================================================#
 
+data_test="loutre" # To be done
+metadata, descriptors = desc.createDescriptorsSOAP(data_test,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
+data_test=data_test.join(pd.DataFrame({'descriptor':list(descriptors)}))
 
-scaler[specie].fit(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(int(metadata['train_set_size']*metadata['n_specie'][specie]),metadata['n_features']))
+#=============================================================================#
+
