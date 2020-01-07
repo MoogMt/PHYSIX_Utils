@@ -62,7 +62,7 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 400
 metadata['total_size_set'] = len(energies)
-metadata,data_train = mtd.choseTrainDataRandom(metadata,traj,energies)
+metadata,data_train = mtd.choseDataRandom(metadata,traj,energies)
 # Creating testing set
 metadata["test_set_size"] = 500
 data_test = mtd.ChooseDataExclusion(metadata,traj,energies)
