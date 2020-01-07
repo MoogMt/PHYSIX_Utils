@@ -72,7 +72,7 @@ def createDescriptorsSOAP(data, metadata,
     for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
         for index_atom in range(metadata['n_atoms']):
             descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom],)
-    return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
+    return metadata, descriptors
 #=============================================================================#
 
 # ACSF
@@ -97,7 +97,7 @@ def createDescriptorsACSF(data, metadata,
     for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
         for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
             descriptors[index_structure,index_atom,:] = acsf.create(data['structures'][index_structure],positions=[index_atom])
-    return metadata, data.join(pd.DataFrame({'descriptor':list(descriptors)}))
+    return metadata, descriptors
 #=============================================================================#    
 
 #from scipy.spatial.distance import cdist

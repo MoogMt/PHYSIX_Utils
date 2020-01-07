@@ -46,16 +46,16 @@ def choseTrainDataRandom(metadata,structures,energies):
 
 def scaleData(data,metadata):
     scaler = []
-    for specie in range(len(metadata["species"])):
+    for specie in range(metadata["n_species"]):
         scaler.append(StandardScaler())        
-        scaler[specie].fit(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(int(metadata['train_set_size']*metadata['n_specie'][specie]),metadata['n_features']))    
-        data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:] = scaler[specie].transform(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(data[:,metadata["start_species"][specie]:2,:].shape[0]*2,metadata["n_features"])).reshape(data.shape[0],2,metadata["n_features"])
+        scaler[specie].fit(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(metadata['train_set_size']*metadata['n_specie'][specie],metadata['n_features']))    
+        data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:] = scaler[specie].transform(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])).reshape(data.shape[0],metadata["nb_element_species"][specie],metadata["n_features"])
     return data, scaler
 
 def pcaSelectBestParams(descriptors,metadata):
     pca=[]
     for specie in range(len(metadata["species"])):
-        pca.append(PCA(n_components=metadata["pca_n"]).fit(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*2,metadata["n_features"])))
+        pca.append(PCA(n_components=metadata["pca_n"]).fit(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])))
         if metadata['verbose']: 
             print("Precision of new features ",metadata["species"][specie]," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
     return pca
