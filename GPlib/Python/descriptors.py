@@ -1,17 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Dec 28 18:04:53 2019
-
-@author: moogmt
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Sat Apr 20 14:49:53 2019
 
-@author: julienh
+@author: julienh with modifications from moogmt
 """
 
 import tqdm
