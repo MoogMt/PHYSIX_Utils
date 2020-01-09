@@ -20,6 +20,7 @@ default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
 default_n_hidden_layer=2                # Number of hidden layers
 default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
 default_dropout_coef=np.zeros((default_n_species,default_n_hidden_layer+1)) # Dropout for faster convergence (can be desactivated) 
+default_restore_weights=True
 default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./"
@@ -85,49 +86,27 @@ def buildNetwork( metadata,
 
     return keras.models.Model(inputs=all_input_layers ,outputs=added_layer(all_subnets) )   
 
-def predict(model, input_data ):
-        predictions = model.predict([np.stack(input_data.str[0].as_matrix()),
-               np.stack(input_data.str[1].as_matrix()),
-               np.stack(input_data.str[2].as_matrix()),
-               np.stack(input_data.str[3].as_matrix()),
-               np.stack(input_data.str[4].as_matrix()),
-               np.stack(input_data.str[5].as_matrix()),
-               np.stack(input_data.str[6].as_matrix()),
-               ])
-        return predictions
+def predict(model, input_data ): 
+        return model.predict(input_data)
 
-def train(model, input_train, output_train, input_test, output_test, metadata ):
+def train(model, input_train, output_train, input_test, output_test, metadata,
+                            patience=default_patience,
+                            restore_weights=default_restore_weights,
+                            ):
 
-    callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"],restore_best_weights=True)
+    if not "patience" in metadata :
+        metadata["patience"] = patience
+    if not "restore_weights" in metadata :
+        metadata["restore_weights"] = restore_weights
+    
+    callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
 
     # fit model
-    metadata['history'] = model.fit([np.stack(input_train.str[0].as_matrix()),
-               np.stack(input_train.str[1].as_matrix()),
-               np.stack(input_train.str[2].as_matrix()),
-               np.stack(input_train.str[3].as_matrix()),
-               np.stack(input_train.str[4].as_matrix()),
-               np.stack(input_train.str[5].as_matrix()),
-               np.stack(input_train.str[6].as_matrix()),
-               ], 
-                output_train,
-                validation_data=([np.stack(input_test.str[0].as_matrix()),
-                   np.stack(input_test.str[1].as_matrix()),
-                   np.stack(input_test.str[2].as_matrix()),
-                   np.stack(input_test.str[3].as_matrix()),
-                   np.stack(input_test.str[4].as_matrix()),
-                   np.stack(input_test.str[5].as_matrix()),
-                   np.stack(input_test.str[6].as_matrix()),
-                   ],output_test),
-                epochs=metadata["epochs"],verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
+    metadata['history'] = model.fit( input_train, output_train, validation_data=(input_test,output_test), 
+            epochs=metadata["epochs"],
+            verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
     
-    mean_error = model.evaluate([np.stack(output_test.str[0].as_matrix()),
-               np.stack(input_test.str[1].as_matrix()),
-               np.stack(input_test.str[2].as_matrix()),
-               np.stack(input_test.str[3].as_matrix()),
-               np.stack(input_test.str[4].as_matrix()),
-               np.stack(input_test.str[5].as_matrix()),
-               np.stack(input_test.str[6].as_matrix()),
-               ],output_test)[0]
+    mean_error = model.evaluate(input_test,output_test)[0]
 
     if metadata["save_model"] :
         model.save(metadata["path_saved_model"])

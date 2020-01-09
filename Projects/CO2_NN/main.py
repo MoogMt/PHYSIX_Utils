@@ -98,6 +98,7 @@ metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
 metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
 metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
+metadata["restore_weights"] = True
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
 metadata["n_nodes_per_layer"] = 20           # Number of nodes per hidden layer
@@ -122,6 +123,6 @@ if metadata["plot_network"]:
 
 #=============================================================================#
 # TRAINING NETWORK
-data_train,data_test,mean_error,metadata = behler.train(data_train,data_test,model,metadata)
+input_train,output_train,input_test,output_test,mean_error,metadata = behler.train(input_train,output_train,input_test,output_test,model,metadata)
 #=============================================================================#
 

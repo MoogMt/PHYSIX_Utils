@@ -157,7 +157,7 @@ def buildInput(data):
     data_=np.stack(data["descriptor"].str[:].values)
     nb_data=np.shape(data_)[0]
     for i in range(nb_data):
-        input.append(data_[i,:,:])
+        input_.append(data_[i,:,:])
     return input_
 
 def sortAtomsSpecie( atoms ) :
