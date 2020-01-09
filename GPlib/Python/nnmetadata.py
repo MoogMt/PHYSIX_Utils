@@ -17,6 +17,13 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler  
 from sklearn.decomposition import PCA
 
+def writeDataToDisk( data, path_to_file ):
+    file_out=open(path_to_file,"w")
+    for i in range( np.shape(data)[1] ):
+        print("loutre")
+    file_out.close()
+    return True
+
 # 
 def choseTrainDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['train_index'] = chosen_index

@@ -42,27 +42,36 @@ def buildNetwork( metadata,
                   replace_inputs=default_replace_inputs
                  ):
     
-    #Neural Net
+    #Neural Net metadata
+    #=========================================================================#
     metadata=handleNNOption("activation_fct", activation_fct, metadata, replace_inputs )
     metadata=handleNNOption("loss_fct", loss_fct, metadata, replace_inputs )
     metadata=handleNNOption("optimizer", optimizer, metadata, replace_inputs )
     metadata=handleNNOption("n_epochs", n_epochs, metadata, replace_inputs )
     metadata=handleNNOption("patience", patience, metadata, replace_inputs )
-    metadata=handleNNOption("n_nodes_per_layer", n_nodes_per_layer, metadata, replace_inputs )
-    metadata=handleNNOption("n_hidden_layer", n_hidden_layer, metadata, replace_inputs )
     metadata=handleNNOption("n_nodes_structure", n_hidden_layer, metadata, replace_inputs )
-    metadata=handleNNOption("dropout_coef", n_hidden_layer, metadata, replace_inputs )
+    metadata=handleNNOption("dropout_coef", dropout_coef, metadata, replace_inputs )
+    #=========================================================================#
     
     # Construction subnetwork
+    #=========================================================================#
     specie_subnets=[]
     for specie in range(metadata["n_species"]):
         specie_subnets=np.append(specie_subnets,keras.Sequential(name=str(metadata["species"][specie]+"_subnet")))
         specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,0]))
-        for node in range(metadata["n_hidden_layer"]):
-            specie_subnets[specie].add(keras.layers.Dense(node,activation=metadata["activation_fct"],kernel_constraint=keras.constraints.maxnorm(3) ) )
-            specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,node]))
+        layer=1
+        for n_node in metadata["n_nodes_structure"][specie,:] :
+            if n_node > 0:
+                specie_subnets[specie].add(keras.layers.Dense(n_node,activation=metadata["activation_fct"],kernel_constraint=keras.constraints.maxnorm(3) ) )
+                specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,layer]))
+                layer += 1
+            else:
+                break
         specie_subnets[specie].add(keras.layers.Dense(1,activation="linear"))
-
+    #=========================================================================#
+    
+    # Linking subnets
+    #=========================================================================#
     all_input_layers=[]
     all_subnets=[]
     for specie in range(metadata["n_species"]):
@@ -72,6 +81,7 @@ def buildNetwork( metadata,
             all_subnets.append( specie_subnets[specie](atom) )
             count_+=1
     added_layer = keras.layers.Add(name="Addition")
+    #=========================================================================#
 
     return keras.models.Model(inputs=all_input_layers),added_layer  
 
