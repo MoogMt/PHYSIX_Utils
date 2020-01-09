@@ -124,7 +124,7 @@ def getNbAtomsPerSpecies( atoms, metadata):
     metadata["nb_element_species"]=np.zeros(metadata["n_species"],dtype=int)
     for specie in range( metadata["n_species"] ):
         for atom in range( len(atoms) ):
-            if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
+            if metadata["species"][specie] == pT.z2Names(atoms.numbers[atom]) :
                 metadata["nb_element_species"][specie] += 1
     return metadata
 
@@ -177,6 +177,7 @@ default_total_size_set = 0
 default_start_species  = np.zeros(default_n_atoms,dtype=int)
 default_nb_element_species = np.zeros(default_n_atoms,dtype=int)
 default_species_sorted = False
+default_replace = False   # Whether or not we can select several times the same data point in the training set
 
 # Default Descriptors parameters
 default_descriptor   = 'None'
@@ -186,19 +187,6 @@ default_PCA = False
 default_pca_N = 0 
 default_scale = False
 
-# Neural Net default parameters
-default_train_fraction = 0.1 # Fraction of total dataset, if chosing data randomly from total set
-default_train_set_size = 0   # Size of the training set
-default_replace = False   # Whether or not we can select several times the same data point in the training set
-default_activation_fct = 'tanh'  # Activation function in the dense hidden layers
-default_loss_fct = 'mean_squared_error' # Loss function in the NN
-default_opt = 'adam'                    # Choice of optimizers for training of the NN weights 
-default_n_epoch = 1000                  # Number of epoch for optimization?
-default_patience = 100                  # Patience for convergence
-default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
-default_n_hidden_layer=2                # Number of hidden layers
-default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
-default_dropout_coef=np.zeros((default_n_hidden_layer+1,default_n_species)) # Dropout for faster convergence (can be desactivated) 
 
 # Default I/O settingss
 default_path_to_import_model = ""        # If taking over from previous model, path where to save the NN
@@ -221,23 +209,12 @@ def buildMetaData( traj_file, energy_file, output_folder,
                   start_species=default_start_species,
                   nb_element_species=default_nb_element_species,
                   species_sorted=default_species_sorted,
+                  replace = default_replace,
                   descriptor=default_descriptor, 
  #                 neigh_lim=default_neigh_lim,
                   pca=default_PCA,
                   pca_n=default_pca_N,
                   scale=default_scale, 
-                  train_fraction=default_train_fraction,
-                  train_set_size=default_train_set_size,
-                  replace=default_replace,
-                  activation_fct=default_activation_fct,
-                  loss_fct=default_loss_fct,
-                  opt=default_opt,
-                  n_epoch=default_n_epoch,
-                  patience=default_patience,
-                  n_nodes_per_layer=default_n_nodes_per_layer,
-                  n_hidden_layer=default_n_hidden_layer,
-                  n_nodes_structure=default_n_nodes_structure,
-                  dropout_coef=default_dropout_coef,
                   path_to_import_model=default_path_to_import_model,
                   prefix=default_prefix,
                   suffix=default_suffix,
@@ -258,6 +235,7 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'start_species': start_species,
             'nb_element_species': nb_element_species,
             'species_sorted': species_sorted,
+            'replace': replace,
 
              #Descriptor
             'descriptor_type': descriptor,    #Choice of descriptor
@@ -267,21 +245,6 @@ def buildMetaData( traj_file, energy_file, output_folder,
             'pca_check': pca,             #False if no PCA, a number if PCA to select N first axis
             'pca_n': pca_n,
             'scaler': scale,             #False if no scaling, None if scaling
-                        
-            #Neural Net
-            'train_fraction': train_fraction,
-            'train_set_size': train_set_size,
-            'replace': replace,       # Choose whether you can pick twice the same data point in the train set at random
-            'activation_function': activation_fct,
-            'loss_function': loss_fct,
-            'optimizer': opt, 
-            'epochs': n_epoch,
-            'patience': patience,
-            'n_nodes_per_layer': n_nodes_per_layer,
-            'n_hidden_layer': n_hidden_layer,
-            'n_nodes_structure': n_nodes_structure,
-            'dropout_coef': dropout_coef,
-
             # I/O        
             'traj_file': traj_file,
             'energy_file': energy_file,

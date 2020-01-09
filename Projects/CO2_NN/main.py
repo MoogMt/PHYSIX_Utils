@@ -13,6 +13,7 @@ import descriptors as desc
 import pandas as pd
 import behler
 import keras
+import numpy as np
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -74,9 +75,9 @@ lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
 metadata, descriptors = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
+descriptors, scalers = mtd.scaleData(descriptors,metadata)
 data_train=data_train.join(pd.DataFrame({'descriptor':list(descriptors)}))
 # Scaling
-descriptors, scalers = mtd.scaleData(descriptors,metadata)
 # Test set
 #------------------------------------------------------------------------------
 metadata, descriptors = desc.createDescriptorsSOAP(data_test,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
@@ -85,7 +86,16 @@ data_test=data_test.join(pd.DataFrame({'descriptor':list(descriptors)}))
 
 # BUILDING NETWORK
 #=============================================================================#
-model=behler.buildNetwork(metadata)
+default_activation_fct = 'tanh'  # Activation function in the dense hidden layers
+default_loss_fct = 'mean_squared_error' # Loss function in the NN
+default_opt = 'adam'                    # Choice of optimizers for training of the NN weights 
+default_n_epoch = 1000                  # Number of epoch for optimization?
+default_patience = 100                  # Patience for convergence
+default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
+default_n_hidden_layer=2                # Number of hidden layers
+default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
+default_dropout_coef=np.zeros((default_n_hidden_layer+1,default_n_species)) # Dropout for faster convergence (can be desactivated) 
+model=behler.buildNetwork(metadata,metadata[""])
 model.compile(loss=metadata["loss_func"], optimizer=metadata["optimizer"], metrics=['accuracy'])
 if metadata["plot_network"]:
     keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
