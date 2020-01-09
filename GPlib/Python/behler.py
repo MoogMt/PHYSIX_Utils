@@ -189,14 +189,14 @@ def writeStatErrors( metadata, path_out_stat,
         write_="w+"
     # Writting data
     file_out=open(path_out_stat,write_)
-    file_out.write(str(metadata["MAE_train"])," ",)
-    file_out.write(str(metadata["MAE_test"])," ")
-    file_out.write(str(np.round(metadata["MAE_train"]/metadata["range_energy"]*100, metadata["rounding"] )), " ",)
-    file_out.write(str(np.round(metadata["MAE_test"] /metadata["range_energy"]*100, metadata["rounding"] )), " ")
-    file_out.write(str(metadata["MSE_train"])," ",)
-    file_out.write(str(metadata["MSE_test"])," ")
-    file_out.write(str(metadata["R2_train"])," ",)
-    file_out.write(str(metadata["R2_test"]),"\n")
+    file_out.write(str(metadata["MAE_train"])+" ",)
+    file_out.write(str(metadata["MAE_test"])+" ")
+    file_out.write(str(np.round(metadata["MAE_train"]/metadata["range_energy"]*100, metadata["rounding"] ))+ " ",)
+    file_out.write(str(np.round(metadata["MAE_test"] /metadata["range_energy"]*100, metadata["rounding"] ))+ " ")
+    file_out.write(str(metadata["MSE_train"])+" ",)
+    file_out.write(str(metadata["MSE_test"])+" ")
+    file_out.write(str(metadata["R2_train"])+" ",)
+    file_out.write(str(metadata["R2_test"])+"\n")
     file_out.close()
     return
 #==============================================================================
@@ -207,7 +207,7 @@ def writeComparativePrediction( file_path, output_, prediction_ ):
     file_out=open(file_path,"w")
     nb_data=np.shape(output_)[0]
     for i in range(nb_data):
-        file_out.write( str(str(output_[i])+" "+str(prediction_[i]),"\n") )
+        file_out.write( str(str(output_[i])+" "+str(prediction_[i])+"\n") )
     file_out.close()
     return 
 #==============================================================================
