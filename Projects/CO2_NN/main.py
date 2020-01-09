@@ -116,15 +116,14 @@ metadata["plot_network"]=False
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
 metadata["saved_model"] = False
 metadata["path_folder_save"]=str(folder_out)
-metadata["suffix_write"]=str("train-"+metadata["train_set_size"] + "_" +
-           "test-"+metadata["test_set_size"]        + "_" +
-           "layers-"+metadata["n_hidden_layer"]     + "_" +
-           "n_nodes-"+metadata["n_nodes_per_layer"] + "_" + 
-           "nmaxSOAP-" + metadata["nmax_SOAP"] + "_" + 
-           "lmaxSOAP-" + metadata["lmax_SOAP"] + "_" +
-           "sigmaSOAP-" + metadata["sigma_SOAP"] + "_"+
-           "cutoffSOAP-" + metadata["cutoff_SOAP"] 
-           )
+metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])              + "_" +
+                             "test-"       + str(metadata["test_set_size"])               + "_" +
+                             "layers-"     + str(metadata["n_hidden_layer"])              + "_" +
+                             "n_nodes-"    + str(metadata["n_nodes_per_layer"])           + "_" + 
+                             "nmaxSOAP-"   + str(metadata["nmax_SOAP"])                   + "_" + 
+                             "lmaxSOAP-"   + str(metadata["lmax_SOAP"])                   + "_" +
+                             "sigmaSOAP-"  + str(metadata["sigma_SOAP"])                  + "_" + 
+                             "cutoffSOAP-" + str(metadata["cutoff_SOAP"]) )
 
 metadata, metadata_stat, predictions_train, prediction_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)
 
