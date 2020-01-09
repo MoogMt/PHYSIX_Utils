@@ -68,12 +68,12 @@ def buildNetwork( metadata,
     for specie in range(metadata["n_species"]):
         count_=1
         for atom in range(metadata["start_species"][specie],metadata["start_species"][specie]+metadata["nb_element_species"][specie]):
-            all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie])+"_input"+str(count_)) )            
+            all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie]+"_input"+str(count_) )) )            
             all_subnets.append( specie_subnets[specie](atom) )
             count_+=1
-    add_layer = keras.layers.Add(name="Addition")
-    
-    return keras.models.Model(inputs=all_input_layers ,outputs=add_layer(all_subnets) )   
+    added_layer = keras.layers.Add(name="Addition")
+
+    return keras.models.Model(inputs=all_input_layers),added_layer  
 
 def predict(model, input_data ):
         predictions = model.predict([np.stack(input_data.str[0].as_matrix()),

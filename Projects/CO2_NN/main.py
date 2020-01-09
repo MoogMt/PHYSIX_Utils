@@ -100,7 +100,7 @@ metadata["dropout_coef"]=np.zeros((metadata["n_hidden_layer"]+1,metadata["n_spec
 metadata["plot_network"]=True
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
 # Build the network
-model=behler.buildNetwork(metadata)
+model,added_layer=behler.buildNetwork(metadata)
 # Compile the network
 model.compile(loss=metadata["loss_func"], optimizer=metadata["optimizer"], metrics=['accuracy'])
 # Plot the network
