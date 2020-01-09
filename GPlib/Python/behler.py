@@ -34,7 +34,7 @@ def handleNNOption( input_label, default_value, metadata, replace ):
     if not input_label in metadata or replace :
         metadata[input_label] = default_value
     return metadata
-def handleNNOption( input_label, default_value, metadata ):
+def handleNNOption2( input_label, default_value, metadata ):
     if not input_label in metadata :
         metadata[input_label] = default_value
     return metadata
@@ -126,10 +126,10 @@ def train(model, input_train, output_train, input_test, output_test, metadata,
           saved_model = default_saved_model
           ):
         
-    metadata=handleNNOption( "n_epochs", default_n_epochs, metadata )
-    metadata=handleNNOption( "patience", default_patience, metadata )
-    metadata=handleNNOption( "restore_weights", default_restore_weights, metadata )
-    metadata=handleNNOption( "saved_model", default_saved_model, metadata )
+    metadata=handleNNOption2("n_epochs", default_n_epochs, metadata )
+    metadata=handleNNOption2("patience", default_patience, metadata )
+    metadata=handleNNOption2("restore_weights", default_restore_weights, metadata )
+    metadata=handleNNOption2("saved_model", default_saved_model, metadata )
     
     # Fit Parameters
     callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
@@ -220,8 +220,8 @@ def buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_t
                            path_folder_save=default_path_folder_save,
                            suffix_write=default_suffix_write):
     
-    metadata=handleNNOption( "suffix_write", default_suffix_write, metadata )
-    metadata=handleNNOption( "suffix_write", default_suffix_write, metadata )
+    metadata=handleNNOption2( "suffix_write", default_suffix_write, metadata )
+    metadata=handleNNOption2( "suffix_write", default_suffix_write, metadata )
     
     # BUILDING
     #=============================================================================#
