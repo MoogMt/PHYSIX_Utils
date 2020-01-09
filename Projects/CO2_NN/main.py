@@ -62,10 +62,10 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 2000
 metadata['total_size_set'] = len(energies)
-metadata,data_train = mtd.choseTrainDataRandom(metadata,traj,energies)
+metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
 metadata["test_set_size"] = 1000
-metadata, data_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
+metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
 sigma_  = 0.8  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.2 # cut_off SOAP, 
@@ -73,14 +73,11 @@ nmax_   = 2
 lmax_   = 1
 # Train set
 #-----------------------------------------------------------------------------
-metadata, descriptors = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
-descriptors, scalers = mtd.scaleData(descriptors,metadata)
-data_train=data_train.join(pd.DataFrame({'descriptor':list(descriptors)}))
-# Scaling
+metadata, input_train = desc.createDescriptorsSOAP(input_train_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
+#descriptors, scalers = mtd.scaleData(input_train,metadata)
 # Test set
 #------------------------------------------------------------------------------
-metadata, descriptors = desc.createDescriptorsSOAP(data_test,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
-data_test=data_test.join(pd.DataFrame({'descriptor':list(descriptors)}))
+metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
 # Building Inputs
 input_train=mtd.buildInput(data_train)
 output_train=data_train.energy.values
@@ -103,7 +100,7 @@ metadata["restore_weights"] = True
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
 metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
-metadata["n_hidden_layer"] = 4                # Number of hidden layers
+metadata["n_hidden_layer"] = 4               # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
         
 # Dropout coefficients
@@ -127,5 +124,4 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
                              "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
                              "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
 
-model, metadata, metadata_stat, predictions_train, prediction_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)
-
+model, metadata, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)

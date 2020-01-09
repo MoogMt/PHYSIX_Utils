@@ -39,7 +39,7 @@ def choseTrainDataByIndex(metadata,structures,energies,chosen_index):
         for i in range(metadata['train_set_size']):
             energies_train[i] = energies[chosen_index[i]]          
             structures_train[i] = structures[chosen_index[i]]
-    return metadata, pd.DataFrame({"energy":energies_train,'structures':structures_train})
+    return metadata, structures_train, energies_train
 
 # 
 def choseTrainDataRandom(metadata,structures,energies):    
@@ -58,17 +58,17 @@ def choseTestDataByIndex(metadata,structures,energies,chosen_index):
     metadata['test_index'] = chosen_index
     if metadata['test_set_size'] == 0 :    
         metadata['test_set_size']=len(chosen_index)
-    structures_train = np.empty(metadata['test_set_size'],dtype=ase.atoms.Atoms)
-    energies_train = np.empty(metadata['test_set_size'],dtype=float)
+    structures_test = np.empty(metadata['test_set_size'],dtype=ase.atoms.Atoms)
+    energies_test = np.empty(metadata['test_set_size'],dtype=float)
     if type(structures[0]) != ase.atoms.Atoms :
         for i in range(metadata['test_set_size']) :
-            energies_train[i] = energies[chosen_index[i]]
-            structures_train[i] = ase.atoms.Atoms(numbers=metadata['n_atoms'], positions=structures[chosen_index[i],:] )   
+            energies_test[i] = energies[chosen_index[i]]
+            structures_test[i] = ase.atoms.Atoms(numbers=metadata['n_atoms'], positions=structures[chosen_index[i],:] )   
     else:
         for i in range(metadata['test_set_size']):
-            energies_train[i] = energies[chosen_index[i]]          
-            structures_train[i] = structures[chosen_index[i]]
-    return metadata, pd.DataFrame({"energy":energies_train,'structures':structures_train})
+            energies_test[i] = energies[chosen_index[i]]          
+            structures_test[i] = structures[chosen_index[i]]
+    return metadata, structures_test, energies_test
 
 def getIndexExcluding( index_excluding, size_total ):
     return np.array(list(filter(lambda x : x not in index_excluding, np.arange(size_total))))

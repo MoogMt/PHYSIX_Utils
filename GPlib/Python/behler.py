@@ -244,8 +244,8 @@ def buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_t
     predictions_train = predict( model, input_train, output_train )
     predictions_test  = predict( model, input_test,  output_test  )
     # Write the comparative between predictions and outputs
-    file_comp_train=str(metadata["path_folder_save"]+"ComparativeErrorsTrain_"+metadata["suffix_write"])
-    file_comp_test=str(metadata["path_folder_save"]+"ComparativeErrorsTest_"+metadata["suffix_write"])
+    file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )
+    file_comp_test  = str( metadata["path_folder_save"] + "ComparativeErrorsTest_"  +metadata["suffix_write"] )
     writeComparativePrediction(file_comp_train, output_train, predictions_train )
     writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
     # Compute and write Statistical errors

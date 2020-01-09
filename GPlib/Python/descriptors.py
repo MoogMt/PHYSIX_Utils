@@ -60,10 +60,10 @@ def createDescriptorsSOAP(data, metadata,
     soap = SOAP( species=metadata['species'], sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax_SOAP'], lmax=metadata['lmax_SOAP'],sparse=metadata['sparse_SOAP'] )
     metadata['n_features'] = soap.get_number_of_features()
     # Computing descriptors
-    descriptors = pd.np.empty((np.shape(data)[0],metadata['n_atoms'],metadata['n_features']))
+    descriptors = np.empty((metadata['n_atoms'],np.shape(data)[0],metadata['n_features']))
     for index_structure in tqdm.tqdm(range(np.shape(data)[0])): # This whole thing is a bit insane, we could directly build it propertly for the training and avoid nonsentical stuff...
         for index_atom in range(metadata['n_atoms']):
-            descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom],)
+            descriptors[index_atom,index_structure,:] = soap.create(data[index_structure],positions=[index_atom],)
     return metadata, descriptors
 #=============================================================================#
 
@@ -85,10 +85,10 @@ def createDescriptorsACSF(data, metadata,
     acsf = ACSF(species=metadata['species'],rcut=metadata['cutoff_acsf'],g2_params=metadata['g2_params'],g4_params=metadata['g3_params'])
     metadata['n_features'] = acsf.get_number_of_features()    
     # Computing descriptors
-    descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))    
+    descriptors = pd.np.empty((metadata['n_atoms'],np.shape(data)[0],metadata['n_features']))    
     for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
         for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
-            descriptors[index_structure,index_atom,:] = acsf.create(data['structures'][index_structure],positions=[index_atom])
+            descriptors[index_atom,index_structure,:] = acsf.create(data[index_structure],positions=[index_atom])
     return metadata, descriptors
 #=============================================================================#    
 
