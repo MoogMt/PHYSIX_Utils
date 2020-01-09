@@ -61,7 +61,7 @@ def createDescriptorsSOAP(data, metadata,
     metadata['n_features'] = soap.get_number_of_features()
     # Computing descriptors
     descriptors = pd.np.empty((np.shape(data)[0],metadata['n_atoms'],metadata['n_features']))
-    for index_structure in tqdm.tqdm(range(np.shape(data)[0])):
+    for index_structure in tqdm.tqdm(range(np.shape(data)[0])): # This whole thing is a bit insane, we could directly build it propertly for the training and avoid nonsentical stuff...
         for index_atom in range(metadata['n_atoms']):
             descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom],)
     return metadata, descriptors

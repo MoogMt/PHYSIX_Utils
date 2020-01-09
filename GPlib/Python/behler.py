@@ -34,6 +34,10 @@ def handleNNOption( input_label, default_value, metadata, replace ):
     if not input_label in metadata or replace :
         metadata[input_label] = default_value
     return metadata
+def handleNNOption( input_label, default_value, metadata ):
+    if not input_label in metadata :
+        metadata[input_label] = default_value
+    return metadata
 #==============================================================================
 
 #===================
@@ -101,30 +105,14 @@ def buildNetwork( metadata,
 #============
 # PREDICTION
 #==============================================================================
-default_save_prediction = False
-default_save_prediction_path = "./prediction.dat"
-def predict(model, metadata, input_, output_,
-            # Optionnal
-            save_prediction=default_save_prediction, 
-            save_prediction_path=default_save_prediction_path 
-            ): 
-    # CHECK 
-    if not "save_prediction" in metadata:
-        metadata["save_prediction"] = save_prediction
-    if not "save_prediction_path" in metadata:
-        metadata["save_prediction_path"] = save_prediction_path
-        
+def predict(model, input_, output_): 
     # PREDICTION
-    prediction=model.predict(input_)    
-    
-    # OPTIONNAL SAVE RESULTS
-    if metadata["save_prediction"]:
-        file_out=open(metadata["save_prediction_path"],"w")
-        nb_data=np.shape(input_)[1]
-        for i in range(nb_data):
-            file_out.write(str(output_[i])+" "+str(prediction[i][0])+"\n")
-        file_out.close()
-    return prediction
+    prediction_raw=model.predict(input_)
+    nb_data=np.shape(prediction_raw)[0]
+    prediction_treat=np.zeros(nb_data)
+    for i in range(nb_data):
+        prediction_treat[i] = prediction_raw[i][0]
+    return prediction_treat
 #==============================================================================
 
 #=================
@@ -137,14 +125,11 @@ def train(model, input_train, output_train, input_test, output_test, metadata,
           restore_weights = default_restore_weights,
           saved_model = default_saved_model
           ):
-    
-    # CHECK
-    if not "n_epochs" in metadata:
-        metadata["n_epochs"] = n_epochs
-    if not "patience" in metadata :
-        metadata["patience"] = patience
-    if not "restore_weights" in metadata :
-        metadata["restore_weights"] = restore_weights
+        
+    metadata=handleNNOption( "n_epochs", default_n_epochs, metadata )
+    metadata=handleNNOption( "patience", default_patience, metadata )
+    metadata=handleNNOption( "restore_weights", default_restore_weights, metadata )
+    metadata=handleNNOption( "saved_model", default_saved_model, metadata )
     
     # Fit Parameters
     callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
@@ -162,7 +147,111 @@ def train(model, input_train, output_train, input_test, output_test, metadata,
     return model, mean_error, metadata
 #==============================================================================
 
-# Plotting errors
+
+from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score
+
+# Computing statistical errors
+#==============================================================================
+default_rounding=4 # Numerical precision on the error
+def computeErrors( output_train, output_test, prediction_train, prediction_test, 
+                  # Optionnal args
+                  rounding=default_rounding):
+    
+    metadata_stat_errors={}
+    
+    # Energie range
+    metadata_stat_errors["range_energy"] = output_train.max()-output_train.min()
+    # Mean Absolute Errors
+    metadata_stat_errors["MAE_train"] = np.round( mean_absolute_error( output_train, prediction_train ), rounding )
+    metadata_stat_errors["MAE_test"]  = np.round( mean_absolute_error( output_test,  prediction_test  ), rounding )
+    # Mean Squared Errors
+    metadata_stat_errors["MSE_train"] = np.round( mean_squared_error( output_train, prediction_train ), rounding )
+    metadata_stat_errors["MSE_test"]  = np.round( mean_squared_error( output_test,  prediction_test  ), rounding )
+    # R2 Errors
+    metadata_stat_errors["R2_train"] = np.round( r2_score( output_train, prediction_train ), rounding )
+    metadata_stat_errors["R2_test"]  = np.round( r2_score( output_test,  prediction_test  ), rounding )
+    # Rouding
+    metadata_stat_errors["rounding"] = rounding
+    
+    return metadata_stat_errors
+#==============================================================================
+
+# Writting Statistical errors to disk
+#==============================================================================
+default_write_from_scratch = True
+def writeStatErrors( metadata, path_out_stat, 
+                    #Optionnal
+                    write_from_scratch=default_write_from_scratch # Choose False if you want to append to file
+                    ):
+    # Choosing writing mode 
+    write_="w"
+    if not write_from_scratch:
+        write_="w+"
+    # Writting data
+    file_out=open(path_out_stat,write_)
+    file_out.write(metadata["MAE_train"]," ",)
+    file_out.write(metadata["MAE_test"]," ")
+    file_out.write(np.round(metadata["MAE_train"]/metadata["range_energy"]*100, metadata["rounding"] ), " ",)
+    file_out.write(np.round(metadata["MAE_test"] /metadata["range_energy"]*100, metadata["rounding"] ), " ")
+    file_out.write(metadata["MSE_train"]," ",)
+    file_out.write(metadata["MSE_test"]," ")
+    file_out.write(metadata["R2_train"]," ",)
+    file_out.write(metadata["R2_test"],"\n")
+    file_out.close()
+    return
+#==============================================================================
+
+# Plotting prediction against reality           
+#==============================================================================
+def writeComparativePrediction( file_path, output_, prediction_ ):
+    file_out=open(file_path,"w")
+    nb_data=np.shape(output_)[0]
+    for i in range(nb_data):
+        file_out.write(str(output_[i])+" "+prediction_[i],"\n")
+    file_out.close()
+    return 
 #==============================================================================
     
+# ALL IN ONE
+default_path_folder_save="./"
+default_suffix_write=""
 #==============================================================================
+def buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test, 
+                           path_folder_save=default_path_folder_save,
+                           suffix_write=default_suffix_write):
+    
+    metadata=handleNNOption( "suffix_write", default_suffix_write, metadata )
+    metadata=handleNNOption( "suffix_write", default_suffix_write, metadata )
+    
+    # BUILDING
+    #=============================================================================#
+    model=buildNetwork(metadata)
+    # Compile the network
+    model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['accuracy'])
+    # Plot the network
+    if metadata["plot_network"]:
+        keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
+    #=============================================================================#
+
+    # TRAINING NETWORK
+    #=============================================================================#
+    model, mean_error, metadata = train(model,input_train,output_train,input_test,output_test,metadata)
+    #=============================================================================#
+
+    # PREDICTION
+    #===============================================================================
+    # Make the prediction
+    predictions_train = predict( model, metadata, input_train, output_train )
+    predictions_test  = predict( model, metadata, input_test,  output_test  )
+    # Write the comparative between predictions and outputs
+    file_comp_train=str(metadata["path_folder_save"]+"ComparativeErrorsTrain_"+metadata["suffix_write"])
+    file_comp_test=str(metadata["path_folder_save"]+"ComparativeErrorsTest_"+metadata["suffix_write"])
+    writeComparativePrediction(file_comp_train, output_train, predictions_train )
+    writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
+    # Compute and write Statistical errors
+    metadata_stat = computeErrors( output_train, output_test, predictions_train, predictions_test )
+    path_stat_err=str(metadata["path_folder_save"]+"StatisticalErr_"+metadata["suffix_write"])
+    writeStatErrors( metadata_stat, path_stat_err)    
+    #===============================================================================    
+    return metadata, metadata_stat, predictions_train, predictions_test
+    

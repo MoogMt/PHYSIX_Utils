@@ -60,17 +60,17 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 # Creating training set
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 5000
+metadata['train_set_size'] = 2000
 metadata['total_size_set'] = len(energies)
 metadata,data_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
 metadata["test_set_size"] = 1000
 metadata, data_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
-sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
-cutoff_ = 3.5 # cut_off SOAP, 
-nmax_   = 3 
-lmax_   = 2
+sigma_  = 0.8  # 3*sigma ~ 2.7A relatively large spread
+cutoff_ = 3.2 # cut_off SOAP, 
+nmax_   = 2 
+lmax_   = 1
 # Train set
 #-----------------------------------------------------------------------------
 metadata, descriptors = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
@@ -95,7 +95,7 @@ import behler
         
 # Iteration parameters
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
-metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
+metadata["optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
 metadata["n_epochs"] = 500                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
 metadata["restore_weights"] = True
@@ -103,7 +103,7 @@ metadata["restore_weights"] = True
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
 metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
-metadata["n_hidden_layer"] = 2                # Number of hidden layers
+metadata["n_hidden_layer"] = 5                # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
         
 # Dropout coefficients
@@ -115,33 +115,16 @@ metadata["dropout_coef"][1:,:]=0.5
 metadata["plot_network"]=False
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
 metadata["saved_model"] = False
+metadata["path_folder_save"]=str(folder_out)
+metadata["suffix_write"]=str("train-"+metadata["train_set_size"] + "_" +
+           "test-"+metadata["test_set_size"]        + "_" +
+           "layers-"+metadata["n_hidden_layer"]     + "_" +
+           "n_nodes-"+metadata["n_nodes_per_layer"] + "_" + 
+           "nmaxSOAP-" + metadata["nmax_SOAP"] + "_" + 
+           "lmaxSOAP-" + metadata["lmax_SOAP"] + "_" +
+           "sigmaSOAP-" + metadata["sigma_SOAP"] + "_"+
+           "cutoffSOAP-" + metadata["cutoff_SOAP"] 
+           )
 
-# Build the network
-model=behler.buildNetwork(metadata)
-# Compile the network
-model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['accuracy'])
-# Plot the network
-if metadata["plot_network"]:
-        keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
-#=============================================================================#
-
-#=============================================================================#
-# TRAINING NETWORK
-model, mean_error, metadata = behler.train(model,input_train,output_train,input_test,output_test,metadata)
-#=============================================================================#
-
-# PREDICTION
-#===============================================================================
-metadata["save_prediction"] = True
-metadata["save_prediction_path"] = str(folder_out+"model"+
-        str(metadata["n_hidden_layer"])+"_"
-       +str(metadata["n_nodes_per_layer"])+"_"
-       +str(metadata["train_set_size"])+"_"
-       +str(metadata["test_set_size"])+"_"
-       +str(metadata["nmax_SOAP"])+"_"
-       +str(metadata["lmax_SOAP"])+"_"
-       +str(metadata["cutoff_SOAP"])+"_"
-       +str(metadata["sigma_SOAP"]))
-predictions=behler.predict(model,metadata,input_test,output_test)
-#===============================================================================
+metadata, metadata_stat, predictions_train, prediction_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)
 
