@@ -88,17 +88,24 @@ data_test=data_test.join(pd.DataFrame({'descriptor':list(descriptors)}))
 # Parameters of the Neural net
 import behler
 
-metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
+# Iteration parameters
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
 metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
 metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
+# Subnetorks structure
+metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
 metadata["n_nodes_per_layer"] = 20           # Number of nodes per hidden layer
 metadata["n_hidden_layer"]=2                # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
-metadata["dropout_coef"]=np.zeros((metadata["n_hidden_layer"]+1,metadata["n_species"])) # Dropout for faster convergence (can be desactivated) 
+# Dropout coefficients
+metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
+metadata["dropout_coef"][0,:]=0.2
+metadata["dropout_coef"][1:,:]=0.5
+# Plot network
 metadata["plot_network"]=True
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
+
 # Build the network
 model,added_layer=behler.buildNetwork(metadata)
 # Compile the network

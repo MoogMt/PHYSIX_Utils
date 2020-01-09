@@ -19,7 +19,7 @@ default_patience = 100                  # Patience for convergence
 default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
 default_n_hidden_layer=2                # Number of hidden layers
 default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
-default_dropout_coef=np.zeros((default_n_hidden_layer+1,default_n_species)) # Dropout for faster convergence (can be desactivated) 
+default_dropout_coef=np.zeros((default_n_species,default_n_hidden_layer+1)) # Dropout for faster convergence (can be desactivated) 
 default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./"
@@ -78,7 +78,7 @@ def buildNetwork( metadata,
         count_=1
         for atom in range(metadata["start_species"][specie],metadata["start_species"][specie]+metadata["nb_element_species"][specie]):
             all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie]+"_input"+str(count_) )) )            
-            all_subnets.append( specie_subnets[specie](atom) )
+            all_subnets.append( specie_subnets[specie](all_input_layers[atom]) )
             count_+=1
     added_layer = keras.layers.Add(name="Addition")
     #=========================================================================#
