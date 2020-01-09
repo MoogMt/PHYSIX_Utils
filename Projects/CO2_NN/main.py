@@ -11,7 +11,6 @@ import filexyz as xyz
 import cpmd 
 import descriptors as desc
 import pandas as pd
-import behler
 import keras
 import numpy as np
 
@@ -86,17 +85,25 @@ data_test=data_test.join(pd.DataFrame({'descriptor':list(descriptors)}))
 
 # BUILDING NETWORK
 #=============================================================================#
-default_activation_fct = 'tanh'  # Activation function in the dense hidden layers
-default_loss_fct = 'mean_squared_error' # Loss function in the NN
-default_opt = 'adam'                    # Choice of optimizers for training of the NN weights 
-default_n_epoch = 1000                  # Number of epoch for optimization?
-default_patience = 100                  # Patience for convergence
-default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
-default_n_hidden_layer=2                # Number of hidden layers
-default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
-default_dropout_coef=np.zeros((default_n_hidden_layer+1,default_n_species)) # Dropout for faster convergence (can be desactivated) 
-model=behler.buildNetwork(metadata,metadata[""])
+# Parameters of the Neural net
+import behler
+
+metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
+metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
+metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
+metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
+metadata["patience"] = 100                  # Patience for convergence
+metadata["n_nodes_per_layer"] = 20           # Number of nodes per hidden layer
+metadata["n_hidden_layer"]=2                # Number of hidden layers
+metadata["n_nodes_structure"]=np.ones((metadata["n_specie"],metadata["n_hidden_layer"]))*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
+metadata["dropout_coef"]=np.zeros((metadata["n_hidden_layer"]+1,metadata["n_species"])) # Dropout for faster convergence (can be desactivated) 
+metadata["plot_network"]=True
+metadata["path_plot_network"]=str(folder_out,"plot_network.png")
+# Build the network
+model=behler.buildNetwork(metadata)
+# Compile the network
 model.compile(loss=metadata["loss_func"], optimizer=metadata["optimizer"], metrics=['accuracy'])
+# Plot the network
 if metadata["plot_network"]:
     keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
 #=============================================================================#

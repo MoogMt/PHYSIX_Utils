@@ -21,6 +21,8 @@ default_n_hidden_layer=2                # Number of hidden layers
 default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
 default_dropout_coef=np.zeros((default_n_hidden_layer+1,default_n_species)) # Dropout for faster convergence (can be desactivated) 
 default_replace_inputs=False
+default_plot_network=True
+default_path_plot_network="./"
 
 def handleNNOption( input_label, default_value, metadata, replace ):
     if not input_label in metadata or replace :
@@ -60,6 +62,7 @@ def buildNetwork( data, metadata,
             specie_subnets[specie].add(keras.layers.Dense(node,activation=metadata["activation_function"],kernel_constraints=keras.constraints.maxnorm(3)))
             specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_rate"][specie,node]))
         specie_subnets[specie].add(keras.layers.Dense(1,activation="linear"))
+
     all_input_layers=[]
     all_subnets=[]
     for specie in range(metadata["n_species"]):
@@ -68,7 +71,8 @@ def buildNetwork( data, metadata,
             all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie])+"_input"+str(count_)) )            
             all_subnets.append( specie_subnets[specie](atom) )
             count_+=1
-    add_layer = keras.layers.Add(name="Addition")    
+    add_layer = keras.layers.Add(name="Addition")
+    
     return keras.models.Model(inputs=all_input_layers ,outputs=add_layer(all_subnets) )   
 
 def predict(model, input_data ):
@@ -82,12 +86,12 @@ def predict(model, input_data ):
                ])
         return predictions
 
-def train(model, input_data, metadata ):
+def train(model, input_train, output_train, input_test, output_test, metadata ):
 
     callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"],restore_best_weights=True)
 
     # fit model
-    metadata['history'] = model.fit([np.stack(x_train.str[0].as_matrix()),
+    metadata['history'] = model.fit([np.stack(input_train.str[0].as_matrix()),
                np.stack(input_train.str[1].as_matrix()),
                np.stack(input_train.str[2].as_matrix()),
                np.stack(input_train.str[3].as_matrix()),
@@ -95,29 +99,30 @@ def train(model, input_data, metadata ):
                np.stack(input_train.str[5].as_matrix()),
                np.stack(input_train.str[6].as_matrix()),
                ], 
-                y_train,
-                validation_data=([np.stack(x_test.str[0].as_matrix()),
+                output_train,
+                validation_data=([np.stack(input_test.str[0].as_matrix()),
                    np.stack(input_test.str[1].as_matrix()),
                    np.stack(input_test.str[2].as_matrix()),
                    np.stack(input_test.str[3].as_matrix()),
                    np.stack(input_test.str[4].as_matrix()),
                    np.stack(input_test.str[5].as_matrix()),
                    np.stack(input_test.str[6].as_matrix()),
-                   ],y_test),
+                   ],output_test),
                 epochs=metadata["epochs"],verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
     
-    mean_error = model.evaluate([np.stack(x_test.str[0].as_matrix()),
+    mean_error = model.evaluate([np.stack(output_test.str[0].as_matrix()),
                np.stack(input_test.str[1].as_matrix()),
                np.stack(input_test.str[2].as_matrix()),
                np.stack(input_test.str[3].as_matrix()),
                np.stack(input_test.str[4].as_matrix()),
                np.stack(input_test.str[5].as_matrix()),
                np.stack(input_test.str[6].as_matrix()),
-               ],y_test)[0]
+               ],output_test)[0]
 
     if metadata["save_model"] :
-        model.save(metadata["path_saved_model"])    
-    return data, mean_error, metadata
+        model.save(metadata["path_saved_model"])
+        
+    return input_train, output_train, input_test, output_test, mean_error, metadata
  
  
 
