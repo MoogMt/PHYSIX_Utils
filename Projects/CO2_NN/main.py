@@ -81,6 +81,11 @@ data_train=data_train.join(pd.DataFrame({'descriptor':list(descriptors)}))
 #------------------------------------------------------------------------------
 metadata, descriptors = desc.createDescriptorsSOAP(data_test,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
 data_test=data_test.join(pd.DataFrame({'descriptor':list(descriptors)}))
+# Building Inputs
+input_train=mtd.buildInput(data_train)
+output_train=data_train.energy.values
+input_test=mtd.buildInput(data_test)
+output_test=data_test.energy.values
 #=============================================================================#
 
 # BUILDING NETWORK

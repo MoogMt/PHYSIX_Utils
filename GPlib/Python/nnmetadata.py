@@ -151,6 +151,15 @@ def sortAtomsUniq( atoms ):
                 atoms.positions[j,:] = store_positions
     return atoms
 
+
+def buildInput(data):
+    input_=[]
+    data_=np.stack(data["descriptor"].str[:].values)
+    nb_data=np.shape(data_)[0]
+    for i in range(nb_data):
+        input.append(data_[i,:,:])
+    return input_
+
 def sortAtomsSpecie( atoms ) :
     if type(atoms) == list:
         for index in range(len(atoms)):
