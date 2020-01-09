@@ -9,7 +9,8 @@ Created on Tue Jan  7 13:32:52 2020
 import numpy as np
 import keras
 
-# Neural Net default parameters
+# Neural Net Default Parameters
+#==============================================================================
 default_n_species=1
 default_activation_fct = 'tanh'  # Activation function in the dense hidden layers
 default_loss_fct = 'mean_squared_error' # Loss function in the NN
@@ -23,15 +24,23 @@ default_dropout_coef=np.zeros((default_n_species,default_n_hidden_layer+1)) # Dr
 default_restore_weights=True
 default_replace_inputs=False
 default_plot_network=True
-default_path_plot_network="./"
+default_path_plot_network="./network_plot.png"
 default_saved_model=False
+#==============================================================================
 
+# HANDLING OPTIONS OF NN
+#==============================================================================
 def handleNNOption( input_label, default_value, metadata, replace ):
     if not input_label in metadata or replace :
         metadata[input_label] = default_value
     return metadata
+#==============================================================================
 
+#===================
+# BUILDING NETWORK
+#==============================================================================
 def buildNetwork( metadata,
+                 # Optionnal Arguments
                   activation_fct=default_activation_fct,
                   loss_fct=default_loss_fct,
                   optimizer=default_optimizer,
@@ -86,16 +95,48 @@ def buildNetwork( metadata,
     #=========================================================================#
 
     return keras.models.Model(inputs=all_input_layers ,outputs=added_layer(all_subnets) )   
+#==============================================================================
 
-def predict(model, input_data ): 
-        return model.predict(input_data)
 
+#============
+# PREDICTION
+#==============================================================================
+default_save_prediction = False
+default_save_prediction_path = "./prediction.dat"
+def predict(model, metadata, input_, 
+            # Optionnal
+            save_prediction=default_save_prediction, 
+            save_prediction_path=default_save_prediction_path 
+            ): 
+    # CHECK 
+    if not "save_prediction" in metadata:
+        metadata["save_prediction"] = save_prediction
+    if not "save_prediction_path" in metadata:
+        metadata["save_prediction_path"] = save_prediction_path
+        
+    # PREDICTION
+    prediction=model.predict(input_)    
+    
+    # OPTIONNAL SAVE RESULTS
+    if metadata["save_prediction"]:
+        file_out=open(metadata["save_prediction_path"],"w")
+        file_out.write("\n")
+        file_out.close()
+    return prediction
+#==============================================================================
+
+#=================
+# TRAINING MODEL
+#==============================================================================
 def train(model, input_train, output_train, input_test, output_test, metadata,
-                            n_epochs = default_n_epochs,
-                            patience = default_patience,
-                            restore_weights = default_restore_weights,
-                            saved_model = default_saved_model
-                            ):
+          # OPTIONNAL ARGS
+          n_epochs = default_n_epochs,
+          patience = default_patience,
+          restore_weights = default_restore_weights,
+          saved_model = default_saved_model
+          ):
+    
+    # CHECK
     if not "n_epochs" in metadata:
         metadata["n_epochs"] = n_epochs
     if not "patience" in metadata :
@@ -103,17 +144,19 @@ def train(model, input_train, output_train, input_test, output_test, metadata,
     if not "restore_weights" in metadata :
         metadata["restore_weights"] = restore_weights
     
+    # Fit Parameters
     callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
 
-    # fit model
+    # Actual Fitting
     metadata['history'] = model.fit( input_train, output_train, validation_data=(input_test,output_test), epochs=metadata["n_epochs"],verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
     
+    # Compute the mean error
     mean_error = model.evaluate(input_test,output_test)[0]
 
+    # Optionnal save model
     if metadata["saved_model"] :
         model.save(metadata["path_saved_model"])
         
-    return input_train, output_train, input_test, output_test, mean_error, metadata
- 
- 
+    return model, mean_error, metadata
+#==============================================================================
 

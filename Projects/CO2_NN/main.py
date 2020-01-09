@@ -92,51 +92,47 @@ output_test=data_test.energy.values
 #=============================================================================#
 # Parameters of the Neural net
 import behler
-
-
-f = open(str(folder_out+"results.dat"), "w")
-
-# Loop over network structure
-n_layers=[2,3,4,5,6]
-n_nodes=[20,30,40,50,60]
-for n_layer in n_layers:
-    for n_node in n_nodes:
         
-    # Iteration parameters
-    metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
-    metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
-    metadata["n_epochs"] = 2000                  # Number of epoch for optimization?
-    metadata["patience"] = 100                  # Patience for convergence
-    metadata["restore_weights"] = True
+# Iteration parameters
+metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
+metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
+metadata["n_epochs"] = 2000                  # Number of epoch for optimization?
+metadata["patience"] = 100                  # Patience for convergence
+metadata["restore_weights"] = True
     
-    # Subnetorks structure
-    metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
-    metadata["n_nodes_per_layer"] = n_nodes           # Number of nodes per hidden layer
-    metadata["n_hidden_layer"] = n_layer                # Number of hidden layers
-    metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
+# Subnetorks structure
+metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
+metadata["n_nodes_per_layer"] = n_nodes           # Number of nodes per hidden layer
+metadata["n_hidden_layer"] = n_layer                # Number of hidden layers
+metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
         
-    # Dropout coefficients
-    metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
-    metadata["dropout_coef"][0,:]=0.2
-    metadata["dropout_coef"][1:,:]=0.5
+# Dropout coefficients
+metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
+metadata["dropout_coef"][0,:]=0.2
+metadata["dropout_coef"][1:,:]=0.5
         
-    # Plot network
-    metadata["plot_network"]=False
-    metadata["path_plot_network"]=str(folder_out+"plot_network.png")
-    metadata["saved_model"] = False
+# Plot network
+metadata["plot_network"]=False
+metadata["path_plot_network"]=str(folder_out+"plot_network.png")
+metadata["saved_model"] = False
 
-    # Build the network
-    model=behler.buildNetwork(metadata)
-    # Compile the network
-    model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['accuracy'])
-    # Plot the network
-    if metadata["plot_network"]:
+# Build the network
+model=behler.buildNetwork(metadata)
+# Compile the network
+model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['accuracy'])
+# Plot the network
+if metadata["plot_network"]:
         keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
 #=============================================================================#
 
 #=============================================================================#
 # TRAINING NETWORK
-    input_train,output_train,input_test,output_test,mean_error,metadata = behler.train(model,input_train,output_train,input_test,output_test,metadata)
-    f.write(str(n_layer+," "+n_node+" "+mean_error+"\n"))
+model, mean_error, metadata = behler.train(model,input_train,output_train,input_test,output_test,metadata)
 #=============================================================================#
-f.close()
+
+# PREDICTION
+#===============================================================================
+metadata["save_prediction"] = True
+output_predicted=behler.predict(model,metadata,input_test)
+#===============================================================================
+
