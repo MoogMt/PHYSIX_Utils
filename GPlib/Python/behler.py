@@ -103,7 +103,7 @@ def buildNetwork( metadata,
 #==============================================================================
 default_save_prediction = False
 default_save_prediction_path = "./prediction.dat"
-def predict(model, metadata, input_, 
+def predict(model, metadata, input_, output_,
             # Optionnal
             save_prediction=default_save_prediction, 
             save_prediction_path=default_save_prediction_path 
@@ -120,7 +120,9 @@ def predict(model, metadata, input_,
     # OPTIONNAL SAVE RESULTS
     if metadata["save_prediction"]:
         file_out=open(metadata["save_prediction_path"],"w")
-        file_out.write("\n")
+        nb_data=np.shape(input_)[1]
+        for i in range(nb_data):
+            file_out.write(str(output_[i])+" "+str(prediction[i][0])+"\n")
         file_out.close()
     return prediction
 #==============================================================================
@@ -160,3 +162,7 @@ def train(model, input_train, output_train, input_test, output_test, metadata,
     return model, mean_error, metadata
 #==============================================================================
 
+# Plotting errors
+#==============================================================================
+    
+#==============================================================================

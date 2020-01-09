@@ -3,7 +3,7 @@
 """
 Created on Thu Dec 26 07:50:29 2019
 
-@author: moogmt
+@author: moogmt inspired by the work of julienh
 """
 
 import nnmetadata as mtd
@@ -60,7 +60,7 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 # Creating training set
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 2000
+metadata['train_set_size'] = 5000
 metadata['total_size_set'] = len(energies)
 metadata,data_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
@@ -69,7 +69,7 @@ metadata, data_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.5 # cut_off SOAP, 
-nmax_   = 2 
+nmax_   = 3 
 lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
@@ -96,14 +96,14 @@ import behler
 # Iteration parameters
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
 metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
-metadata["n_epochs"] = 2000                  # Number of epoch for optimization?
+metadata["n_epochs"] = 500                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
 metadata["restore_weights"] = True
     
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
-metadata["n_nodes_per_layer"] = n_nodes           # Number of nodes per hidden layer
-metadata["n_hidden_layer"] = n_layer                # Number of hidden layers
+metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
+metadata["n_hidden_layer"] = 2                # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
         
 # Dropout coefficients
@@ -133,6 +133,15 @@ model, mean_error, metadata = behler.train(model,input_train,output_train,input_
 # PREDICTION
 #===============================================================================
 metadata["save_prediction"] = True
-output_predicted=behler.predict(model,metadata,input_test)
+metadata["save_prediction_path"] = str(folder_out+"model"+
+        str(metadata["n_hidden_layer"])+"_"
+       +str(metadata["n_nodes_per_layer"])+"_"
+       +str(metadata["train_set_size"])+"_"
+       +str(metadata["test_set_size"])+"_"
+       +str(metadata["nmax_SOAP"])+"_"
+       +str(metadata["lmax_SOAP"])+"_"
+       +str(metadata["cutoff_SOAP"])+"_"
+       +str(metadata["sigma_SOAP"]))
+predictions=behler.predict(model,metadata,input_test,output_test)
 #===============================================================================
 
