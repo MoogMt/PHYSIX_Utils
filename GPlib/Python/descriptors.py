@@ -58,10 +58,10 @@ def createDescriptorsSOAP(data, metadata,
         return False, False
     # Prepping SOAP descriptor structure
     soap = SOAP( species=metadata['species'], sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax_SOAP'], lmax=metadata['lmax_SOAP'],sparse=metadata['sparse_SOAP'] )
-    metadata['n_features'] = soap.get_number_of_features()    
+    metadata['n_features'] = soap.get_number_of_features()
     # Computing descriptors
-    descriptors = pd.np.empty((metadata['train_set_size'],metadata['n_atoms'],metadata['n_features']))
-    for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
+    descriptors = pd.np.empty((np.shape(data)[0],metadata['n_atoms'],metadata['n_features']))
+    for index_structure in tqdm.tqdm(range(np.shape(data)[0])):
         for index_atom in range(metadata['n_atoms']):
             descriptors[index_structure,index_atom,:] = soap.create(data['structures'][index_structure],positions=[index_atom],)
     return metadata, descriptors

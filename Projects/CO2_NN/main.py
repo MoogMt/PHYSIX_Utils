@@ -62,18 +62,23 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 400
 metadata['total_size_set'] = len(energies)
-metadata,data_train = mtd.choseDataRandom(metadata,traj,energies)
+metadata,data_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
 metadata["test_set_size"] = 500
-data_test = mtd.ChooseDataExclusion(metadata,traj,energies)
+metadata, data_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.5 # cut_off SOAP, 
 nmax_   = 2 
 lmax_   = 2
+# Train set
+#-----------------------------------------------------------------------------
 metadata, descriptors = desc.createDescriptorsSOAP(data_train,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
-descriptors, scalers = mtd.scaleData(descriptors,metadata)
 data_train=data_train.join(pd.DataFrame({'descriptor':list(descriptors)}))
+# Scaling
+descriptors, scalers = mtd.scaleData(descriptors,metadata)
+# Test set
+#------------------------------------------------------------------------------
 metadata, descriptors = desc.createDescriptorsSOAP(data_test,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
 data_test=data_test.join(pd.DataFrame({'descriptor':list(descriptors)}))
 #=============================================================================#
@@ -86,8 +91,8 @@ if metadata["plot_network"]:
     keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
 #=============================================================================#
 
-# TRAINING NETWORK
 #=============================================================================#
+# TRAINING NETWORK
 data_train,data_test,mean_error,metadata = behler.train(data_train,data_test,model,metadata)
 #=============================================================================#
 
