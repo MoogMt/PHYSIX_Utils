@@ -168,8 +168,8 @@ def getStartSpecies( atoms, metadata ):
     metadata["start_species"] = np.zeros(metadata["n_species"],dtype=int)
     for specie in range( metadata["n_species"] ):
         for atom in range( len(atoms) ):
-            if metadata["species"][specie] == pT.names2Z(atoms.numbers[atom]) :
-                metadata["start_species"] = atom
+            if metadata["species"][specie] == pT.z2Names(atoms.numbers[atom]) :
+                metadata["start_species"][specie] = atom
                 break
     return metadata
 
