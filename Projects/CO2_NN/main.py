@@ -95,10 +95,10 @@ metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
 metadata["n_nodes_per_layer"] = 20           # Number of nodes per hidden layer
 metadata["n_hidden_layer"]=2                # Number of hidden layers
-metadata["n_nodes_structure"]=np.ones((metadata["n_specie"],metadata["n_hidden_layer"]))*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
+metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]))*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
 metadata["dropout_coef"]=np.zeros((metadata["n_hidden_layer"]+1,metadata["n_species"])) # Dropout for faster convergence (can be desactivated) 
 metadata["plot_network"]=True
-metadata["path_plot_network"]=str(folder_out,"plot_network.png")
+metadata["path_plot_network"]=str(folder_out+"plot_network.png")
 # Build the network
 model=behler.buildNetwork(metadata)
 # Compile the network

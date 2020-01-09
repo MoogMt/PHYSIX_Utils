@@ -29,7 +29,7 @@ def handleNNOption( input_label, default_value, metadata, replace ):
         metadata[input_label] = default_value
     return metadata
 
-def buildNetwork( data, metadata,
+def buildNetwork( metadata,
                   activation_fct=default_activation_fct,
                   loss_fct=default_loss_fct,
                   optimizer=default_optimizer,
@@ -56,10 +56,10 @@ def buildNetwork( data, metadata,
     # Construction subnetwork
     specie_subnets=[]
     for specie in range(metadata["n_species"]):
-        specie_subnets=np.append(specie_subnets,keras.Sequential(name=str(metadata["specie"],"_subnet")))
+        specie_subnets=np.append(specie_subnets,keras.Sequential(name=str(metadata["species"][specie]+"_subnet")))
         specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,0]))
         for node in range(metadata["n_hidden_layer"]):
-            specie_subnets[specie].add(keras.layers.Dense(node,activation=metadata["activation_fct"],kernel_constraints=keras.constraints.maxnorm(3)))
+            specie_subnets[specie].add(keras.layers.Dense(node,activation=metadata["activation_fct"],kernel_constraint=keras.constraints.maxnorm(3) ) )
             specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,node]))
         specie_subnets[specie].add(keras.layers.Dense(1,activation="linear"))
 
@@ -67,7 +67,7 @@ def buildNetwork( data, metadata,
     all_subnets=[]
     for specie in range(metadata["n_species"]):
         count_=1
-        for atom in range(metadata["start_specie"][specie],metadata["start_specie"][specie]+metadata["nb_element_species"][specie]):
+        for atom in range(metadata["start_species"][specie],metadata["start_species"][specie]+metadata["nb_element_species"][specie]):
             all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie])+"_input"+str(count_)) )            
             all_subnets.append( specie_subnets[specie](atom) )
             count_+=1
