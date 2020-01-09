@@ -83,7 +83,7 @@ def buildNetwork( metadata,
     added_layer = keras.layers.Add(name="Addition")
     #=========================================================================#
 
-    return keras.models.Model(inputs=all_input_layers),added_layer  
+    return keras.models.Model(inputs=all_input_layers ,outputs=added_layer(all_subnets) )   
 
 def predict(model, input_data ):
         predictions = model.predict([np.stack(input_data.str[0].as_matrix()),

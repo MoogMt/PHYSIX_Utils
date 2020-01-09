@@ -107,9 +107,9 @@ metadata["plot_network"]=True
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
 
 # Build the network
-model,added_layer=behler.buildNetwork(metadata)
+model=behler.buildNetwork(metadata)
 # Compile the network
-model.compile(loss=metadata["loss_func"], optimizer=metadata["optimizer"], metrics=['accuracy'])
+model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['accuracy'])
 # Plot the network
 if metadata["plot_network"]:
     keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
