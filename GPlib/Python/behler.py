@@ -207,7 +207,7 @@ def writeComparativePrediction( file_path, output_, prediction_ ):
     file_out=open(file_path,"w")
     nb_data=np.shape(output_)[0]
     for i in range(nb_data):
-        file_out.write(str(output_[i])+" "+str(prediction_[i]),"\n")
+        file_out.write( str(str(output_[i])+" "+str(prediction_[i]),"\n") )
     file_out.close()
     return 
 #==============================================================================
@@ -253,5 +253,5 @@ def buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_t
     path_stat_err=str(metadata["path_folder_save"]+"StatisticalErr_"+metadata["suffix_write"])
     writeStatErrors( metadata_stat, path_stat_err)    
     #===============================================================================    
-    return metadata, metadata_stat, predictions_train, predictions_test
+    return model, metadata, metadata_stat, predictions_train, predictions_test
     

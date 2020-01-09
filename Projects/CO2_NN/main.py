@@ -127,5 +127,5 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
                              "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
                              "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
 
-metadata, metadata_stat, predictions_train, prediction_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)
+model, metadata, metadata_stat, predictions_train, prediction_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)
 
