@@ -96,14 +96,14 @@ import behler
 # Iteration parameters
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
 metadata["optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
-metadata["n_epochs"] = 500                  # Number of epoch for optimization?
+metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
 metadata["restore_weights"] = True
     
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
 metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
-metadata["n_hidden_layer"] = 5                # Number of hidden layers
+metadata["n_hidden_layer"] = 4                # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
         
 # Dropout coefficients
@@ -123,7 +123,9 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
                              "nmaxSOAP-"   + str(metadata["nmax_SOAP"])                   + "_" + 
                              "lmaxSOAP-"   + str(metadata["lmax_SOAP"])                   + "_" +
                              "sigmaSOAP-"  + str(metadata["sigma_SOAP"])                  + "_" + 
-                             "cutoffSOAP-" + str(metadata["cutoff_SOAP"]) )
+                             "cutoffSOAP-" + str(metadata["cutoff_SOAP"])                 + "_" +
+                             "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
+                             "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
 
 metadata, metadata_stat, predictions_train, prediction_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)
 

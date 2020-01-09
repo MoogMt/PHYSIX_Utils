@@ -189,14 +189,14 @@ def writeStatErrors( metadata, path_out_stat,
         write_="w+"
     # Writting data
     file_out=open(path_out_stat,write_)
-    file_out.write(metadata["MAE_train"]," ",)
-    file_out.write(metadata["MAE_test"]," ")
-    file_out.write(np.round(metadata["MAE_train"]/metadata["range_energy"]*100, metadata["rounding"] ), " ",)
-    file_out.write(np.round(metadata["MAE_test"] /metadata["range_energy"]*100, metadata["rounding"] ), " ")
-    file_out.write(metadata["MSE_train"]," ",)
-    file_out.write(metadata["MSE_test"]," ")
-    file_out.write(metadata["R2_train"]," ",)
-    file_out.write(metadata["R2_test"],"\n")
+    file_out.write(str(metadata["MAE_train"])," ",)
+    file_out.write(str(metadata["MAE_test"])," ")
+    file_out.write(str(np.round(metadata["MAE_train"]/metadata["range_energy"]*100, metadata["rounding"] )), " ",)
+    file_out.write(str(np.round(metadata["MAE_test"] /metadata["range_energy"]*100, metadata["rounding"] )), " ")
+    file_out.write(str(metadata["MSE_train"])," ",)
+    file_out.write(str(metadata["MSE_test"])," ")
+    file_out.write(str(metadata["R2_train"])," ",)
+    file_out.write(str(metadata["R2_test"]),"\n")
     file_out.close()
     return
 #==============================================================================
@@ -207,7 +207,7 @@ def writeComparativePrediction( file_path, output_, prediction_ ):
     file_out=open(file_path,"w")
     nb_data=np.shape(output_)[0]
     for i in range(nb_data):
-        file_out.write(str(output_[i])+" "+prediction_[i],"\n")
+        file_out.write(str(output_[i])+" "+str(prediction_[i]),"\n")
     file_out.close()
     return 
 #==============================================================================
@@ -241,8 +241,8 @@ def buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_t
     # PREDICTION
     #===============================================================================
     # Make the prediction
-    predictions_train = predict( model, metadata, input_train, output_train )
-    predictions_test  = predict( model, metadata, input_test,  output_test  )
+    predictions_train = predict( model, input_train, output_train )
+    predictions_test  = predict( model, input_test,  output_test  )
     # Write the comparative between predictions and outputs
     file_comp_train=str(metadata["path_folder_save"]+"ComparativeErrorsTrain_"+metadata["suffix_write"])
     file_comp_test=str(metadata["path_folder_save"]+"ComparativeErrorsTest_"+metadata["suffix_write"])
