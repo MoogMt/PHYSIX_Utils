@@ -57,10 +57,10 @@ def buildNetwork( data, metadata,
     specie_subnets=[]
     for specie in range(metadata["n_species"]):
         specie_subnets=np.append(specie_subnets,keras.Sequential(name=str(metadata["specie"],"_subnet")))
-        specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_rate"][specie,0]))
-        for node in range(metadata["node_Nb"]):
-            specie_subnets[specie].add(keras.layers.Dense(node,activation=metadata["activation_function"],kernel_constraints=keras.constraints.maxnorm(3)))
-            specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_rate"][specie,node]))
+        specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,0]))
+        for node in range(metadata["n_hidden_layer"]):
+            specie_subnets[specie].add(keras.layers.Dense(node,activation=metadata["activation_fct"],kernel_constraints=keras.constraints.maxnorm(3)))
+            specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,node]))
         specie_subnets[specie].add(keras.layers.Dense(1,activation="linear"))
 
     all_input_layers=[]

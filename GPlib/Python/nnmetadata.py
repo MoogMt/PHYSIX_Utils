@@ -81,7 +81,7 @@ def scaleData(data,metadata):
     scaler = []
     for specie in range(metadata["n_species"]):
         scaler.append(StandardScaler())        
-        scaler[specie].fit(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(metadata['train_set_size']*metadata['n_species'][specie],metadata['n_features']))    
+        scaler[specie].fit(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(metadata['train_set_size']*metadata['nb_element_species'][specie],metadata['n_features']))    
         data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:] = scaler[specie].transform(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])).reshape(data.shape[0],metadata["nb_element_species"][specie],metadata["n_features"])
     return data, scaler
 
