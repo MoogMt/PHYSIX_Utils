@@ -60,11 +60,11 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 # Creating training set
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 400
+metadata['train_set_size'] = 2000
 metadata['total_size_set'] = len(energies)
 metadata,data_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
-metadata["test_set_size"] = 500
+metadata["test_set_size"] = 1000
 metadata, data_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
@@ -96,7 +96,7 @@ import behler
 # Iteration parameters
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
 metadata["default_optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
-metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
+metadata["n_epochs"] = 2000                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
 metadata["restore_weights"] = True
 # Subnetorks structure
@@ -111,6 +111,7 @@ metadata["dropout_coef"][1:,:]=0.5
 # Plot network
 metadata["plot_network"]=True
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
+metadata["saved_model"] = False
 
 # Build the network
 model=behler.buildNetwork(metadata)
@@ -123,6 +124,6 @@ if metadata["plot_network"]:
 
 #=============================================================================#
 # TRAINING NETWORK
-input_train,output_train,input_test,output_test,mean_error,metadata = behler.train(input_train,output_train,input_test,output_test,model,metadata)
+input_train,output_train,input_test,output_test,mean_error,metadata = behler.train(model,input_train,output_train,input_test,output_test,metadata)
 #=============================================================================#
 

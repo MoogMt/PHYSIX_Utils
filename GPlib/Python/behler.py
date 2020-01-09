@@ -24,6 +24,7 @@ default_restore_weights=True
 default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./"
+default_saved_model=False
 
 def handleNNOption( input_label, default_value, metadata, replace ):
     if not input_label in metadata or replace :
@@ -90,10 +91,13 @@ def predict(model, input_data ):
         return model.predict(input_data)
 
 def train(model, input_train, output_train, input_test, output_test, metadata,
-                            patience=default_patience,
-                            restore_weights=default_restore_weights,
+                            n_epochs = default_n_epochs,
+                            patience = default_patience,
+                            restore_weights = default_restore_weights,
+                            saved_model = default_saved_model
                             ):
-
+    if not "n_epochs" in metadata:
+        metadata["n_epochs"] = n_epochs
     if not "patience" in metadata :
         metadata["patience"] = patience
     if not "restore_weights" in metadata :
@@ -102,13 +106,11 @@ def train(model, input_train, output_train, input_test, output_test, metadata,
     callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
 
     # fit model
-    metadata['history'] = model.fit( input_train, output_train, validation_data=(input_test,output_test), 
-            epochs=metadata["epochs"],
-            verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
+    metadata['history'] = model.fit( input_train, output_train, validation_data=(input_test,output_test), epochs=metadata["n_epochs"],verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
     
     mean_error = model.evaluate(input_test,output_test)[0]
 
-    if metadata["save_model"] :
+    if metadata["saved_model"] :
         model.save(metadata["path_saved_model"])
         
     return input_train, output_train, input_test, output_test, mean_error, metadata
