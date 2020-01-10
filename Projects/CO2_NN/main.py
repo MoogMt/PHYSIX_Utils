@@ -66,7 +66,7 @@ metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadat
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.2 # cut_off SOAP, 
-nmax_   = 3
+nmax_   = 2
 lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------

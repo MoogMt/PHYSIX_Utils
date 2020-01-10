@@ -62,7 +62,8 @@ def makePCA( n_components ):
 
 default_path_pcavar = "./"
 def pcaVariance( input_, path_pcavar=default_path_pcavar ):
-    pca=PCA().fit()
+    nb_point=len(input_[:])*len(input_[0])
+    pca=PCA().fit( np.array(input_[:]).reshape(nb_point,np.shape(input_[0])[1]) )
     var=np.cumsum(pca.explained_variance_ratio_)
     file_out=open(path_pcavar,"w")
     for i in range( np.shape(var)[0] ):
