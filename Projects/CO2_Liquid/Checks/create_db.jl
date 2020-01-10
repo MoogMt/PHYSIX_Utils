@@ -59,8 +59,6 @@ function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
     end
     size_traj=size(traj)[1]
 
-
-
     file_out=open(folder_target,"All_data.dat")
     for i=1:nb_step
         for j=1:nb_data

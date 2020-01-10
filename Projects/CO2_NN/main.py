@@ -56,8 +56,8 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 # CREATING DESCRIPTORS
 #=============================================================================#
 # Creating training set
-metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 5000
+metadata['n_jobs'] = 4 # Number of parallel cores to use (CPU)
+metadata['train_set_size'] = 10000
 metadata['total_size_set'] = len(energies)
 metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
@@ -66,7 +66,7 @@ metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadat
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.2 # cut_off SOAP, 
-nmax_   = 2
+nmax_   = 3
 lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
@@ -77,8 +77,8 @@ metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_
 #------------------------------------------------------------------------------
 # PCA
 #------------------------------------------------------------------------------
-metadata["path_pcavar"]=str(folder_out+"pca_var.dat")
-var_pca = mtd.pcaVariance(input_train,metadata["path_pcavar"])
+#metadata["path_pcavar"]=str(folder_out+"pca_var.dat")
+#var_pca = mtd.pcaVariance(input_train,metadata["path_pcavar"])
 #------------------------------------------------------------------------------
 # Scaling 
 #------------------------------------------------------------------------------
@@ -107,8 +107,8 @@ metadata["verbose_train"] = 1
 
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
-metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
-metadata["n_hidden_layer"] = 3               # Number of hidden layers
+metadata["n_nodes_per_layer"] = 40           # Number of nodes per hidden layer
+metadata["n_hidden_layer"] = 2               # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
         
 # Dropout coefficients
