@@ -77,8 +77,8 @@ def buildNetwork( metadata,
         layer=1
         for n_node in metadata["n_nodes_structure"][specie,:] :
             if n_node > 0:
-                specie_subnets[specie].add(keras.layers.Dense(n_node,activation=metadata["activation_fct"],kernel_constraint=keras.constraints.maxnorm(3) ) )
-                specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,layer]))
+                specie_subnets[specie].add( keras.layers.Dense(n_node,activation=metadata["activation_fct"], kernel_constraint=keras.constraints.maxnorm(3) ) )
+                specie_subnets[specie].add( keras.layers.Dropout(metadata["dropout_coef"][specie,layer]) )
                 layer += 1
             else:
                 break
