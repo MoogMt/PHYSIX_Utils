@@ -57,7 +57,7 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 # CREATING DESCRIPTORS
 #=============================================================================#
 # Creating training set
-metadata['n_jobs'] = 2 # Number of parallel cores to use (CPU)
+metadata['n_jobs'] = 4 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 1000
 metadata['total_size_set'] = len(energies)
 metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
@@ -72,10 +72,18 @@ lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
 metadata, input_train = desc.createDescriptorsSOAP(input_train_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
-#input_train, scalers = mtd.scaleData(input_train,metadata)
 # Test set
 #------------------------------------------------------------------------------
 metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
+# Scaling 
+#------------------------------------------------------------------------------
+# Scaling Energy
+metadata, output_train = mtd.scaleEnergy( output_train, metadata )
+metadata, output_test  = mtd.scaleEnergy( output_test,  metadata )
+# Scaling Input
+scalers = mtd.createScale( input_train, metadata ) # Create scaler on training set
+input_train = mtd.applyScale( input_train, scalers )
+input_test  = mtd.applyScale( input_test,  scalers )
 #=============================================================================#
 
 # BUILDING NETWORK
@@ -116,6 +124,14 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
                              "cutoffSOAP-" + str(metadata["cutoff_SOAP"])                 + "_" +
                              "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
                              "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
-model, metadata, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test)
+model, metadata, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredict(metadata,input_train,input_test,output_train,output_test)
 
-
+# Write the comparative between predictions and outputs
+file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )
+file_comp_test  = str( metadata["path_folder_save"] + "ComparativeErrorsTest_"  +metadata["suffix_write"] )
+metadata, output_train = mtd.deScaleEnergy( output_train, metadata )
+metadata, output_test  = mtd.deScaleEnergy( output_test,  metadata )
+metadata, predictions_train = mtd.deScaleEnergy( predictions_train, metadata )
+metadata, predictions_test  = mtd.deScaleEnergy( predictions_test,  metadata )
+behler.writeComparativePrediction(file_comp_train, output_train, predictions_train )
+behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test   )

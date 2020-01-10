@@ -12,10 +12,14 @@ import os
 import ase
 import numpy as np
 import periodicTable as pT
-import pandas as pd
 
 from sklearn.preprocessing import StandardScaler  
 from sklearn.decomposition import PCA
+
+def handleOptionArg( input_label, default_value, metadata ):
+    if not input_label in metadata :
+        metadata[input_label] = default_value
+    return metadata
 
 def writeDataToDisk( data, path_to_file ):
     file_out=open(path_to_file,"w")
@@ -84,15 +88,29 @@ def choseTestDataRandomExclusion(metadata,structures,energies):
     chosen_index=getIndexExcluding( metadata["train_index"], metadata["total_size_set"] )
     return choseTestDataByIndex(metadata,structures,energies,chosen_index)
 
-def scaleData(data,metadata):
+def scaleInput( input_, metadata ):
     scaler = []
     for specie in range(metadata["n_species"]):
-        scaler.append(StandardScaler())        
-        scaler[specie].fit(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(metadata['train_set_size']*metadata['nb_element_species'][specie],metadata['n_features']))    
-        data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:] = scaler[specie].transform(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(data[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])).reshape(data.shape[0],metadata["nb_element_species"][specie],metadata["n_features"])
-    return data, scaler
+        scaler.append(StandardScaler())
+        start_specie=metadata["start_species"][specie]
+        end_specie=start_specie+metadata["nb_element_species"][specie]
+        nb_data=metadata["nb_element_species"][specie]*metadata["train_set_size"]
+        scaler[specie].fit(input_[start_specie:end_specie,:,:].reshape(nb_data,metadata['n_features']))    
+        input_[start_specie:end_specie,:,:] = scaler[specie].transform(input_[start_specie:end_specie,:,:].reshape(input_[start_specie:end_specie,:,:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])).reshape(metadata["nb_element_species"][specie],metadata["train_set_size"],metadata["n_features"])
+    return input_, scaler
 
-def pcaSelectBestParams(descriptors,metadata):
+default_range_train_energy=1
+default_min_train_energy=0
+def ScaleEnergy( output, metadata ):
+    metadata["range_train_energy"] = output.max()-output.min()
+    metadata["min_train_energy"] = output.min()
+    return metadata, (output-metadata["min_train_energy"])/metadata["range_train_energy"]
+def deScaleEnergy( output_scaled, metadata, range_train_energy=default_range_train_energy, min_train_energy=default_min_train_energy ):
+    metadata=handleOptionArg( "range_train_energy", default_range_train_energy, metadata )
+    metadata=handleOptionArg( "min_train_energy", default_min_train_energy, metadata )
+    return metadata, (output_scaled*metadata["range_train_energy"])+metadata["min_train_energy"]
+
+def pcaSelectBestParams(descriptors,meta):
     pca=[]
     for specie in range(len(metadata["species"])):
         pca.append(PCA(n_components=metadata["pca_n"]).fit(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])))
