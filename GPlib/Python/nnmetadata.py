@@ -104,7 +104,9 @@ def applyScale( scalers, input_, metadata ):
     for specie in range(metadata["n_species"]):
         start_specie = metadata["start_species"][specie]
         end_specie   = start_specie + metadata["nb_element_species"][specie]
-        input_[start_specie:end_specie,:,:] = scalers[specie].transform( input_[start_specie:end_specie,:,:].reshape() )
+        nb_points = np.shape(input_[start_specie:end_specie,:,:])[1]
+        nb_atoms_total = metadata["nb_element_species"][specie]*nb_points
+        input_[start_specie:end_specie,:,:] = scalers[specie].transform( input_[start_specie:end_specie,:,:].reshape(nb_atoms_total,metadata["n_features"]) ).reshape( metadata["nb_element_species"][specie], nb_points, metadata["n_features"] )
     return input_
 #------------------------------------------------------------------------------
 default_range_train_energy=1
