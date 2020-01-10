@@ -57,6 +57,19 @@ def choseTrainDataRandom(metadata,structures,energies):
     chosen_index = np.random.choice(metadata['total_size_set'],size=metadata['train_set_size'],replace=metadata['replace'])
     return choseTrainDataByIndex(metadata,structures,energies,chosen_index)
 
+def makePCA( n_components ):
+    return PCA(n_components=n_components)
+
+default_path_pcavar = "./"
+def pcaVariance( input_, path_pcavar=default_path_pcavar ):
+    pca=PCA().fit()
+    var=np.cumsum(pca.explained_variance_ratio_)
+    file_out=open(path_pcavar,"w")
+    for i in range( np.shape(var)[0] ):
+        file_out.write( str(i)+" "+str(var[i])+"\n" )
+    file_out.close()
+    return var
+
 #  THIS SHOULD BE IMPROVED **SOMEWHAT**
 def choseTestDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['test_index'] = chosen_index

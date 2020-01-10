@@ -74,6 +74,12 @@ metadata, input_train = desc.createDescriptorsSOAP(input_train_raw,metadata,sigm
 # Test set
 #------------------------------------------------------------------------------
 metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
+#------------------------------------------------------------------------------
+# PCA
+#------------------------------------------------------------------------------
+metadata["path_pcavar"]=str(folder_out+"pca_var.dat")
+var_pca = mtd.pcaVariance(input_train,metadata["path_pcavar"])
+#------------------------------------------------------------------------------
 # Scaling 
 #------------------------------------------------------------------------------
 # Scaling Energy
