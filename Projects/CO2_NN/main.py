@@ -58,11 +58,11 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 # Creating training set
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 2000
+metadata['train_set_size'] = 10000
 metadata['total_size_set'] = len(energies)
 metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
-metadata["test_set_size"] = 1000
+metadata["test_set_size"] = 5000
 metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
 sigma_  = 0.8  # 3*sigma ~ 2.7A relatively large spread

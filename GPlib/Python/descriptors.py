@@ -66,7 +66,7 @@ def createDescriptorsSOAP(data, metadata,
         for index_structure in range(np.shape(data)[0]): # This whole thing is a bit insane, we could directly build it propertly for the training and avoid nonsentical stuff...
             descriptors_loc[index_structure,:] = soap.create(data[index_structure],positions=[index_atom],)
         descriptors.append( descriptors_loc )
-    return metadata, np.array(descriptors)
+    return metadata, descriptors
 #=============================================================================#
 
 # ACSF
@@ -93,7 +93,7 @@ def createDescriptorsACSF(data, metadata,
         for index_structure in range(metadata['train_set_size']):
             descriptors_loc[index_structure,:] = acsf.create(data[index_structure],positions=[index_atom])
         descriptors.append( descriptors_loc )
-    return metadata, np.array(descriptors)
+    return metadata, descriptors
 #=============================================================================#    
 
 #from scipy.spatial.distance import cdist
