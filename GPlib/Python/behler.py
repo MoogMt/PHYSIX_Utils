@@ -230,7 +230,7 @@ def buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_t
     model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['accuracy'])
     # Plot the network
     if metadata["plot_network"]:
-        keras.utils.plot_model(model,to_file=metadata["path_plot_network"])
+        keras.utils.plot_model(model,to_file=metadata["path_plot_network"],show_shapes=True, show_layer_names=True)
     #=============================================================================#
 
     # TRAINING NETWORK
