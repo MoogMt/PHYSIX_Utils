@@ -88,16 +88,9 @@ def choseTestDataRandomExclusion(metadata,structures,energies):
     chosen_index=getIndexExcluding( metadata["train_index"], metadata["total_size_set"] )
     return choseTestDataByIndex(metadata,structures,energies,chosen_index)
 
-def scaleInput( input_, metadata ):
-    scaler = []
-    for specie in range(metadata["n_species"]):
-        scaler.append(StandardScaler())
-        start_specie=metadata["start_species"][specie]
-        end_specie=start_specie+metadata["nb_element_species"][specie]
-        nb_data=metadata["nb_element_species"][specie]*metadata["train_set_size"]
-        scaler[specie].fit(input_[start_specie:end_specie,:,:].reshape(nb_data,metadata['n_features']))    
-        input_[start_specie:end_specie,:,:] = scaler[specie].transform(input_[start_specie:end_specie,:,:].reshape(input_[start_specie:end_specie,:,:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])).reshape(metadata["nb_element_species"][specie],metadata["train_set_size"],metadata["n_features"])
-    return input_, scaler
+# SCALERS
+#==============================================================================
+# Input
 def createScaler( input_, metadata ):
     scalers = []
     for specie in range(metadata["n_species"]):
@@ -113,7 +106,7 @@ def applyScale( scalers, input_, metadata ):
         end_specie   = start_specie + metadata["nb_element_species"][specie]
         input_[start_specie:end_specie,:,:] = scalers[specie].transform( input_[start_specie:end_specie,:,:].reshape() )
     return input_
-
+#------------------------------------------------------------------------------
 default_range_train_energy=1
 default_min_train_energy=0
 def scaleEnergy( output, metadata ):
@@ -124,7 +117,10 @@ def deScaleEnergy( output_scaled, metadata, range_train_energy=default_range_tra
     metadata=handleOptionArg( "range_train_energy", default_range_train_energy, metadata )
     metadata=handleOptionArg( "min_train_energy", default_min_train_energy, metadata )
     return metadata, (output_scaled*metadata["range_train_energy"])+metadata["min_train_energy"]
+#==============================================================================
 
+# PCA
+#==============================================================================
 def pcaSelectBestParams(descriptors,meta):
     pca=[]
     for specie in range(len(metadata["species"])):
@@ -132,6 +128,8 @@ def pcaSelectBestParams(descriptors,meta):
         if metadata['verbose']: 
             print("Precision of new features ",metadata["species"][specie]," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
     return pca
+#==============================================================================
+
 
 def getNbAtoms( atoms ):
     if type(atoms) == ase.atoms.Atoms :
