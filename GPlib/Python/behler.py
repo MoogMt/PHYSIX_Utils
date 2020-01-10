@@ -161,16 +161,16 @@ def computeErrors( output_train, output_test, prediction_train, prediction_test,
     metadata_stat_errors={}
     
     # Energie range
-    metadata_stat_errors["range_energy"] = mtd.deScaleEnergy( output_train.max()-output_train.min(), metadata )
+    metadata_stat_errors["range_energy"] =  output_train.max()-output_train.min()
     # Mean Absolute Errors
-    metadata_stat_errors["MAE_train"] = np.round( mtd.deScaleEnergy(mean_absolute_error( output_train, prediction_train ), metadata ), rounding )
-    metadata_stat_errors["MAE_test"]  = np.round( mtd.deScaleEnergy(mean_absolute_error( output_test,  prediction_test  ), metadata ), rounding )
+    metadata_stat_errors["MAE_train"] = np.round( mean_absolute_error( output_train, prediction_train ), rounding )
+    metadata_stat_errors["MAE_test"]  = np.round( mean_absolute_error( output_test,  prediction_test  ), rounding )
     # Mean Squared Errors
-    metadata_stat_errors["MSE_train"] = np.round( mtd.deScaleEnergy(mean_squared_error( output_train, prediction_train ), metadata ), rounding )
-    metadata_stat_errors["MSE_test"]  = np.round( mtd.deScaleEnergy(mean_squared_error( output_test,  prediction_test  ), metadata ), rounding )
+    metadata_stat_errors["MSE_train"] = np.round( mean_squared_error( output_train, prediction_train ), rounding )
+    metadata_stat_errors["MSE_test"]  = np.round( mean_squared_error( output_test,  prediction_test  ), rounding )
     # R2 Errors
-    metadata_stat_errors["R2_train"] = np.round( mtd.deScaleEnergy(r2_score( output_train, prediction_train ), metadata ), rounding )
-    metadata_stat_errors["R2_test"]  = np.round( mtd.deScaleEnergy(r2_score( output_test,  prediction_test  ), metadata ), rounding )
+    metadata_stat_errors["R2_train"] = np.round( r2_score( output_train, prediction_train ), rounding )
+    metadata_stat_errors["R2_test"]  = np.round( r2_score( output_test,  prediction_test  ), rounding )
     # Rouding
     metadata_stat_errors["rounding"] = rounding
     
