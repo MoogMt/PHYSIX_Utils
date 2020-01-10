@@ -61,9 +61,9 @@ def createDescriptorsSOAP(data, metadata,
     metadata['n_features'] = soap.get_number_of_features()
     # Computing descriptors
     descriptors = []
-    for index_atom in range(metadata['n_atoms']):
+    for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
         descriptors_loc = np.empty((np.shape(data)[0],metadata['n_features']))
-        for index_structure in tqdm.tqdm(range(np.shape(data)[0])): # This whole thing is a bit insane, we could directly build it propertly for the training and avoid nonsentical stuff...
+        for index_structure in range(np.shape(data)[0]): # This whole thing is a bit insane, we could directly build it propertly for the training and avoid nonsentical stuff...
             descriptors_loc[index_structure,:] = soap.create(data[index_structure],positions=[index_atom],)
         descriptors.append( descriptors_loc )
     return metadata, np.array(descriptors)
@@ -90,7 +90,7 @@ def createDescriptorsACSF(data, metadata,
     descriptors = []  
     for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
         descriptors_loc = np.empty((np.shape(data)[0],metadata['n_features']))
-        for index_structure in tqdm.tqdm(range(metadata['train_set_size'])):
+        for index_structure in range(metadata['train_set_size']):
             descriptors_loc[index_structure,:] = acsf.create(data[index_structure],positions=[index_atom])
         descriptors.append( descriptors_loc )
     return metadata, np.array(descriptors)
