@@ -10,8 +10,6 @@ import nnmetadata as mtd
 import filexyz as xyz
 import cpmd 
 import descriptors as desc
-import pandas as pd
-import keras
 import numpy as np
 
 data_base  = "/media/moogmt/Elements/CO2/"
@@ -78,11 +76,6 @@ metadata, input_train = desc.createDescriptorsSOAP(input_train_raw,metadata,sigm
 # Test set
 #------------------------------------------------------------------------------
 metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
-# Building Inputs
-input_train=mtd.buildInput(data_train)
-output_train=data_train.energy.values
-input_test=mtd.buildInput(data_test)
-output_test=data_test.energy.values
 #=============================================================================#
 
 # BUILDING NETWORK
