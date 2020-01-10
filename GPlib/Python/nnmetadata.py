@@ -107,6 +107,12 @@ def createScaler( input_, metadata ):
         end_specie   = start_specie + metadata["nb_element_species"][specie]
         scalers[specie].fit(np.array(input_[start_specie:end_specie]).reshape(nb_atoms_total,metadata['n_features']))    
     return scalers
+def applyScale( scalers, input_, metadata ):
+    for specie in range(metadata["n_species"]):
+        start_specie = metadata["start_species"][specie]
+        end_specie   = start_specie + metadata["nb_element_species"][specie]
+        input_[start_specie:end_specie,:,:] = scalers[specie].transform( input_[start_specie:end_specie,:,:].reshape() )
+    return input_
 
 default_range_train_energy=1
 default_min_train_energy=0
