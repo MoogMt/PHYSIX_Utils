@@ -8,7 +8,6 @@ Created on Tue Jan  7 13:32:52 2020
 
 import numpy as np
 import keras
-import nnmetadata as mtd
 
 # Neural Net Default Parameters
 #==============================================================================
@@ -26,7 +25,6 @@ default_restore_weights=True
 default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./network_plot.png"
-default_saved_model=False
 #==============================================================================
 
 # HANDLING OPTIONS OF NN
@@ -119,22 +117,29 @@ def predict(model, input_, output_):
 #=================
 # TRAINING MODEL
 #==============================================================================
+default_batch_size=10
+default_verbose_train=0
+default_saved_model=False
 def train(model, input_train, output_train, input_test, output_test, metadata,
           # OPTIONNAL ARGS
           n_epochs = default_n_epochs,
+          batch_size=default_batch_size,
           patience = default_patience,
           restore_weights = default_restore_weights,
-          saved_model = default_saved_model
+          saved_model = default_saved_model,
+          verbose_train=default_verbose_train
           ):
         
     metadata=handleNNOption2("n_epochs", default_n_epochs, metadata )
+    metadata=handleNNOption2("verbose_train", verbose_train, metadata )
     metadata=handleNNOption2("patience", default_patience, metadata )
+    metadata=handleNNOption2("batch_size", batch_size, metadata )
     metadata=handleNNOption2("restore_weights", default_restore_weights, metadata )
     metadata=handleNNOption2("saved_model", default_saved_model, metadata )
     
     # Fit Parameters
-    callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
-
+    callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=metadata["verbose_train"], patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
+    
     # Actual Fitting
     metadata['history'] = model.fit( input_train, output_train, validation_data=(input_test,output_test), epochs=metadata["n_epochs"],verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
     
@@ -228,7 +233,7 @@ def buildTrainPredict(metadata,input_train,input_test,output_train,output_test,
     #=============================================================================#
     model=buildNetwork(metadata)
     # Compile the network
-    model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['accuracy'])
+    model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['mse'])
     # Plot the network
     if metadata["plot_network"]:
         keras.utils.plot_model(model,to_file=metadata["path_plot_network"],show_shapes=True, show_layer_names=True)
