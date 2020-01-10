@@ -98,11 +98,11 @@ metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_
         
 # Dropout coefficients
 metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
-metadata["dropout_coef"][0,:]=0.2
-metadata["dropout_coef"][1:,:]=0.5
+metadata["dropout_coef"][0,:]=0.3
+metadata["dropout_coef"][1:,:]=0.6
         
 # Plot network
-metadata["plot_network"]=False
+metadata["plot_network"]=True
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
 metadata["saved_model"] = False
 metadata["path_folder_save"]=str(folder_out)
