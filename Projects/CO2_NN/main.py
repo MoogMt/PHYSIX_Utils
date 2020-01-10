@@ -18,22 +18,21 @@ verbose_check=True # Whether we want error messages
 debug = False # Debug mode: verbose descriptions are written in a debug file
 # in order to check everything
 
-volume=8.82
-temperature=3000 
-run_nb=1
-
-folder_in = data_base + str(volume) + "/" + str(temperature) + "K/" + str(run_nb) + "-run/"
-folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
-
-file_traj = folder_in + "TRAJEC.xyz"
-file_energies = folder_in + "ENERGIES"
-
 
 # EXTRACTING DATA
 #=============================================================================#
+volume=8.82
+temperature=3000 
+run_nb=1
+folder_in = data_base + str(volume) + "/" + str(temperature) + "K/" + str(run_nb) + "-run/"
+folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
+file_traj = folder_in + "TRAJEC.xyz"
+file_energies = folder_in + "ENERGIES"
+#------------------------------------------------------------------------------
 metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
 if not mtd.checkMetaDataIO(metadata,verbose_check):
     exit
+#------------------------------------------------------------------------------
 nb_step=cpmd.getNbLineEnergies(file_energies)
 # Reading trajectory
 traj = xyz.readPbcCubic( file_traj, volume )
@@ -81,7 +80,7 @@ metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_
 metadata, output_train = mtd.scaleEnergy( output_train, metadata )
 metadata, output_test  = mtd.scaleEnergy( output_test,  metadata )
 # Scaling Input
-scalers = mtd.createScale( input_train, metadata ) # Create scaler on training set
+scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
 input_train = mtd.applyScale( input_train, scalers )
 input_test  = mtd.applyScale( input_test,  scalers )
 #=============================================================================#

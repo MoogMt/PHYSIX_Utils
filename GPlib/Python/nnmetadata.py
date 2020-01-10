@@ -98,10 +98,19 @@ def scaleInput( input_, metadata ):
         scaler[specie].fit(input_[start_specie:end_specie,:,:].reshape(nb_data,metadata['n_features']))    
         input_[start_specie:end_specie,:,:] = scaler[specie].transform(input_[start_specie:end_specie,:,:].reshape(input_[start_specie:end_specie,:,:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])).reshape(metadata["nb_element_species"][specie],metadata["train_set_size"],metadata["n_features"])
     return input_, scaler
+def createScaler( input_, metadata ):
+    scalers = []
+    for specie in range(metadata["n_species"]):
+        scalers.append(StandardScaler())
+        nb_atoms_total=metadata["nb_element_species"][specie]*metadata["train_set_size"]
+        start_specie = metadata["start_species"][specie]
+        end_specie   = start_specie + metadata["nb_element_species"][specie]
+        scalers[specie].fit(np.array(input_[start_specie:end_specie]).reshape(nb_atoms_total,metadata['n_features']))    
+    return scalers
 
 default_range_train_energy=1
 default_min_train_energy=0
-def ScaleEnergy( output, metadata ):
+def scaleEnergy( output, metadata ):
     metadata["range_train_energy"] = output.max()-output.min()
     metadata["min_train_energy"] = output.min()
     return metadata, (output-metadata["min_train_energy"])/metadata["range_train_energy"]
