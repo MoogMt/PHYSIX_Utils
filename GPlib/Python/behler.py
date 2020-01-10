@@ -217,7 +217,7 @@ def writeComparativePrediction( file_path, output_, prediction_ ):
 default_path_folder_save="./"
 default_suffix_write=""
 #==============================================================================
-def buildTrainPredictWrite(metadata,input_train,input_test,output_train,output_test, 
+def buildTrainPredict(metadata,input_train,input_test,output_train,output_test, 
                            path_folder_save=default_path_folder_save,
                            suffix_write=default_suffix_write):
     

@@ -81,8 +81,8 @@ metadata, output_train = mtd.scaleEnergy( output_train, metadata )
 metadata, output_test  = mtd.scaleEnergy( output_test,  metadata )
 # Scaling Input
 scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
-input_train = mtd.applyScale( input_train, scalers, metadata )
-input_test  = mtd.applyScale( input_test,  scalers, metadata )
+input_train = mtd.applyScale( scalers, input_train, metadata )
+input_test  = mtd.applyScale( scalers, input_test,  metadata )
 #=============================================================================#
 
 # BUILDING NETWORK
