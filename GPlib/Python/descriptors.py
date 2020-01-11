@@ -63,10 +63,7 @@ def createDescriptorsSOAP(data, metadata,
     for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
         descriptors_loc = np.empty((np.shape(data)[0],metadata['n_features']))
         for index_structure in range(np.shape(data)[0]): # This whole thing is a bit insane, we could directly build it propertly for the training and avoid nonsentical stuff...
-            if metadata["n_jobs"] > 1:
-                descriptors_loc[index_structure,:] = soap.create(data[index_structure],positions=[index_atom],n_jobs=metadata["n_jobs"])
-            else:
-                descriptors_loc[index_structure,:] = soap.create(data[index_structure],positions=[index_atom])
+            descriptors_loc[index_structure,:] = soap.create(data[index_structure],positions=[index_atom])
         descriptors.append( descriptors_loc )
     return metadata, descriptors
 #=============================================================================#

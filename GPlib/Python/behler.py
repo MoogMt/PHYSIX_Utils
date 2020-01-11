@@ -13,10 +13,6 @@ import keras
 #==============================================================================
 default_n_species=1
 default_activation_fct = 'tanh'  # Activation function in the dense hidden layers
-default_loss_fct = 'mean_squared_error' # Loss function in the NN
-default_optimizer = 'adam'                    # Choice of optimizers for training of the NN weights 
-default_n_epochs = 1000                  # Number of epoch for optimization?
-default_patience = 100                  # Patience for convergence
 default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
 default_n_hidden_layer=2                # Number of hidden layers
 default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
@@ -29,11 +25,7 @@ default_path_plot_network="./network_plot.png"
 
 # HANDLING OPTIONS OF NN
 #==============================================================================
-def handleNNOption( input_label, default_value, metadata, replace ):
-    if not input_label in metadata or replace :
-        metadata[input_label] = default_value
-    return metadata
-def handleNNOption2( input_label, default_value, metadata ):
+def handleNNOption( input_label, default_value, metadata):
     if not input_label in metadata :
         metadata[input_label] = default_value
     return metadata
@@ -45,10 +37,6 @@ def handleNNOption2( input_label, default_value, metadata ):
 def buildNetwork( metadata,
                  # Optionnal Arguments
                   activation_fct=default_activation_fct,
-                  loss_fct=default_loss_fct,
-                  optimizer=default_optimizer,
-                  n_epochs=default_n_epochs,
-                  patience=default_patience,
                   n_nodes_per_layer=default_n_nodes_per_layer,
                   n_hidden_layer=default_n_hidden_layer,
                   n_nodes_structure=default_n_nodes_structure,
@@ -59,10 +47,6 @@ def buildNetwork( metadata,
     #Neural Net metadata
     #=========================================================================#
     metadata=handleNNOption("activation_fct", activation_fct, metadata, replace_inputs )
-    metadata=handleNNOption("loss_fct", loss_fct, metadata, replace_inputs )
-    metadata=handleNNOption("optimizer", optimizer, metadata, replace_inputs )
-    metadata=handleNNOption("n_epochs", n_epochs, metadata, replace_inputs )
-    metadata=handleNNOption("patience", patience, metadata, replace_inputs )
     metadata=handleNNOption("n_nodes_structure", n_hidden_layer, metadata, replace_inputs )
     metadata=handleNNOption("dropout_coef", dropout_coef, metadata, replace_inputs )
     #=========================================================================#
@@ -120,6 +104,8 @@ def predict(model, input_, output_):
 default_batch_size=10
 default_verbose_train=0
 default_saved_model=False
+default_n_epochs = 1000                  # Number of epoch for optimization?
+default_patience = 100                  # Patience for convergence
 def train(model, input_train, output_train, input_test, output_test, metadata,
           # OPTIONNAL ARGS
           n_epochs = default_n_epochs,
@@ -130,12 +116,12 @@ def train(model, input_train, output_train, input_test, output_test, metadata,
           verbose_train=default_verbose_train
           ):
         
-    metadata=handleNNOption2("n_epochs", default_n_epochs, metadata )
-    metadata=handleNNOption2("verbose_train", verbose_train, metadata )
-    metadata=handleNNOption2("patience", default_patience, metadata )
-    metadata=handleNNOption2("batch_size", batch_size, metadata )
-    metadata=handleNNOption2("restore_weights", default_restore_weights, metadata )
-    metadata=handleNNOption2("saved_model", default_saved_model, metadata )
+    metadata=handleNNOption("n_epochs", default_n_epochs, metadata )
+    metadata=handleNNOption("verbose_train", verbose_train, metadata )
+    metadata=handleNNOption("patience", default_patience, metadata )
+    metadata=handleNNOption("batch_size", batch_size, metadata )
+    metadata=handleNNOption("restore_weights", default_restore_weights, metadata )
+    metadata=handleNNOption("saved_model", default_saved_model, metadata )
     
     # Fit Parameters
     callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=metadata["verbose_train"], patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
@@ -219,15 +205,21 @@ def writeComparativePrediction( file_path, output_, prediction_ ):
 #==============================================================================
     
 # ALL IN ONE
+#==============================================================================
 default_path_folder_save="./"
 default_suffix_write=""
-#==============================================================================
+default_optimizer = 'adam'                    # Choice of optimizers for training of the NN weights 
+default_loss_fct = 'mean_squared_error' # Loss function in the NN
 def buildTrainPredict(metadata,input_train,input_test,output_train,output_test, 
+                           loss_fct=default_loss_fct,
+                           optimizer=default_optimizer,
                            path_folder_save=default_path_folder_save,
                            suffix_write=default_suffix_write):
     
-    metadata=handleNNOption2( "suffix_write", default_suffix_write, metadata )
-    metadata=handleNNOption2( "suffix_write", default_suffix_write, metadata )
+    metadata=handleNNOption( "optimizer", optimizer, metadata )
+    metadata=handleNNOption( "loss_fct", loss_fct, metadata )
+    metadata=handleNNOption( "path_folder_save", path_folder_save, metadata )
+    metadata=handleNNOption( "suffix_write", suffix_write, metadata )
     
     # BUILDING
     #=============================================================================#

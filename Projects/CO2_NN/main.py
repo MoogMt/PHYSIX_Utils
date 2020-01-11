@@ -11,6 +11,7 @@ import filexyz as xyz
 import cpmd 
 import descriptors as desc
 import numpy as np
+import behler
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -56,8 +57,10 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 # CREATING DESCRIPTORS
 #=============================================================================#
 # Creating training set
-metadata['n_jobs'] = 4 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 10000
+metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
+   
+
+metadata['train_set_size'] = 2000
 metadata['total_size_set'] = len(energies)
 metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
@@ -67,7 +70,7 @@ metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadat
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.2 # cut_off SOAP, 
 nmax_   = 3
-lmax_   = 2
+lmax_   = 3
 # Train set
 #-----------------------------------------------------------------------------
 metadata, input_train = desc.createDescriptorsSOAP(input_train_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
@@ -75,30 +78,28 @@ metadata, input_train = desc.createDescriptorsSOAP(input_train_raw,metadata,sigm
 #------------------------------------------------------------------------------
 metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
 #------------------------------------------------------------------------------
+# Scaling 
+#------------------------------------------------------------------------------
+# Scaling Energy
+metadata, output_train_scale = mtd.scaleEnergy( output_train, metadata )
+metadata, output_test_scale  = mtd.scaleEnergy( output_test,  metadata )
+# Scaling Input
+scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
+input_train_scale = mtd.applyScale( scalers, input_train, metadata )
+input_test_scale  = mtd.applyScale( scalers, input_test,  metadata )
 # PCA
 #------------------------------------------------------------------------------
 #metadata["path_pcavar"]=str(folder_out+"pca_var.dat")
 #var_pca = mtd.pcaVariance(input_train,metadata["path_pcavar"])
-#------------------------------------------------------------------------------
-# Scaling 
-#------------------------------------------------------------------------------
-# Scaling Energy
-metadata, output_train = mtd.scaleEnergy( output_train, metadata )
-metadata, output_test  = mtd.scaleEnergy( output_test,  metadata )
-# Scaling Input
-scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
-input_train = mtd.applyScale( scalers, input_train, metadata )
-input_test  = mtd.applyScale( scalers, input_test,  metadata )
 #=============================================================================#
 
 # BUILDING NETWORK
 #=============================================================================#
 # Parameters of the Neural net
-import behler
-        
+
 # Iteration parameters
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
-metadata["optimizer"] = 'adam'                    # Choice of optimizers for training of the NN weights 
+metadata["optimizer"] = 'Adam'                    # Choice of optimizers for training of the NN weights 
 metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
 metadata["patience"] = 100                  # Patience for convergence
 metadata["restore_weights"] = True
@@ -107,15 +108,15 @@ metadata["verbose_train"] = 1
 
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
-metadata["n_nodes_per_layer"] = 40           # Number of nodes per hidden layer
-metadata["n_hidden_layer"] = 2               # Number of hidden layers
+metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
+metadata["n_hidden_layer"] = 3               # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
-        
+
 # Dropout coefficients
 metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
 metadata["dropout_coef"][0,:]=0.2
 metadata["dropout_coef"][1:,:]=0.5
-        
+    
 # Plot network
 metadata["plot_network"]=True
 metadata["path_plot_network"]=str(folder_out+"plot_network.png")
@@ -131,13 +132,13 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
                              "cutoffSOAP-" + str(metadata["cutoff_SOAP"])                 + "_" +
                              "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
                              "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
-model, metadata, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredict(metadata,input_train,input_test,output_train,output_test)
+model, metadata, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredict(metadata,input_train_scale,input_test_scale,output_train_scale,output_test_scale)
 
 # Write the comparative between predictions and outputs
 file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )
 file_comp_test  = str( metadata["path_folder_save"] + "ComparativeErrorsTest_"  +metadata["suffix_write"] )
-metadata, output_train = mtd.deScaleEnergy( output_train, metadata )
-metadata, output_test  = mtd.deScaleEnergy( output_test,  metadata )
+metadata, output_train = mtd.deScaleEnergy( output_train_scale, metadata )
+metadata, output_test  = mtd.deScaleEnergy( output_test_scale,  metadata )
 metadata, predictions_train = mtd.deScaleEnergy( predictions_train, metadata )
 metadata, predictions_test  = mtd.deScaleEnergy( predictions_test,  metadata )
 behler.writeComparativePrediction(file_comp_train, output_train, predictions_train )
