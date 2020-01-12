@@ -40,12 +40,14 @@ def buildSpecieSubNetwork( specie, n_nodes, drop_out_rate=default_dropout_coef, 
 def buildAllAtomsNetworks( species, nb_species, start_species, nb_element_species, n_features, specie_subnets ):
     all_layers   = []
     all_networks = []
+    count_all=0
     for specie in range( nb_species ):
         count_ = 1
         for atom in range( start_species[specie], start_species[specie]+nb_element_species[specie] ):
             all_layers.append( keras.layers.Input( shape=(n_features,), name =str( species[specie] + "_input" + str(count_) ) ) )
-            all_networks.append( specie_subnets[specie]( all_layers[atom] ) )
+            all_networks.append( specie_subnets[specie]( all_layers[ count_all ] ) )
             count_ += 1
+            count_all += 1 
     return all_networks, all_layers
 #==============================================================================
 def buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint ):
@@ -68,48 +70,7 @@ def buildNetwork( species, nb_species, n_features, start_species, nb_element_spe
     #==========================================================================
 
     return keras.models.Model( inputs=all_layers, outputs=final_layer( all_networks ) )   
-#==============================================================================
-def buildNetwork_OLD( metadata,
-                 # Optionnal Arguments
-                  activation_fct=default_activation_fct,
-                  n_nodes_per_layer=default_n_nodes_per_layer,
-                  n_hidden_layer=default_n_hidden_layer,
-                  n_nodes_structure=default_n_nodes_structure,
-                  dropout_coef=default_dropout_coef,
-                  replace_inputs=default_replace_inputs
-                 ):
-    
-    # Construction subnetwork
-    #=========================================================================#
-    specie_subnets=[]
-    for specie in range(metadata["n_species"]):
-        specie_subnets=np.append(specie_subnets,keras.Sequential(name=str(metadata["species"][specie]+"_subnet")))
-        specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,0]))
-        layer=1
-        for n_node in metadata["n_nodes_structure"][specie,:] :
-            if n_node > 0:
-                specie_subnets[specie].add( keras.layers.Dense(n_node,activation=metadata["activation_fct"], kernel_constraint=keras.constraints.maxnorm(3) ) )
-                specie_subnets[specie].add( keras.layers.Dropout(metadata["dropout_coef"][specie,layer]) )
-                layer += 1
-            else:
-                break
-        specie_subnets[specie].add(keras.layers.Dense(1,activation="linear"))
-    #=========================================================================#
-    
-    # Linking subnets
-    #=========================================================================#
-    all_input_layers=[]
-    all_subnets=[]
-    for specie in range(metadata["n_species"]):
-        count_=1
-        for atom in range(metadata["start_species"][specie],metadata["start_species"][specie]+metadata["nb_element_species"][specie]):
-            all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie]+"_input"+str(count_) )) )            
-            all_subnets.append( specie_subnets[specie](all_input_layers[atom]) )
-            count_+=1
-    added_layer = keras.layers.Add(name="Addition")
-    #=========================================================================#
 
-    return keras.models.Model(inputs=all_input_layers ,outputs=added_layer(all_subnets) )   
 #==============================================================================
 
 
@@ -274,23 +235,64 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test,
     return model, metadata_stat, predictions_train, predictions_test
 
 def getAtomicEnergy( specie, start_specie, nb_element_specie, n_nodes, drop_out_rate,  input_, model_general, activation_fct=default_activation_fct, loss_fct=default_loss_fct, optimizer=default_optimizer, kernel_constraint=default_kernel_constraint, early_stop_metric=default_early_stop_metric ):
+    # Parameters
     nb_data=np.shape(input_)[1]
     n_features=np.shape(input_)[2]
+    # Reshaping input
+    input_reshape=np.array( input_[start_specie:start_specie+nb_element_specie]).reshape(nb_data*nb_element_specie,n_features)
     # Buildint structure
-    structure_network_specie = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, 1 )
+    network_structure = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, 1 )
     # Define Inputs
-    input_layers_specie = keras.layers.Input( shape=(n_features,), name =str( specie + "_input_energy" ) ) 
-    # Create Network
-    network_specie =  structure_network_specie( input_layers_specie ) 
+    input_layers = [ keras.layers.Input( shape=(n_features,), name =str( specie + "_input_energy" ) )  ]
     # Creating model
-    model_specie=keras.models.Model( inputs=input_layers_specie, outputs=structure_network_specie( network_specie ) )   
+    model_specie=keras.models.Model( inputs=input_layers, outputs=network_structure( input_layers ) )   
     # Compiling model 
     model_specie.compile(loss=loss_fct, optimizer=optimizer, metrics=default_early_stop_metric)
     # Getting weights from previous model
     model_specie.set_weights ( model_general.get_layer( specie+"_subnet" ).get_weights() )
     # Prediction
-    energies=np.zeros((nb_data,nb_element_specie))
-    for step in range( nb_data ) :
-        for atom in range(start_specie,start_specie+nb_element_specie):
-            energies[step,atom]=predict( model_specie, input_[atom][step,:] ) 
-    return  energies.reshape(nb_element_specie*len(input_))
+    return predict( model_specie, input_reshape ) 
+
+
+#==============================================================================
+def buildNetwork_OLD( metadata,
+                 # Optionnal Arguments
+                  activation_fct=default_activation_fct,
+                  n_nodes_per_layer=default_n_nodes_per_layer,
+                  n_hidden_layer=default_n_hidden_layer,
+                  n_nodes_structure=default_n_nodes_structure,
+                  dropout_coef=default_dropout_coef,
+                  replace_inputs=default_replace_inputs
+                 ):
+    
+    # Construction subnetwork
+    #=========================================================================#
+    specie_subnets=[]
+    for specie in range(metadata["n_species"]):
+        specie_subnets=np.append(specie_subnets,keras.Sequential(name=str(metadata["species"][specie]+"_subnet")))
+        specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,0]))
+        layer=1
+        for n_node in metadata["n_nodes_structure"][specie,:] :
+            if n_node > 0:
+                specie_subnets[specie].add( keras.layers.Dense(n_node,activation=metadata["activation_fct"], kernel_constraint=keras.constraints.maxnorm(3) ) )
+                specie_subnets[specie].add( keras.layers.Dropout(metadata["dropout_coef"][specie,layer]) )
+                layer += 1
+            else:
+                break
+        specie_subnets[specie].add(keras.layers.Dense(1,activation="linear"))
+    #=========================================================================#
+    
+    # Linking subnets
+    #=========================================================================#
+    all_input_layers=[]
+    all_subnets=[]
+    for specie in range(metadata["n_species"]):
+        count_=1
+        for atom in range(metadata["start_species"][specie],metadata["start_species"][specie]+metadata["nb_element_species"][specie]):
+            all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie]+"_input"+str(count_) )) )            
+            all_subnets.append( specie_subnets[specie](all_input_layers[atom]) )
+            count_+=1
+    added_layer = keras.layers.Add(name="Addition")
+    #=========================================================================#
+
+    return keras.models.Model(inputs=all_input_layers ,outputs=added_layer(all_subnets) )   

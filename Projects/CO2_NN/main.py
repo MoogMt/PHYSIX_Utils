@@ -167,8 +167,6 @@ metadata, predictions_test  = mtd.deScaleEnergy( predictions_test,  metadata )
 behler.writeComparativePrediction(file_comp_train, output_train, predictions_train )
 behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
 
-
-
 energies = mtd.deScaleEnergy( behler.getAtomicEnergy( metadata["species"][0], 
                                    metadata["start_species"][0],
                                    metadata["nb_element_species"][0],
