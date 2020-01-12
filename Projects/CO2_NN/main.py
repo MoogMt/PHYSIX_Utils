@@ -59,17 +59,17 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 # Creating training set
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 1000
+metadata['train_set_size'] = 5000
 metadata['total_size_set'] = len(energies)
 metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
-metadata["test_set_size"] = 200
+metadata["test_set_size"] = 1000
 metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
-sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
-cutoff_ = 3.2 # cut_off SOAP, 
-nmax_   = 3
-lmax_   = 3
+sigma_  = 0.6  # 3*sigma ~ 2.7A relatively large spread
+cutoff_ = 4.5 # cut_off SOAP, 
+nmax_   = 2
+lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
 metadata, input_train = desc.createDescriptorsSOAP(input_train_raw,metadata,sigma_SOAP=sigma_,cutoff_SOAP=cutoff_,nmax_SOAP=nmax_,lmax_SOAP=lmax_)
@@ -100,9 +100,9 @@ input_test_scale  = mtd.applyScale( scalers, input_test,  metadata )
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
 metadata["optimizer"] = 'Adam'                    # Choice of optimizers for training of the NN weights 
 metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
-metadata["patience"] = 100                  # Patience for convergence
+metadata["patience"] = 50                  # Patience for convergence
 metadata["restore_weights"] = True
-metadata["batch_size"] = 500
+metadata["batch_size"] = 1000
 metadata["verbose_train"] = 1
 metadata["early_stop_metric"]=['mse']
 
