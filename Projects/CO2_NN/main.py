@@ -167,16 +167,45 @@ metadata, predictions_test  = mtd.deScaleEnergy( predictions_test,  metadata )
 behler.writeComparativePrediction(file_comp_train, output_train, predictions_train )
 behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
 
-energies = mtd.deScaleEnergy( behler.getAtomicEnergy( metadata["species"][0], 
-                                   metadata["start_species"][0],
-                                   metadata["nb_element_species"][0],
-                                   metadata["n_nodes_structure"][0,:],
-                                   metadata["dropout_coef"][0,:],
-                                   input_test_scale, 
-                                   model,
-                                   activation_fct=metadata["activation_fct"],
-                                   loss_fct=metadata["loss_fct"], 
-                                   optimizer=metadata["optimizer"], 
-                                   kernel_constraint=metadata["kernel_constraint"], 
-                                   early_stop_metric=metadata["early_stop_metrics"]
-                                   ))
+energies_train = []
+energies_test  = []
+for specie in range( metadata["n_species"] ):
+    energies_train.append(mtd.deScaleEnergy( behler.getAtomicEnergy( metadata["species"][specie], 
+                                                                   metadata["start_species"][specie],
+                                                                   metadata["nb_element_species"][specie],
+                                                                   metadata["n_nodes_structure"][specie,:],
+                                                                   metadata["dropout_coef"][specie,:],
+                                                                   input_test_scale, 
+                                                                   model,
+                                                                   activation_fct=metadata["activation_fct"],
+                                                                   loss_fct=metadata["loss_fct"], 
+                                                                   optimizer=metadata["optimizer"], 
+                                                                   kernel_constraint=metadata["kernel_constraint"], 
+                                                                   early_stop_metric=metadata["early_stop_metrics"]),
+                                                                    metadata )[1])
+    energies_test.append(mtd.deScaleEnergy( behler.getAtomicEnergy( metadata["species"][specie], 
+                                                                   metadata["start_species"][specie],
+                                                                   metadata["nb_element_species"][specie],
+                                                                   metadata["n_nodes_structure"][specie,:],
+                                                                   metadata["dropout_coef"][specie,:],
+                                                                   input_test_scale, 
+                                                                   model,
+                                                                   activation_fct=metadata["activation_fct"],
+                                                                   loss_fct=metadata["loss_fct"], 
+                                                                   optimizer=metadata["optimizer"], 
+                                                                   kernel_constraint=metadata["kernel_constraint"], 
+                                                                   early_stop_metric=metadata["early_stop_metrics"]),
+                                                                    metadata )[1])
+
+import matplotlib.pyplot as plt
+
+nb_bins=100
+plt.figure(1)
+for specie in range(metadata["n_species"]):
+    plt.hist(energies_train[specie], bins=nb_bins)
+plt.show()
+
+plt.figure(2)
+for specie in range(metadata["n_species"]):
+    plt.hist(energies_test[specie], bins=nb_bins)
+plt.show()
