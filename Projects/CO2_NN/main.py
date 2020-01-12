@@ -104,14 +104,14 @@ metadata["patience"] = 100                  # Patience for convergence
 metadata["restore_weights"] = True
 metadata["batch_size"] = 500
 metadata["verbose_train"] = 1
-metadata["early_stop_metrics"]=['mse']
+metadata["early_stop_metric"]=['mse']
 
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
 metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
 metadata["n_hidden_layer"] = 3               # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
-metadata["kernel_constraints"] = keras.constraints.maxnorm(2)
+metadata["kernel_constraint"] = keras.constraints.maxnorm(2)
 
 # Dropout coefficients
 metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
@@ -133,7 +133,17 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
                              "cutoffSOAP-" + str(metadata["cutoff_SOAP"])                 + "_" +
                              "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
                              "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
-model, metadata, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredict(metadata,input_train_scale,input_test_scale,output_train_scale,output_test_scale)
+
+
+model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredictWrite( input_train,input_test,output_train,output_test, metadata["species"], metadata["n_species"], metadata["n_features"], metadata["start_species"], metadata["nb_element_species"], metadata["n_nodes_structure"], metadata["dropout_coef"], metadata["kernel_constraint"],
+                           activation_fct = metadata["activation_fct"],
+                           loss_fct=metadata["loss_fct"],
+                           optimizer=metadata["optimizer"],
+                           path_folder_save=metadata["path_folder_save"], 
+                           early_stop_metric=metadata["early_stop_metric"],
+                           plot_network=metadata["plot_network"],
+                           path_plot_network=metadata["path_plot_network"],
+                           suffix_write=metadata["suffix_write"])
 
 # Write the comparative between predictions and outputs
 file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )

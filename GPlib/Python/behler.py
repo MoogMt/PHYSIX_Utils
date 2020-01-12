@@ -43,29 +43,31 @@ def buildAllAtomsNetworks( species, nb_species, start_species, nb_element_specie
         for atom in range( start_species[specie], start_species[specie]+nb_element_species[specie] ):
             all_networks.append( keras.layers.Input( shape=(n_features,), name =str( species[specie] + "_input" + str(count_) ) ) )
             all_layers.append( specie_subnets[specie]( all_networks[atom] ) )
+            count_ += 1
     return all_networks, all_layers
 #==============================================================================
 def buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint ):
     
     # Construction subnetwork
     #=========================================================================#
-    nb_species=len(species)
     specie_subnets=[]
     for specie in range( nb_species ):
-        specie_subnets=np.append(specie_subnets, buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, kernel_constraint ) )
+        specie_subnets=np.append(specie_subnets, buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, kernel_constraint, 1 ) )
     #=========================================================================#
     
     # Building All Networks
     #=========================================================================#
     all_networks, all_layers = buildAllAtomsNetworks( species, nb_species, start_species, nb_element_species, n_features, specie_subnets )
+    print("network_length=",len(all_networks))
+    print("layer length=",len(all_layers))
     #=========================================================================#
 
     # Final Addition Layer
     #==========================================================================
-    added_layer = keras.layers.Add(name="Addition")
+    final_layer = keras.layers.Add( name="Addition" )
     #==========================================================================
 
-    return keras.models.Model( inputs=all_layers ,outputs=added_layer( all_networks ) )   
+    return keras.models.Model( inputs=all_layers, outputs=final_layer( all_networks ) )   
 #==============================================================================
 def buildNetwork_( metadata,
                  # Optionnal Arguments
@@ -210,7 +212,7 @@ default_path_folder_save="./"
 default_suffix_write=""
 default_optimizer = 'adam'                    # Choice of optimizers for training of the NN weights 
 default_loss_fct = 'mean_squared_error' # Loss function in the NN
-default_metrics=['mse']
+default_early_stop_metric=['mse']
 default_plot_network = False
 default_path_plot_network = "./plot_network.png"
 default_suffix_write=""
@@ -219,7 +221,7 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
                            loss_fct=default_loss_fct,
                            optimizer=default_optimizer,
                            path_folder_save=default_path_folder_save,
-                           metrics=default_metrics,
+                           early_stop_metric=default_early_stop_metric,
                            plot_network=default_plot_network,
                            path_plot_network=default_path_plot_network,
                            suffix_write=default_suffix_write
@@ -229,7 +231,7 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
     #=============================================================================#
     model=buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint )
     # Compile the network
-    model.compile(loss=loss_fct, optimizer=optimizer, metrics=metrics)
+    model.compile(loss=loss_fct, optimizer=optimizer, metrics=early_stop_metric)
     # Plot the network
     if plot_network:
         keras.utils.plot_model(model,to_file=path_plot_network,show_shapes=True, show_layer_names=True)
