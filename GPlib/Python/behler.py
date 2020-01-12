@@ -21,8 +21,9 @@ default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./network_plot.png"
 default_kernel_constraint=None
+default_out_number=1
 #=============================================================================
-def buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, out_number ):
+def buildSpecieSubNetwork( specie, n_nodes, drop_out_rate=default_dropout_coef, activation_fct=default_activation_fct, kernel_constraint=default_kernel_constraint, out_number=default_out_number ):
     subnet=keras.Sequential( name=str( specie+"_subnet" ) )
     subnet.add(keras.layers.Dropout( drop_out_rate[0] ))
     layer=1
@@ -128,14 +129,21 @@ def predict(model, input_ ):
 #=================
 # TRAINING MODEL
 #==============================================================================
-default_verbose_train=0
+default_verbose_train=1
 default_n_epochs=1000
 default_patience = 100                  # Patience for convergence
 default_saved_model=False
 default_path_saved_model="./saved_model"
 default_batch_size=None
 default_restore_weights=True
-def train( model, input_train, output_train, input_test, output_test, n_epochs, batch_size=default_batch_size, patience = default_patience, restore_weights = default_restore_weights, saved_model = default_saved_model, path_saved_model = default_path_saved_model, verbose_train=default_verbose_train ):
+def train( model, input_train, output_train, input_test, output_test, 
+          n_epochs=default_n_epochs, 
+          batch_size=default_batch_size, 
+          patience = default_patience, 
+          restore_weights = default_restore_weights, 
+          saved_model = default_saved_model, 
+          path_saved_model = default_path_saved_model, 
+          verbose_train=default_verbose_train ):
     
     # Fit Parameters
     callback_ = keras.callbacks.EarlyStopping( monitor='val_loss', mode='min', verbose=verbose_train, patience=patience ,restore_best_weights=restore_weights ) # Parameters for Early Stopping
@@ -217,7 +225,14 @@ default_early_stop_metric=['mse']
 default_plot_network = False
 default_path_plot_network = "./plot_network.png"
 default_suffix_write=""
-def buildTrainPredictWrite(input_train,input_test,output_train,output_test, species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, 
+def buildTrainPredictWrite(input_train,input_test,output_train,output_test, 
+                           species, 
+                           nb_species, 
+                           n_features, 
+                           start_species, 
+                           nb_element_species, 
+                           nodes_structure, 
+                           drop_out_rate, 
                            n_epochs=default_n_epochs,
                            batch_size=default_batch_size,
                            kernel_constraint=default_kernel_constraint,
@@ -243,7 +258,7 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
 
     # TRAINING NETWORK
     #=============================================================================#
-    model, history = train(model,input_train,output_train,input_test,output_test,n_epochs,batch_size)
+    model, history = train(model,input_train,output_train,input_test,output_test,n_epochs,batch_size,verbose_train=1)
     #=============================================================================#
 
     # PREDICTION
@@ -258,9 +273,12 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
     #===============================================================================    
     return model, metadata_stat, predictions_train, predictions_test
 
-def getAtomicEnergy( specie, n_nodes, drop_out_rate, activation_fct, loss_fct, optimizer, constraints, metrics, input_, model_general ):
-    model_specie = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, constraints, 1 )
-    model_specie.compile(loss=loss_fct, optimizer=optimizer, metrics=metrics)
+def getAtomicEnergy( specie, start_specie, nb_element_specie, n_nodes, drop_out_rate,  input_, model_general, activation_fct=default_activation_fct, loss_fct=default_loss_fct, optimizer=default_optimizer, kernel_constraint=default_kernel_constraint, early_stop_metric=default_early_stop_metric ):
+    model_specie = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, 1 )
+    model_specie.compile(loss=loss_fct, optimizer=optimizer, metrics=default_early_stop_metric)
     model_specie.set_weights ( model_general.get_layer( specie+"_subnet" ).get_weights() )
-    energies = predict( model_specie, input_, )
-    return energies
+    energies=np.zeros((len(input_),nb_element_specie))
+    for step in range(len(input_)):
+        for atom in range(start_specie,start_specie+nb_element_specie):
+            energies[step,atom]=predict( model_specie, input_[atom][step,:] ) 
+    return  energies.reshape(nb_element_specie*len(input_))

@@ -137,7 +137,17 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
 
 import behler
 
-model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredictWrite( input_train,input_test,output_train,output_test, metadata["species"], metadata["n_species"], metadata["n_features"], metadata["start_species"], metadata["nb_element_species"], metadata["n_nodes_structure"], metadata["dropout_coef"], metadata["kernel_constraint"],
+model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredictWrite( input_train_scale,input_test_scale,output_train_scale,output_test_scale, 
+                           metadata["species"], 
+                           metadata["n_species"], 
+                           metadata["n_features"], 
+                           metadata["start_species"], 
+                           metadata["nb_element_species"], 
+                           metadata["n_nodes_structure"], 
+                           metadata["dropout_coef"], 
+                           metadata["n_epochs"],
+                           metadata["batch_size"],
+                           metadata["kernel_constraint"],
                            activation_fct = metadata["activation_fct"],
                            loss_fct=metadata["loss_fct"],
                            optimizer=metadata["optimizer"],
@@ -160,13 +170,15 @@ behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test
 
 
 energies = mtd.deScaleEnergy( behler.getAtomicEnergy( metadata["species"][0], 
+                                   metadata["start_species"][0],
+                                   metadata["nb_element_species"][0],
                                    metadata["n_nodes_structure"][0,:],
                                    metadata["dropout_coef"][0,:],
-                                   metadata["activation_fct"],
-                                   metadata["loss_fct"], 
-                                   metadata["optimizer"], 
-                                   metadata["kernel_constraints"], 
-                                   metadata["early_stop_metrics"],
                                    input_test_scale, 
-                                   model ))
-
+                                   model,
+                                   activation_fct=metadata["activation_fct"],
+                                   loss_fct=metadata["loss_fct"], 
+                                   optimizer=metadata["optimizer"], 
+                                   kernel_constraint=metadata["kernel_constraint"], 
+                                   early_stop_metric=metadata["early_stop_metrics"]
+                                   ))
