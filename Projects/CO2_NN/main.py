@@ -175,7 +175,7 @@ for specie in range( metadata["n_species"] ):
                                                                    metadata["nb_element_species"][specie],
                                                                    metadata["n_nodes_structure"][specie,:],
                                                                    metadata["dropout_coef"][specie,:],
-                                                                   input_test_scale, 
+                                                                   input_train_scale, 
                                                                    model,
                                                                    activation_fct=metadata["activation_fct"],
                                                                    loss_fct=metadata["loss_fct"], 
