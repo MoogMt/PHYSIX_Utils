@@ -143,3 +143,7 @@ metadata, predictions_train = mtd.deScaleEnergy( predictions_train, metadata )
 metadata, predictions_test  = mtd.deScaleEnergy( predictions_test,  metadata )
 behler.writeComparativePrediction(file_comp_train, output_train, predictions_train )
 behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
+
+
+specie=0
+energies = behler.getAtomicEnergy(metadata["species"][0], metadata["n_nodes_per_layer"][0,:],drop_out_rate, activation_fct, loss_fct, optimizer, constraints, metrics, input_, model_general )

@@ -9,32 +9,65 @@ Created on Tue Jan  7 13:32:52 2020
 import numpy as np
 import keras
 
-# Neural Net Default Parameters
-#==============================================================================
+#===================
+# BUILDING NETWORK
 default_n_species=1
 default_activation_fct = 'tanh'  # Activation function in the dense hidden layers
 default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
 default_n_hidden_layer=2                # Number of hidden layers
 default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
 default_dropout_coef=np.zeros((default_n_species,default_n_hidden_layer+1)) # Dropout for faster convergence (can be desactivated) 
-default_restore_weights=True
 default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./network_plot.png"
+#=============================================================================
+def buildSpecieSubNetwork( specie_name, n_nodes, drop_out_rate, activation_fct, constraints, out_number ):
+    subnet=keras.Sequential( name=str( specie_name+"_subnet" ) )
+    subnet.add(keras.layers.Dropout( drop_out_rate[0] ))
+    layer=1
+    for node in n_nodes:
+        if node > 0:
+            subnet.add( keras.layers.Dense( node, activation=activation_fct, kernel_constraints=constraints ) )
+            subnet.add( keras.layers.Dropout( drop_out_rate[ layer ] ) )
+            layer += 1
+        else:
+            break
+    subnet.add( keras.layers.Dense( out_number, activation="linear" ) )
+    return subnet
 #==============================================================================
+def buildAllAtomsNetworks( species, nb_species, start_species, nb_element_species, n_features, specie_subnets ):
+    all_networks = []
+    all_layers   = []
+    for specie in range( nb_species ):
+        count_ = 1
+        for atom in range( start_species[specie], start_species[specie]+nb_element_species[specie] ):
+            all_networks.append( keras.layers.Input( shape=(n_features,), name =str( species[specie] + "_input" + str(count_) ) ) )
+            all_layers.append( specie_subnets[specie]( all_networks[atom] ) )
+    return all_networks, all_layers
+#==============================================================================
+def buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, constraints ):
+    
+    # Construction subnetwork
+    #=========================================================================#
+    nb_species=len(species)
+    specie_subnets=[]
+    for specie in range( nb_species ):
+        specie_subnets=np.append(specie_subnets, buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, constraints ) )
+    #=========================================================================#
+    
+    # Building All Networks
+    #=========================================================================#
+    all_networks, all_layers = buildAllAtomsNetworks( species, nb_species, start_species, nb_element_species, n_features, specie_subnets )
+    #=========================================================================#
 
-# HANDLING OPTIONS OF NN
-#==============================================================================
-def handleNNOption( input_label, default_value, metadata):
-    if not input_label in metadata :
-        metadata[input_label] = default_value
-    return metadata
-#==============================================================================
+    # Final Addition Layer
+    #==========================================================================
+    added_layer = keras.layers.Add(name="Addition")
+    #==========================================================================
 
-#===================
-# BUILDING NETWORK
+    return keras.models.Model( inputs=all_layers ,outputs=added_layer( all_networks ) )   
 #==============================================================================
-def buildNetwork( metadata,
+def buildNetwork_( metadata,
                  # Optionnal Arguments
                   activation_fct=default_activation_fct,
                   n_nodes_per_layer=default_n_nodes_per_layer,
@@ -43,13 +76,6 @@ def buildNetwork( metadata,
                   dropout_coef=default_dropout_coef,
                   replace_inputs=default_replace_inputs
                  ):
-    
-    #Neural Net metadata
-    #=========================================================================#
-    metadata=handleNNOption("activation_fct", activation_fct, metadata, replace_inputs )
-    metadata=handleNNOption("n_nodes_structure", n_hidden_layer, metadata, replace_inputs )
-    metadata=handleNNOption("dropout_coef", dropout_coef, metadata, replace_inputs )
-    #=========================================================================#
     
     # Construction subnetwork
     #=========================================================================#
@@ -101,42 +127,24 @@ def predict(model, input_, output_):
 #=================
 # TRAINING MODEL
 #==============================================================================
-default_batch_size=10
 default_verbose_train=0
-default_saved_model=False
-default_n_epochs = 1000                  # Number of epoch for optimization?
 default_patience = 100                  # Patience for convergence
-def train(model, input_train, output_train, input_test, output_test, metadata,
-          # OPTIONNAL ARGS
-          n_epochs = default_n_epochs,
-          batch_size=default_batch_size,
-          patience = default_patience,
-          restore_weights = default_restore_weights,
-          saved_model = default_saved_model,
-          verbose_train=default_verbose_train
-          ):
-        
-    metadata=handleNNOption("n_epochs", default_n_epochs, metadata )
-    metadata=handleNNOption("verbose_train", verbose_train, metadata )
-    metadata=handleNNOption("patience", default_patience, metadata )
-    metadata=handleNNOption("batch_size", batch_size, metadata )
-    metadata=handleNNOption("restore_weights", default_restore_weights, metadata )
-    metadata=handleNNOption("saved_model", default_saved_model, metadata )
+default_saved_model=False
+default_path_saved_model="./saved_model"
+default_restore_weights=True
+def train( model, input_train, output_train, input_test, output_test, n_epochs, batch_size, patience = default_patience, restore_weights = default_restore_weights, saved_model = default_saved_model, path_saved_model = default_path_saved_model, verbose_train=default_verbose_train ):
     
     # Fit Parameters
-    callback_ = keras.callbacks.EarlyStopping(monitor='val_loss', mode='min', verbose=metadata["verbose_train"], patience=metadata["patience"] ,restore_best_weights=metadata["restore_weights"])
+    callback_ = keras.callbacks.EarlyStopping( monitor='val_loss', mode='min', verbose=verbose_train, patience=patience ,restore_best_weights=restore_weights ) # Parameters for Early Stopping
     
     # Actual Fitting
-    metadata['history'] = model.fit( input_train, output_train, validation_data=(input_test,output_test), epochs=metadata["n_epochs"],verbose=1,callbacks=[callback_])  # CHANGE EPOCHS
+    history = model.fit( input_train, output_train, validation_data=(input_test,output_test), epochs=n_epochs, verbose=verbose_train, callbacks=[callback_]) # Training pocedure
     
-    # Compute the mean error
-    mean_error = model.evaluate(input_test,output_test)[0]
-
     # Optionnal save model
-    if metadata["saved_model"] :
-        model.save(metadata["path_saved_model"])
+    if saved_model :
+        model.save( path_saved_model )
         
-    return model, mean_error, metadata
+    return model, history
 #==============================================================================
 
 
@@ -145,7 +153,7 @@ from sklearn.metrics import mean_absolute_error,mean_squared_error,r2_score
 # Computing statistical errors
 #==============================================================================
 default_rounding=4 # Numerical precision on the error
-def computeErrors( output_train, output_test, prediction_train, prediction_test, metadata,
+def computeErrors( output_train, output_test, prediction_train, prediction_test, 
                   # Optionnal args
                   rounding=default_rounding):
     
@@ -170,17 +178,9 @@ def computeErrors( output_train, output_test, prediction_train, prediction_test,
 
 # Writting Statistical errors to disk
 #==============================================================================
-default_write_from_scratch = True
-def writeStatErrors( metadata, path_out_stat, 
-                    #Optionnal
-                    write_from_scratch=default_write_from_scratch # Choose False if you want to append to file
-                    ):
-    # Choosing writing mode 
-    write_="w"
-    if not write_from_scratch:
-        write_="w+"
+def writeStatErrors( metadata, path_out_stat ):
     # Writting data
-    file_out=open(path_out_stat,write_)
+    file_out=open(path_out_stat,"w")
     file_out.write(str(metadata["MAE_train"])+" ",)
     file_out.write(str(metadata["MAE_test"])+" ")
     file_out.write(str(np.round(metadata["MAE_train"]/metadata["range_energy"]*100, metadata["rounding"] ))+ " ",)
@@ -210,30 +210,34 @@ default_path_folder_save="./"
 default_suffix_write=""
 default_optimizer = 'adam'                    # Choice of optimizers for training of the NN weights 
 default_loss_fct = 'mean_squared_error' # Loss function in the NN
-def buildTrainPredict(metadata,input_train,input_test,output_train,output_test, 
+default_metrics=['mse']
+default_plot_network = False
+default_path_plot_network = "./plot_network.png"
+default_suffix_write=""
+def buildTrainPredictWrite(input_train,input_test,output_train,output_test, species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, constraints,
+                           activation_fct = default_activation_fct,
                            loss_fct=default_loss_fct,
                            optimizer=default_optimizer,
                            path_folder_save=default_path_folder_save,
-                           suffix_write=default_suffix_write):
-    
-    metadata=handleNNOption( "optimizer", optimizer, metadata )
-    metadata=handleNNOption( "loss_fct", loss_fct, metadata )
-    metadata=handleNNOption( "path_folder_save", path_folder_save, metadata )
-    metadata=handleNNOption( "suffix_write", suffix_write, metadata )
+                           metrics=default_metrics,
+                           plot_network=default_plot_network,
+                           path_plot_network=default_path_plot_network,
+                           suffix_write=default_suffix_write
+                           ):
     
     # BUILDING
     #=============================================================================#
-    model=buildNetwork(metadata)
+    model=buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, constraints )
     # Compile the network
-    model.compile(loss=metadata["loss_fct"], optimizer=metadata["optimizer"], metrics=['mse'])
+    model.compile(loss=loss_fct, optimizer=optimizer, metrics=metrics)
     # Plot the network
-    if metadata["plot_network"]:
-        keras.utils.plot_model(model,to_file=metadata["path_plot_network"],show_shapes=True, show_layer_names=True)
+    if plot_network:
+        keras.utils.plot_model(model,to_file=path_plot_network,show_shapes=True, show_layer_names=True)
     #=============================================================================#
 
     # TRAINING NETWORK
     #=============================================================================#
-    model, mean_error, metadata = train(model,input_train,output_train,input_test,output_test,metadata)
+    model, history = train(model,input_train,output_train,input_test,output_test,)
     #=============================================================================#
 
     # PREDICTION
@@ -242,9 +246,15 @@ def buildTrainPredict(metadata,input_train,input_test,output_train,output_test,
     predictions_train = predict( model, input_train, output_train )
     predictions_test  = predict( model, input_test,  output_test  )
     # Compute Statistical errors
-    metadata_stat = computeErrors( output_train, output_test, predictions_train, predictions_test, metadata )
-    path_stat_err=str(metadata["path_folder_save"]+"StatisticalErr_"+metadata["suffix_write"])
+    metadata_stat = computeErrors( output_train, output_test, predictions_train, predictions_test )
+    path_stat_err=str( path_folder_save + "StatisticalErr_" + suffix_write)
     writeStatErrors( metadata_stat, path_stat_err)    
     #===============================================================================    
-    return model, metadata, metadata_stat, predictions_train, predictions_test
-    
+    return model, metadata_stat, predictions_train, predictions_test
+
+def getAtomicEnergy( specie, n_nodes, drop_out_rate, activation_fct, loss_fct, optimizer, constraints, metrics, input_, model_general ):
+    model_specie = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, constraints, 1 )
+    model_specie.compile(loss=loss_fct, optimizer=optimizer, metrics=metrics)
+    model_specie.set_weights ( model_general.get_layer( specie+"_subet" ).get_weights() )
+    energies = predict( model_specie, input_, )
+    return energies
