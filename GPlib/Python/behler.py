@@ -21,13 +21,13 @@ default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./network_plot.png"
 #=============================================================================
-def buildSpecieSubNetwork( specie_name, n_nodes, drop_out_rate, activation_fct, constraints, out_number ):
+def buildSpecieSubNetwork( specie_name, n_nodes, drop_out_rate, activation_fct, kernel_constraint, out_number ):
     subnet=keras.Sequential( name=str( specie_name+"_subnet" ) )
     subnet.add(keras.layers.Dropout( drop_out_rate[0] ))
     layer=1
     for node in n_nodes:
         if node > 0:
-            subnet.add( keras.layers.Dense( node, activation=activation_fct, kernel_constraints=constraints ) )
+            subnet.add( keras.layers.Dense( node, activation=activation_fct, kernel_constraint=kernel_constraint ) )
             subnet.add( keras.layers.Dropout( drop_out_rate[ layer ] ) )
             layer += 1
         else:
@@ -45,14 +45,14 @@ def buildAllAtomsNetworks( species, nb_species, start_species, nb_element_specie
             all_layers.append( specie_subnets[specie]( all_networks[atom] ) )
     return all_networks, all_layers
 #==============================================================================
-def buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, constraints ):
+def buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint ):
     
     # Construction subnetwork
     #=========================================================================#
     nb_species=len(species)
     specie_subnets=[]
     for specie in range( nb_species ):
-        specie_subnets=np.append(specie_subnets, buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, constraints ) )
+        specie_subnets=np.append(specie_subnets, buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, kernel_constraint ) )
     #=========================================================================#
     
     # Building All Networks
@@ -114,7 +114,7 @@ def buildNetwork_( metadata,
 #============
 # PREDICTION
 #==============================================================================
-def predict(model, input_, output_): 
+def predict(model, input_ ): 
     # PREDICTION
     prediction_raw=model.predict(input_)
     nb_data=np.shape(prediction_raw)[0]
@@ -214,7 +214,7 @@ default_metrics=['mse']
 default_plot_network = False
 default_path_plot_network = "./plot_network.png"
 default_suffix_write=""
-def buildTrainPredictWrite(input_train,input_test,output_train,output_test, species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, constraints,
+def buildTrainPredictWrite(input_train,input_test,output_train,output_test, species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, kernel_constraint,
                            activation_fct = default_activation_fct,
                            loss_fct=default_loss_fct,
                            optimizer=default_optimizer,
@@ -227,7 +227,7 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
     
     # BUILDING
     #=============================================================================#
-    model=buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, constraints )
+    model=buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint )
     # Compile the network
     model.compile(loss=loss_fct, optimizer=optimizer, metrics=metrics)
     # Plot the network
@@ -243,8 +243,8 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
     # PREDICTION
     #===============================================================================
     # Make the prediction
-    predictions_train = predict( model, input_train, output_train )
-    predictions_test  = predict( model, input_test,  output_test  )
+    predictions_train = predict( model, input_train )
+    predictions_test  = predict( model, input_test  )
     # Compute Statistical errors
     metadata_stat = computeErrors( output_train, output_test, predictions_train, predictions_test )
     path_stat_err=str( path_folder_save + "StatisticalErr_" + suffix_write)
@@ -255,6 +255,6 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
 def getAtomicEnergy( specie, n_nodes, drop_out_rate, activation_fct, loss_fct, optimizer, constraints, metrics, input_, model_general ):
     model_specie = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, constraints, 1 )
     model_specie.compile(loss=loss_fct, optimizer=optimizer, metrics=metrics)
-    model_specie.set_weights ( model_general.get_layer( specie+"_subet" ).get_weights() )
+    model_specie.set_weights ( model_general.get_layer( specie+"_subnet" ).get_weights() )
     energies = predict( model_specie, input_, )
     return energies

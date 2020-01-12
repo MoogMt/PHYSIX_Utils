@@ -12,6 +12,7 @@ import cpmd
 import descriptors as desc
 import numpy as np
 import behler
+import keras
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -58,13 +59,11 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 # Creating training set
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-   
-
-metadata['train_set_size'] = 2000
+metadata['train_set_size'] = 1000
 metadata['total_size_set'] = len(energies)
 metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
-metadata["test_set_size"] = 1000
+metadata["test_set_size"] = 200
 metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
@@ -105,12 +104,14 @@ metadata["patience"] = 100                  # Patience for convergence
 metadata["restore_weights"] = True
 metadata["batch_size"] = 500
 metadata["verbose_train"] = 1
+metadata["early_stop_metrics"]=['mse']
 
 # Subnetorks structure
 metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
 metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
 metadata["n_hidden_layer"] = 3               # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
+metadata["kernel_constraints"] = keras.constraints.maxnorm(2)
 
 # Dropout coefficients
 metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
@@ -145,5 +146,15 @@ behler.writeComparativePrediction(file_comp_train, output_train, predictions_tra
 behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
 
 
-specie=0
-energies = behler.getAtomicEnergy(metadata["species"][0], metadata["n_nodes_per_layer"][0,:],drop_out_rate, activation_fct, loss_fct, optimizer, constraints, metrics, input_, model_general )
+
+energies = mtd.deScaleEnergy( behler.getAtomicEnergy( metadata["species"][0], 
+                                   metadata["n_nodes_structure"][0,:],
+                                   metadata["dropout_coef"][0,:],
+                                   metadata["activation_fct"],
+                                   metadata["loss_fct"], 
+                                   metadata["optimizer"], 
+                                   metadata["kernel_constraints"], 
+                                   metadata["early_stop_metrics"],
+                                   input_test_scale, 
+                                   model ))
+
