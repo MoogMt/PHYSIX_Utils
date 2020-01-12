@@ -20,9 +20,10 @@ default_dropout_coef=np.zeros((default_n_species,default_n_hidden_layer+1)) # Dr
 default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./network_plot.png"
+default_kernel_constraint=None
 #=============================================================================
-def buildSpecieSubNetwork( specie_name, n_nodes, drop_out_rate, activation_fct, kernel_constraint, out_number ):
-    subnet=keras.Sequential( name=str( specie_name+"_subnet" ) )
+def buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, out_number ):
+    subnet=keras.Sequential( name=str( specie+"_subnet" ) )
     subnet.add(keras.layers.Dropout( drop_out_rate[0] ))
     layer=1
     for node in n_nodes:
@@ -36,13 +37,13 @@ def buildSpecieSubNetwork( specie_name, n_nodes, drop_out_rate, activation_fct, 
     return subnet
 #==============================================================================
 def buildAllAtomsNetworks( species, nb_species, start_species, nb_element_species, n_features, specie_subnets ):
-    all_networks = []
     all_layers   = []
+    all_networks = []
     for specie in range( nb_species ):
         count_ = 1
         for atom in range( start_species[specie], start_species[specie]+nb_element_species[specie] ):
-            all_networks.append( keras.layers.Input( shape=(n_features,), name =str( species[specie] + "_input" + str(count_) ) ) )
-            all_layers.append( specie_subnets[specie]( all_networks[atom] ) )
+            all_layers.append( keras.layers.Input( shape=(n_features,), name =str( species[specie] + "_input" + str(count_) ) ) )
+            all_networks.append( specie_subnets[specie]( all_layers[atom] ) )
             count_ += 1
     return all_networks, all_layers
 #==============================================================================
@@ -52,14 +53,12 @@ def buildNetwork( species, nb_species, n_features, start_species, nb_element_spe
     #=========================================================================#
     specie_subnets=[]
     for specie in range( nb_species ):
-        specie_subnets=np.append(specie_subnets, buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, kernel_constraint, 1 ) )
+        specie_subnets.append( buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, kernel_constraint, 1 ) )
     #=========================================================================#
     
     # Building All Networks
     #=========================================================================#
     all_networks, all_layers = buildAllAtomsNetworks( species, nb_species, start_species, nb_element_species, n_features, specie_subnets )
-    print("network_length=",len(all_networks))
-    print("layer length=",len(all_layers))
     #=========================================================================#
 
     # Final Addition Layer
@@ -130,11 +129,13 @@ def predict(model, input_ ):
 # TRAINING MODEL
 #==============================================================================
 default_verbose_train=0
+default_n_epochs=1000
 default_patience = 100                  # Patience for convergence
 default_saved_model=False
 default_path_saved_model="./saved_model"
+default_batch_size=None
 default_restore_weights=True
-def train( model, input_train, output_train, input_test, output_test, n_epochs, batch_size, patience = default_patience, restore_weights = default_restore_weights, saved_model = default_saved_model, path_saved_model = default_path_saved_model, verbose_train=default_verbose_train ):
+def train( model, input_train, output_train, input_test, output_test, n_epochs, batch_size=default_batch_size, patience = default_patience, restore_weights = default_restore_weights, saved_model = default_saved_model, path_saved_model = default_path_saved_model, verbose_train=default_verbose_train ):
     
     # Fit Parameters
     callback_ = keras.callbacks.EarlyStopping( monitor='val_loss', mode='min', verbose=verbose_train, patience=patience ,restore_best_weights=restore_weights ) # Parameters for Early Stopping
@@ -216,7 +217,10 @@ default_early_stop_metric=['mse']
 default_plot_network = False
 default_path_plot_network = "./plot_network.png"
 default_suffix_write=""
-def buildTrainPredictWrite(input_train,input_test,output_train,output_test, species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, kernel_constraint,
+def buildTrainPredictWrite(input_train,input_test,output_train,output_test, species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, 
+                           n_epochs=default_n_epochs,
+                           batch_size=default_batch_size,
+                           kernel_constraint=default_kernel_constraint,
                            activation_fct = default_activation_fct,
                            loss_fct=default_loss_fct,
                            optimizer=default_optimizer,
@@ -239,7 +243,7 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test, spec
 
     # TRAINING NETWORK
     #=============================================================================#
-    model, history = train(model,input_train,output_train,input_test,output_test,)
+    model, history = train(model,input_train,output_train,input_test,output_test,n_epochs,batch_size)
     #=============================================================================#
 
     # PREDICTION

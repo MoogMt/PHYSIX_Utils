@@ -11,8 +11,8 @@ import filexyz as xyz
 import cpmd 
 import descriptors as desc
 import numpy as np
-import behler
 import keras
+
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -134,6 +134,8 @@ metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])    
                              "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
                              "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
 
+
+import behler
 
 model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPredictWrite( input_train,input_test,output_train,output_test, metadata["species"], metadata["n_species"], metadata["n_features"], metadata["start_species"], metadata["nb_element_species"], metadata["n_nodes_structure"], metadata["dropout_coef"], metadata["kernel_constraint"],
                            activation_fct = metadata["activation_fct"],
