@@ -69,7 +69,7 @@ def buildNetwork( species, nb_species, n_features, start_species, nb_element_spe
 
     return keras.models.Model( inputs=all_layers, outputs=final_layer( all_networks ) )   
 #==============================================================================
-def buildNetwork_( metadata,
+def buildNetwork_OLD( metadata,
                  # Optionnal Arguments
                   activation_fct=default_activation_fct,
                   n_nodes_per_layer=default_n_nodes_per_layer,
@@ -274,11 +274,23 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test,
     return model, metadata_stat, predictions_train, predictions_test
 
 def getAtomicEnergy( specie, start_specie, nb_element_specie, n_nodes, drop_out_rate,  input_, model_general, activation_fct=default_activation_fct, loss_fct=default_loss_fct, optimizer=default_optimizer, kernel_constraint=default_kernel_constraint, early_stop_metric=default_early_stop_metric ):
-    model_specie = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, 1 )
+    nb_data=np.shape(input_)[1]
+    n_features=np.shape(input_)[2]
+    # Buildint structure
+    structure_network_specie = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, 1 )
+    # Define Inputs
+    input_layers_specie = keras.layers.Input( shape=(n_features,), name =str( specie + "_input_energy" ) ) 
+    # Create Network
+    network_specie =  structure_network_specie( input_layers_specie ) 
+    # Creating model
+    model_specie=keras.models.Model( inputs=input_layers_specie, outputs=structure_network_specie( network_specie ) )   
+    # Compiling model 
     model_specie.compile(loss=loss_fct, optimizer=optimizer, metrics=default_early_stop_metric)
+    # Getting weights from previous model
     model_specie.set_weights ( model_general.get_layer( specie+"_subnet" ).get_weights() )
-    energies=np.zeros((len(input_),nb_element_specie))
-    for step in range(len(input_)):
+    # Prediction
+    energies=np.zeros((nb_data,nb_element_specie))
+    for step in range( nb_data ) :
         for atom in range(start_specie,start_specie+nb_element_specie):
             energies[step,atom]=predict( model_specie, input_[atom][step,:] ) 
     return  energies.reshape(nb_element_specie*len(input_))
