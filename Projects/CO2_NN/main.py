@@ -113,10 +113,10 @@ metadata["n_hidden_layer"] = 3               # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
 metadata["kernel_constraint"] = None
 
-# Dropout coefficients
+# Dropout rates
 metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
-metadata["dropout_coef"][0,:]=0.2
-metadata["dropout_coef"][1:,:]=0.5
+metadata["dropout_coef"][0,:]=0.2    # Drop out rate between initial descriptor and specie sub_network
+metadata["dropout_coef"][1:,:]=0.5   # Drop out rate inside the nodes of the specie sub_network
     
 # Plot network
 metadata["plot_network"]=True
@@ -167,6 +167,46 @@ metadata, predictions_test  = mtd.deScaleEnergy( predictions_test,  metadata )
 behler.writeComparativePrediction(file_comp_train, output_train, predictions_train )
 behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
 
+
+import matplotlib.pyplot as plt
+
+n_figure=1
+
+plt.figure(n_figure)
+plt.plot(output_train, predictions_train,"r.")
+plt.plot(output_test, predictions_test, "b.")
+plt.show()
+n_figure +=1
+
+
+plt.figure(n_figure)
+plt.plot(output_train,"r-")
+plt.plot(output_test, "b-")
+plt.show()
+n_figure +=1
+
+plt.figure(n_figure)
+plt.plot(output_train,"r-")
+plt.plot(predictions_train, "b-")
+plt.show()
+n_figure +=1
+
+plt.figure(n_figure)
+plt.plot( (output_train-predictions_train)/96*13.6,"r-")
+plt.show()
+n_figure +=1
+
+plt.figure(n_figure)
+plt.plot( (output_test-predictions_test)/96*13.6,"r-")
+plt.show()
+n_figure +=1
+
+plt.figure(n_figure)
+plt.plot(output_test,"r-")
+plt.plot(predictions_test, "b-")
+plt.show()
+n_figure +=1
+
 energies_train = []
 energies_test  = []
 for specie in range( metadata["n_species"] ):
@@ -197,15 +237,16 @@ for specie in range( metadata["n_species"] ):
                                                                    early_stop_metric=metadata["early_stop_metric"]),
                                                                     metadata )[1])
 
-import matplotlib.pyplot as plt
 
 nb_bins=100
 plt.figure(1)
 for specie in range(metadata["n_species"]):
     plt.hist(energies_train[specie], bins=nb_bins)
 plt.show()
+n_figure+=1 
 
 plt.figure(2)
 for specie in range(metadata["n_species"]):
     plt.hist(energies_test[specie], bins=nb_bins)
 plt.show()
+n_figure+=1
