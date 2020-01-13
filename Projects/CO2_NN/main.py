@@ -38,8 +38,9 @@ nb_step=cpmd.getNbLineEnergies(file_energies)
 traj = xyz.readPbcCubic( file_traj, volume )
 metadata['periodic'] = True
 # Reading ENERGIES file
-energies=cpmd.readPotEnergy( file_energies )
-comput_time=cpmd.cpmd_scf_comptime( file_energies)
+data_out     = cpmd.readEnergiesFile( file_energies )
+energies     = cpmd.extractPotentialEnergy(     data_out )
+comput_time  = cpmd.extractSCFcomputationTime(  data_out )
 # Homogenizing with stride
 stride_energies=5 # Improve by reading the stride in the input file and making adjustements.
 energies    = energies    [ 0: len(energies):stride_energies ]
@@ -51,6 +52,7 @@ metadata['species'] = mtd.getSpecies(traj[0])
 metadata['n_species'] = len(metadata['species'])
 #traj=mtd.sortAtomsSpecie(traj) # Use if you need to sort the atoms per type, current implementation is *very* slow
 metadata["species_sorted"]=True
+metadata['total_size_set'] = len(energies)
 metadata=mtd.getStartSpecies(traj,metadata)
 metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
@@ -58,12 +60,16 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 # CREATING DESCRIPTORS
 #=============================================================================#
 # Creating training set
-metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 1000
-metadata['total_size_set'] = len(energies)
-metadata, input_train_raw, output_train_raw = mtd.choseTrainDataRandom( traj, energies, )
+n_jobs = 8 # Number of parallel cores to use (CPU)
+fraction_choice=0.4
+nb_bins = 10
+comp_time_lim = 10
+index_train = mtd.samplingExtremitiesFraction( fraction_choice, energies, comput_time, nb_bins, comp_time_lim  )
+train_set_size = len(index_train)
+input_train_raw  = mtd.extractTrajectory( traj, index_train )
+output_train_raw = energies[ index_train ]
 # Creating testing set
-metadata["test_set_size"] = 200
+test_set_size = 200
 metadata, input_test_raw, output_test_raw = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread

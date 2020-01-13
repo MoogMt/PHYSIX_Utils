@@ -32,7 +32,7 @@ def readPotEnergy(file_path):
 
 def readEnergiesFile(file_path):
     nb_point=getNbLineEnergies(file_path)
-    data=np.zeros(nb_point,7)
+    data=np.zeros((nb_point,7))
     f=open(file_path,"r")
     for i in range (nb_point):
         data[i,:] = f.readline().split()[1:] # Read all data except first column (time)

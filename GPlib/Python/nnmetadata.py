@@ -48,9 +48,9 @@ def samplingExtremitiesFraction( fraction, energies, comp_time, nb_bins, comp_ti
         comp_time_threshold = 0
     nb_point=len(energies)
     # Chosen point will be 1, others 0
-    choice_points=np.zeros(( nb_point ),dtype=int)    
+    choice_points=np.zeros( nb_point ,dtype=int)    
     # Keeping points that are above a given computational threshold
-    choice_points[ comp_time > comp_time_threshold  ] = 1
+    choice_points[ np.nonzero( comp_time[ comp_time > comp_time_threshold ] )   ] = 1
     # Computing bins
     min_energy=energies.min()
     delta_energy=(energies.max()-min_energy)/nb_bins
@@ -61,7 +61,14 @@ def samplingExtremitiesFraction( fraction, energies, comp_time, nb_bins, comp_ti
     for point in range( nb_point ):
             if np.random.rand() > 1 - fraction:
                 choice_points[point] += 1
-    return choice_points[ choice_points > 0 ]
+    return np.nonzero(choice_points[ choice_points > 0 ])[0]
+#------------------------------------------------------------------------------
+def extractTrajectory( traj, chosen_index ):
+    nb_train_size=len(chosen_index)
+    structures = np.empty( nb_train_size, dtype=ase.atoms.Atoms )
+    for i in range( nb_train_size ):
+        structures[i] = traj[chosen_index[i]]
+    return structures
 #------------------------------------------------------------------------------
 def choseTrainDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['train_index'] = chosen_index
