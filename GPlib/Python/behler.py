@@ -92,14 +92,18 @@ def predict(model, input_ ):
 #==============================================================================
 default_verbose_train=1
 default_n_epochs=1000
-default_patience = 100                  # Patience for convergence
+default_patience = 20                  # Patience for convergence
 default_saved_model=False
 default_path_saved_model="./saved_model"
 default_batch_size=None
 default_restore_weights=True
-def train( model, input_train, output_train, input_test, output_test, 
-          n_epochs=default_n_epochs, 
-          batch_size=default_batch_size, 
+def train( model, 
+          input_train, 
+          output_train, 
+          input_test, 
+          output_test, 
+          n_epochs, 
+          batch_size, 
           patience = default_patience, 
           restore_weights = default_restore_weights, 
           saved_model = default_saved_model, 
@@ -186,7 +190,10 @@ default_early_stop_metric=['mse']
 default_plot_network = False
 default_path_plot_network = "./plot_network.png"
 default_suffix_write=""
-def buildTrainPredictWrite(input_train,input_test,output_train,output_test, 
+def buildTrainPredictWrite(input_train,
+                           input_test,
+                           output_train,
+                           output_test, 
                            species, 
                            nb_species, 
                            n_features, 
@@ -194,9 +201,10 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test,
                            nb_element_species, 
                            nodes_structure, 
                            drop_out_rate, 
-                           n_epochs=default_n_epochs,
+                           n_epochs,
                            batch_size=default_batch_size,
                            kernel_constraint=default_kernel_constraint,
+                           patience=default_patience,
                            activation_fct = default_activation_fct,
                            loss_fct=default_loss_fct,
                            optimizer=default_optimizer,
@@ -219,7 +227,7 @@ def buildTrainPredictWrite(input_train,input_test,output_train,output_test,
 
     # TRAINING NETWORK
     #=============================================================================#
-    model, history = train(model,input_train,output_train,input_test,output_test,n_epochs,batch_size,verbose_train=1)
+    model, history = train(model, input_train, output_train, input_test, output_test, n_epochs, batch_size, patience=patience, verbose_train=1)
     #=============================================================================#
 
     # PREDICTION
@@ -253,46 +261,3 @@ def getAtomicEnergy( specie, start_specie, nb_element_specie, n_nodes, drop_out_
     # Prediction
     return predict( model_specie, input_reshape ) 
 
-
-#==============================================================================
-def buildNetwork_OLD( metadata,
-                 # Optionnal Arguments
-                  activation_fct=default_activation_fct,
-                  n_nodes_per_layer=default_n_nodes_per_layer,
-                  n_hidden_layer=default_n_hidden_layer,
-                  n_nodes_structure=default_n_nodes_structure,
-                  dropout_coef=default_dropout_coef,
-                  replace_inputs=default_replace_inputs
-                 ):
-    
-    # Construction subnetwork
-    #=========================================================================#
-    specie_subnets=[]
-    for specie in range(metadata["n_species"]):
-        specie_subnets=np.append(specie_subnets,keras.Sequential(name=str(metadata["species"][specie]+"_subnet")))
-        specie_subnets[specie].add(keras.layers.Dropout(metadata["dropout_coef"][specie,0]))
-        layer=1
-        for n_node in metadata["n_nodes_structure"][specie,:] :
-            if n_node > 0:
-                specie_subnets[specie].add( keras.layers.Dense(n_node,activation=metadata["activation_fct"], kernel_constraint=keras.constraints.maxnorm(3) ) )
-                specie_subnets[specie].add( keras.layers.Dropout(metadata["dropout_coef"][specie,layer]) )
-                layer += 1
-            else:
-                break
-        specie_subnets[specie].add(keras.layers.Dense(1,activation="linear"))
-    #=========================================================================#
-    
-    # Linking subnets
-    #=========================================================================#
-    all_input_layers=[]
-    all_subnets=[]
-    for specie in range(metadata["n_species"]):
-        count_=1
-        for atom in range(metadata["start_species"][specie],metadata["start_species"][specie]+metadata["nb_element_species"][specie]):
-            all_input_layers.append( keras.layers.Input(shape=(metadata["n_features"],),name=str(metadata["species"][specie]+"_input"+str(count_) )) )            
-            all_subnets.append( specie_subnets[specie](all_input_layers[atom]) )
-            count_+=1
-    added_layer = keras.layers.Add(name="Addition")
-    #=========================================================================#
-
-    return keras.models.Model(inputs=all_input_layers ,outputs=added_layer(all_subnets) )   

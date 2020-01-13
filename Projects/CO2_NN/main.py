@@ -69,8 +69,9 @@ train_set_size = len(index_train)
 input_train_raw  = mtd.extractTrajectory( traj, index_train )
 output_train_raw = energies[ index_train ]
 # Creating testing set
+replace_elements=True
 test_set_size = 1000
-input_test_raw, output_test_raw = mtd.choseDataRandomExclusion( traj, energies, test_set_size, index_train )
+input_test_raw, output_test_raw = mtd.choseDataRandomExclusion( traj, energies, test_set_size, index_train, replace_elements )
 #==============================================================================
 
 # CREATING DESCRIPTORS
@@ -93,7 +94,7 @@ input_test, n_features = desc.createDescriptorsSOAP( input_test_raw, species, si
 output_train_scale, min_output_train, range_output_train = mtd.scaleData( output_train_raw )
 output_test_scale,  min_output_test,  range_output_test  = mtd.scaleData( output_test_raw )
 # Scaling Input
-scalers = mtd.createScaler( input_train, species, start_species, nb_element_species, n_features ) # Create scaler on training set
+scalers = mtd.createScaler( input_train, species, start_species, nb_element_species, train_set_size, n_features ) # Create scaler on training set
 input_train_scale = mtd.applyScale( scalers, input_train, species, start_species, nb_element_species, n_features )
 input_test_scale  = mtd.applyScale( scalers, input_test,  species, start_species, nb_element_species, n_features )
 #=============================================================================#
@@ -108,7 +109,7 @@ optimizer = 'Adam'                    # Choice of optimizers for training of the
 n_epochs = 1000                  # Number of epoch for optimization?
 patience = 20                  # Patience for convergence
 restore_weights = True
-batch_size = 300
+batch_size = None
 verbose_train = 1
 early_stop_metric=['mse']
 
@@ -120,7 +121,7 @@ n_nodes_structure=np.ones((n_species,n_hidden_layer),dtype=int)*n_nodes_per_laye
 kernel_constraint = None
 
 # Dropout rates
-dropout_rate=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
+dropout_rate=np.zeros(( n_species, n_hidden_layer+1)) # Dropout for faster convergence (can be desactivated) 
 dropout_rate[0,:]=0.2    # Drop out rate between initial descriptor and specie sub_network
 dropout_rate[1:,:]=0.5   # Drop out rate inside the nodes of the specie sub_network
     
@@ -146,7 +147,8 @@ model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPre
                                                                                           dropout_rate, 
                                                                                           n_epochs,
                                                                                           batch_size,
-                                                                                          kernel_constraint,
+                                                                                          kernel_constraint=kernel_constraint,
+                                                                                          patience = patience,
                                                                                           activation_fct = activation_fct,
                                                                                           loss_fct=loss_fct,
                                                                                           optimizer=optimizer,

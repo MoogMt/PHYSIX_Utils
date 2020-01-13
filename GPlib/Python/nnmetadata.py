@@ -70,13 +70,20 @@ def extractTrajectory( traj, chosen_index ):
         structures[i] = traj[chosen_index[i]]
     return structures
 #------------------------------------------------------------------------------
-def choseDataRandomExclusion( traj, energies, test_size, train_index ) :
-    chosen_index=getIndexExcluding( train_index, len(energies) )
+def choseDataRandomExclusion( traj, energies, test_size, index_exclude, replace ) :
+    chosen_index=[]
+    total_size=len(energies)
+    if not replace:
+        chosen_index = getIndexExcluding( index_exclude, total_size )
+        chosen_index = chosen_index[ np.random.choice( chosen_index, size=test_size, replace=False ) ]
+    else:
+        chosen_index = np.random.choice( total_size , size=test_size, replace=True )
     energies=energies[chosen_index]
     structures = np.empty( test_size, dtype=ase.atoms.Atoms )
-    for i in range( test_size ) :
-        structures[i] = traj[ chosen_index[i] ]
+    for i in range( len(chosen_index) ) :
+         structures[i] = traj[ chosen_index[i] ]
     return structures, energies
+        
 #==============================================================================
 
 # Principal Component Analysis stuff
