@@ -222,7 +222,7 @@ n_figure +=1
 energies_train = []
 energies_test  = []
 for specie in range( n_species ):
-    energies_train.append(mtd.deScaleEnergy( behler.getAtomicEnergy( species[specie], 
+    energies_train.append(mtd.deScaleData( behler.getAtomicEnergy( species[specie], 
                                                                      start_species[specie],
                                                                      nb_element_species[specie],
                                                                      n_nodes_structure[specie,:],
@@ -235,7 +235,7 @@ for specie in range( n_species ):
                                                                      kernel_constraint=kernel_constraint, 
                                                                      early_stop_metric=early_stop_metric),
                                                                      min_output_train, range_output_train ) )
-    energies_test.append(mtd.deScaleEnergy( behler.getAtomicEnergy( species[specie], 
+    energies_test.append(mtd.deScaleData( behler.getAtomicEnergy( species[specie], 
                                                                     start_species[specie],
                                                                     nb_element_species[specie],
                                                                     n_nodes_structure[specie,:],
@@ -253,12 +253,14 @@ for specie in range( n_species ):
 nb_bins=100
 plt.figure(1)
 for specie in range( n_species ):
+    plt.xlabel("Energy (Ry)")
     plt.hist(energies_train[specie], bins=nb_bins)
 plt.show()
 n_figure+=1 
 
 plt.figure(2)
 for specie in range( n_species ):
+    plt.ylabel("Energy (Ry)")
     plt.hist(energies_test[specie], bins=nb_bins)
 plt.show()
 n_figure+=1
