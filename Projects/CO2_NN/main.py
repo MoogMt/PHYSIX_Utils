@@ -59,16 +59,16 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 #=============================================================================#
 # Creating training set
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
-metadata['train_set_size'] = 5000
+metadata['train_set_size'] = 1000
 metadata['total_size_set'] = len(energies)
-metadata, input_train_raw, output_train = mtd.choseTrainDataRandom(metadata,traj,energies)
+metadata, input_train_raw, output_train_raw = mtd.choseTrainDataRandom(metadata,traj,energies)
 # Creating testing set
-metadata["test_set_size"] = 1000
-metadata, input_test_raw, output_test = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
+metadata["test_set_size"] = 200
+metadata, input_test_raw, output_test_raw = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
 # Build descriptors from positions (train set only)
-sigma_  = 0.6  # 3*sigma ~ 2.7A relatively large spread
-cutoff_ = 4.5 # cut_off SOAP, 
-nmax_   = 2
+sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
+cutoff_ = 4.0 # cut_off SOAP, 
+nmax_   = 3
 lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
@@ -80,8 +80,8 @@ metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_
 # Scaling 
 #------------------------------------------------------------------------------
 # Scaling Energy
-metadata, output_train_scale = mtd.scaleEnergy( output_train, metadata )
-metadata, output_test_scale  = mtd.scaleEnergy( output_test,  metadata )
+metadata, output_train_scale = mtd.scaleEnergy( output_train_raw, metadata )
+metadata, output_test_scale  = mtd.scaleEnergy( output_test_raw,  metadata )
 # Scaling Input
 scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
 input_train_scale = mtd.applyScale( scalers, input_train, metadata )
@@ -100,18 +100,18 @@ input_test_scale  = mtd.applyScale( scalers, input_test,  metadata )
 metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
 metadata["optimizer"] = 'Adam'                    # Choice of optimizers for training of the NN weights 
 metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
-metadata["patience"] = 50                  # Patience for convergence
+metadata["patience"] = 20                  # Patience for convergence
 metadata["restore_weights"] = True
-metadata["batch_size"] = 1000
+metadata["batch_size"] = 300
 metadata["verbose_train"] = 1
 metadata["early_stop_metric"]=['mse']
 
 # Subnetorks structure
-metadata["activation_fct"] = 'tanh'  # Activation function in the dense hidden layers
-metadata["n_nodes_per_layer"] = 30           # Number of nodes per hidden layer
+metadata["activation_fct"] = 'relu'  # Activation function in the dense hidden layers
+metadata["n_nodes_per_layer"] = metadata["n_features"]           # Number of nodes per hidden layer
 metadata["n_hidden_layer"] = 3               # Number of hidden layers
 metadata["n_nodes_structure"]=np.ones((metadata["n_species"],metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
-metadata["kernel_constraint"] = keras.constraints.maxnorm(2)
+metadata["kernel_constraint"] = None
 
 # Dropout coefficients
 metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
@@ -181,7 +181,7 @@ for specie in range( metadata["n_species"] ):
                                                                    loss_fct=metadata["loss_fct"], 
                                                                    optimizer=metadata["optimizer"], 
                                                                    kernel_constraint=metadata["kernel_constraint"], 
-                                                                   early_stop_metric=metadata["early_stop_metrics"]),
+                                                                   early_stop_metric=metadata["early_stop_metric"]),
                                                                     metadata )[1])
     energies_test.append(mtd.deScaleEnergy( behler.getAtomicEnergy( metadata["species"][specie], 
                                                                    metadata["start_species"][specie],
@@ -194,7 +194,7 @@ for specie in range( metadata["n_species"] ):
                                                                    loss_fct=metadata["loss_fct"], 
                                                                    optimizer=metadata["optimizer"], 
                                                                    kernel_constraint=metadata["kernel_constraint"], 
-                                                                   early_stop_metric=metadata["early_stop_metrics"]),
+                                                                   early_stop_metric=metadata["early_stop_metric"]),
                                                                     metadata )[1])
 
 import matplotlib.pyplot as plt
