@@ -39,17 +39,29 @@ def getIndexExcluding( index_excluding, size_total ):
 def getDataFromIndex( input_, output_, indexs_chosen ):
     return input_[ indexs_chosen ], output_[ indexs_chosen ]
 #------------------------------------------------------------------------------
-def makeEquilibratedSampling( energies, comp_time, nb_bins, comp_time_threshold ):
+def samplingExtremitiesFraction( fraction, energies, comp_time, nb_bins, comp_time_threshold ):
+    if fraction > 1 :
+        fraction = 1
+    elif fraction < 0:
+        fraction = 0
+    if comp_time_threshold < 0:
+        comp_time_threshold = 0
+    nb_point=len(energies)
+    # Chosen point will be 1, others 0
+    choice_points=np.zeros(( nb_point ),dtype=int)    
+    # Keeping points that are above a given computational threshold
+    choice_points[ comp_time > comp_time_threshold  ] = 1
+    # Computing bins
     min_energy=energies.min()
     delta_energy=(energies.max()-min_energy)/nb_bins
-    nb_point=len(energies)
-    bins_energy=np.zeros((nb_point),dtype=int)
-    comp_bin = np.zeros((2),dtype=int)
+    point_bins=np.array(np.round((energies-min_energy)/delta_energy,0),int)
+    # Keeping the first and last bins 
+    choice_points[ point_bins == 0 ] = 1
+    choice_points[ point_bins == nb_bins-1 ] = 1 
     for point in range( nb_point ):
-        bins_energy[bin] += int(  (energies[point]-min_energy)/delta_energy )
-        if comp_time[point] > comp_time_threshold:
-            comp_bin[point] + 1
-    return bins
+            if np.random.rand() > 1 - fraction:
+                choice_points[point] += 1
+    return choice_points[ choice_points > 0 ]
 #------------------------------------------------------------------------------
 def choseTrainDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['train_index'] = chosen_index
