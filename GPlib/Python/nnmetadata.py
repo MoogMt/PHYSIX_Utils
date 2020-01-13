@@ -94,24 +94,43 @@ def choseTestDataRandomExclusion(metadata,structures,energies):
 def makePCA( n_components ):
     return PCA(n_components=n_components)
 #------------------------------------------------------------------------------
+default_write_var = False
 default_path_pcavar = "./"
-def pcaVariance( input_, path_pcavar=default_path_pcavar ):
+def pcaVariance( input_, write_var=default_write_var,  path_pcavar=default_path_pcavar ):
     nb_point=len(input_[:])*len(input_[0])
     pca=PCA().fit( np.array(input_[:]).reshape(nb_point,np.shape(input_[0])[1]) )
+    if write_var :
     var=np.cumsum(pca.explained_variance_ratio_)
-    file_out=open(path_pcavar,"w")
-    for i in range( np.shape(var)[0] ):
-        file_out.write( str(i)+" "+str(var[i])+"\n" )
-    file_out.close()
+        file_out=open(path_pcavar,"w")
+        for i in range( np.shape(var)[0] ):
+            file_out.write( str(i)+" "+str(var[i])+"\n" )
+        file_out.close()
     return var
 #------------------------------------------------------------------------------
-def pcaSelectBestParams(descriptors,meta):
+default_verbose_pca = False
+def pcaSelectBestParams( input_, n_pca, species, start_species, nb_element_species, n_features, verbose=default_verbose_pca ):
     pca=[]
-    for specie in range(len(metadata["species"])):
-        pca.append(PCA(n_components=metadata["pca_n"]).fit(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])))
-        if metadata['verbose']: 
-            print("Precision of new features ",metadata["species"][specie]," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
+    for specie in range(len(species) ):
+        pca.append( PCA( n_components=n_pca ).
+                   fit( input_[:,start_species[specie]:start_species[specie]+nb_element_species[specie],:].
+                   reshape( input_[ :, start_species[specie]:start_species[specie]+nb_element_species[specie], : ].
+                   shape[0]*nb_element_species[specie], n_features ) ) )
+        if verbose: 
+            print("Precision of new features ",specie," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
     return pca
+def pcaNFromVar( input_, fraction, species, start_species, nb_element_species, n_features, verbose=default_verbose_pca ):
+    n_pca=np.zeros(2,dtype=Int)
+    for specie in range(len(species) ):
+        pca=PCA( n_components=n_pca ).
+                   fit( input_[:,start_species[specie]:start_species[specie]+nb_element_species[specie],:].
+                   reshape( input_[ :, start_species[specie]:start_species[specie]+nb_element_species[specie], : ].
+                   shape[0]*nb_element_species[specie], n_features ) ) )
+         variance=np.cumsum(pca[specie].explained_variance_ratio_)[-1]
+         for i in range( len(variance) ):
+             if variance[i] > fraction:
+                 n_pca[specie] = i
+                 break
+    return n_pca
 #==============================================================================
 
 # Scalers - to be generalized
