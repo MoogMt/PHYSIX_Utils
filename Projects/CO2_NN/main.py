@@ -11,8 +11,6 @@ import filexyz as xyz
 import cpmd 
 import descriptors as desc
 import numpy as np
-import keras
-
 
 data_base  = "/media/moogmt/Elements/CO2/"
 
@@ -80,8 +78,8 @@ metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_
 # Scaling 
 #------------------------------------------------------------------------------
 # Scaling Energy
-metadata, output_train_scale = mtd.scaleEnergy( output_train_raw, metadata )
-metadata, output_test_scale  = mtd.scaleEnergy( output_test_raw,  metadata )
+output_train_scale, min_output_train, range_output_train = mtd.scaleEnergy( output_train_raw, metadata )
+output_test_scale,  min_output_test,  range_outputn_test = mtd.scaleEnergy( output_test_raw,  metadata )
 # Scaling Input
 scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
 input_train_scale = mtd.applyScale( scalers, input_train, metadata )

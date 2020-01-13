@@ -12,23 +12,28 @@ import os
 import ase
 import numpy as np
 import periodicTable as pT
+import cpmd
+import filexyz
 
 from sklearn.preprocessing import StandardScaler  
 from sklearn.decomposition import PCA
 
+
+#==============================================================================
 def handleOptionArg( input_label, default_value, metadata ):
     if not input_label in metadata :
         metadata[input_label] = default_value
     return metadata
+def handleAllOptionaArg( input_label_list, default_values_list, metadata ):
+    for i in range( len(input_label_list) ):
+        metadata = handleOptionArg( input_label_list[i], default_values_list[i], metadata )
+    return metadata
+#==============================================================================
 
-def writeDataToDisk( data, path_to_file ):
-    file_out=open(path_to_file,"w")
-    for i in range( np.shape(data)[1] ):
-        print("loutre")
-    file_out.close()
-    return True
+def getIndexExcluding( index_excluding, size_total ):
+    return np.array(list(filter(lambda x : x not in index_excluding, np.arange(size_total))))
 
-# 
+#============================================================================== 
 def choseTrainDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['train_index'] = chosen_index
     if metadata['train_set_size'] == 0 :    
@@ -43,9 +48,8 @@ def choseTrainDataByIndex(metadata,structures,energies,chosen_index):
         for i in range(metadata['train_set_size']):
             energies_train[i] = energies[chosen_index[i]]          
             structures_train[i] = structures[chosen_index[i]]
-    return metadata, structures_train, energies_train
-
-# 
+    return metadata, structures_train, energies_train 
+#------------------------------------------------------------------------------
 def choseTrainDataRandom(metadata,structures,energies):    
     if metadata['train_set_size'] == 0 :
         if metadata['train_fraction'] < 1:
@@ -56,22 +60,7 @@ def choseTrainDataRandom(metadata,structures,energies):
         metadata['train_set_size'] = int(metadata['train_fraction']*metadata['total_size_set'])
     chosen_index = np.random.choice(metadata['total_size_set'],size=metadata['train_set_size'],replace=metadata['replace'])
     return choseTrainDataByIndex(metadata,structures,energies,chosen_index)
-
-def makePCA( n_components ):
-    return PCA(n_components=n_components)
-
-default_path_pcavar = "./"
-def pcaVariance( input_, path_pcavar=default_path_pcavar ):
-    nb_point=len(input_[:])*len(input_[0])
-    pca=PCA().fit( np.array(input_[:]).reshape(nb_point,np.shape(input_[0])[1]) )
-    var=np.cumsum(pca.explained_variance_ratio_)
-    file_out=open(path_pcavar,"w")
-    for i in range( np.shape(var)[0] ):
-        file_out.write( str(i)+" "+str(var[i])+"\n" )
-    file_out.close()
-    return var
-
-#  THIS SHOULD BE IMPROVED **SOMEWHAT**
+#------------------------------------------------------------------------------
 def choseTestDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['test_index'] = chosen_index
     if metadata['test_set_size'] == 0 :    
@@ -87,10 +76,7 @@ def choseTestDataByIndex(metadata,structures,energies,chosen_index):
             energies_test[i] = energies[chosen_index[i]]          
             structures_test[i] = structures[chosen_index[i]]
     return metadata, structures_test, energies_test
-
-def getIndexExcluding( index_excluding, size_total ):
-    return np.array(list(filter(lambda x : x not in index_excluding, np.arange(size_total))))
-
+#------------------------------------------------------------------------------
 def choseTestDataRandomExclusion(metadata,structures,energies):    
     if metadata['test_set_size'] == 0 :
         if metadata['test_fraction'] < 1:
@@ -101,11 +87,37 @@ def choseTestDataRandomExclusion(metadata,structures,energies):
         metadata['train_set_size'] = int(metadata['test_fraction']*metadata['total_size_set'])
     chosen_index=getIndexExcluding( metadata["train_index"], metadata["total_size_set"] )
     return choseTestDataByIndex(metadata,structures,energies,chosen_index)
-
-# SCALERS
 #==============================================================================
-# Input
+
+# Principal Component Analysis stuff
+#==============================================================================
+def makePCA( n_components ):
+    return PCA(n_components=n_components)
+#------------------------------------------------------------------------------
+default_path_pcavar = "./"
+def pcaVariance( input_, path_pcavar=default_path_pcavar ):
+    nb_point=len(input_[:])*len(input_[0])
+    pca=PCA().fit( np.array(input_[:]).reshape(nb_point,np.shape(input_[0])[1]) )
+    var=np.cumsum(pca.explained_variance_ratio_)
+    file_out=open(path_pcavar,"w")
+    for i in range( np.shape(var)[0] ):
+        file_out.write( str(i)+" "+str(var[i])+"\n" )
+    file_out.close()
+    return var
+#------------------------------------------------------------------------------
+def pcaSelectBestParams(descriptors,meta):
+    pca=[]
+    for specie in range(len(metadata["species"])):
+        pca.append(PCA(n_components=metadata["pca_n"]).fit(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])))
+        if metadata['verbose']: 
+            print("Precision of new features ",metadata["species"][specie]," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
+    return pca
+#==============================================================================
+
+# Scalers - to be generalized
+#==============================================================================
 def createScaler( input_, metadata ):
+    # Create a scaler for the input using Scitkit Learn Standard Scaler
     scalers = []
     for specie in range(metadata["n_species"]):
         scalers.append(StandardScaler())
@@ -114,7 +126,9 @@ def createScaler( input_, metadata ):
         end_specie   = start_specie + metadata["nb_element_species"][specie]
         scalers[specie].fit(np.array(input_[start_specie:end_specie]).reshape(nb_atoms_total,metadata['n_features']))    
     return scalers
+#------------------------------------------------------------------------------
 def applyScale( scalers, input_, metadata ):
+    # Applies a created scaler
     input_array=np.array(input_[:])
     for specie in range(metadata["n_species"]):
         start_specie = metadata["start_species"][specie]
@@ -126,30 +140,19 @@ def applyScale( scalers, input_, metadata ):
         input_[i] = input_array[i,:,:]
     return input_
 #------------------------------------------------------------------------------
-default_range_train_energy=1
-default_min_train_energy=0
-def scaleEnergy( output, metadata ):
-    metadata["range_train_energy"] = output.max()-output.min()
-    metadata["min_train_energy"] = output.min()
-    return metadata, (output-metadata["min_train_energy"])/metadata["range_train_energy"]
-def deScaleEnergy( output_scaled, metadata, range_train_energy=default_range_train_energy, min_train_energy=default_min_train_energy ):
-    metadata=handleOptionArg( "range_train_energy", default_range_train_energy, metadata )
-    metadata=handleOptionArg( "min_train_energy", default_min_train_energy, metadata )
-    return metadata, (output_scaled*metadata["range_train_energy"])+metadata["min_train_energy"]
-#==============================================================================
-
-# PCA
-#==============================================================================
-def pcaSelectBestParams(descriptors,meta):
-    pca=[]
-    for specie in range(len(metadata["species"])):
-        pca.append(PCA(n_components=metadata["pca_n"]).fit(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].reshape(descriptors[:,metadata["start_species"][specie]:metadata["start_species"][specie]+metadata["nb_element_species"][specie],:].shape[0]*metadata["nb_element_species"][specie],metadata["n_features"])))
-        if metadata['verbose']: 
-            print("Precision of new features ",metadata["species"][specie]," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
-    return pca
+#  Basic hand_made scalers
+def scaleData( data ):
+    min_data = data.min()
+    range_data = data.max() - min_data
+    return ( data - min_data)/range_data, min_data, range_data
+#------------------------------------------------------------------------------
+def deScaleData( data_scaled, range_data, min_data ):
+    return data_scaled*range_data+min_data
 #==============================================================================
 
 
+# Handling Atoms stuff - may be moved at a later point
+#==============================================================================
 def getNbAtoms( atoms ):
     if type(atoms) == ase.atoms.Atoms :
         return len(atoms)
@@ -160,7 +163,7 @@ def getNbAtoms( atoms ):
             return len(atoms[0])
         elif type(atoms[0]) == np.ndarray :
             return len(atoms)
-
+#------------------------------------------------------------------------------
 def getSpecies( atoms ):
     if type(atoms) == list:
         atoms=atoms[0]
@@ -174,7 +177,7 @@ def getSpecies( atoms ):
         if check :
             types_=np.append(types_,pT.z2Names(atoms.numbers[atom]))
     return types_
-
+#------------------------------------------------------------------------------
 def getNbAtomsPerSpecies( atoms, metadata):
     if type(atoms) == list:
         atoms=atoms[0]
@@ -184,12 +187,11 @@ def getNbAtomsPerSpecies( atoms, metadata):
             if metadata["species"][specie] == pT.z2Names(atoms.numbers[atom]) :
                 metadata["nb_element_species"][specie] += 1
     return metadata
-
+#------------------------------------------------------------------------------
 def sortAtomsUniq( atoms ):
     # Sorting by decreasing Z 
-    # BEHOLD THE BUBLE SORT OF DEATH - Y a probablement plus efficace
-    # Mais sachant qu'on fera *jamais* plus de tableaux de 10^4 elements,
-    # et que c'est pas qqchose qu'on va faire régulièrement, ça va...
+    # BEHOLD THE BUBLE SORT OF DEATH - Needs to be changed asap by something 
+    # less ineficient - probably are python functions that can do stuff
     for i in range(len(atoms)):
         for j in range(i+1,len(atoms)):
             if atoms.numbers[i] < atoms.numbers[j]:
@@ -200,8 +202,7 @@ def sortAtomsUniq( atoms ):
                 atoms.numbers[j] = store_z
                 atoms.positions[j,:] = store_positions
     return atoms
-
-
+#------------------------------------------------------------------------------
 def buildInput(data):
     input_=[]
     data_=np.stack(data["descriptor"].str[:].values)
@@ -209,7 +210,7 @@ def buildInput(data):
     for atom in range(nb_atoms):
         input_.append(data_[:,atom,:])
     return input_
-
+#------------------------------------------------------------------------------
 def sortAtomsSpecie( atoms ) :
     if type(atoms) == list:
         for index in range(len(atoms)):
@@ -217,7 +218,7 @@ def sortAtomsSpecie( atoms ) :
         return atoms
     else:
         return sortAtomsUniq(atoms)
-
+#------------------------------------------------------------------------------
 def getStartSpecies( atoms, metadata ):
     if not metadata["species_sorted"] :
         atoms=sortAtomsSpecie(atoms)
@@ -231,6 +232,7 @@ def getStartSpecies( atoms, metadata ):
                 metadata["start_species"][specie] = atom
                 break
     return metadata
+#==============================================================================
 
 # Default physics params
 default_n_atoms        = 1
@@ -252,7 +254,6 @@ default_descriptor   = 'None'
 default_PCA = False
 default_pca_N = 0 
 default_scale = False
-
 
 # Default I/O settingss
 default_path_to_import_model = ""        # If taking over from previous model, path where to save the NN
