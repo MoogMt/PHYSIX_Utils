@@ -36,7 +36,7 @@ if not mtd.checkMetaDataIO(metadata,verbose_check):
 nb_step=cpmd.getNbLineEnergies(file_energies)
 # Reading trajectory
 traj = xyz.readPbcCubic( file_traj, volume )
-metadata['periodic'] = True
+periodic = True
 # Reading ENERGIES file
 data_out     = cpmd.readEnergiesFile( file_energies )
 energies     = cpmd.extractPotentialEnergy(     data_out )
@@ -54,7 +54,7 @@ n_species = len(species)
 species_sorted=True
 total_size_set = len( energies )
 start_species=mtd.getStartSpecies( traj, species )
-nb_element_per_species=mtd.getNbAtomsPerSpecies( traj, species )
+nb_element_species=mtd.getNbAtomsPerSpecies( traj, species )
 #=============================================================================#
 
 # Equilibrate sampling
@@ -82,10 +82,10 @@ nmax_   = 3
 lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
-input_train = desc.createDescriptorsSOAP( input_train_raw, species, sigma_, cutoff_, nmax_, lmax_ )
+input_train, n_features = desc.createDescriptorsSOAP( input_train_raw, species, sigma_, cutoff_, nmax_, lmax_, periodic )
 # Test set
 #------------------------------------------------------------------------------
-input_test = desc.createDescriptorsSOAP( input_test_raw, species, sigma_, cutoff_, nmax_, lmax_ )
+input_test, n_features = desc.createDescriptorsSOAP( input_test_raw, species, sigma_, cutoff_, nmax_, lmax_, periodic )
 #------------------------------------------------------------------------------
 # Scaling 
 #------------------------------------------------------------------------------
@@ -94,8 +94,8 @@ output_train_scale, min_output_train, range_output_train = mtd.scaleData( output
 output_test_scale,  min_output_test,  range_output_test  = mtd.scaleData( output_test_raw )
 # Scaling Input
 scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
-input_train_scale = mtd.applyScale( scalers, input_train, metadata )
-input_test_scale  = mtd.applyScale( scalers, input_test,  metadata )
+input_train_scale = mtd.applyScale( scalers, input_train, species, start_species, nb_element_species, n_features )
+input_test_scale  = mtd.applyScale( scalers, input_test,  species, start_species, nb_element_species, n_features )
 #=============================================================================#
 
 # BUILDING NETWORK
@@ -103,43 +103,33 @@ input_test_scale  = mtd.applyScale( scalers, input_test,  metadata )
 # Parameters of the Neural net
 
 # Iteration parameters
-metadata["loss_fct"] = 'mean_squared_error' # Loss function in the NN
-metadata["optimizer"] = 'Adam'                    # Choice of optimizers for training of the NN weights 
-metadata["n_epochs"] = 1000                  # Number of epoch for optimization?
-metadata["patience"] = 20                  # Patience for convergence
-metadata["restore_weights"] = True
-metadata["batch_size"] = 300
-metadata["verbose_train"] = 1
-metadata["early_stop_metric"]=['mse']
+loss_fct = 'mean_squared_error' # Loss function in the NN
+optimizer = 'Adam'                    # Choice of optimizers for training of the NN weights 
+n_epochs = 1000                  # Number of epoch for optimization?
+patience = 20                  # Patience for convergence
+restore_weights = True
+batch_size = 300
+verbose_train = 1
+early_stop_metric=['mse']
 
 # Subnetorks structure
-metadata["activation_fct"] = 'relu'  # Activation function in the dense hidden layers
-metadata["n_nodes_per_layer"] = metadata["n_features"]           # Number of nodes per hidden layer
-metadata["n_hidden_layer"] = 3               # Number of hidden layers
-metadata["n_nodes_structure"]=np.ones((n_species,metadata["n_hidden_layer"]),dtype=int)*metadata["n_nodes_per_layer"] # Structure of the NNs (overrides the two precedent ones)
-metadata["kernel_constraint"] = None
+activation_fct = 'relu'  # Activation function in the dense hidden layers
+n_nodes_per_layer = n_features           # Number of nodes per hidden layer
+n_hidden_layer = 3               # Number of hidden layers
+n_nodes_structure=np.ones((n_species,n_hidden_layer),dtype=int)*n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
+kernel_constraint = None
 
 # Dropout rates
-metadata["dropout_coef"]=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
-metadata["dropout_coef"][0,:]=0.2    # Drop out rate between initial descriptor and specie sub_network
-metadata["dropout_coef"][1:,:]=0.5   # Drop out rate inside the nodes of the specie sub_network
+dropout_rate=np.zeros((metadata["n_species"],metadata["n_hidden_layer"]+1)) # Dropout for faster convergence (can be desactivated) 
+dropout_rate[0,:]=0.2    # Drop out rate between initial descriptor and specie sub_network
+dropout_rate[1:,:]=0.5   # Drop out rate inside the nodes of the specie sub_network
     
 # Plot network
-metadata["plot_network"]=True
-metadata["path_plot_network"]=str(folder_out+"plot_network.png")
-metadata["saved_model"] = False
-metadata["path_folder_save"]=str(folder_out)
-metadata["suffix_write"]=str("train-"      + str(metadata["train_set_size"])              + "_" +
-                             "test-"       + str(metadata["test_set_size"])               + "_" +
-                             "layers-"     + str(metadata["n_hidden_layer"])              + "_" +
-                             "n_nodes-"    + str(metadata["n_nodes_per_layer"])           + "_" + 
-                             "nmaxSOAP-"   + str(metadata["nmax_SOAP"])                   + "_" + 
-                             "lmaxSOAP-"   + str(metadata["lmax_SOAP"])                   + "_" +
-                             "sigmaSOAP-"  + str(metadata["sigma_SOAP"])                  + "_" + 
-                             "cutoffSOAP-" + str(metadata["cutoff_SOAP"])                 + "_" +
-                             "drop_out0-"  + str(metadata["dropout_coef"][0,0])           + "_" + 
-                             "drop_outN-"  + str(metadata["dropout_coef"][1,0])           ) 
-
+plot_network=True
+path_plot_network=str(folder_out+"plot_network.png")
+saved_model = False
+path_folder_save=str(folder_out)
+suffix_write=""
 
 import behler
 
@@ -149,22 +139,22 @@ model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPre
                                                                                           output_test_scale, 
                                                                                           species, 
                                                                                           n_species, 
-                           metadata["n_features"], 
-                           metadata["start_species"], 
-                           metadata["nb_element_species"], 
-                           metadata["n_nodes_structure"], 
-                           metadata["dropout_coef"], 
-                           metadata["n_epochs"],
-                           metadata["batch_size"],
-                           metadata["kernel_constraint"],
-                           activation_fct = metadata["activation_fct"],
-                           loss_fct=metadata["loss_fct"],
-                           optimizer=metadata["optimizer"],
-                           path_folder_save=metadata["path_folder_save"], 
-                           early_stop_metric=metadata["early_stop_metric"],
-                           plot_network=metadata["plot_network"],
-                           path_plot_network=metadata["path_plot_network"],
-                           suffix_write=metadata["suffix_write"])
+                                                                                          n_features, 
+                                                                                          start_species, 
+                                                                                          nb_element_species, 
+                                                                                          n_nodes_structure, 
+                                                                                          dropout_rate, 
+                                                                                          n_epochs,
+                                                                                          batch_size,
+                                                                                          kernel_constraint,
+                                                                                          activation_fct = activation_fct,
+                                                                                          loss_fct=loss_fct,
+                                                                                          optimizer=optimizer,
+                                                                                          path_folder_save=path_folder_save, 
+                                                                                          early_stop_metric=early_stop_metric,
+                                                                                          plot_network=plot_network,
+                                                                                          path_plot_network=path_plot_network,
+                                                                                          suffix_write=suffix_write)
 
 # Descaling energies
 output_train = mtd.deScaleData( output_train_scale, min_output_train, range_output_train )
@@ -173,8 +163,8 @@ predictions_train = mtd.deScaleData( predictions_train, metadata )
 predictions_test  = mtd.deScaleData( predictions_test,  metadata )
 
 # Write the comparative between predictions and outputs
-file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )
-file_comp_test  = str( metadata["path_folder_save"] + "ComparativeErrorsTest_"  +metadata["suffix_write"] )
+file_comp_train = str( path_folder_save + "ComparativeErrorsTrain_" + suffix_write )
+file_comp_test  = str( path_folder_save + "ComparativeErrorsTest_"  + suffix_write )
 behler.writeComparativePrediction( file_comp_train, output_train, predictions_train )
 behler.writeComparativePrediction( file_comp_test,  output_test, predictions_test   )
 
@@ -227,31 +217,31 @@ energies_train = []
 energies_test  = []
 for specie in range( n_species ):
     energies_train.append(mtd.deScaleEnergy( behler.getAtomicEnergy( species[specie], 
-                                                                     metadata["start_species"][specie],
-                                                                     metadata["nb_element_species"][specie],
-                                                                     metadata["n_nodes_structure"][specie,:],
-                                                                     metadata["dropout_coef"][specie,:],
+                                                                     start_species[specie],
+                                                                     nb_element_species[specie],
+                                                                     n_nodes_structure[specie,:],
+                                                                     dropout_rate[specie,:],
                                                                      input_train_scale, 
                                                                      model,
-                                                                     activation_fct=metadata["activation_fct"],
-                                                                     loss_fct=metadata["loss_fct"], 
-                                                                     optimizer=metadata["optimizer"], 
-                                                                     kernel_constraint=metadata["kernel_constraint"], 
-                                                                     early_stop_metric=metadata["early_stop_metric"]),
-                                                                      ) )
+                                                                     activation_fct=activation_fct,
+                                                                     loss_fct=loss_fct, 
+                                                                     optimizer=optimizer, 
+                                                                     kernel_constraint=kernel_constraint, 
+                                                                     early_stop_metric=early_stop_metric),
+                                                                     min_output_train, range_output_train ) )
     energies_test.append(mtd.deScaleEnergy( behler.getAtomicEnergy( species[specie], 
-                                                                    metadata["start_species"][specie],
-                                                                    metadata["nb_element_species"][specie],
-                                                                    metadata["n_nodes_structure"][specie,:],
-                                                                    metadata["dropout_coef"][specie,:],
+                                                                    start_species[specie],
+                                                                    nb_element_species[specie],
+                                                                    n_nodes_structure[specie,:],
+                                                                    dropout_rate[specie,:],
                                                                     input_test_scale, 
                                                                     model,
-                                                                    activation_fct=metadata["activation_fct"],
-                                                                    loss_fct=metadata["loss_fct"], 
-                                                                    optimizer=metadata["optimizer"], 
-                                                                    kernel_constraint=metadata["kernel_constraint"], 
-                                                                    early_stop_metric=metadata["early_stop_metric"]),
-                                                                    min_energie_ ) )
+                                                                    activation_fct=activation_fct,
+                                                                    loss_fct=loss_fct, 
+                                                                    optimizer=optimizer, 
+                                                                    kernel_constraint=kernel_constraint, 
+                                                                    early_stop_metric=early_stop_metric),
+                                                                    min_output_test, range_output_test ) )
 
 
 nb_bins=100

@@ -55,7 +55,7 @@ def createDescriptorsSOAP(data, species, sigma_SOAP, cutoff_SOAP, nmax_SOAP, lma
     descriptors = np.empty( ( n_atoms, n_steps, n_features ),  dtype=object )
     for index_structure in tqdm.tqdm(range( n_steps )): 
         descriptors[:,index_structure,:] = soap.create( data[index_structure] )
-    return descriptors
+    return descriptors, n_features
 #=============================================================================#
 
 # ACSF

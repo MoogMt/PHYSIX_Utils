@@ -122,26 +122,28 @@ def pcaNFromVar( input_, fraction, species, start_species, nb_element_species, n
 
 # Scalers - to be generalized
 #==============================================================================
-def createScaler( input_, metadata ):
+def createScaler( input_, species, start_species, nb_element_species, train_set_size, n_features ):
     # Create a scaler for the input using Scitkit Learn Standard Scaler
     scalers = []
-    for specie in range(metadata["n_species"]):
+    n_species = len(species)
+    for specie in range( n_species ):
         scalers.append(StandardScaler())
-        nb_atoms_total=metadata["nb_element_species"][specie]*metadata["train_set_size"]
-        start_specie = metadata["start_species"][specie]
-        end_specie   = start_specie + metadata["nb_element_species"][specie]
-        scalers[specie].fit(np.array(input_[start_specie:end_specie]).reshape(nb_atoms_total,metadata['n_features']))    
+        nb_atoms_total = nb_element_species[specie]*train_set_size
+        start_specie = start_species[specie]
+        end_specie   = start_specie + nb_element_species[specie]
+        scalers[specie].fit(np.array(input_[start_specie:end_specie]).reshape(nb_atoms_total,n_features))    
     return scalers
 #------------------------------------------------------------------------------
-def applyScale( scalers, input_, metadata ):
+def applyScale( scalers, input_, species, start_species, nb_element_species, n_features ):
+    n_species=len(species)
     # Applies a created scaler
     input_array=np.array(input_[:])
-    for specie in range(metadata["n_species"]):
-        start_specie = metadata["start_species"][specie]
-        end_specie   = start_specie + metadata["nb_element_species"][specie]
+    for specie in range( n_species ):
+        start_specie = start_species[specie]
+        end_specie   = start_specie + nb_element_species[specie]
         nb_points = np.shape(input_array[:,:,:])[1]
-        nb_atoms_total = metadata["nb_element_species"][specie]*nb_points
-        input_array[start_specie:end_specie,:,:] = scalers[specie].transform( input_array[start_specie:end_specie,:,:].reshape(nb_atoms_total,metadata["n_features"]) ).reshape( metadata["nb_element_species"][specie], nb_points, metadata["n_features"] )
+        nb_atoms_total = nb_element_species[specie]*nb_points
+        input_array[start_specie:end_specie,:,:] = scalers[specie].transform( input_array[start_specie:end_specie,:,:].reshape(nb_atoms_total, n_features ) ).reshape( nb_element_species[specie], nb_points, n_features )
     for i in range(np.shape(input_array)[0]):
         input_[i] = input_array[i,:,:]
     return input_
