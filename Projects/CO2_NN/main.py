@@ -103,13 +103,15 @@ input_test_scale  = mtd.applyScale( scalers, input_test,  species, start_species
 #=============================================================================#
 # Parameters of the Neural net
 
+from keras.constraints import max_norm
+
 # Iteration parameters
 loss_fct = 'mean_squared_error' # Loss function in the NN
 optimizer = 'Adam'                    # Choice of optimizers for training of the NN weights 
 n_epochs = 1000                  # Number of epoch for optimization?
 patience = 20                  # Patience for convergence
 restore_weights = True
-batch_size = None
+batch_size = 2000
 verbose_train = 1
 early_stop_metric=['mse']
 
@@ -118,7 +120,8 @@ activation_fct = 'relu'  # Activation function in the dense hidden layers
 n_nodes_per_layer = n_features           # Number of nodes per hidden layer
 n_hidden_layer = 3               # Number of hidden layers
 n_nodes_structure=np.ones((n_species,n_hidden_layer),dtype=int)*n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
-kernel_constraint = None
+kernel_constraint = kernel_constraint=max_norm(3.)
+bias_constraint = kernel_constraint=max_norm(1.)
 
 # Dropout rates
 dropout_rate=np.zeros(( n_species, n_hidden_layer+1)) # Dropout for faster convergence (can be desactivated) 
@@ -130,7 +133,7 @@ plot_network=True
 path_plot_network=str(folder_out+"plot_network.png")
 saved_model = False
 path_folder_save=str(folder_out)
-suffix_write=""
+suffix_write="test"
 
 import behler
 
@@ -148,6 +151,7 @@ model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPre
                                                                                           n_epochs,
                                                                                           batch_size,
                                                                                           kernel_constraint=kernel_constraint,
+                                                                                          bias_constraint=bias_constraint,
                                                                                           patience = patience,
                                                                                           activation_fct = activation_fct,
                                                                                           loss_fct=loss_fct,

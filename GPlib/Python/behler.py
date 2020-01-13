@@ -21,15 +21,16 @@ default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./network_plot.png"
 default_kernel_constraint=None
+default_bias_constraint=None
 default_out_number=1
 #=============================================================================
-def buildSpecieSubNetwork( specie, n_nodes, drop_out_rate=default_dropout_coef, activation_fct=default_activation_fct, kernel_constraint=default_kernel_constraint, out_number=default_out_number ):
+def buildSpecieSubNetwork( specie, n_nodes, drop_out_rate=default_dropout_coef, activation_fct=default_activation_fct, kernel_constraint=default_kernel_constraint, bias_constraint=default_bias_constraint, out_number=default_out_number ):
     subnet=keras.Sequential( name=str( specie+"_subnet" ) )
     subnet.add(keras.layers.Dropout( drop_out_rate[0] ))
     layer=1
     for node in n_nodes:
         if node > 0:
-            subnet.add( keras.layers.Dense( node, activation=activation_fct, kernel_constraint=kernel_constraint ) )
+            subnet.add( keras.layers.Dense( node, activation=activation_fct, kernel_constraint=kernel_constraint, bias_constraint=bias_constraint ) )
             subnet.add( keras.layers.Dropout( drop_out_rate[ layer ] ) )
             layer += 1
         else:
@@ -204,6 +205,7 @@ def buildTrainPredictWrite(input_train,
                            n_epochs,
                            batch_size=default_batch_size,
                            kernel_constraint=default_kernel_constraint,
+                           bias_constraint=default_bias_constraint,
                            patience=default_patience,
                            activation_fct = default_activation_fct,
                            loss_fct=default_loss_fct,
@@ -242,14 +244,14 @@ def buildTrainPredictWrite(input_train,
     #===============================================================================    
     return model, metadata_stat, predictions_train, predictions_test
 
-def getAtomicEnergy( specie, start_specie, nb_element_specie, n_nodes, drop_out_rate,  input_, model_general, activation_fct=default_activation_fct, loss_fct=default_loss_fct, optimizer=default_optimizer, kernel_constraint=default_kernel_constraint, early_stop_metric=default_early_stop_metric ):
+def getAtomicEnergy( specie, start_specie, nb_element_specie, n_nodes, drop_out_rate,  input_, model_general, activation_fct=default_activation_fct, loss_fct=default_loss_fct, optimizer=default_optimizer, kernel_constraint=default_kernel_constraint, bias_constraint=default_bias_constraint, early_stop_metric=default_early_stop_metric ):
     # Parameters
     nb_data=np.shape(input_)[1]
     n_features=np.shape(input_)[2]
     # Reshaping input
     input_reshape=np.array( input_[start_specie:start_specie+nb_element_specie]).reshape(nb_data*nb_element_specie,n_features)
     # Buildint structure
-    network_structure = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, 1 )
+    network_structure = buildSpecieSubNetwork( specie, n_nodes, drop_out_rate, activation_fct, kernel_constraint, bias_constraint, 1 )
     # Define Inputs
     input_layers = [ keras.layers.Input( shape=(n_features,), name =str( specie + "_input_energy" ) )  ]
     # Creating model
