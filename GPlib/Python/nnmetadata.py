@@ -146,7 +146,7 @@ def scaleData( data ):
     range_data = data.max() - min_data
     return ( data - min_data)/range_data, min_data, range_data
 #------------------------------------------------------------------------------
-def deScaleData( data_scaled, range_data, min_data ):
+def deScaleData( data_scaled, min_data, range_data ):
     return data_scaled*range_data+min_data
 #==============================================================================
 

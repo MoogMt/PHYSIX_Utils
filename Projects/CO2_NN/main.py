@@ -78,8 +78,8 @@ metadata, input_test = desc.createDescriptorsSOAP(input_test_raw,metadata,sigma_
 # Scaling 
 #------------------------------------------------------------------------------
 # Scaling Energy
-output_train_scale, min_output_train, range_output_train = mtd.scaleEnergy( output_train_raw, metadata )
-output_test_scale,  min_output_test,  range_outputn_test = mtd.scaleEnergy( output_test_raw,  metadata )
+output_train_scale, min_output_train, range_output_train = mtd.scaleData( output_train_raw, metadata )
+output_test_scale,  min_output_test,  range_output_test  = mtd.scaleData( output_test_raw,  metadata )
 # Scaling Input
 scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
 input_train_scale = mtd.applyScale( scalers, input_train, metadata )
@@ -156,15 +156,15 @@ model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPre
                            suffix_write=metadata["suffix_write"])
 
 # Write the comparative between predictions and outputs
+# Can be made better by writting two different functions
 file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )
 file_comp_test  = str( metadata["path_folder_save"] + "ComparativeErrorsTest_"  +metadata["suffix_write"] )
-metadata, output_train = mtd.deScaleEnergy( output_train_scale, metadata )
-metadata, output_test  = mtd.deScaleEnergy( output_test_scale,  metadata )
-metadata, predictions_train = mtd.deScaleEnergy( predictions_train, metadata )
-metadata, predictions_test  = mtd.deScaleEnergy( predictions_test,  metadata )
-behler.writeComparativePrediction(file_comp_train, output_train, predictions_train )
-behler.writeComparativePrediction(file_comp_test,  output_test, predictions_test   )
-
+output_train = mtd.deScaleData( output_train_scale, min_output_train, range_output_train )
+output_test  = mtd.deScaleData( output_test_scale,  min_output_test,  range_output_test )
+predictions_train = mtd.deScaleData( predictions_train, metadata )
+predictions_test  = mtd.deScaleData( predictions_test,  metadata )
+behler.writeComparativePrediction( file_comp_train, output_train, predictions_train )
+behler.writeComparativePrediction( file_comp_test,  output_test, predictions_test   )
 
 import matplotlib.pyplot as plt
 
@@ -175,7 +175,6 @@ plt.plot(output_train, predictions_train,"r.")
 plt.plot(output_test, predictions_test, "b.")
 plt.show()
 n_figure +=1
-
 
 plt.figure(n_figure)
 plt.plot(output_train,"r-")
