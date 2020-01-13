@@ -248,13 +248,13 @@ for specie in range( n_species ):
 
 nb_bins=100
 plt.figure(1)
-for specie in range(metadata["n_species"]):
+for specie in range( n_species ):
     plt.hist(energies_train[specie], bins=nb_bins)
 plt.show()
 n_figure+=1 
 
 plt.figure(2)
-for specie in range(metadata["n_species"]):
+for specie in range( n_species ):
     plt.hist(energies_test[specie], bins=nb_bins)
 plt.show()
 n_figure+=1
