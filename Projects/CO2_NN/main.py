@@ -70,7 +70,8 @@ input_train_raw  = mtd.extractTrajectory( traj, index_train )
 output_train_raw = energies[ index_train ]
 # Creating testing set
 test_set_size = 200
-metadata, input_test_raw, output_test_raw = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
+metadata, input_test_raw, output_test_raw = mtd.choseTestDataRandomExclusion(traj,energies)
+input_test_raw, output_test_raw = mtd.choseDataRandomExclusion( traj, energies, test_set_size, index_train )
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 4.0 # cut_off SOAP, 
