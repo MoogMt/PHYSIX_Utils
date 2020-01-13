@@ -155,14 +155,15 @@ model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPre
                            path_plot_network=metadata["path_plot_network"],
                            suffix_write=metadata["suffix_write"])
 
-# Write the comparative between predictions and outputs
-# Can be made better by writting two different functions
-file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )
-file_comp_test  = str( metadata["path_folder_save"] + "ComparativeErrorsTest_"  +metadata["suffix_write"] )
+# Descaling energies
 output_train = mtd.deScaleData( output_train_scale, min_output_train, range_output_train )
 output_test  = mtd.deScaleData( output_test_scale,  min_output_test,  range_output_test )
 predictions_train = mtd.deScaleData( predictions_train, metadata )
 predictions_test  = mtd.deScaleData( predictions_test,  metadata )
+
+# Write the comparative between predictions and outputs
+file_comp_train = str( metadata["path_folder_save"] + "ComparativeErrorsTrain_" +metadata["suffix_write"] )
+file_comp_test  = str( metadata["path_folder_save"] + "ComparativeErrorsTest_"  +metadata["suffix_write"] )
 behler.writeComparativePrediction( file_comp_train, output_train, predictions_train )
 behler.writeComparativePrediction( file_comp_test,  output_test, predictions_test   )
 
@@ -171,36 +172,43 @@ import matplotlib.pyplot as plt
 n_figure=1
 
 plt.figure(n_figure)
-plt.plot(output_train, predictions_train,"r.")
-plt.plot(output_test, predictions_test, "b.")
+plt.xlabel("E_{output} (Ry)")
+plt.ylabel("E_{prediction} (Ry)")
+plt.plot(output_train-output_train.min(), predictions_train-output_train.min(),"r.")
+plt.plot(output_test-output_test.min(), predictions_test-output_test.min(), "b.")
+plt.legend(["Train","Test"])
 plt.show()
 n_figure +=1
 
 plt.figure(n_figure)
-plt.plot(output_train,"r-")
-plt.plot(output_test, "b-")
-plt.show()
-n_figure +=1
-
-plt.figure(n_figure)
-plt.plot(output_train,"r-")
-plt.plot(predictions_train, "b-")
-plt.show()
-n_figure +=1
-
-plt.figure(n_figure)
+plt.xlabel("Structure Index (#)")
+plt.ylabel("E_{output}^{train}-E_{prediction}^{train} (Ry/CO_{2})")
 plt.plot( (output_train-predictions_train)/96*13.6,"r-")
 plt.show()
 n_figure +=1
 
 plt.figure(n_figure)
+plt.xlabel("Structure Index (#)")
+plt.ylabel("E_{output}^{train}-E_{prediction}^{train} (Ry/CO_{2})")
 plt.plot( (output_test-predictions_test)/96*13.6,"r-")
 plt.show()
 n_figure +=1
 
 plt.figure(n_figure)
+plt.xlabel("Structure Index (#)")
+plt.ylabel("Energy (Ry)")
 plt.plot(output_test,"r-")
 plt.plot(predictions_test, "b-")
+plt.legend(["Output (test)","Prediction (test)"])
+plt.show()
+n_figure +=1
+
+plt.figure(n_figure)
+plt.xlabel("Structure Index (#)")
+plt.ylabel("Energy (Ry)")
+plt.plot(output_train,"r-")
+plt.plot(predictions_train, "b-")
+plt.legend(["Output (train)","Prediction (train)"])
 plt.show()
 n_figure +=1
 

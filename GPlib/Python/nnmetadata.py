@@ -99,8 +99,8 @@ default_path_pcavar = "./"
 def pcaVariance( input_, write_var=default_write_var,  path_pcavar=default_path_pcavar ):
     nb_point=len(input_[:])*len(input_[0])
     pca=PCA().fit( np.array(input_[:]).reshape(nb_point,np.shape(input_[0])[1]) )
-    if write_var :
     var=np.cumsum(pca.explained_variance_ratio_)
+    if write_var :
         file_out=open(path_pcavar,"w")
         for i in range( np.shape(var)[0] ):
             file_out.write( str(i)+" "+str(var[i])+"\n" )
@@ -119,14 +119,11 @@ def pcaSelectBestParams( input_, n_pca, species, start_species, nb_element_speci
             print("Precision of new features ",specie," :",np.cumsum(pca[specie].explained_variance_ratio_)[-1],"\n" )        
     return pca
 def pcaNFromVar( input_, fraction, species, start_species, nb_element_species, n_features, verbose=default_verbose_pca ):
-    n_pca=np.zeros(2,dtype=Int)
+    n_pca=np.zeros(2,dtype=int)
     for specie in range(len(species) ):
-        pca=PCA( n_components=n_pca ).
-                   fit( input_[:,start_species[specie]:start_species[specie]+nb_element_species[specie],:].
-                   reshape( input_[ :, start_species[specie]:start_species[specie]+nb_element_species[specie], : ].
-                   shape[0]*nb_element_species[specie], n_features ) ) )
-         variance=np.cumsum(pca[specie].explained_variance_ratio_)[-1]
-         for i in range( len(variance) ):
+        pca=PCA( n_components=n_pca ).fit( input_[:,start_species[specie]:start_species[specie]+nb_element_species[specie],:].reshape( input_[ :, start_species[specie]:start_species[specie]+nb_element_species[specie], : ].shape[0]*nb_element_species[specie], n_features ) ) 
+        variance=np.cumsum(pca[specie].explained_variance_ratio_)[-1]
+        for i in range( len(variance) ):
              if variance[i] > fraction:
                  n_pca[specie] = i
                  break
