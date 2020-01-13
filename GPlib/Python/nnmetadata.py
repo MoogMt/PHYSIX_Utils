@@ -30,10 +30,27 @@ def handleAllOptionaArg( input_label_list, default_values_list, metadata ):
     return metadata
 #==============================================================================
 
+#==============================================================================
 def getIndexExcluding( index_excluding, size_total ):
     return np.array(list(filter(lambda x : x not in index_excluding, np.arange(size_total))))
+#==============================================================================
 
 #============================================================================== 
+def getDataFromIndex( input_, output_, indexs_chosen ):
+    return input_[ indexs_chosen ], output_[ indexs_chosen ]
+#------------------------------------------------------------------------------
+def makeEquilibratedSampling( energies, comp_time, nb_bins, comp_time_threshold ):
+    min_energy=energies.min()
+    delta_energy=(energies.max()-min_energy)/nb_bins
+    nb_point=len(energies)
+    bins_energy=np.zeros((nb_point),dtype=int)
+    comp_bin = np.zeros((2),dtype=int)
+    for point in range( nb_point ):
+        bins_energy[bin] += int(  (energies[point]-min_energy)/delta_energy )
+        if comp_time[point] > comp_time_threshold:
+            comp_bin[point] + 1
+    return bins
+#------------------------------------------------------------------------------
 def choseTrainDataByIndex(metadata,structures,energies,chosen_index): 
     metadata['train_index'] = chosen_index
     if metadata['train_set_size'] == 0 :    

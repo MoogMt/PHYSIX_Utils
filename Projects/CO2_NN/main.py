@@ -39,9 +39,11 @@ traj = xyz.readPbcCubic( file_traj, volume )
 metadata['periodic'] = True
 # Reading ENERGIES file
 energies=cpmd.readPotEnergy( file_energies )
+comput_time=cpmd.cpmd_scf_comptime( file_energies)
 # Homogenizing with stride
 stride_energies=5 # Improve by reading the stride in the input file and making adjustements.
-energies=energies[0:len(energies):stride_energies]
+energies    = energies    [ 0: len(energies):stride_energies ]
+comput_time = comput_time [ 0: len(energies):stride_energies ]
 # add a check to verify congruence of sizes...
 # Getting species present in the simulation
 metadata['n_atoms'] = len(traj[0])
@@ -59,7 +61,7 @@ metadata=mtd.getNbAtomsPerSpecies(traj,metadata)
 metadata['n_jobs'] = 8 # Number of parallel cores to use (CPU)
 metadata['train_set_size'] = 1000
 metadata['total_size_set'] = len(energies)
-metadata, input_train_raw, output_train_raw = mtd.choseTrainDataRandom(metadata,traj,energies)
+metadata, input_train_raw, output_train_raw = mtd.choseTrainDataRandom( traj, energies, )
 # Creating testing set
 metadata["test_set_size"] = 200
 metadata, input_test_raw, output_test_raw = mtd.choseTestDataRandomExclusion(metadata,traj,energies)
