@@ -40,32 +40,22 @@ def checkSOAPParams( metadata, verbose ):
         return False
     return True
 
-def createDescriptorsSOAP(data, metadata,
-                          sigma_SOAP=default_sigma_SOAP, 
-                          cutoff_SOAP=default_cutoff_SOAP, 
-                          nmax_SOAP=default_nmax_SOAP, 
-                          lmax_SOAP=default_lmax_SOAP,
-                          sparse_SOAP=default_sparse_SOAP,
+def createDescriptorsSOAP(data, species, sigma_SOAP, cutoff_SOAP, nmax_SOAP, lmax_SOAP, periodic,
+                          sparse_SOAP=default_sparse_SOAP
                           ):
-    # Updating metadata
-    metadata['sigma_SOAP']  = sigma_SOAP
-    metadata['cutoff_SOAP'] = cutoff_SOAP
-    metadata['nmax_SOAP']   = nmax_SOAP
-    metadata['lmax_SOAP']   = lmax_SOAP
-    metadata['sparse_SOAP'] = sparse_SOAP
-    if not checkSOAPParams( metadata, metadata['verbose']): 
-        return False, False
-    # Prepping SOAP descriptor structure
-    soap = SOAP( species=metadata['species'], sigma=metadata['sigma_SOAP'], periodic=metadata['periodic'], rcut=metadata['cutoff_SOAP'], nmax=metadata['nmax_SOAP'], lmax=metadata['lmax_SOAP'],sparse=metadata['sparse_SOAP'] )
-    metadata['n_features'] = soap.get_number_of_features()
+
+    # Initialize SOAP
+    soap = SOAP( species=species, sigma=sigma_SOAP, periodic=periodic, rcut=cutoff_SOAP, nmax=nmax_SOAP, lmax=lmax_SOAP, sparse=sparse_SOAP )
+    
+    # Compute number of features
+    n_features = soap.get_number_of_features()
+    n_atoms = np.shape(data)[1]
+    n_steps = np.shape(data)[0]
     # Computing descriptors
-    descriptors = []
-    for index_atom in tqdm.tqdm(range(metadata['n_atoms'])):
-        descriptors_loc = np.empty((np.shape(data)[0],metadata['n_features']))
-        for index_structure in range(np.shape(data)[0]): # This whole thing is a bit insane, we could directly build it propertly for the training and avoid nonsentical stuff...
-            descriptors_loc[index_structure,:] = soap.create(data[index_structure],positions=[index_atom])
-        descriptors.append( descriptors_loc )
-    return metadata, descriptors
+    descriptors = np.empty( ( n_atoms, n_steps, n_features ),  dtype=object )
+    for index_structure in tqdm.tqdm(range( n_steps )): 
+        descriptors[:,index_structure,:] = soap.create( data[index_structure] )
+    return descriptors
 #=============================================================================#
 
 # ACSF

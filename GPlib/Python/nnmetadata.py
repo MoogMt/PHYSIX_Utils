@@ -184,15 +184,17 @@ def getSpecies( atoms ):
             types_=np.append(types_,pT.z2Names(atoms.numbers[atom]))
     return types_
 #------------------------------------------------------------------------------
-def getNbAtomsPerSpecies( atoms, metadata):
+def getNbAtomsPerSpecies( atoms, species ):
     if type(atoms) == list:
         atoms=atoms[0]
-    metadata["nb_element_species"]=np.zeros(metadata["n_species"],dtype=int)
-    for specie in range( metadata["n_species"] ):
-        for atom in range( len(atoms) ):
-            if metadata["species"][specie] == pT.z2Names(atoms.numbers[atom]) :
-                metadata["nb_element_species"][specie] += 1
-    return metadata
+    n_species = len(species)
+    n_atoms  = len(atoms)
+    nb_element_species = np.zeros( n_species, dtype=int )
+    for specie in range( n_species ):
+        for atom in range( n_atoms ):
+            if species[specie] == pT.z2Names(atoms.numbers[atom]) :
+                nb_element_species[specie] += 1
+    return nb_element_species
 #------------------------------------------------------------------------------
 def sortAtomsUniq( atoms ):
     # Sorting by decreasing Z 
@@ -225,19 +227,18 @@ def sortAtomsSpecie( atoms ) :
     else:
         return sortAtomsUniq(atoms)
 #------------------------------------------------------------------------------
-def getStartSpecies( atoms, metadata ):
-    if not metadata["species_sorted"] :
-        atoms=sortAtomsSpecie(atoms)
-        metadata["species_sorted"] = True
+def getStartSpecies( atoms, species ):
     if type(atoms) == list: 
         atoms=atoms[0]
-    metadata["start_species"] = np.zeros(metadata["n_species"],dtype=int)
-    for specie in range( metadata["n_species"] ):
-        for atom in range( len(atoms) ):
-            if metadata["species"][specie] == pT.z2Names(atoms.numbers[atom]) :
-                metadata["start_species"][specie] = atom
+    n_species=len(species)
+    n_atoms=len(atoms)
+    start_species = np.zeros( n_species, dtype=int )
+    for specie in range( n_species ):
+        for atom in range( n_atoms ):
+            if species[specie] == pT.z2Names(atoms.numbers[atom]) :
+                start_species[specie] = atom
                 break
-    return metadata
+    return start_species
 #==============================================================================
 
 # Default physics params
