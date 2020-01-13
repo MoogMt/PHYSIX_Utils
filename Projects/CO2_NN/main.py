@@ -93,7 +93,7 @@ input_test, n_features = desc.createDescriptorsSOAP( input_test_raw, species, si
 output_train_scale, min_output_train, range_output_train = mtd.scaleData( output_train_raw )
 output_test_scale,  min_output_test,  range_output_test  = mtd.scaleData( output_test_raw )
 # Scaling Input
-scalers = mtd.createScaler( input_train, metadata ) # Create scaler on training set
+scalers = mtd.createScaler( input_train, species, start_species, nb_element_species, n_features ) # Create scaler on training set
 input_train_scale = mtd.applyScale( scalers, input_train, species, start_species, nb_element_species, n_features )
 input_test_scale  = mtd.applyScale( scalers, input_test,  species, start_species, nb_element_species, n_features )
 #=============================================================================#
@@ -159,8 +159,8 @@ model, metadata_stat, predictions_train, predictions_test = behler.buildTrainPre
 # Descaling energies
 output_train = mtd.deScaleData( output_train_scale, min_output_train, range_output_train )
 output_test  = mtd.deScaleData( output_test_scale,  min_output_test,  range_output_test )
-predictions_train = mtd.deScaleData( predictions_train, metadata )
-predictions_test  = mtd.deScaleData( predictions_test,  metadata )
+predictions_train = mtd.deScaleData( predictions_train, min_output_train, range_output_train )
+predictions_test  = mtd.deScaleData( predictions_test,  min_output_test, range_output_test )
 
 # Write the comparative between predictions and outputs
 file_comp_train = str( path_folder_save + "ComparativeErrorsTrain_" + suffix_write )

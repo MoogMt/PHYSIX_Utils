@@ -49,8 +49,8 @@ def createDescriptorsSOAP(data, species, sigma_SOAP, cutoff_SOAP, nmax_SOAP, lma
     
     # Compute number of features
     n_features = soap.get_number_of_features()
-    n_atoms = np.shape(data)[1]
-    n_steps = np.shape(data)[0]
+    n_atoms = np.shape(data[0])[0]
+    n_steps = len(data)
     # Computing descriptors
     descriptors = np.empty( ( n_atoms, n_steps, n_features ),  dtype=object )
     for index_structure in tqdm.tqdm(range( n_steps )): 
