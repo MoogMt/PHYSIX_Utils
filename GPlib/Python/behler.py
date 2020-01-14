@@ -16,7 +16,7 @@ default_activation_fct = 'tanh'  # Activation function in the dense hidden layer
 default_n_nodes_per_layer= 80           # Number of nodes per hidden layer
 default_n_hidden_layer=2                # Number of hidden layers
 default_n_nodes_structure=np.ones((default_n_species,default_n_hidden_layer))*default_n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
-default_dropout_coef=np.zeros((default_n_species,default_n_hidden_layer+1)) # Dropout for faster convergence (can be desactivated) 
+default_dropout_rate=np.zeros((default_n_species,default_n_hidden_layer+1)) # Dropout for faster convergence (can be desactivated) 
 default_replace_inputs=False
 default_plot_network=True
 default_path_plot_network="./network_plot.png"
@@ -24,14 +24,14 @@ default_kernel_constraint=None
 default_bias_constraint=None
 default_out_number=1
 #=============================================================================
-def buildSpecieSubNetwork( specie, n_nodes, drop_out_rate=default_dropout_coef, activation_fct=default_activation_fct, kernel_constraint=default_kernel_constraint, bias_constraint=default_bias_constraint, out_number=default_out_number ):
+def buildSpecieSubNetwork( specie, n_nodes, dropout_rate=default_dropout_rate, activation_fct=default_activation_fct, kernel_constraint=default_kernel_constraint, bias_constraint=default_bias_constraint, out_number=default_out_number ):
     subnet=keras.Sequential( name=str( specie+"_subnet" ) )
-    subnet.add(keras.layers.Dropout( drop_out_rate[0] ))
+    subnet.add(keras.layers.Dropout( dropout_rate[0] ))
     layer=1
     for node in n_nodes:
         if node > 0:
             subnet.add( keras.layers.Dense( node, activation=activation_fct, kernel_constraint=kernel_constraint, bias_constraint=bias_constraint ) )
-            subnet.add( keras.layers.Dropout( drop_out_rate[ layer ] ) )
+            subnet.add( keras.layers.Dropout( dropout_rate[ layer ] ) )
             layer += 1
         else:
             break
@@ -51,13 +51,13 @@ def buildAllAtomsNetworks( species, nb_species, start_species, nb_element_specie
             count_all += 1 
     return all_networks, all_layers
 #==============================================================================
-def buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint ):
+def buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint=default_kernel_constraint, bias_constraint=default_bias_constraint ):
     
     # Construction subnetwork
     #=========================================================================#
     specie_subnets=[]
     for specie in range( nb_species ):
-        specie_subnets.append( buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], drop_out_rate[specie,:], activation_fct, kernel_constraint, 1 ) )
+        specie_subnets.append( buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], dropout_rate=drop_out_rate[specie,:], activation_fct=activation_fct, kernel_constraint=kernel_constraint, bias_constraint=bias_constraint,out_number=1 ) )
     #=========================================================================#
     
     # Building All Networks
@@ -219,7 +219,7 @@ def buildTrainPredictWrite(input_train,
     
     # BUILDING
     #=============================================================================#
-    model=buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint )
+    model=buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint, bias_constraint )
     # Compile the network
     model.compile(loss=loss_fct, optimizer=optimizer, metrics=early_stop_metric)
     # Plot the network
