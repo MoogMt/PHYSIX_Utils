@@ -33,7 +33,7 @@ mutable struct AtomMolList
     end
 end
 
-function switchAtoms( atoms::T1 , index1::T2, index2::T3 ) where { T1 <: AtomMolList, T2 <: Int, T3 <: Int }
+function switchAtoms!( atoms::T1 , index1::T2, index2::T3 ) where { T1 <: AtomMolList, T2 <: Int, T3 <: Int }
     # Storing
     a_index=atoms.atom_index[index1]
     a_name=atoms.atom_names[index1]
@@ -55,7 +55,15 @@ function switchAtoms( atoms::T1 , index1::T2, index2::T3 ) where { T1 <: AtomMol
     return
 end
 
-function move( atoms::T1 , move::Vector{T2} ) where { T1 <: atom_mod.AtomList, T2 <: Real }
+function moveAtom( atoms::T1 , move::Vector{T2} ) where { T1 <: atom_mod.AtomList, T2 <: Real }
+    for i=1:size(atoms.positions)[1]
+        for j=1:3
+            atoms.positions[i,j] += move[j]
+        end
+    end
+    return atoms
+end
+function moveAtom!( atoms::T1 , move::Vector{T2} ) where { T1 <: atom_mod.AtomList, T2 <: Real }
     for i=1:size(atoms.positions)[1]
         for j=1:3
             atoms.positions[i,j] += move[j]

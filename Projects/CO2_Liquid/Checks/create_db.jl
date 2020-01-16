@@ -1,4 +1,4 @@
-GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+GPfolder=string("/home/mathieu/PHYSIX_Utils/GPlib/Julia/")
 push!(LOAD_PATH, GPfolder)
 
 using atom_mod
@@ -9,27 +9,23 @@ using conversion
 using cpmd
 using press_stress
 using exp_data
+using utils
 
-# Folder for data
-folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
-folder_base="/media/moogmt/Elements/CO2/"
+function buildingDataBase( folder_target::T1, timestep_target::T2 ) where { T1 <: AbstractString, T2 <: Real }
 
-# T,V
-Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82]
-Temperatures=[2000,2500,3000]
-runs=[1,2,3,4]
+    # Determining target files paths
+    file_input=string(folder_target,"input") # Input - to get timestep + strides
+    file_stress=string(folder_target,"STRESS")  # STRESS: contains the stress tensor
+    file_traj=string(folder_target,"TRAJEC.xyz") # TRAJEC.xyz: MD Trajectory
 
-function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
+    # Getting the stride for the STRESS file
+    stride_stress = cpmd.readIntputStrideStress( file_input )
+    # Getting the stride for the TRAJEC and FTRAJECTORY files
+    stride_traj   = cpmd.readIntputStrideTraj(file_input )
+    # Getting the timestep of the simulation
+    timestep =  cpmd.readInputTimestep( file_input )
 
-    file_input=string(folder_target,"input")
-    file_stress=string(folder_target,"STRESS")
-    file_traj=string(folder_target,"TRAJEC.xyz")
-
-    stride_stress=cpmd.readIntputStrideStress( file_input )
-    stride_traj=cpmd.readIntputStrideTraj(file_input)
-
-    stride_real_stress=round(Int,stride_traj/stride_stress)
-    stride_real_data=round(Int,stride_traj)
+    n_stress =
 
     file_energy=string(folder_in,"ENERGIES")
     temperature, e_pot,e_tot,msd,comp_time,test=cpmd.readEnergyFile( file_energy )
@@ -71,11 +67,45 @@ function buildingDB( folder_target::T1 ) where { T1 <: AbstractString }
     return true
 end
 
+#==============================================================================#
+computers_names = [
+"hp-physix5",
+"joliotite",
+"OtterCentral"
+]
+computers_pathsCO2=[
+"/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/",
+"/media/mathieu/Elements/CO2/",
+"/media/moogmt/Element/CO2/"
+]
+folder_path = utils.determineFolderPath( computers_names, computers_pathsCO2 )
+if ! folder_path
+    print("Computer is not known, add it to the database.")
+    exit()
+end
+#==============================================================================#
+
+# Timesteps
+standard_timestep = 40
+standard_stride   = 5
+
+# T,V
+Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82]
+Temperatures=[ 2000, 2500, 3000 ]
+
+# Target Timestep
+timestep_target=conversion.hatime2fs*standard_timestep*standard_stride
+
 for V in Volumes
     for T in Temperatures
-        for n_run in runs
+        n_run = 1
+        check = true
+        while check
             folder_target=string(folder_base,V,"/",T,"K/")
-            if ! buildingDB( folder_target )
+            if ! isfile( isdir(folder_target) )
+                check = false
+            end
+            if ! buildingDB( folder_target, timestep_target )
                 print("Problem at "V," ",T,"K ",n_run," !\n")
             end
         end

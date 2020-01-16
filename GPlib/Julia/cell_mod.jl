@@ -30,6 +30,7 @@ mutable struct Cell_param
         new([a,b,c],[alpha,beta,gamma])
     end
 end
+
 mutable struct Cell_vec
     v1::Vector{Real}
     v2::Vector{Real}

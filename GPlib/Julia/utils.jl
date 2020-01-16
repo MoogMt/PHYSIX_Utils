@@ -4,6 +4,19 @@ module utils
 #  List of useful random functions that I could not fit elsewhere
 #-------------------------------------------------------------------------------
 
+#==============================================================================#
+function determineFolderPath( computers_names::Vector{T1}, paths::Vector{T2} ) where { T1 <: AbstractString, T2 <: AbstractString }
+    size_vector = size( computers_names )[1]
+    host_name = gethostname()
+    for i=1:size_vector
+        if computers_names[i] == host_name
+            return paths[i]
+        end
+    end
+    return false
+end
+#==============================================================================#
+
 # VECTORS
 #==============================================================================#
 # - Checks whether vector is of dimension dim

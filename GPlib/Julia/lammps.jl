@@ -1,10 +1,18 @@
-#========#
-# LAMMPS #
-#========#
+module cpmd
+
+using conversion
+using atom_mod
+
+export writeLammpsInput
+
+# Handles interface with LAMMPS
+# - Reads input files
+# - Writes input files
+# - Reads output files
 
 #==============================================================================#
 # Writting from a collection of molecules
-function lammpsData{T <: molecule}( molecules::Vector{T}, file::AbstractString )
+function writeLammpsInput( molecules::Vector{T1}, file::T2 ) where { T1 <: atom_mod.AtomMolList, T2 <: AbstractString }
   # Variables
   # - number of atomic species
   nb_types=size(getNames(molecules))[1]
@@ -65,13 +73,6 @@ function lammpsData{T <: molecule}( molecules::Vector{T}, file::AbstractString )
   end
   close(out)
 end
-#------------------------------------------------------------------------------#
-# Writting from cell
-function lammpsData(cell::cell,file::AbstractString)
-  if size(getElements(cell)[i])[1] != 0
-    lammpsData(getAtoms(cell,file))
-  else
-    error("No atoms in the cell.")
-  end
-end
 #==============================================================================#
+
+end
