@@ -197,7 +197,6 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
 
     return stress,true
 end
-
 # Read FTRAJECTORY file
 #-------------------------------------------------------------------------------
 # Contains: positions, velocity and forces in atomic units for each step

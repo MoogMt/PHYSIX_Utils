@@ -96,9 +96,6 @@ function buildingDataBase( folder_target::T1, timestep_target::T2 ) where { T1 <
 end
 
 
-function homogenezieDataSim()  where { }
-
-end
 
 #==============================================================================#
 computers_names = [
