@@ -197,12 +197,19 @@ function readStress( file_name::T1, stride::T2 ) where { T1 <: AbstractString, T
 
     return stress,true
 end
+
 # Read FTRAJECTORY file
+#-------------------------------------------------------------------------------
 # Contains: positions, velocity and forces in atomic units for each step
 # Structure:
 # 1 line per atom per step
 # Per line:
 # atom_number x y z vx vy vz fx fy fz
+#-------------------------------------
+# Positions in Bohr
+# Velocities in Bohr/tHart
+# Forces in Ha/Bohr
+#-------------------------------------
 function getNbStepAtomsFTRAJ( lines::Vector{T1} ) where { T1 <: AbstractString }
     nb_lines=size(lines)[1]
     nb_restart_lines=0
@@ -273,5 +280,7 @@ function readFTRAJ( file_input::T1 ) where { T1 <: AbstractString }
 
     return positions,velocity,forces
 end
-#==============================================================================#
+#-------------------------------------------------------------------------------
+
+
 end
