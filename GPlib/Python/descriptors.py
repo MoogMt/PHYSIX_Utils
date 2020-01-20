@@ -20,27 +20,16 @@ default_cutoff_SOAP = 1.001 # Angstroms
 default_nmax_SOAP   = 1     # nmax for the radial expansion
 default_lmax_SOAP   = 0     # lmax for the angular expansion
 default_sparse_SOAP = False # Sparse, avoid 0
+        
+def createDescriptorsSingleSOAP(data, species, sigma_SOAP, cutoff_SOAP, nmax_SOAP, lmax_SOAP, periodic,
+                          sparse_SOAP=default_sparse_SOAP
+                          ):
 
-def checkSOAPParams( metadata, verbose ):
-    if metadata['sigma_SOAP'] < 0:
-        if verbose:
-            print("Invalid value of the sigma for SOAP: sigma=",metadata['sigma_SOAP'],"\n")
-        return False
-    if metadata['cutoff_SOAP'] < 1.0 :
-        if verbose:
-            print("Invalue value of the cut_off for SOAP: cut off = ",metadata['cutoff_SOAP'],"\n")
-        return False
-    if metadata['nmax_SOAP'] < 1.0 :
-        if verbose:
-            print("Invalue value of the cut_off for SOAP: nmax = ",metadata['cutoff_SOAP'],"\n")
-        return False
-    if metadata['lmax_SOAP'] < 0. or metadata['lmax_SOAP'] > metadata['nmax_SOAP'] : 
-        if verbose: 
-            print("Invalue value of the cut_off for SOAP: lmax = ",metadata['lmax_SOAP'],"\n")
-        return False
-    return True
+    # Initialize SOAP
+    soap = SOAP( species=species, sigma=sigma_SOAP, periodic=periodic, rcut=cutoff_SOAP, nmax=nmax_SOAP, lmax=lmax_SOAP, sparse=sparse_SOAP )
+    return soap.create( data )
 
-def createDescriptorsSOAP(data, species, sigma_SOAP, cutoff_SOAP, nmax_SOAP, lmax_SOAP, periodic,
+def createDescriptorsAllSOAP(data, species, sigma_SOAP, cutoff_SOAP, nmax_SOAP, lmax_SOAP, periodic,
                           sparse_SOAP=default_sparse_SOAP
                           ):
 
@@ -58,7 +47,7 @@ def createDescriptorsSOAP(data, species, sigma_SOAP, cutoff_SOAP, nmax_SOAP, lma
     descriptors_ = []
     for atom in range( n_atoms ):
         descriptors_.append( descriptors[atom,:,:] )
-    return descriptors_, n_features 
+    return descriptors_
 #=============================================================================#
 
 # ACSF

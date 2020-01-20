@@ -7,7 +7,7 @@ Created on Tue Jan  7 13:32:52 2020
 """
 
 import numpy as np
-import keras
+import tensorflow.keras as keras
 
 #===================
 # BUILDING NETWORK
@@ -55,22 +55,34 @@ def buildNetwork( species, nb_species, n_features, start_species, nb_element_spe
     
     # Construction subnetwork
     #=========================================================================#
-    specie_subnets=[]
+    specie_subnets=np.empty(nb_species,dtype=object)
     for specie in range( nb_species ):
-        specie_subnets.append( buildSpecieSubNetwork( species[specie], nodes_structure[specie,:], dropout_rate=drop_out_rate[specie,:], activation_fct=activation_fct, kernel_constraint=kernel_constraint, bias_constraint=bias_constraint,out_number=1 ) )
+        specie_subnets[specie]=keras.Sequential( name=str( species[specie] +"_subnet" ) )
+        #specie_subnets[specie].add(keras.layers.Dropout( drop_out_rate[specie,0] ))
+        layer=1
+        for node in nodes_structure[specie,:]:
+            if node > 0:
+                specie_subnets[specie].add( keras.layers.Dense( node, activation=activation_fct, kernel_constraint=kernel_constraint, bias_constraint=bias_constraint ) )
+                #specie_subnets[specie].add( keras.layers.Dropout( drop_out_rate[ specie, layer ] ) )
+                layer += 1
+            else:
+                break
+        specie_subnets[specie].add( keras.layers.Dense( 1, activation="linear" ) )
     #=========================================================================#
     
     # Building All Networks
     #=========================================================================#
     all_networks, all_layers = buildAllAtomsNetworks( species, nb_species, start_species, nb_element_species, n_features, specie_subnets )
+    
     #=========================================================================#
 
     # Final Addition Layer
     #==========================================================================
     final_layer = keras.layers.Add( name="Addition" )
+    final = final_layer( all_networks )
     #==========================================================================
 
-    return keras.models.Model( inputs=all_layers, outputs=final_layer( all_networks ) )   
+    return keras.models.Model( inputs=all_layers, outputs=final )   
 
 #==============================================================================
 
@@ -186,6 +198,7 @@ def writeComparativePrediction( file_path, output_, prediction_ ):
 default_path_folder_save="./"
 default_suffix_write=""
 default_optimizer = 'adam'                    # Choice of optimizers for training of the NN weights 
+default_learning_rate = 0.0001
 default_loss_fct = 'mean_squared_error' # Loss function in the NN
 default_early_stop_metric=['mse']
 default_plot_network = False
@@ -210,6 +223,7 @@ def buildTrainPredictWrite(input_train,
                            activation_fct = default_activation_fct,
                            loss_fct=default_loss_fct,
                            optimizer=default_optimizer,
+                           learning_rate=default_learning_rate,
                            path_folder_save=default_path_folder_save,
                            early_stop_metric=default_early_stop_metric,
                            plot_network=default_plot_network,
@@ -220,8 +234,10 @@ def buildTrainPredictWrite(input_train,
     # BUILDING
     #=============================================================================#
     model=buildNetwork( species, nb_species, n_features, start_species, nb_element_species, nodes_structure, drop_out_rate, activation_fct, kernel_constraint, bias_constraint )
+    # Optimizer
+    opt=keras.optimizers.Adam(learning_rate=learning_rate, beta_1=0.9, beta_2=0.999, amsgrad=True )
     # Compile the network
-    model.compile(loss=loss_fct, optimizer=optimizer, metrics=early_stop_metric)
+    model.compile(loss=loss_fct, optimizer=opt, metrics=early_stop_metric)
     # Plot the network
     if plot_network:
         keras.utils.plot_model(model,to_file=path_plot_network,show_shapes=True, show_layer_names=True)
