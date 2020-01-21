@@ -65,25 +65,25 @@ nb_step_stress = getNbStepStress( file_stress_in )
 if nb_step_stress == false
     return false
 end
-nb_step_stress = trunc( Int, nb_step_stress/n_stress ) + 1
+nb_step_stress = utils.nbStepStriding( nb_step_stress, n_stress )
 #-------------------------------------------
 nb_step_ftraj, nb_atoms_ftraj = getNbStepAtomsFtraj( file_ftrajectory_in )
 if nb_step_ftraj == false
     return false
 end
-nb_step_ftraj  = trunc( Int, nb_step_ftraj/n_ftraj ) + 1
+nb_step_ftraj  = utils.nbStepStriding( nb_step_ftraj, n_ftraj )
 #-------------------------------------------
 nb_step_energy = getNbStepEnergies( file_energy_in )
 if nb_step_energy == false
     return false
 end
-nb_step_energy = trunc( Int, nb_step_energy/n_energy ) + 1
+nb_step_energy = utils.nbStepStriding( nb_step_energy, n_energy )
 #-------------------------------------------
 nb_step_traj = filexyz.getNbSteps( file_trajec_in )
 if nb_step_traj == false
     return false
 end
-nb_step_traj = trunc( Int, nb_step_traj/n_traj ) + 1
+nb_step_traj = utils.nbStepStriding( nb_step_traj, n_traj )
 #-------------------------------------------
 
 #-------------------------------------------
@@ -97,20 +97,20 @@ target_length = min( nb_step_traj, nb_step_ftraj, nb_step_energy, nb_step_stress
 nb_ignored=0
 #---------------------------------------------
 stress_tensor = cpmd.readStress( file_stress_in, n_stress, nb_ignored, target_length )
-cpmd.writeStress( file_stress, stress_tensor )
-utils.writeData( file_pressure, press_stress.computePressure(stress_tensor) )
+cpmd.writeStress( file_stress_out, stress_tensor )
+utils.writeData( file_pressure_out, press_stress.computePressure(stress_tensor) )
 stress_tensor=[] # Clearing memory
 #---------------------------------------------
-filexyz.writeXYZ( file_traj, filexyz.readFileAtomList( file_trajec_in, n_traj, nb_ignored, target_length ) )
+filexyz.writeXYZ( file_traj_out, filexyz.readFileAtomList( file_trajec_in, n_traj, nb_ignored, target_length ) )
 #---------------------------------------------
 positions,velocities,forces=cpmd.readFtraj( file_ftrajectory_in, n_ftraj, nb_ignored, target_length )
-cpmd.writeFtraj( file_ftraj, positions, velocities, forces )
+cpmd.writeFtraj( file_ftraj_out, positions, velocities, forces )
 positions=[]
 velocities=[]
 forces=[]
 #---------------------------------------------
 temp, epot, etot, msd, comp = cpmd.readEnergies( file_energy_in, n_energy, nb_ignored, target_length )
-cpmd.writeEnergies( file_energy, temp, epot, etot, msd, comp )
+cpmd.writeEnergies( file_energy_out, temp, epot, etot, msd, comp )
 epot=[]
 etot=[]
 msd=[]
