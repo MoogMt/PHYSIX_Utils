@@ -26,7 +26,7 @@ temperature=3000
 run_nb=1
 folder_in = data_base + str(volume) + "/" + str(temperature) + "K/" + str(run_nb) + "-run/"
 folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
-file_traj = folder_in + "TRAJEC.xyz"
+file_traj = folder_in + "TRAJEC_wrapped.xyz"
 file_energies = folder_in + "ENERGIES"
 #------------------------------------------------------------------------------
 metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
@@ -80,9 +80,9 @@ traj=[]
 #==============================================================================
 # Build descriptors from positions (train set only)
 sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
-cutoff_ = 6.0 # cut_off SOAP, 
+cutoff_ = 4.0 # cut_off SOAP, 
 nmax_   = 3
-lmax_   = 3
+lmax_   = 2
 # Train set
 #-----------------------------------------------------------------------------
 input_train  = desc.createDescriptorsAllSOAP( input_train, species, sigma_, cutoff_, nmax_, lmax_, periodic )
@@ -112,8 +112,8 @@ input_test  = mtd.applyScale( scalers, input_test,  species, start_species, nb_e
 loss_fct = 'mean_squared_error' # Loss function in the NN
 optimizer = 'Adam'                    # Choice of optimizers for training of the NN weights 
 learning_rate = 0.0001
-n_epochs = 2000                  # Number of epoch for optimization?
-patience = 20                  # Patience for convergence
+n_epochs = 1000                  # Number of epoch for optimization?
+patience = 10                  # Patience for convergence
 restore_weights = True
 batch_size = 16
 verbose_train = 1
@@ -122,7 +122,7 @@ early_stop_metric=['mse']
 # Subnetorks structure
 activation_fct = 'relu'  # Activation function in the dense hidden layers
 n_nodes_per_layer = 40           # Number of nodes per hidden layer
-n_hidden_layer = 5               # Number of hidden layers
+n_hidden_layer = 3               # Number of hidden layers
 n_nodes_structure=np.ones((n_species,n_hidden_layer),dtype=int)*n_nodes_per_layer # Structure of the NNs (overrides the two precedent ones)
 kernel_constraint = None
 bias_constraint = None
