@@ -30,9 +30,9 @@ standard_timestep = 40
 standard_stride   = 5
 
 # T,V
-V = 9.0
+V = 9.5
 T = 3000
-run_ = 1
+run_ = 2
 
 timestep_target=conversion.hatime2fs*standard_timestep*standard_stride
 
@@ -67,7 +67,7 @@ if nb_step_stress == false
 end
 nb_step_stress = utils.nbStepStriding( nb_step_stress, n_stress )
 #-------------------------------------------
-nb_step_ftraj, nb_atoms_ftraj = getNbStepAtomsFtraj( file_ftrajectory_in )
+nb_step_ftraj= getNbStepAtomsFtraj( file_ftrajectory_in )
 if nb_step_ftraj == false
     return false
 end
@@ -91,7 +91,7 @@ print("traj_step: ",nb_step_traj,"\n")
 print("ftraj_step: ",nb_step_ftraj,"\n")
 print("energy_step: ",nb_step_energy,"\n")
 print("stress_step: ",nb_step_stress,"\n")
-target_length = min( nb_step_traj, nb_step_ftraj, nb_step_energy, nb_step_stress )
+target_length = min( nb_step_traj,  nb_step_ftraj, nb_step_energy, nb_step_stress ) #,
 #-------------------------------------------
 
 nb_ignored=0

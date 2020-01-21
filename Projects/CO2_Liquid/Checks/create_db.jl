@@ -29,8 +29,8 @@ standard_timestep = 40
 standard_stride   = 5
 
 # T,V
-Volumes=[8.8,8.6]
-Temperatures=[ 2000, 2500, 3000 ]
+Volumes=[9.375]
+Temperatures=[ 3000 ]
 
 
 target_timestep=conversion.hatime2fs*standard_timestep*standard_stride
