@@ -32,8 +32,11 @@ standard_stride   = 5
 # T,V
 V = 9.0
 T = 3000
+run_ = 1
 
-target_timestep=conversion.hatime2fs*standard_timestep*standard_stride
+timestep_target=conversion.hatime2fs*standard_timestep*standard_stride
+
+folder_target=string(folder_base,V,"/",T,"K/",run_,"-run/")
 
 file_stress_out = string(folder_target, "STRESS_db")
 file_pressure_out = string(folder_target, "Pressure_db.dat")
@@ -84,8 +87,8 @@ nb_step_traj = utils.nbStepStriding( nb_step_traj, n_traj )
 
 print("traj_step: ",nb_step_traj,"\n")
 print("ftraj_step: ",nb_step_ftraj,"\n")
-print("traj_energy: ",nb_step_energy,"\n")
-print("traj_stress: ",nb_step_stress,"\n")
+print("energy_step: ",nb_step_energy,"\n")
+print("stress_step: ",nb_step_stress,"\n")
 target_length = min( nb_step_traj, nb_step_ftraj, nb_step_energy, nb_step_stress )
 
 nb_ignored=0
