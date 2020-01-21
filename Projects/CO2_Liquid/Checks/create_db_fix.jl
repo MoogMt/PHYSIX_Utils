@@ -71,7 +71,7 @@ nb_step_ftraj, nb_atoms_ftraj = getNbStepAtomsFtraj( file_ftrajectory_in )
 if nb_step_ftraj == false
     return false
 end
-nb_step_ftraj  = utils.nbStepStriding( nb_step_ftraj , n_ftraj )
+nb_step_ftraj  = trunc(Int,nb_step_ftraj/n_ftraj) + 1  
 #-------------------------------------------
 nb_step_energy = getNbStepEnergies( file_energy_in )
 if nb_step_energy == false
@@ -84,7 +84,6 @@ if nb_step_traj == false
     return false
 end
 nb_step_traj = utils.nbStepStriding( nb_step_traj, n_traj )
-
 print("traj_step: ",nb_step_traj,"\n")
 print("ftraj_step: ",nb_step_ftraj,"\n")
 print("energy_step: ",nb_step_energy,"\n")
