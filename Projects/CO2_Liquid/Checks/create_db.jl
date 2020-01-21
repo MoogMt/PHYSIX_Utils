@@ -29,7 +29,7 @@ standard_timestep = 40
 standard_stride   = 5
 
 # T,V
-Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82]
+Volumes=[8.8,8.6]
 Temperatures=[ 2000, 2500, 3000 ]
 
 
