@@ -30,9 +30,9 @@ standard_timestep = 40
 standard_stride   = 5
 
 # T,V
-V = 9.5
+V = 8.8
 T = 3000
-run_ = 2
+run_ = 1
 
 timestep_target=conversion.hatime2fs*standard_timestep*standard_stride
 
@@ -62,27 +62,16 @@ file_stress_in = string(folder_target,"STRESS")
 file_ftrajectory_in = string(folder_target,"FTRAJECTORY")
 
 nb_step_stress = getNbStepStress( file_stress_in )
-if nb_step_stress == false
-    return false
-end
+
 nb_step_stress = utils.nbStepStriding( nb_step_stress, n_stress )
 #-------------------------------------------
-nb_step_ftraj= getNbStepAtomsFtraj( file_ftrajectory_in )
-if nb_step_ftraj == false
-    return false
-end
+nb_step_ftraj, nb_atoms = getNbStepAtomsFtraj( file_ftrajectory_in )
 nb_step_ftraj  = utils.nbStepStriding( nb_step_ftraj, n_ftraj )
 #-------------------------------------------
 nb_step_energy = getNbStepEnergies( file_energy_in )
-if nb_step_energy == false
-    return false
-end
 nb_step_energy = utils.nbStepStriding( nb_step_energy, n_energy )
 #-------------------------------------------
 nb_step_traj = filexyz.getNbSteps( file_trajec_in )
-if nb_step_traj == false
-    return false
-end
 nb_step_traj = utils.nbStepStriding( nb_step_traj, n_traj )
 #-------------------------------------------
 
