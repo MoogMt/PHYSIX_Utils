@@ -28,9 +28,9 @@ end
 
 # T,V
 Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
-Temperatures=[ 3000, 2500, 2000 ]
-# Target Timestep
+Temperatures=[ 3000, 2500, 2000, 1750 ]
 
+# Target Timestep
 for V in Volumes
     for T in Temperatures
         run_=1
@@ -39,10 +39,11 @@ for V in Volumes
             folder_target = string(folder_base,V,"/",T,"K/",run_,"-run/")
             if isdir(folder_target)
                 if isfile( string(folder_target,"FLAG") )
-                    cpmd.writeRelaunchTrajec( folder_target )
+                    cpmd.relaunchRunTrajec( folder_target, string(folder_target,"input_restart") )
                 else
-                    cpmd.writeRelaunchFtraj( folder_target )
+                    cpmd.relaunchRunFtraj( folder_target, string(folder_target,"input_restart") )
                 end
+                print("Ok for V:",V," T:",T,"K run:",run_,"\n")
                 run_ += 1
             else
                 check = false

@@ -30,9 +30,9 @@ standard_timestep = 40
 standard_stride   = 5
 
 # T,V
-V = 10.0
-T = 3000
-run_ = 2
+V = 9.5
+T = 1750
+run_ = 1
 
 timestep_target=conversion.hatime2fs*standard_timestep*standard_stride
 
@@ -99,7 +99,7 @@ print("stress_step: ",nb_step_stress,"\n")
 #-------------------------------------------
 
 #-------------------------------------------
-target_length = min( nb_step_traj, nb_step_ftraj, nb_step_energy, nb_step_stress ) #
+target_length = min( nb_step_traj, nb_step_energy, nb_step_stress ) #nb_step_ftraj, 
 if target_length == 0
     print("Error: target_length = 0.\n")
 end
