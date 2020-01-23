@@ -1,4 +1,4 @@
-GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
+GPfolder=string("/home/mathieu/LibAtomicSim/Julia/")
 push!(LOAD_PATH, GPfolder)
 
 using atom_mod
