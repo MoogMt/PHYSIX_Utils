@@ -76,8 +76,8 @@ energies     = cpmd.extractPotentialEnergy(     data_out )
 comput_time  = cpmd.extractSCFcomputationTime(  data_out )
 # Homogenizing with stride
 stride_energies=5 # Improve by reading the stride in the input file and making adjustements.
-energies    = energies    [ 0: len(energies):stride_energies ]
-comput_time = comput_time [ 0: len(energies):stride_energies ]
+energies    = energies    [ 0:len(energies):stride_energies ]
+comput_time = comput_time [ 0:len(energies):stride_energies ]
 # add a check to verify congruence of sizes...
 # Getting species present in the simulation
 n_atoms = len(traj[0])
@@ -93,23 +93,41 @@ nb_element_species=mtd.getNbAtomsPerSpecies( traj, species )
 # Keeping only easily identifiable carbons
 #=============================================================================#
 import ase.geometry as asegeom
-import matplotlib.pyplot as plt
 
-# Build descriptors from positions (train set only)
-sigma_  = 0.9  # 3*sigma ~ 2.7A relatively large spread
-cutoff_ = 4.0 # cut_off SOAP, 
-nmax_   = 3
-lmax_   = 2
+
 
 specie_labeled=np.zeros((0,2))
 specie=0
 step=0
 distances=asegeom.get_distances(traj[step].positions, pbc=traj[step].pbc,cell=traj[step].cell )[1]
-label=[ sum() for atom in range(len(traj)) ]
-index_=[ sum( dist > 1.6 and dist < 1.8 for dist in distances[atom,:] ) < 1 for atom in range(len(traj[0])) ]
+
+
+distances = [asegeom.get_distances(traj[step].positions, pbc=traj[step].pbc,cell=traj[step].cell )[1] for step in range(1,1000) ]
+cut_off = 1.75
+cut_low = 1.6
+cut_high = 1.9
+
+to_ignore_mask = np.array([ sum ( (distances[atom,:] > cut_low) & (distances[atom,:] < cut_high )) for atom in range(n_atoms) ]) < 1
+label_naive = np.array( [ sum( distances[atom,:]  < cut_off ) for atom in range(n_atoms) ] )
+
+max_neighbours = np.amax( [sum( distances[ atom, : ] < cut_low ) for atom in range(n_atoms)] )
+
+mask_label = np.empty((max_neighbours+1,n_atoms),dtype=bool)
+for nb_neigh in range(0,max_neighbours+1):
+    mask_label[ nb_neigh, : ] = [ sum( distances[atom,:] < cut_low )-1 == nb_neigh for atom in range(n_atoms) ] & ~to_ignore_mask
+
+# Build descriptors from positions (train set only)
+sigma_  = 0.3  # 3*sigma ~ 2.7A relatively large spread
+cutoff_ = 3.5 # cut_off SOAP, 
+nmax_   = 3
+lmax_   = 3
+
 descriptorC=desc.createDescriptorsSOAP( traj[step], species, sigma_, cutoff_, nmax_, lmax_, periodic )[0:32][index_[0:32],:]
 descriptorO=desc.createDescriptorsSOAP( traj[step], species, sigma_, cutoff_, nmax_, lmax_, periodic )[0:32][index_[0:32],:]
 
 
 #=============================================================================#
+
+import matplotlib.pyplot as plt
+
 
