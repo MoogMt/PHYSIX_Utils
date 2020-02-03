@@ -25,6 +25,7 @@ Temperatures=[2000,2500,3000]
 runs=[1,2,3,4]
 
 cut_off_rmsd=0.2
+target_length=20000
 
 for V in Volumes
     for T in Temperatures
@@ -33,6 +34,7 @@ for V in Volumes
 
         total_nb_step=0
         total_time=[]
+        max_nb_run=1
 
         for nbrun in runs
 
@@ -59,6 +61,7 @@ for V in Volumes
                     write(handle_out,string("CHECK"))
                     close(handle_out)
                     merge = false
+                    max_nb_run += 1
                     break
                 else
                     times = atom_mod.getNbStep( folder_local, nbrun, "-run/TRAJEC_db.xyz" )
@@ -69,12 +72,67 @@ for V in Volumes
                 times = atom_mod.getNbStep( folder_local, nbrun, "-run/TRAJEC_db.xyz" )
                 nb_total += times
                 push!( total_time, times )
+                max_nb_run += 1
             end
+
         end
 
         if nb_total < target_length && merge
-            print("Total length of simulation is not ")
-        end
+            print("Total length of simulation is not long enough for merge!")
+            print("Length: ",nb_total," step Target: ",target_length," step\n")
+        else
+            # Merging TRAJEC.xyz
+            #---------------------------------------------
+            traj_final = Vector{ AtomList }(undef, target_length)
+            for i=max_nb_run:-1:1
 
+            end
+            filexyz.writeXYZ( folder_local, "TRAJEC_db.xyz" )
+            traj_final=0
+            # Merging FTRAJ
+            #---------------------------------------------
+            positions_final = zeros(Real, target_length, 3 )
+            velocities_final = zeros(Real, target_length, 3 )
+            forces_final = zeros(Real, target_length, 3 )
+            for i=max_nb_run:-1:1
+
+            end
+            cpmd.writeFtraj( string( folder_local, "FTRAJECTORY_db" ) )
+            positions_final=0
+            velocities_final=0
+            forces_final = 0
+            #---------------------------------------------
+            # Merging ENERGIES
+            temp_final = zeros(Real, target_length )
+            epot_final = zeros(Real, target_length )
+            etot_final = zeros(Real, target_length )
+            msd_final = zeros(Real, target_length )
+            comp_time = zeros(Real, target_length )
+            for i=max_nb_run:-1:1
+
+            end
+            cpmd.writeEnergies( string( folder_local, "ENERGIES_db" ) )
+            temp_final = 0
+            epot_final = 0
+            etot_final = 0
+            msd_final = 0
+            comp_time = 0
+            #---------------------------------------------
+            # Merging Stress
+            stress_tensor = zeros( Real, target_length,3,3)
+            for i=max_nb_run:-1:1
+
+            end
+            cpmd.writeStress( string( folder_local, "STRESS_db" ) )
+            stress_tensor=0
+            #---------------------------------------------
+            stress_tensor = zeros( Real, target_length,3,3)
+            for i=max_nb_run:-1:1
+
+            end
+            cpmd.writePressure( string( folder_local, "Pressure_db" ) )
+            pressure=0
+            #---------------------------------------------
+        end
     end
 end
