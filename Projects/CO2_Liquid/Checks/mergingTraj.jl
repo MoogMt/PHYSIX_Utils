@@ -84,8 +84,17 @@ for V in Volumes
             # Merging TRAJEC.xyz
             #---------------------------------------------
             traj_final = Vector{ AtomList }(undef, target_length)
+            check=0
+            remain=nb_total
             for i=max_nb_run:-1:1
-
+                traj = filexyz( traj )
+                if remain > total_time[i]
+                    traj_final[nb_total-total_time[i]-check] = traj[1:total_time[i]]
+                    remain -= total_time[i]
+                else
+                    traj_final[nb_total-total_time[i]-check] = traj[total_time[i]-remain:total_time[i]]
+                end
+                check += total_time[i]
             end
             filexyz.writeXYZ( folder_local, "TRAJEC_db.xyz" )
             traj_final=0
