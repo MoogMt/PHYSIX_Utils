@@ -45,7 +45,7 @@ import cpmd
 import descriptors as desc
 import numpy as np
 
-data_base  = "/media/moogmt/Elements/CO2/"
+data_base  = "/home/moogmt/CO2/"
 
 verbose_check=True # Whether we want error messages 
 debug = False # Debug mode: verbose descriptions are written in a debug file
@@ -57,27 +57,15 @@ debug = False # Debug mode: verbose descriptions are written in a debug file
 volume=8.82
 temperature=3000 
 run_nb=1
-folder_in = data_base + str(volume) + "/" + str(temperature) + "K/" + str(run_nb) + "-run/"
-folder_out = data_base + str(volume) + "/" + str(temperature) + "K/Data/"
-file_traj = folder_in + "TRAJEC.xyz"
-file_energies = folder_in + "ENERGIES"
-#------------------------------------------------------------------------------
-metadata=mtd.buildMetaData(file_traj,file_energies,folder_out, temperature)
-if not mtd.checkMetaDataIO(metadata,verbose_check):
-    exit
-#------------------------------------------------------------------------------
-nb_step=cpmd.getNbLineEnergies(file_energies)
+folder_in = data_base + str(run_nb) + "-run/"
+folder_out = data_base + "Data/"
+file_traj = folder_in + "TRAJEC_db.xyz"
+#-----------------------------------------------------------------------------
 # Reading trajectory
+stride_ = 1
 traj = xyz.readPbcCubic( file_traj, volume )
+traj = traj[0:len(traj):stride_]
 periodic = True
-# Reading ENERGIES file
-data_out     = cpmd.readEnergiesFile( file_energies )
-energies     = cpmd.extractPotentialEnergy(     data_out )
-comput_time  = cpmd.extractSCFcomputationTime(  data_out )
-# Homogenizing with stride
-stride_energies=5 # Improve by reading the stride in the input file and making adjustements.
-energies    = energies    [ 0:len(energies):stride_energies ]
-comput_time = comput_time [ 0:len(energies):stride_energies ]
 # add a check to verify congruence of sizes...
 # Getting species present in the simulation
 n_atoms = len(traj[0])
@@ -85,7 +73,6 @@ species = mtd.getSpecies(traj[0])
 n_species = len(species)
 #traj=mtd.sortAtomsSpecie(traj) # Use if you need to sort the atoms per type, current implementation is *very* slow
 species_sorted=True
-total_size_set = len( energies )
 start_species=mtd.getStartSpecies( traj, species )
 nb_element_species=mtd.getNbAtomsPerSpecies( traj, species )
 #=============================================================================#
@@ -94,33 +81,47 @@ nb_element_species=mtd.getNbAtomsPerSpecies( traj, species )
 #=============================================================================#
 import ase.geometry as asegeom
 
-
-
-specie_labeled=np.zeros((0,2))
-specie=0
 step=0
-distances=asegeom.get_distances(traj[step].positions, pbc=traj[step].pbc,cell=traj[step].cell )[1]
+
+file_2C = open( data_base + str("2C.dat"), "w" )
+file_3C = open( data_base + str("3C.dat"), "w" )
+file_4C = open( data_base + str("4C.dat"), "w" )
+
+file_2O = open( data_base + str("2O.dat"), "w" )
+file_3O = open( data_base + str("3O.dat"), "w" )
 
 
-distances = [asegeom.get_distances(traj[step].positions, pbc=traj[step].pbc,cell=traj[step].cell )[1] for step in range(1,1000) ]
-cut_off = 1.75
-cut_low = 1.6
-cut_high = 1.9
-
-to_ignore_mask = np.array([ sum ( (distances[atom,:] > cut_low) & (distances[atom,:] < cut_high )) for atom in range(n_atoms) ]) < 1
-label_naive = np.array( [ sum( distances[atom,:]  < cut_off ) for atom in range(n_atoms) ] )
-
-max_neighbours = np.amax( [sum( distances[ atom, : ] < cut_low ) for atom in range(n_atoms)] )
-
-mask_label = np.empty((max_neighbours+1,n_atoms),dtype=bool)
-for nb_neigh in range(0,max_neighbours+1):
-    mask_label[ nb_neigh, : ] = [ sum( distances[atom,:] < cut_low )-1 == nb_neigh for atom in range(n_atoms) ] & ~to_ignore_mask
 
 # Build descriptors from positions (train set only)
 sigma_  = 0.3  # 3*sigma ~ 2.7A relatively large spread
 cutoff_ = 3.5 # cut_off SOAP, 
 nmax_   = 3
 lmax_   = 3
+distances=asegeom.get_distances(traj[step].positions, pbc=traj[step].pbc,cell=traj[step].cell )[1]
+soaps = desc.createDescriptorsSingleSOAP( traj[step], species, sigma_, cutoff_, nmax_, lmax_, periodic )
+
+cut_off = 1.75
+cut_low = 1.6
+cut_high = 1.9
+
+
+to_ignore_mask = np.array([ sum ( (distances[atom,:] > cut_low) & (distances[atom,:] < cut_high )) for atom in range(n_atoms) ]) < 1
+label_naive = np.array( [ sum( distances[atom,:]  < cut_off )-1 for atom in range(n_atoms) ] )
+max_neighbours = np.amax( [sum( distances[ atom, : ] < cut_low ) for atom in range(n_atoms)] )
+
+mask_label = np.empty((max_neighbours+1,n_atoms),dtype=bool)
+for nb_neigh in range(0,max_neighbours+1):
+    mask_label[ nb_neigh, : ] = [ sum( distances[atom,:] < cut_low )-1 == nb_neigh for atom in range(n_atoms) ] & ~to_ignore_mask
+
+
+
+file_2C.close()
+file_3C.close()
+file_4C.close()
+
+file_2O.close()
+file_3O.close()
+
 
 descriptorC=desc.createDescriptorsSOAP( traj[step], species, sigma_, cutoff_, nmax_, lmax_, periodic )[0:32][index_[0:32],:]
 descriptorO=desc.createDescriptorsSOAP( traj[step], species, sigma_, cutoff_, nmax_, lmax_, periodic )[0:32][index_[0:32],:]
@@ -129,5 +130,5 @@ descriptorO=desc.createDescriptorsSOAP( traj[step], species, sigma_, cutoff_, nm
 #=============================================================================#
 
 import matplotlib.pyplot as plt
-
+  
 
