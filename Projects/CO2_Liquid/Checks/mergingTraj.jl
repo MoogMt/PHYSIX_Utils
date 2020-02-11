@@ -147,24 +147,24 @@ for V in Volumes
                 end
                 if i == max_nb_run
                     if target_length-total_time[nb_times] > 1
-                        positions_final[ target_length-total_time[nb_times]:target_length ] = positions[1:total_time[i]]
-                        velocities_final[ target_length-total_time[nb_times]:target_length ] = velocities[1:total_time[i]]
-                        forces_final[ target_length-total_time[nb_times]:target_length ] = forces[1:total_time[i]]
+                        positions_final[ target_length-total_time[nb_times]:target_length,:] = positions[1:total_time[i],:]
+                        velocities_final[ target_length-total_time[nb_times]:target_length,:] = velocities[1:total_time[i],:]
+                        forces_final[ target_length-total_time[nb_times]:target_length,:] = forces[1:total_time[i],:]
                     else
-                        positions_final[1:target_length] = positions[total_time[i]+1-target_length:total_time[i] ]
-                        velocities_final[1:target_length] = velocities[total_time[i]+1-target_length:total_time[i] ]
-                        forces_final[1:target_length] = forces[total_time[i]+1-target_length:total_time[i] ]
+                        positions_final[1:target_length,:] = positions[total_time[i]+1-target_length:total_time[i],:]
+                        velocities_final[1:target_length,:] = velocities[total_time[i]+1-target_length:total_time[i],:]
+                        forces_final[1:target_length,:] = forces[total_time[i]+1-target_length:total_time[i],:]
                         check=false
                         break
                     end
                 elseif target_length-sum(total_time[i:nb_times]) > 1
-                    positions_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = positions[1:total_time[i]]
-                    velocities_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = velocities[1:total_time[i]]
-                    forces_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = forces[1:total_time[i]]
+                    positions_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:] = positions[1:total_time[i],:]
+                    velocities_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:] = velocities[1:total_time[i],:]
+                    forces_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:] = forces[1:total_time[i],:]
                 else
-                    positions_final[1:target_length-sum(total_time[i+1:nb_times])] = positions[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
-                    velocities_final[1:target_length-sum(total_time[i+1:nb_times])] = velocities[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
-                    forces_final[1:target_length-sum(total_time[i+1:nb_times])] = forces[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    positions_final[1:target_length-sum(total_time[i+1:nb_times]),:] = positions[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:]
+                    velocities_final[1:target_length-sum(total_time[i+1:nb_times]),:] = velocities[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:]
+                    forces_final[1:target_length-sum(total_time[i+1:nb_times]),:] = forces[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:]
                     break
                 end
             end
@@ -180,29 +180,42 @@ for V in Volumes
             etot_final = zeros(Real, target_length )
             msd_final = zeros(Real, target_length )
             comp_final = zeros(Real, target_length )
-            check=0
-            remain=total_nb_step
+            check=false
             for i=max_nb_run:-1:1
-                if remain < 1
+                temp,epot,etot,msd,comp = cpmd.readEnergies( string( folder_local, i, "-run/ENERGIES_db" ) )
+                if ! check
                     break
                 end
-                temp,epot,etot,msd,comp = cpmd.readEnergies( string( folder_local, i, "-run/ENERGIES_db" ) )
-                if remain > total_time[i]
-                    temp_final[target_length-total_time[i]-check:target_length-check] = temp[1:total_time[i]]
-                    epot_final[target_length-total_time[i]-check:target_length-check] = epot[1:total_time[i]]
-                    etot_final[target_length-total_time[i]-check:target_length-check] = etot[1:total_time[i]]
-                    msd_final[target_length-total_time[i]-check:target_length-check] = msd[1:total_time[i]]
-                    comp_final[target_length-total_time[i]-check:target_length-check] = comp[1:total_time[i]]
-                    remain -= total_time[i]
+                if i == max_nb_run
+                    if target_length-total_time[nb_times] > 1
+                        temp_final[ target_length-total_time[nb_times]:target_length ] = temp[1:total_time[i]]
+                        epot_final[ target_length-total_time[nb_times]:target_length ] = epot[1:total_time[i]]
+                        etot_final[ target_length-total_time[nb_times]:target_length ] = etot[1:total_time[i]]
+                        msd_final[ target_length-total_time[nb_times]:target_length ] = msd[1:total_time[i]]
+                        comp_final[ target_length-total_time[nb_times]:target_length ] = comp[1:total_time[i]]
+                    else
+                        temp_final[1:target_length] = temp[total_time[i]+1-target_length:total_time[i] ]
+                        epot_final[1:target_length] = epot[total_time[i]+1-target_length:total_time[i] ]
+                        etot_final[1:target_length] = etot[total_time[i]+1-target_length:total_time[i] ]
+                        msd_final[1:target_length] = msd[total_time[i]+1-target_length:total_time[i] ]
+                        comp_final[1:target_length] = comp[total_time[i]+1-target_length:total_time[i] ]
+                        check=false
+                        break
+                    end
+                elseif target_length-sum(total_time[i:nb_times]) > 1
+                    temp_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = temp[1:total_time[i]]
+                    epot_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = epot[1:total_time[i]]
+                    etot_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = etot[1:total_time[i]]
+                    msd_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = msd[1:total_time[i]]
+                    comp_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = comp[1:total_time[i]]
                 else
-                    temp_final[target_length-total_time[i]-check:target_length-check] = temp[total_time[i]-remain:total_time[i]]
-                    epot_final[target_length-total_time[i]-check:target_length-check] = epot[total_time[i]-remain:total_time[i]]
-                    etot_final[target_length-total_time[i]-check:target_length-check] = etot[total_time[i]-remain:total_time[i]]
-                    msd_final[target_length-total_time[i]-check:target_length-check] = msd[total_time[i]-remain:total_time[i]]
-                    comp_final[target_length-total_time[i]-check:target_length-check] = comp[total_time[i]-remain:total_time[i]]
-                    remain = 0
+                    temp_final[1:target_length-sum(total_time[i+1:nb_times])] = temp[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    epot_final[1:target_length-sum(total_time[i+1:nb_times])] = epot[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    etot_final[1:target_length-sum(total_time[i+1:nb_times])] = etot[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    msd_final[1:target_length-sum(total_time[i+1:nb_times])] = msd[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    comp_final[1:target_length-sum(total_time[i+1:nb_times])] = comp[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    break
                 end
-                check += total_time[i]
             end
             cpmd.writeEnergies( string( folder_local, "ENERGIES_fdb" ), temp_final, epot_final, etot_final, msd_final, comp_final )
             # Clean up
@@ -214,21 +227,26 @@ for V in Volumes
             #---------------------------------------------
             # Merging Stress / Pressure
             stress_tensor_final = zeros( Real, target_length,3,3)
-            check=0
-            remain=total_nb_step
+            check=false
             for i=max_nb_run:-1:1
-                if remain < 1
+                stress_tensor = cpmd.readStress( string( folder_local, i, "-run/STRESS_db" )  )
+                if ! check
                     break
                 end
-                stress_tensor = cpmd.readStress( string( folder_local, i, "-run/STRESS_db" )  )
-                if remain > total_time[i]
-                    stress_tensor_final[target_length-total_time[i]-check:target_length-check,:,:] = stress_tensor[1:total_time[i],:,:]
-                    remain -= total_time[i]
+                if i == max_nb_run
+                    if target_length-total_time[nb_times] > 1
+                        stress_tensor_final[target_length-total_time[nb_times]:target_length,:,:] = stress_tensor[1:total_time[i],:,:]
+                    else
+                        stress_tensor_final[1:target_length,:,:] = stress_tensor[total_time[i]+1-target_length:total_time[i],:,:]
+                        check=false
+                        break
+                    end
+                elseif target_length-sum(total_time[i:nb_times]) > 1
+                    stress_tensor_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:,:] = stress_tensor[1:total_time[i],:,:]
                 else
-                    stress_tensor_final[target_length-total_time[i]-check:target_length-check,:,:] = stress_tensor[total_time[i]-remain:total_time[i],:,:]
-                    remain = 0
+                    stress_tensor_final[1:target_length-sum(total_time[i+1:nb_times]),:,:] = stress_tensor[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:,:]
+                    break
                 end
-                check += total_time[i]
             end
             cpmd.writeStress( string( folder_local, "STRESS_fdb" ), stress_tensor_final )
             #---------------------------------------------
