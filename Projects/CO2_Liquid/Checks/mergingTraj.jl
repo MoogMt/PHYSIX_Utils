@@ -72,12 +72,12 @@ for V in Volumes
                     max_nb_run += 1
                     break
                 else
-                    times = filexyz.getNbStep( string(folder_local, nbrun, "-run/TRAJEC_db.xyz" ) )
+                    times = filexyz.getNbSteps( string(folder_local, nbrun, "-run/TRAJEC_db.xyz" ) )
                     total_nb_step += times
                     push!( total_time, times )
                 end
             else
-                times = filexyz.getNbStep( string(folder_local, nbrun, "-run/TRAJEC_db.xyz" ) )
+                times = filexyz.getNbSteps( string(folder_local, nbrun, "-run/TRAJEC_db.xyz" ) )
                 total_nb_step += times
                 push!( total_time, times )
                 max_nb_run += 1
