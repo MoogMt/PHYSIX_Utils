@@ -107,9 +107,9 @@ for V in Volumes
             # Shorting FTRAJECTORY
             #---------------------------------------------
             positions, velocities, forces = cpmd.readFtraj( string( folder_local, 1, "-run/FTRAJECTORY_db" )  )
-            positions_final[1:target_length,:,:] = positions[total_time[1]+1-target_length:total_time[1],:,:]
-            velocities_final[1:target_length,:,:] = velocities[total_time[1]+1-target_length:total_time[1],:,:]
-            forces_final[1:target_length,:,:] = forces[total_time[1]+1-target_length:total_time[1],:,:]
+            positions_final = positions[total_time[1]+1-target_length:total_time[1],:,:]
+            velocities_final = velocities[total_time[1]+1-target_length:total_time[1],:,:]
+            forces_final = forces[total_time[1]+1-target_length:total_time[1],:,:]
             cpmd.writeFtraj( string( folder_local, "FTRAJECTORY_fdb" ), positions_final, velocities_final, forces_final )
             # Clean up
             positions=0
@@ -121,11 +121,11 @@ for V in Volumes
             # Shorting ENERGIES
             #---------------------------------------------
             temp,epot,etot,msd,comp = cpmd.readEnergies( string( folder_local, 1, "-run/ENERGIES_db" )  )
-            temp_final[1:target_length] = temp[total_time[1]+1-target_length:total_time[1] ]
-            epot_final[1:target_length] = epot[total_time[1]+1-target_length:total_time[1] ]
-            etot_final[1:target_length] = etot[total_time[1]+1-target_length:total_time[1] ]
-            msd_final[1:target_length] = msd[total_time[1]+1-target_length:total_time[1] ]
-            comp_final[1:target_length] = comp[total_time[1]+1-target_length:total_time[1] ]
+            temp_final = temp[total_time[1]+1-target_length:total_time[1] ]
+            epot_final = epot[total_time[1]+1-target_length:total_time[1] ]
+            etot_final = etot[total_time[1]+1-target_length:total_time[1] ]
+            msd_final = msd[total_time[1]+1-target_length:total_time[1] ]
+            comp_final = comp[total_time[1]+1-target_length:total_time[1] ]
             cpmd.writeEnergies( string( folder_local, "ENERGIES_fdb" ), temp_final, epot_final, etot_final, msd_final, comp_final )
             temp = 0
             epot = 0
@@ -140,7 +140,7 @@ for V in Volumes
             # Shorting STRESS
             #---------------------------------------------
             stress_tensor = cpmd.readStress( string( folder_local, 1, "-run/STRESS_db" )   )
-            stress_tensor_final[1:target_length,:,:] = stress_tensor[total_time[1]+1-target_length:total_time[1],:,:]
+            stress_tensor_final = stress_tensor[total_time[1]+1-target_length:total_time[1],:,:]
             stress_tensor=0
             cpmd.writeStress( string( folder_local, "STRESS_fdb" ), stress_tensor_final )
             pressure_final = press_stress.computePressure( stress_tensor_final )
