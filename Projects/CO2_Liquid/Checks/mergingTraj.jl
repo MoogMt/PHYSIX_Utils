@@ -50,14 +50,23 @@ for V in Volumes
                 break
             end
 
-            if ! isfile( string(folder_in,"FLAG") ) || ! isfile( string(folder_in,"FLAG2") ) || ! isfile( string(folder_in,"FLAG") )
-                print("FLAG spotted in ",V," ",T,"K",)
+            if isfile( string(folder_in,"FLAG") ) || isfile( string(folder_in,"FLAG2") ) || isfile( string(folder_in,"FLAG3") )
+                print("FLAG spotted in ",V," ",T,"K\n",)
+                if isfile( string(folder_in,"FLAG") )
+                    print("FLAG\n")
+                end
+                if isfile( string(folder_in,"FLAG2") )
+                    print("FLAG2\n")
+                end
+                if isfile( string(folder_in,"FLAG3") )
+                    print("FLAG3\n")
+                end
             end
 
             if nbrun > 1
 
-                traj_current_curr = filexyz.readFileAtomList( folder_local, nbrun, "-run/TRAJEC_db.xyz")
-                traj_current_prev = filexyz.readFileAtomList( folder_local, nbrun-1, "-run/TRAJEC_db.xyz")
+                traj_current_curr = filexyz.readFileAtomList( string( folder_local, nbrun, "-run/TRAJEC_db.xyz") )
+                traj_current_prev = filexyz.readFileAtomList( string( folder_local, nbrun-1, "-run/TRAJEC_db.xyz") )
 
                 if traj_current_prev == false || traj_current_curr == false
                     break
