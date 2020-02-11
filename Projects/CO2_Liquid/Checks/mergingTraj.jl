@@ -21,10 +21,8 @@ folder_base="/media/moogmt/Elements/CO2/"
 folder_base="/media/mathieu/Elements/CO2/"
 
 # T,V
-# Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82]
-# Temperatures=[2000,2500,3000]
-Volumes = [8.82]
-Temperatures = [2500]
+Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82]
+Temperatures=[2000,2500,3000]
 runs=[1,2,3,4]
 
 cut_off_rmsd=0.2
@@ -34,6 +32,10 @@ for V in Volumes
     for T in Temperatures
         print("Merging trajectories in ",V," ",T,"K\n")
         folder_local=string(folder_base,V,"/",T,"K/")
+
+        if ! isdir(folder_local)
+            continue
+        end
 
         total_nb_step=0
         total_time=[]
@@ -80,6 +82,7 @@ for V in Volumes
                 else
                     times = filexyz.getNbSteps( string(folder_local, nbrun, "-run/TRAJEC_db.xyz" ) )
                     total_nb_step += times
+                    max_nb_run += 1
                     push!( total_time, times )
                 end
             else
@@ -91,6 +94,11 @@ for V in Volumes
         end
 
         nb_times=size(total_time)[1]
+
+        if ! merge
+            print("Major issue somewhere here (",V," ",T,"K), moving on.")
+            continue
+        end
 
         # If only one simulation
         if max_nb_run == 1
@@ -151,9 +159,11 @@ for V in Volumes
             if total_nb_step < target_length && ! merge
                 if ! merge
                     print("Issues with one of the runs. \n")
+                    break
                 else
                     print("Total length of simulation is not long enough for merge! \n")
                     print("Length: ",total_nb_step," step Target: ",target_length," step\n")
+                    break
                 end
             else
                 # Merging TRAJEC.xyz
