@@ -132,13 +132,14 @@ for V in Volumes
             filexyz.writeXYZ( string( folder_local, "TRAJEC_fdb.xyz" ), traj_final )
             cell = cell_mod.Cell_param(V,V,V)
             filexyz.writeXYZ( string( folder_local, "TRAJEC_fdb_wrapped.xyz" ), cell_mod.wrap( traj_final, cell ) )
+            nb_atoms = size(traj[1].names)[1]
             # Clean up
             traj_final=0
             # Merging FTRAJ
             #---------------------------------------------
-            positions_final = zeros(Real, target_length, 3 )
-            velocities_final = zeros(Real, target_length, 3 )
-            forces_final = zeros(Real, target_length, 3 )
+            positions_final = zeros(Real, target_length, nb_atoms, 3 )
+            velocities_final = zeros(Real, target_length, nb_atoms, 3 )
+            forces_final = zeros(Real, target_length, nb_atoms, 3 )
             check=false
             for i=max_nb_run:-1:1
                 positions, velocities, forces = cpmd.readFtraj( string( folder_local, i, "-run/FTRAJECTORY_db" )  )
@@ -147,24 +148,24 @@ for V in Volumes
                 end
                 if i == max_nb_run
                     if target_length-total_time[nb_times] > 1
-                        positions_final[ target_length-total_time[nb_times]:target_length,:] = positions[1:total_time[i],:]
-                        velocities_final[ target_length-total_time[nb_times]:target_length,:] = velocities[1:total_time[i],:]
-                        forces_final[ target_length-total_time[nb_times]:target_length,:] = forces[1:total_time[i],:]
+                        positions_final[ target_length-total_time[nb_times]:target_length,:,:] = positions[1:total_time[i],:,:]
+                        velocities_final[ target_length-total_time[nb_times]:target_length,:,:] = velocities[1:total_time[i],:,:]
+                        forces_final[ target_length-total_time[nb_times]:target_length,:,:] = forces[1:total_time[i],:,:]
                     else
-                        positions_final[1:target_length,:] = positions[total_time[i]+1-target_length:total_time[i],:]
-                        velocities_final[1:target_length,:] = velocities[total_time[i]+1-target_length:total_time[i],:]
-                        forces_final[1:target_length,:] = forces[total_time[i]+1-target_length:total_time[i],:]
+                        positions_final[1:target_length,:,:] = positions[total_time[i]+1-target_length:total_time[i],:,:]
+                        velocities_final[1:target_length,:,:] = velocities[total_time[i]+1-target_length:total_time[i],:,:]
+                        forces_final[1:target_length,:,:] = forces[total_time[i]+1-target_length:total_time[i],:,:]
                         check=false
                         break
                     end
                 elseif target_length-sum(total_time[i:nb_times]) > 1
-                    positions_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:] = positions[1:total_time[i],:]
-                    velocities_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:] = velocities[1:total_time[i],:]
-                    forces_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:] = forces[1:total_time[i],:]
+                    positions_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:,:] = positions[1:total_time[i],:,:]
+                    velocities_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:,:] = velocities[1:total_time[i],:,:]
+                    forces_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times]),:,:] = forces[1:total_time[i],:,:]
                 else
-                    positions_final[1:target_length-sum(total_time[i+1:nb_times]),:] = positions[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:]
-                    velocities_final[1:target_length-sum(total_time[i+1:nb_times]),:] = velocities[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:]
-                    forces_final[1:target_length-sum(total_time[i+1:nb_times]),:] = forces[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:]
+                    positions_final[1:target_length-sum(total_time[i+1:nb_times]),:,:] = positions[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:,:]
+                    velocities_final[1:target_length-sum(total_time[i+1:nb_times]),:,:] = velocities[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:,:]
+                    forces_final[1:target_length-sum(total_time[i+1:nb_times]),:,:] = forces[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i],:,:]
                     break
                 end
             end
