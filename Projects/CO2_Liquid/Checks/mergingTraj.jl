@@ -95,6 +95,8 @@ for V in Volumes
 
         end
 
+        nb_times=size(total_time)[1]
+
         if total_nb_step < target_length && ! merge
             if ! merge
                 print("Issues with one of the runs. \n")
@@ -105,24 +107,31 @@ for V in Volumes
         else
             # Merging TRAJEC.xyz
             #---------------------------------------------
+            check=true
             traj_final = Vector{ AtomList }(undef, target_length)
-            check=0
-            remain=total_nb_step
             for i=max_nb_run:-1:1
-                if remain < 1
+                traj = filexyz.readFileAtomList( string( folder_local, i, "-run/TRAJEC_db.xyz" ) )
+                if ! check
                     break
                 end
-                traj = filexyz.readFileAtomList( string( folder_local, i, "-run/TRAJEC_db.xyz" ) )
-                if remain > total_time[i]
-                    traj_final[total_nb_step-total_time[i]-check:total_nb_step-check] = traj[1:total_time[i]]
-                    remain -= total_time[i]
+                if i == max_nb_run
+                    if target_length-total_time[nb_times] > 1
+                        traj_final[ target_length-total_time[nb_times]:target_length ] = traj[1:total_time[i]]
+                    else
+                        traj_final[1:target_length] = traj[total_time[i]+1-target_length:total_time[i] ]
+                        check=false
+                        break
+                    end
+                elseif target_length-sum(total_time[i:nb_times]) > 1
+                    traj_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = traj[1:total_time[i]]
                 else
-                    traj_final[total_nb_step-total_time[i]-check:total_nb_step-check] = traj[total_time[i]-remain:total_time[i]]
-                    remain = 0
+                    traj_final[1:target_length-sum(total_time[i+1:nb_times])] = traj[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    break
                 end
-                check += total_time[i]
             end
             filexyz.writeXYZ( string( folder_local, "TRAJEC_fdb.xyz" ), traj_final )
+            cell = cell_mod.Cell_param(V,V,V)
+            filexyz.writeXYZ( string( folder_local, "TRAJEC_fdb_wrapped.xyz" ), cell_mod.wrap( traj_final, cell ) )
             # Clean up
             traj_final=0
             # Merging FTRAJ
@@ -130,25 +139,34 @@ for V in Volumes
             positions_final = zeros(Real, target_length, 3 )
             velocities_final = zeros(Real, target_length, 3 )
             forces_final = zeros(Real, target_length, 3 )
-            check=0
-            remain=total_nb_step
+            check=false
             for i=max_nb_run:-1:1
-                if remain < 1
+                positions, velocities, forces = cpmd.readFtraj( string( folder_local, i, "-run/FTRAJECTORY_db" )  )
+                if ! check
                     break
                 end
-                positions, velocities, forces = cpmd.readFtraj( string( folder_local, i, "-run/FTRAJECTORY_db" )  )
-                if remain > total_time[i]
-                    positions_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = positions[1:total_time[i],:]
-                    velocities_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = velocities[1:total_time[i],:]
-                    forces_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = forces[1:total_time[i],:]
-                    remain -= total_time[i]
+                if i == max_nb_run
+                    if target_length-total_time[nb_times] > 1
+                        positions_final[ target_length-total_time[nb_times]:target_length ] = positions[1:total_time[i]]
+                        velocities_final[ target_length-total_time[nb_times]:target_length ] = velocities[1:total_time[i]]
+                        forces_final[ target_length-total_time[nb_times]:target_length ] = forces[1:total_time[i]]
+                    else
+                        positions_final[1:target_length] = positions[total_time[i]+1-target_length:total_time[i] ]
+                        velocities_final[1:target_length] = velocities[total_time[i]+1-target_length:total_time[i] ]
+                        forces_final[1:target_length] = forces[total_time[i]+1-target_length:total_time[i] ]
+                        check=false
+                        break
+                    end
+                elseif target_length-sum(total_time[i:nb_times]) > 1
+                    positions_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = positions[1:total_time[i]]
+                    velocities_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = velocities[1:total_time[i]]
+                    forces_final[target_length-sum(total_time[i:nb_times]):target_length-sum(total_time[i+1:nb_times])] = forces[1:total_time[i]]
                 else
-                    positions_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = positions[total_time[i]-remain:total_time[i],:]
-                    velocities_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = velocities[total_time[i]-remain:total_time[i],:]
-                    forces_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = forces[total_time[i]-remain:total_time[i],:]
-                    remain = 0
+                    positions_final[1:target_length-sum(total_time[i+1:nb_times])] = positions[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    velocities_final[1:target_length-sum(total_time[i+1:nb_times])] = velocities[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    forces_final[1:target_length-sum(total_time[i+1:nb_times])] = forces[total_time[i]-(target_length-sum(total_time[i+1:nb_times])):total_time[i]]
+                    break
                 end
-                check += total_time[i]
             end
             cpmd.writeFtraj( string( folder_local, "FTRAJECTORY_fdb" ), positions_final, velocities_final, forces_final )
             # Clean up
@@ -170,18 +188,18 @@ for V in Volumes
                 end
                 temp,epot,etot,msd,comp = cpmd.readEnergies( string( folder_local, i, "-run/ENERGIES_db" ) )
                 if remain > total_time[i]
-                    temp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = temp[1:total_time[i]]
-                    epot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = epot[1:total_time[i]]
-                    etot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = etot[1:total_time[i]]
-                    msd_final[total_nb_step-total_time[i]-check:total_nb_step-check] = msd[1:total_time[i]]
-                    comp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = comp[1:total_time[i]]
+                    temp_final[target_length-total_time[i]-check:target_length-check] = temp[1:total_time[i]]
+                    epot_final[target_length-total_time[i]-check:target_length-check] = epot[1:total_time[i]]
+                    etot_final[target_length-total_time[i]-check:target_length-check] = etot[1:total_time[i]]
+                    msd_final[target_length-total_time[i]-check:target_length-check] = msd[1:total_time[i]]
+                    comp_final[target_length-total_time[i]-check:target_length-check] = comp[1:total_time[i]]
                     remain -= total_time[i]
                 else
-                    temp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = temp[total_time[i]-remain:total_time[i]]
-                    epot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = epot[total_time[i]-remain:total_time[i]]
-                    etot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = etot[total_time[i]-remain:total_time[i]]
-                    msd_final[total_nb_step-total_time[i]-check:total_nb_step-check] = msd[total_time[i]-remain:total_time[i]]
-                    comp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = comp[total_time[i]-remain:total_time[i]]
+                    temp_final[target_length-total_time[i]-check:target_length-check] = temp[total_time[i]-remain:total_time[i]]
+                    epot_final[target_length-total_time[i]-check:target_length-check] = epot[total_time[i]-remain:total_time[i]]
+                    etot_final[target_length-total_time[i]-check:target_length-check] = etot[total_time[i]-remain:total_time[i]]
+                    msd_final[target_length-total_time[i]-check:target_length-check] = msd[total_time[i]-remain:total_time[i]]
+                    comp_final[target_length-total_time[i]-check:target_length-check] = comp[total_time[i]-remain:total_time[i]]
                     remain = 0
                 end
                 check += total_time[i]
@@ -204,10 +222,10 @@ for V in Volumes
                 end
                 stress_tensor = cpmd.readStress( string( folder_local, i, "-run/STRESS_db" )  )
                 if remain > total_time[i]
-                    stress_tensor_final[total_nb_step-total_time[i]-check:total_nb_step-check,:,:] = stress_tensor[1:total_time[i],:,:]
+                    stress_tensor_final[target_length-total_time[i]-check:target_length-check,:,:] = stress_tensor[1:total_time[i],:,:]
                     remain -= total_time[i]
                 else
-                    stress_tensor_final[total_nb_step-total_time[i]-check:total_nb_step-check,:,:] = stress_tensor[total_time[i]-remain:total_time[i],:,:]
+                    stress_tensor_final[target_length-total_time[i]-check:target_length-check,:,:] = stress_tensor[total_time[i]-remain:total_time[i],:,:]
                     remain = 0
                 end
                 check += total_time[i]
