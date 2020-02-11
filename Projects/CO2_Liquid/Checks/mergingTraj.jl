@@ -72,7 +72,7 @@ for V in Volumes
                     break
                 end
 
-                if exp_data.computeRMSD(traj[1],traj2[Int(step)]) < cut_off_rmsd
+                if exp_data.computeRMSD(traj_current_curr[1],traj_current_prev[Int(step)]) < cut_off_rmsd
                     print("Faillure to merge simply at ",nbrun,"\n")
                     handle_out = open( string(folder_local,nbrun,"-run/FLAG4"), "w")
                     write(handle_out,string("CHECK"))
