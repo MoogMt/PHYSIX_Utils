@@ -132,7 +132,7 @@ for V in Volumes
             filexyz.writeXYZ( string( folder_local, "TRAJEC_fdb.xyz" ), traj_final )
             cell = cell_mod.Cell_param(V,V,V)
             filexyz.writeXYZ( string( folder_local, "TRAJEC_fdb_wrapped.xyz" ), cell_mod.wrap( traj_final, cell ) )
-            nb_atoms = size(traj[1].names)[1]
+            nb_atoms = size(traj_final[1].names)[1]
             # Clean up
             traj_final=0
             # Merging FTRAJ
@@ -252,7 +252,7 @@ for V in Volumes
             cpmd.writeStress( string( folder_local, "STRESS_fdb" ), stress_tensor_final )
             #---------------------------------------------
             pressure_final = press_stress.computePressure( stress_tensor_final )
-            cpmd.writePressure( string( folder_local, "Pressure_fdb" ), pressure_final )
+            press_stress.writePressure( string( folder_local, "Pressure_fdb" ), pressure_final )
             # Clean up
             stress_tensor_final=0
             pressure_final=0
