@@ -71,9 +71,10 @@ for V in Volumes
                 if traj_current_prev == false || traj_current_curr == false
                     break
                 end
-
-                if exp_data.computeRMSD(traj_current_curr[1],traj_current_prev[Int(step)]) < cut_off_rmsd
+                rmsd = exp_data.computeRMSD(traj_current_curr[1],traj_current_prev[size(traj_current_prev)[1]] )
+                if rmsd > cut_off_rmsd
                     print("Faillure to merge simply at ",nbrun,"\n")
+                    print("RMSD ",rmsd,"\n")
                     handle_out = open( string(folder_local,nbrun,"-run/FLAG4"), "w")
                     write(handle_out,string("CHECK"))
                     close(handle_out)
@@ -113,10 +114,10 @@ for V in Volumes
                 end
                 traj = filexyz.readFileAtomList( string( folder_local, i, "-run/TRAJEC_db.xyz" ) )
                 if remain > total_time[i]
-                    traj_final[total_nb_step-total_time[i]-check] = traj[1:total_time[i]]
+                    traj_final[total_nb_step-total_time[i]-check:total_nb_step-check] = traj[1:total_time[i]]
                     remain -= total_time[i]
                 else
-                    traj_final[total_nb_step-total_time[i]-check] = traj[total_time[i]-remain:total_time[i]]
+                    traj_final[total_nb_step-total_time[i]-check:total_nb_step-check] = traj[total_time[i]-remain:total_time[i]]
                     remain = 0
                 end
                 check += total_time[i]
@@ -137,14 +138,14 @@ for V in Volumes
                 end
                 positions, velocities, forces = cpmd.readFtraj( string( folder_local, i, "-run/FTRAJECTORY_db" )  )
                 if remain > total_time[i]
-                    positions_final[total_nb_step-total_time[i]-check,:] = positions[1:total_time[i],:]
-                    velocities_final[total_nb_step-total_time[i]-check,:] = velocities[1:total_time[i],:]
-                    forces_final[total_nb_step-total_time[i]-check,:] = forces[1:total_time[i],:]
+                    positions_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = positions[1:total_time[i],:]
+                    velocities_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = velocities[1:total_time[i],:]
+                    forces_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = forces[1:total_time[i],:]
                     remain -= total_time[i]
                 else
-                    positions_final[total_nb_step-total_time[i]-check,:] = positions[total_time[i]-remain:total_time[i],:]
-                    velocities_final[total_nb_step-total_time[i]-check,:] = velocities[total_time[i]-remain:total_time[i],:]
-                    forces_final[total_nb_step-total_time[i]-check,:] = forces[total_time[i]-remain:total_time[i],:]
+                    positions_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = positions[total_time[i]-remain:total_time[i],:]
+                    velocities_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = velocities[total_time[i]-remain:total_time[i],:]
+                    forces_final[total_nb_step-total_time[i]-check:total_nb_step-check,:] = forces[total_time[i]-remain:total_time[i],:]
                     remain = 0
                 end
                 check += total_time[i]
@@ -169,18 +170,18 @@ for V in Volumes
                 end
                 temp,epot,etot,msd,comp = cpmd.readEnergies( string( folder_local, i, "-run/ENERGIES_db" ) )
                 if remain > total_time[i]
-                    temp_final[total_nb_step-total_time[i]-check] = temp[1:total_time[i]]
-                    epot_final[total_nb_step-total_time[i]-check] = epot[1:total_time[i]]
-                    etot_final[total_nb_step-total_time[i]-check] = etot[1:total_time[i]]
-                    msd_final[total_nb_step-total_time[i]-check] = msd[1:total_time[i]]
-                    comp_final[total_nb_step-total_time[i]-check] = comp[1:total_time[i]]
+                    temp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = temp[1:total_time[i]]
+                    epot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = epot[1:total_time[i]]
+                    etot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = etot[1:total_time[i]]
+                    msd_final[total_nb_step-total_time[i]-check:total_nb_step-check] = msd[1:total_time[i]]
+                    comp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = comp[1:total_time[i]]
                     remain -= total_time[i]
                 else
-                    temp_final[total_nb_step-total_time[i]-check] = temp[total_time[i]-remain:total_time[i]]
-                    epot_final[total_nb_step-total_time[i]-check] = epot[total_time[i]-remain:total_time[i]]
-                    etot_final[total_nb_step-total_time[i]-check] = etot[total_time[i]-remain:total_time[i]]
-                    msd_final[total_nb_step-total_time[i]-check] = msd[total_time[i]-remain:total_time[i]]
-                    comp_final[total_nb_step-total_time[i]-check] = comp[total_time[i]-remain:total_time[i]]
+                    temp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = temp[total_time[i]-remain:total_time[i]]
+                    epot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = epot[total_time[i]-remain:total_time[i]]
+                    etot_final[total_nb_step-total_time[i]-check:total_nb_step-check] = etot[total_time[i]-remain:total_time[i]]
+                    msd_final[total_nb_step-total_time[i]-check:total_nb_step-check] = msd[total_time[i]-remain:total_time[i]]
+                    comp_final[total_nb_step-total_time[i]-check:total_nb_step-check] = comp[total_time[i]-remain:total_time[i]]
                     remain = 0
                 end
                 check += total_time[i]
@@ -203,10 +204,10 @@ for V in Volumes
                 end
                 stress_tensor = cpmd.readStress( string( folder_local, i, "-run/STRESS_db" )  )
                 if remain > total_time[i]
-                    stress_tensor_final[total_nb_step-total_time[i]-check,:,:] = stress_tensor[1:total_time[i],:,:]
+                    stress_tensor_final[total_nb_step-total_time[i]-check:total_nb_step-check,:,:] = stress_tensor[1:total_time[i],:,:]
                     remain -= total_time[i]
                 else
-                    stress_tensor_final[total_nb_step-total_time[i]-check,:,:] = stress_tensor[total_time[i]-remain:total_time[i],:,:]
+                    stress_tensor_final[total_nb_step-total_time[i]-check:total_nb_step-check,:,:] = stress_tensor[total_time[i]-remain:total_time[i],:,:]
                     remain = 0
                 end
                 check += total_time[i]
