@@ -14,5 +14,5 @@ Contains:
 
 - Python: Atomic Simulation Environment (ASE), dscribe, Keras, TensorFlow, Numpy, Scipy
 
-- Julia: LinAlgebra, Statistics, etc... ( use the install.jl code to install all dependancies )
+- Julia: Basically the LibAtomSim library and its dependancies.
 
