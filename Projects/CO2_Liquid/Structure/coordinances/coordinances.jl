@@ -27,13 +27,18 @@ function countCoordinances( file_path::T1, V::T2, cut_off::T3, max_number_neighb
     cell = cell_mod.Cell_param(V,V,V)
     nb_step = atom_mod.getNbStep( traj )
     species  = atom_mod.getSpecies( traj[1] )
-    nb_species = atom_mod.getNbSpecies( traj[1] )
+    nb_species = atom_mod.getNbElementSpecies( traj[1], species )
     start_species = atom_mod.getStartSpecies( traj[1], species )
-    count_coordinances=zeros( nb_step, max_number_neighbor+1, nb_species )
+    n_spec = size(species)[1]
+    count_coordinances=zeros(Int, nb_step, max_number_neighbor+1, n_spec )
     for step=1:nb_step
         distance_matrix=contact_matrix.buildMatrix( traj[step], cell,cut_off )
-        for i_spec=1:nb_species
-            count_coordinances[ step, : , i_spec ] = countCoordinances( distance_matrix[ start_species[i_spec]:start_species[i_spec]+nb_species[i_spec], : ], max_number_neighbor )
+        for i_spec=1:n_spec
+            start_ = start_species[i_spec]
+            end_ = start_species[i_spec]+nb_species[i_spec]
+            print("start: ",start_,"\n")
+            print("end: ",end_,"\n")
+            count_coordinances[ step, : , i_spec ] = countCoordinances( distance_matrix[start_:end_,:], max_number_neighbor )
         end
     end
     return count_coordinances, species, nb_species, start_species
