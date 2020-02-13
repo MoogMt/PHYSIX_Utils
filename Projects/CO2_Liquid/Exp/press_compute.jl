@@ -8,6 +8,7 @@ using contact_matrix
 using atom_mod
 using cell_mod
 using press_stress
+using conversion
 
 using Statistics
 
@@ -26,7 +27,7 @@ nb_species=[32,64]
 
 total_mass=0
 for i=1:2
-    total_mass += masses[i]*nb_species[i]
+    global total_mass += masses[i]*nb_species[i]
 end
 total_mass *= conversion.amu2gram
 
