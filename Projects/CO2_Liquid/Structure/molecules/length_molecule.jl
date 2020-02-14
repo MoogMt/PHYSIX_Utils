@@ -24,25 +24,25 @@ nb_step=size(traj)[1]
 
 for step=1:nb_step
 
-positions_local=copy(traj[step].positions)
-matrix = contact_matrix.buildMatrix( traj[step], cell, cut_off )
-molecules=graph.getGroupsFromMatrix(matrix)
-nb_molecules=size(molecules)[1]
-matrices=graph.extractAllMatrixForTrees( matrix, molecules )
+    positions_local=copy(traj[step].positions)
+    matrix = contact_matrix.buildMatrix( traj[step], cell, cut_off )
+    molecules=graph.getGroupsFromMatrix(matrix)
+    nb_molecules=size(molecules)[1]
+    matrices=graph.extractAllMatrixForTrees( matrix, molecules )
 
-nb_atoms=size(traj[1].names)[1]
-visited=zeros(Int,nb_atoms)
+    nb_atoms=size(traj[1].names)[1]
+    visited=zeros(Int,nb_atoms)
 
-for molecule=1:nb_molecules
-    if size(molecules[molecule])[1] <= 1
-        continue
+    for molecule=1:nb_molecules
+        if size(molecules[molecule])[1] <= 1
+            continue
+        end
+        adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
+        visited=zeros(Int,size(molecules[molecule]))
+        cell_mod.unWrapOnce( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule], cut_off)
     end
-    adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
-    visited=zeros(Int,size(molecules[molecule]))
-    cell_mod.checkInfinityAndUnWrap( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule], cut_off)
-end
 
-traj[step].positions=positions_local
+    traj[step].positions=positions_local
 end
 
 folder_out=string(folder_base,"/Data/")
