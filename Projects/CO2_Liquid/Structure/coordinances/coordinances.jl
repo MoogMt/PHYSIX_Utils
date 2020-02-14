@@ -1,6 +1,4 @@
-GPfolder=string("/home/mathieu/LibAtomicSim/Julia/")
-push!(LOAD_PATH, GPfolder)
-
+# Using code from LibAtomicSim
 using filexyz
 using cpmd
 using utils
@@ -8,6 +6,7 @@ using contact_matrix
 using atom_mod
 using cell_mod
 
+# Using code from standard Julia Libraries
 using Statistics
 
 # Computes the coordinances for all files

@@ -1,4 +1,15 @@
-include("contactmatrix.jl")
+# Loading necessary stuff
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using contact_matrix
+using filexyz
+using graph
+using exp_data
+using geom
+
+using Statistics
 
 folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/8.82/3000K/")
 file=string(folder,"TRAJEC_wrapped.xyz")
@@ -156,4 +167,3 @@ for 1:size(sizes)[1]
         step=zeros(nb_molecules)
     end
 end
-

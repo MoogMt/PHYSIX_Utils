@@ -1,4 +1,14 @@
-include("contactmatrix.jl")
+# Loading necessary stuff
+using atom_mod
+using cell_mod
+using cube_mod
+using clustering
+using contact_matrix
+using filexyz
+using graph
+using exp_data
+using geom
+
 
 # Thermodynamical values
 Volumes=["8.82","9.0","9.05","9.1","9.15","9.2","9.3","9.35","9.4","9.8"]

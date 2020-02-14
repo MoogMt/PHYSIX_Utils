@@ -1,6 +1,3 @@
-GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
-push!(LOAD_PATH, GPfolder)
-
 # Loading necessary stuff
 using atom_mod
 using cell_mod
@@ -13,13 +10,13 @@ using exp_data
 using geom
 
 V=8.82
-T=2000
+T=3000
 
 folder_base=string("/media/moogmt/Elements/CO2/",V,"/",T,"K/")
 
 file_traj = string(folder_base,"TRAJEC_wrapped.xyz")
 
-traj,test = filexyz.readFastFile(file_traj)
+traj = filexyz.readFileAtomList( file_traj )
 cell = cell_mod.Cell_param(V,V,V)
 cut_off=1.75
 
@@ -42,7 +39,7 @@ for molecule=1:nb_molecules
     end
     adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
     visited=zeros(Int,size(molecules[molecule]))
-    cell_mod.checkInfinityAndUnWrap(visited,matrices[molecule],adjacent_molecule,positions_local,cell,1,molecules[molecule],cut_off)
+    cell_mod.checkInfinityAndUnWrap( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule], cut_off)
 end
 
 traj[step].positions=positions_local

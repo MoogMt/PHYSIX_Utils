@@ -1,12 +1,13 @@
-GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
-push!(LOAD_PATH, GPfolder)
-
+# Loading necessary stuff
 using atom_mod
 using cell_mod
 using cube_mod
 using clustering
+using contact_matrix
 using filexyz
-
+using graph
+using exp_data
+using geom
 
 V=9.5
 T=3000
