@@ -9,6 +9,19 @@ using graph
 using exp_data
 using geom
 
+function writeMolecule( handle_out::T1 , positions::Array{T2}, species::Vector{T3}, step::T4, mol_index::T5 ) where { T1 <: IO, T2 <: Real,  T3 <: AbstractString, T4 <: Int, T5 <: Int }
+    size_molecule=size(positions)[1]
+    Base.write( handle_out, string( size_molecule, "\n" ) )
+    Base.write( handle_out, string( step," ", mol_index, "\n" ) )
+    for atom=1:size_molecule
+        Base.write(species[atom], " ")
+        for i=1:3
+            Base.write( handle_out, string( positions[atom,i], " " ) )
+        end
+        Base.write( handle_out, string("\n") )
+    end
+    return true
+end
 
 # Thermodynamical values
 Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
@@ -29,6 +42,9 @@ cut_off=1.75
 
 nb_step=size(traj)[1]
 
+handle_mol_inf = open( folder_target, "mol_inf.xyz")
+handle_mol_fin = open( folder_target, "mol_fin.xyz")
+
 for step=1:nb_step
 
     # Computing the molecules through graph exploration
@@ -46,13 +62,20 @@ for step=1:nb_step
         if size(molecules[molecule])[1] <= 1
             continue
         end
-        check = checkInfiniteChain( matrices[molecule], positions_local, cell, molecules[molecule], cut_off  )
-        if check
-
+        isinf, isok = isInfiniteChain( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 )
+        if ! isok
+            print( "Issue with molecule ", molecule, " at step: ", step, "\n" )
+            continue
+        end
+        if isinf
+            writeMolecule( handle_mol_inf, positions, species, step, molecule )
         else
-
+            writeMolecule( handle_mol_fin, positions, species, step, molecule )
         end
     end
 
     traj[step].positions=positions_local
 end
+
+close( handle_mol_inf )
+close( handle_mol_fin )
