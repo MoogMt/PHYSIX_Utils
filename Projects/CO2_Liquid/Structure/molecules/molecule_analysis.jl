@@ -54,24 +54,37 @@ for step=1:nb_step
     nb_molecules=size(molecules)[1]
     matrices=graph.extractAllMatrixForTrees( matrix, molecules )
 
-    # For each molecule, compute add its size to the general histogram
-    # And for the histogram of the infinite/finite size chains
-    # Finally, prints unwrapped molecules in separate .xyz file
-    # depending on if they are infinite or not.
+    # Loop over mmolecules
     for molecule=1:nb_molecules
+        # Molecule is an atom, discard
         if size(molecules[molecule])[1] <= 1
             continue
         end
+        # Check if molecule is finite
         isinf, isok = isInfiniteChain( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 )
+        # If something went wrong, moving on...
         if ! isok
-            print( "Issue with molecule ", molecule, " at step: ", step, "\n" )
+            print( "Issue reconstructing molecule ", molecule, " at step: ", step, "\n" )
             continue
         end
+        # Whether infinite or finite, the size of the molecule is counted, and it is printed in a specific file
         if isinf
-            writeMolecule( handle_mol_inf, positions, species, step, molecule )
+            writeMolecule( handle_mol_inf, positions, species, step, molecule ) # write molecule
+            # If the molecule is infinite, we print the atoms that should be bonded but aren't.
+            list = findUnlinked( positions )
+            # We put the positions of those atoms in a specific file, for visualization purposes (with VMD)
+            writeMolecule( handle_mol_inf_link, positions[list,:], species, step, molecule ) # write links
+            # Counting sizes
+            hist_inf[ size_molecule ] += 1
         else
-            writeMolecule( handle_mol_fin, positions, species, step, molecule )
+            writeMolecule( handle_mol_fin, positions, species, step, molecule ) # write molecule
+            # Counting sizes
+            hist_fin[ size_molecule ] += 1
         end
+        hist_gen[ size_molecule ] += 1
+        # NB: here we only count the molecule by size, hwoever that isn't fair, as a large molecule may take the
+        # totality of the atoms. Therefore, a corrective factor will be needed when computing fair statistics.
+
     end
 
     traj[step].positions=positions_local
