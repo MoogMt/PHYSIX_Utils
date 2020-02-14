@@ -73,7 +73,9 @@ for step=1:nb_step
             # If the molecule is infinite, we print the atoms that should be bonded but aren't.
             list = findUnlinked( positions )
             # We put the positions of those atoms in a specific file, for visualization purposes (with VMD)
-            writeMolecule( handle_mol_inf_link, positions[list,:], species, step, molecule ) # write links
+            for i=1:size(list)[1]
+                writeMolecule( handle_mol_inf_link, positions[list[i,:],:], species, step, molecule ) # write links
+            end
             # Counting sizes
             hist_inf[ size_molecule ] += 1
         else
