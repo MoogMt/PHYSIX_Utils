@@ -52,7 +52,7 @@ handle_mol_inf = open( string( folder_target_mol, "mol_inf.xyz"), "w" )
 handle_mol_fin = open( string( folder_target_mol, "mol_fin.xyz"), "w" )
 
 nb_step  = size( traj )[1]
-nb_atoms = size( traj[0].names )[1]
+nb_atoms = size( traj[1].names )[1]
 
 hist_fin=zeros( Int, nb_atoms )
 hist_inf=zeros( Int, nb_atoms )
