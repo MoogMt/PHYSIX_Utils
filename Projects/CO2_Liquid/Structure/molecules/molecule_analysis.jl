@@ -12,19 +12,19 @@ using geom
 function writeMolecule( handle_out::T1 , positions::Array{T2}, species::Vector{T3}, step::T4, mol_index::T5 ) where { T1 <: IO, T2 <: Real,  T3 <: AbstractString, T4 <: Int, T5 <: Int }
     size_molecule=size(positions)[1]
     Base.write( handle_out, string( size_molecule, "\n" ) )
-    Base.write( handle_out, string( step," ", mol_index, "\n" ) )
+    Base.write( handle_out, string( "STEP: X\n")) # ,step," ", mol_index, "\n" ) )
     for atom=1:size_molecule
-        Base.write(species[atom], " ")
+        Base.write( handle_out, string(species[atom], " ") )
         for i=1:3
-            Base.write( handle_out, string( positions[atom,i], " " ) )
+            Base.write( handle_out, string( round(positions[atom,i],digits=3), " " ) )
         end
         Base.write( handle_out, string("\n") )
     end
     return true
 end
 
-function writeSizeHistogram( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: IO, T2 <: Real }
-end
+# function writeSizeHistogram( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: IO, T2 <: Real }
+# end
 
 # Thermodynamical values
 Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
@@ -45,15 +45,22 @@ cell = cell_mod.Cell_param(V,V,V)
 cut_off=1.75
 
 
+nb_atoms = size(traj[1].names)[1]
+nb_step = size(traj)[1]
+
 folder_target_mol = string( folder_target, "Data/Molecules/" )
 
 if ! isdir( folder_target_mol )
     Base.Filesystem.mkdir( folder_target_mol )
 end
 
-handle_mol_inf = open( string( folder_target_mol, "mol_inf.xyz"), "w" )
-handle_mol_inf_link = open( string( folder_target_mol, "mol_inf_link.xyz" ) , "w" )
-handle_mol_fin = open( string( folder_target_mol, "mol_fin.xyz"), "w" )
+handle_mol_inf = Vector{ IO }( undef, nb_atoms )
+handle_mol_fin = Vector{ IO }( undef, nb_atoms )
+for atom=1:nb_atoms
+  handle_mol_inf[atom]= open( string( folder_target_mol, "mol_inf_",atom,".xyz"), "w" )
+  handle_mol_fin[atom]= open( string( folder_target_mol, "mol_fin_",atom,".xyz"), "w" )
+end
+# handle_mol_inf_link = open( string( folder_target_mol, "mol_inf_link.xyz" ) , "w" )
 
 nb_step  = size( traj )[1]
 nb_atoms = size( traj[1].names )[1]
@@ -64,7 +71,7 @@ hist_gen=zeros( Int, nb_atoms )
 
 for step=1:nb_step
 
-    print("Progress: ",step/nb_step*100,"%\n")
+    print("Progress: ",round(step/nb_step*100,digits=3),"%\n")
 
     # Computing the molecules through graph exploration
     positions_local=copy(traj[step].positions)
@@ -83,23 +90,24 @@ for step=1:nb_step
         # Check if molecule is finite
         visited=zeros(Int,size(molecules[molecule]))
         adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
-        isinf, isok = cell_mod.isInfiniteChain( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule], cut_off )
+        #isinf, isok = cell_mod.isInfiniteChain( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule], cut_off )
+        isinf = cell_mod.checkInfiniteChain( matrices[molecule], positions_local, cell, molecules[molecule], cut_off )
         # If something went wrong, moving on...
-        if ! isok
-            print( "Issue reconstructing molecule ", molecule, " at step: ", step, "\n" )
-            continue
-        end
+        # if ! isok
+        #     print( "Issue reconstructing molecule ", molecule, " at step: ", step, "\n" )
+        #     continue
+        # end
         # Whether infinite or finite, the size of the molecule is counted, and it is printed in a specific file
         if isinf
-            writeMolecule( handle_mol_inf, positions_local[molecules[molecule],:], traj[step].names[ molecules[molecule] ], step, molecule ) # write molecule
+            writeMolecule( handle_mol_inf[size_molecule], positions_local[molecules[molecule],:], traj[step].names[ molecules[molecule] ], step, molecule ) # write molecule
             # If the molecule is infinite, we print the atoms that should be bonded but aren't.
-            list = cell_mod.findUnlinked( matrices[molecule], positions_local[molecules[molecule],:], cell, molecules[molecule], cut_off )
+            #list = cell_mod.findUnlinked( matrices[molecule], positions_local[molecules[molecule],:], cell, molecules[molecule], cut_off )
             # We put the positions of those atoms in a specific file, for visualization purposes (with VMD)
-            writeMolecule( handle_mol_inf_link, positions_local[unique(list),:], traj[step].names[ molecules[unique(list)] ], step, molecule ) # write links
+            #writeMolecule( handle_mol_inf_link, positions_local[unique(list),:], traj[step].names[ molecules[unique(list)] ], step, molecule ) # write links
             # Counting sizes
             hist_inf[ size_molecule ] += 1
         else
-            writeMolecule( handle_mol_fin, positions_local[molecules[molecule],:], traj[step].names[ molecules[molecule] ], step, molecule ) # write molecule
+            writeMolecule( handle_mol_fin[size_molecule], positions_local[molecules[molecule],:], traj[step].names[ molecules[molecule] ], step, molecule ) # write molecule
             # Counting sizes
             hist_fin[ size_molecule ] += 1
         end
@@ -109,5 +117,14 @@ for step=1:nb_step
 
     end
 end
-close( handle_mol_inf )
-close( handle_mol_fin )
+
+for atom=1:nb_atoms
+    close( handle_mol_inf[atom] )
+    close( handle_mol_fin[atom] )
+    if hist_fin[ atom ] == 0
+        Base.Filesystem.rm( string( folder_target_mol, "mol_fin_",atom,".xyz") )
+    end
+    if hist_inf[ atom ] == 0
+        Base.Filesystem.rm( string( folder_target_mol, "mol_inf_",atom,".xyz") )
+    end
+end

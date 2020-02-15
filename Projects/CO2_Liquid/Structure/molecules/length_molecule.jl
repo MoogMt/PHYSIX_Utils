@@ -12,9 +12,9 @@ using geom
 V=8.82
 T=3000
 
-folder_base=string("/media/moogmt/Elements/CO2/",V,"/",T,"K/")
+folder_base=string("/media/mathieu/Elements/CO2/",V,"/",T,"K/")
 
-file_traj = string(folder_base,"TRAJEC_wrapped.xyz")
+file_traj = string(folder_base,"TRAJEC_fdb_wrapped.xyz")
 
 traj = filexyz.readFileAtomList( file_traj )
 cell = cell_mod.Cell_param(V,V,V)
@@ -39,12 +39,12 @@ for step=1:nb_step
         end
         adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
         visited=zeros(Int,size(molecules[molecule]))
-        cell_mod.unWrapOnce( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule], cut_off)
+        cell_mod.unWrapOrthoOnce( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule] )
     end
 
     traj[step].positions=positions_local
 end
 
-folder_out=string(folder_base,"/Data/")
-file_out=string(folder_out,"test.xyz")
+folder_out=string(folder_base,"/Data/Molecules/")
+file_out=string(folder_out,"all_unwrap.xyz")
 filexyz.writeXYZ(file_out,traj)
