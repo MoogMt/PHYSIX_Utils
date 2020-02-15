@@ -23,8 +23,19 @@ function writeMolecule( handle_out::T1 , positions::Array{T2}, species::Vector{T
     return true
 end
 
-# function writeSizeHistogram( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: IO, T2 <: Real }
-# end
+function writeSizeHistogram( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: AbstractString, T2 <: Real }
+    handle_out = open( file_out, "w" )
+    nb_time = size(hist_time)[1]
+    nb_atoms  = size(hist_time)[2]
+    for step = 1:nb_box
+        Base.write( handle_out, string( step,  " " ) )
+        for size_atom=1:nb_atoms
+            Base.write( handle_out, string( hist_time[step,size_atom] " " ) )
+        end
+        Base.write( handle_out, string("\n") )
+    end
+    close( handle_out )
+end
 
 # Thermodynamical values
 Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
