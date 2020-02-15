@@ -81,8 +81,8 @@ function getMaxDistance( positions::Array{T1,2} ) where { T1 <: Real }
     end
     return max_dist
 end
-function getMoleculeLength( traj::Vector{T1} ) where { T1 <: Real }
-    nb_step=size(traj)
+function getMoleculeLength( traj::Vector{T1} ) where { T1 <: AtomList }
+    nb_step=size(traj)[1]
     lengths=Vector{Real}(undef,0)
     for step=1:nb_step
         push!( lengths, getMaxDistance( traj[step].positions) )
@@ -220,15 +220,16 @@ for T in Temperatures
             max_=maximum(lengths)
             min_=minimum(lengths)
             delta_=(max_-min_)/nb_box
-            hist_nb=zeros(Int,nb_box)
+            hist_nb=zeros(Real,nb_box)
             for i=1:size(lengths)[1]
-                write( file_out_lengths, string(lengths[i], "\n"))
+                Base.write( file_out_lengths, string(lengths[i], "\n"))
                 hist_nb[ Int(trunc( (lengths-min_)/delta_ )+1) ] += 1
             end
             close( file_out_lengths )
+            hist_nb /= sum(hist_nb)
             file_out_hist = open( folder_target_mol, "hist_mol_fin_",size_,".dat")
             for ibox=1:nb_box
-                
+                Base.write( file_out_hist, string( (ibox*delta_)+min_," ", hist_nb[i],"\n" ) )
             end
             close( file_out_hist )
         end
