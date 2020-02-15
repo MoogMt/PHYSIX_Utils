@@ -75,8 +75,9 @@ for step=1:nb_step
 
     # Loop over mmolecules
     for molecule=1:nb_molecules
+        size_molecule = size( molecules[molecule] )[1]
         # Molecule is an atom, discard
-        if size(molecules[molecule])[1] <= 1
+        if size_molecule <= 1
             continue
         end
         # Check if molecule is finite
