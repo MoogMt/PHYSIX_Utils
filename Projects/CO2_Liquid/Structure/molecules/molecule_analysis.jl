@@ -51,7 +51,16 @@ end
 handle_mol_inf = open( string( folder_target_mol, "mol_inf.xyz"), "w" )
 handle_mol_fin = open( string( folder_target_mol, "mol_fin.xyz"), "w" )
 
+nb_step  = size( traj )[1]
+nb_atoms = size( traj[0].names )[1]
+
+hist_fin=zeros( Int, nb_atoms )
+hist_inf=zeros( Int, nb_atoms )
+hist_gen=zeros( Int, nb_atoms )
+
 for step=1:nb_step
+
+    print("Progress: ",step/nb_step*100,"%\n")
 
     # Computing the molecules through graph exploration
     positions_local=copy(traj[step].positions)
@@ -69,7 +78,7 @@ for step=1:nb_step
         # Check if molecule is finite
         visited=zeros(Int,size(molecules[molecule]))
         adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
-        isinf, isok = isInfiniteChain( visited, matrices[molecule], adjacency_table, positions_local, cell, 1, molecules[molecule], cut_off )
+        isinf, isok = cell_mod.isInfiniteChain( visited, matrices[molecule], adjacent_molecule, positions_local, cell, 1, molecules[molecule], cut_off )
         # If something went wrong, moving on...
         if ! isok
             print( "Issue reconstructing molecule ", molecule, " at step: ", step, "\n" )
