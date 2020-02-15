@@ -23,6 +23,9 @@ function writeMolecule( handle_out::T1 , positions::Array{T2}, species::Vector{T
     return true
 end
 
+function writeSizeHistogram( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: IO, T2 <: Real }
+end
+
 # Thermodynamical values
 Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
 Temperature=[1750,2000,2500,3000,3500]
@@ -58,6 +61,10 @@ hist_fin=zeros( Int, nb_atoms )
 hist_inf=zeros( Int, nb_atoms )
 hist_gen=zeros( Int, nb_atoms )
 
+# matrix = contact_matrix.buildMatrix( traj[1], cell, cut_off )
+# molecules=graph.getGroupsFromMatrix(matrix)
+# matrices=graph.extractAllMatrixForTrees( matrix, molecules )
+
 for step=1:nb_step
 
     print("Progress: ",step/nb_step*100,"%\n")
@@ -86,15 +93,15 @@ for step=1:nb_step
         end
         # Whether infinite or finite, the size of the molecule is counted, and it is printed in a specific file
         if isinf
-            writeMolecule( handle_mol_inf, positions, species, step, molecule ) # write molecule
+            writeMolecule( handle_mol_inf, positions_local[molecules[molecule],:], traj[step].names[ molecules[molecule] ], step, molecule ) # write molecule
             # If the molecule is infinite, we print the atoms that should be bonded but aren't.
-            list = findUnlinked( positions )
+            list = cell_mod.findUnlinked( matrices[molecule], positions_local[molecules[molecule],:], cell, molecules[molecule], cut_off )
             # We put the positions of those atoms in a specific file, for visualization purposes (with VMD)
-            writeMolecule( handle_mol_inf_link, positions[unique(list),:], traj.names[ molecules[molecule] ], step, molecule ) # write links
+            writeMolecule( handle_mol_inf_link, positions_local[unique(list),:], traj[step].names[ molecules[unique(list)] ], step, molecule ) # write links
             # Counting sizes
             hist_inf[ size_molecule ] += 1
         else
-            writeMolecule( handle_mol_fin, positions, species, step, molecule ) # write molecule
+            writeMolecule( handle_mol_fin, positions_local[molecules[molecule],:], traj[step].names[ molecules[molecule] ], step, molecule ) # write molecule
             # Counting sizes
             hist_fin[ size_molecule ] += 1
         end
@@ -103,9 +110,6 @@ for step=1:nb_step
         # totality of the atoms. Therefore, a corrective factor will be needed when computing fair statistics.
 
     end
-
-    traj[step].positions=positions_local
 end
-
 close( handle_mol_inf )
 close( handle_mol_fin )
