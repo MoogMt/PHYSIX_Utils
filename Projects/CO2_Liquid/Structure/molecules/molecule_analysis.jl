@@ -32,18 +32,24 @@ V=8.82
 T=3000
 
 
-folder_base=string("/media/mathieu/Elements/CO2/",V,"/",T,"K/")
+folder_base = string( "/media/mathieu/Elements/CO2/" )
+folder_target = string( folder_base, V, "/", T, "K/" )
 
-file_traj = string(folder_base,"TRAJEC_fdb_wrapped.xyz")
+file_traj = string( folder_target, "TRAJEC_fdb_wrapped.xyz" )
 
 traj = filexyz.readFileAtomList( file_traj )
 cell = cell_mod.Cell_param(V,V,V)
 cut_off=1.75
 
-nb_step=size(traj)[1]
 
-handle_mol_inf = open( folder_target, "mol_inf.xyz")
-handle_mol_fin = open( folder_target, "mol_fin.xyz")
+folder_target_mol = string( folder_target, "Data/Molecules/" )
+
+if ! isdir( folder_target_mol )
+    Base.Filesystem.mkdir( folder_target_mol )
+end
+
+handle_mol_inf = open( string( folder_target_mol, "mol_inf.xyz"), "w" )
+handle_mol_fin = open( string( folder_target_mol, "mol_fin.xyz"), "w" )
 
 for step=1:nb_step
 
@@ -61,7 +67,9 @@ for step=1:nb_step
             continue
         end
         # Check if molecule is finite
-        isinf, isok = isInfiniteChain( visited::Vector{T1}, matrix::Array{T2,2}, adjacency_table::Vector{T3}, positions::Array{T4,2} , cell::T5, target::T6, index_atoms::Vector{T7}, cut_off::T8 )
+        visited=zeros(Int,size(molecules[molecule]))
+        adjacent_molecule=getAllAdjacentVertex(matrices[molecule])
+        isinf, isok = isInfiniteChain( visited, matrices[molecule], adjacency_table, positions_local, cell, 1, molecules[molecule], cut_off )
         # If something went wrong, moving on...
         if ! isok
             print( "Issue reconstructing molecule ", molecule, " at step: ", step, "\n" )
@@ -73,9 +81,7 @@ for step=1:nb_step
             # If the molecule is infinite, we print the atoms that should be bonded but aren't.
             list = findUnlinked( positions )
             # We put the positions of those atoms in a specific file, for visualization purposes (with VMD)
-            for i=1:size(list)[1]
-                writeMolecule( handle_mol_inf_link, positions[list[i,:],:], species, step, molecule ) # write links
-            end
+            writeMolecule( handle_mol_inf_link, positions[unique(list),:], traj.names[ molecules[molecule] ], step, molecule ) # write links
             # Counting sizes
             hist_inf[ size_molecule ] += 1
         else
@@ -84,7 +90,7 @@ for step=1:nb_step
             hist_fin[ size_molecule ] += 1
         end
         hist_gen[ size_molecule ] += 1
-        # NB: here we only count the molecule by size, hwoever that isn't fair, as a large molecule may take the
+        # NB: here we only count the molecule by size, however that isn't fair, as a large molecule may take the
         # totality of the atoms. Therefore, a corrective factor will be needed when computing fair statistics.
 
     end
