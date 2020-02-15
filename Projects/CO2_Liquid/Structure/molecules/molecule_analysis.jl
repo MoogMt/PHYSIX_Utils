@@ -52,6 +52,7 @@ if ! isdir( folder_target_mol )
 end
 
 handle_mol_inf = open( string( folder_target_mol, "mol_inf.xyz"), "w" )
+handle_mol_inf_link = open( string( folder_target_mol, "mol_inf_link.xyz" ) , "w" )
 handle_mol_fin = open( string( folder_target_mol, "mol_fin.xyz"), "w" )
 
 nb_step  = size( traj )[1]
@@ -60,10 +61,6 @@ nb_atoms = size( traj[1].names )[1]
 hist_fin=zeros( Int, nb_atoms )
 hist_inf=zeros( Int, nb_atoms )
 hist_gen=zeros( Int, nb_atoms )
-
-# matrix = contact_matrix.buildMatrix( traj[1], cell, cut_off )
-# molecules=graph.getGroupsFromMatrix(matrix)
-# matrices=graph.extractAllMatrixForTrees( matrix, molecules )
 
 for step=1:nb_step
 
