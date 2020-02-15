@@ -12,7 +12,7 @@ using geom
 function writeMolecule( handle_out::T1 , positions::Array{T2}, species::Vector{T3}, step::T4, mol_index::T5 ) where { T1 <: IO, T2 <: Real,  T3 <: AbstractString, T4 <: Int, T5 <: Int }
     size_molecule=size(positions)[1]
     Base.write( handle_out, string( size_molecule, "\n" ) )
-    Base.write( handle_out, string( "STEP: X\n")) # ,step," ", mol_index, "\n" ) )
+    Base.write( handle_out, string( "STEP: ",step," ", mol_index, "\n" ) )
     for atom=1:size_molecule
         Base.write( handle_out, string(species[atom], " ") )
         for i=1:3
@@ -22,17 +22,24 @@ function writeMolecule( handle_out::T1 , positions::Array{T2}, species::Vector{T
     end
     return true
 end
-
-function writeSizeHistogram( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: AbstractString, T2 <: Real }
+function writeSizeHistogramTime( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: AbstractString, T2 <: Real }
     handle_out = open( file_out, "w" )
-    nb_time = size(hist_time)[1]
+    nb_step = size(hist_time)[1]
     nb_atoms  = size(hist_time)[2]
-    for step = 1:nb_box
+    for step = 1:nb_step
         Base.write( handle_out, string( step,  " " ) )
         for size_atom=1:nb_atoms
-            Base.write( handle_out, string( hist_time[step,size_atom] " " ) )
+            Base.write( handle_out, string( hist_time[ step, size_atom ], " " ) )
         end
         Base.write( handle_out, string("\n") )
+    end
+    close( handle_out )
+end
+function writeSizeHistogramGlobal( file_out::T1, hist_time::Array{T2,2} )  where { T1 <: AbstractString, T2 <: Real }
+    handle_out = open( file_out, "w" )
+    nb_atoms  = size(hist_time)[2]
+    for size_atom=1:nb_atoms
+        Base.write( handle_out, string( size_atom, " ", sum(hist_time[ :, size_atom ]), "\n" ) )
     end
     close( handle_out )
 end
@@ -76,9 +83,9 @@ end
 nb_step  = size( traj )[1]
 nb_atoms = size( traj[1].names )[1]
 
-hist_fin=zeros( Int, nb_atoms )
-hist_inf=zeros( Int, nb_atoms )
-hist_gen=zeros( Int, nb_atoms )
+hist_fin=zeros( Int, nb_step, nb_atoms )
+hist_inf=zeros( Int, nb_step, nb_atoms )
+hist_gen=zeros( Int, nb_step, nb_atoms )
 
 for step=1:nb_step
 
@@ -116,13 +123,13 @@ for step=1:nb_step
             # We put the positions of those atoms in a specific file, for visualization purposes (with VMD)
             #writeMolecule( handle_mol_inf_link, positions_local[unique(list),:], traj[step].names[ molecules[unique(list)] ], step, molecule ) # write links
             # Counting sizes
-            hist_inf[ size_molecule ] += 1
+            hist_inf[ step, size_molecule ] += 1
         else
             writeMolecule( handle_mol_fin[size_molecule], positions_local[molecules[molecule],:], traj[step].names[ molecules[molecule] ], step, molecule ) # write molecule
             # Counting sizes
-            hist_fin[ size_molecule ] += 1
+            hist_fin[ step, size_molecule ] += 1
         end
-        hist_gen[ size_molecule ] += 1
+        hist_gen[ step, size_molecule ] += 1
         # NB: here we only count the molecule by size, however that isn't fair, as a large molecule may take the
         # totality of the atoms. Therefore, a corrective factor will be needed when computing fair statistics.
 
@@ -139,3 +146,11 @@ for atom=1:nb_atoms
         Base.Filesystem.rm( string( folder_target_mol, "mol_inf_",atom,".xyz") )
     end
 end
+
+writeSizeHistogramTime( string( folder_target_mol, "hist_inf.dat"), hist_inf )
+writeSizeHistogramTime( string( folder_target_mol, "hist_fin.dat"), hist_fin )
+writeSizeHistogramTime( string( folder_target_mol, "hist_gen.dat"), hist_gen )
+
+writeSizeHistogramGlobal( string( folder_target_mol, "hist_inf.dat"), hist_inf )
+writeSizeHistogramGlobal( string( folder_target_mol, "hist_fin.dat"), hist_fin )
+writeSizeHistogramGlobal( string( folder_target_mol, "hist_gen.dat"), hist_gen )
