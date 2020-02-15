@@ -9,6 +9,8 @@ using graph
 using exp_data
 using geom
 
+using LinearAlgebra
+
 function writeMolecule( handle_out::T1 , positions::Array{T2}, species::Vector{T3}, step::T4, mol_index::T5 ) where { T1 <: IO, T2 <: Real,  T3 <: AbstractString, T4 <: Int, T5 <: Int }
     size_molecule=size(positions)[1]
     Base.write( handle_out, string( size_molecule, "\n" ) )
@@ -66,7 +68,27 @@ function readPressure( file_pressure::T1 ) where { T1 <: AbstractString }
     close( handle_press_in )
     return pressure, delta_p, volumes
 end
-
+function getMaxDistance( positions::Array{T1,2} ) where { T1 <: Real }
+    max_dist=0
+    nb_atoms=size(positions)[1]
+    for atom=1:nb_atoms
+        for atom2=1:nb_atoms
+            distance=LinearAlgebra.norm( positions[atom,:]-positions[atom2,:] )
+            if distance > max_dist
+                max_dist = distance
+            end
+        end
+    end
+    return max_dist
+end
+function getMoleculeLength( traj::Vector{T1} ) where { T1 <: Real }
+    nb_step=size(traj)
+    lengths=Vector{Real}(undef,0)
+    for step=1:nb_step
+        push!( lengths, getMaxDistance( traj[step].positions) )
+    end
+    return lengths
+end
 
 # Thermodynamical values
 Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
@@ -177,3 +199,38 @@ for T in Temperatures
     write(handle_inf,string("\n"))
 end
 close(handle_inf)
+
+# Computing length and comparing
+nb_atoms=96
+nb_box=50
+for T in Temperatures
+    for V in Volumes
+        for size_=1:nb_atoms
+            folder_target = string( folder_base, V, "/", T, "K/" )
+            folder_target_mol = string( folder_target, "Data/Molecules/" )
+            target_file = string( folder_target_mol, "mol_fin_",size_,".xyz")
+            if ! isfile( target_file )
+                continue
+            end
+            file_in=open( target_file )
+            molecules = filexyz.readFileAtomList( file_traj )
+            close(file_in)
+            lengths=getMoleculeLength(molecules)
+            file_out_lengths = open( folder_target_mol, "lengths_mol_fin_",size_,".dat")
+            max_=maximum(lengths)
+            min_=minimum(lengths)
+            delta_=(max_-min_)/nb_box
+            hist_nb=zeros(Int,nb_box)
+            for i=1:size(lengths)[1]
+                write( file_out_lengths, string(lengths[i], "\n"))
+                hist_nb[ Int(trunc( (lengths-min_)/delta_ )+1) ] += 1
+            end
+            close( file_out_lengths )
+            file_out_hist = open( folder_target_mol, "hist_mol_fin_",size_,".dat")
+            for ibox=1:nb_box
+                
+            end
+            close( file_out_hist )
+        end
+    end
+end
