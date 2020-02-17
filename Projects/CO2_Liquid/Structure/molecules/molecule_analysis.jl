@@ -71,8 +71,8 @@ end
 function getMaxDistance( positions::Array{T1,2} ) where { T1 <: Real }
     max_dist=0
     nb_atoms=size(positions)[1]
-    for atom=1:nb_atoms
-        for atom2=1:nb_atoms
+    for atom=1:nb_atoms-1
+        for atom2=atom1+1:nb_atoms
             distance=LinearAlgebra.norm( positions[atom,:]-positions[atom2,:] )
             if distance > max_dist
                 max_dist = distance
@@ -259,6 +259,7 @@ for T in Temperatures
         min_=minimum(lengths_total)
         delta_=(max_-min_)/nb_box
         if delta_ == 0
+            print("Check: ",V," ",T,"K\n")
             continue
         end
         hist_nb=zeros(Real,nb_box+1)
