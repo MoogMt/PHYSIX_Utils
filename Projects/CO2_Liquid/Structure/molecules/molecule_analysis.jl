@@ -71,9 +71,9 @@ end
 function getMaxDistance( positions::Array{T1,2} ) where { T1 <: Real }
     max_dist=0
     nb_atoms=size(positions)[1]
-    for atom=1:nb_atoms-1
+    for atom1=1:nb_atoms-1
         for atom2=atom1+1:nb_atoms
-            distance=LinearAlgebra.norm( positions[atom,:]-positions[atom2,:] )
+            distance=LinearAlgebra.norm( positions[atom1,:]-positions[atom2,:] )
             if distance > max_dist
                 max_dist = distance
             end
@@ -206,16 +206,22 @@ close(handle_inf)
 # Computing length and comparing
 nb_atoms=96
 nb_box=50
-for T in Temperatures
-    for V in Volumes
+
+T=3000
+V=8.82
+
+for V in Volumes
+    for T in Temperatures
         folder_target = string( folder_base, V, "/", T, "K/" )
         if ! isfile( string(folder_target, "TRAJEC_fdb.xyz") )
             continue
         end
-        folder_target_mol = string( folder_target, "Data/Molecules/" )
+        print("Processing: ",V," ",T,"K\n")
+        folder_out = string( folder_target, "Data/Molecules/")
         lengths_total=Vector{Real}(undef,0)
-        for size_=1:nb_atoms
-            target_file = string( folder_target_mol, "mol_fin_",size_,".xyz")
+        file_avg_length = open( string(folder_target_mol, "lengths_avg_mol_fin.dat"), "w")
+        for size_ = 1:nb_atoms
+            target_file = string( folder_out, "mol_fin_",size_,".xyz")
             if ! isfile( target_file )
                 if isfile( string(folder_target_mol, "lengths_global_mol_fin_",size_,".dat") )
                     Base.Filesystem.rm( string(folder_target_mol, "lengths_global_mol_fin_",size_,".dat") )
@@ -226,42 +232,38 @@ for T in Temperatures
                 continue
             end
             molecules = filexyz.readFileAtomList( target_file )
-            if typeof( molecules ) == AtomList
-                length=getMoleculeLength( molecules )
-                lengths_total=vcat(length)
+            lengths=getMoleculeLength(molecules)
+            if typeof(molecules) == AtomList
+                push!( lengths_total, lengths )
+                Base.write( file_avg_length, string( size_," ",lengths," ",0,"\n" ) )
                 file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
-                Base.write( file_out_lengths, string(length, "\n"))
+                Base.write( file_out_lengths, string(lengths[i], "\n"))
                 close( file_out_lengths )
             else
-                lengths=getMoleculeLength(molecules)
-                lengths_total=vcat(lengths)
+                # Add the sizes to the general size vector
+                for i=1:size(lengths)[1]
+                    push!(lengths_total,lengths[i])
+                end
+                # Prints the average and standard deviation of lengths for a given size
+                Base.write( file_avg_length, string( size_, " ", Statistics.mean(lengths), " ", Statistics.std(lengths), "\n" ) )
+                # Write all lengths for the size in a specific file and compute length histogram for size
                 file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
-                max_=maximum(lengths)
-                min_=minimum(lengths)
-                delta_=(max_-min_)/nb_box
-                hist_nb=zeros(Real,nb_box+1)
                 for i=1:size(lengths)[1]
                     Base.write( file_out_lengths, string(lengths[i], "\n"))
                     hist_nb[ Int( trunc( (lengths[i]-min_)/delta_ )+1 ) ] += 1
                 end
                 close( file_out_lengths )
+                # Prints the histogram of lengths for the target size
                 file_out_hist = open( string(folder_target_mol, "hist_mol_fin_",size_,".dat"), "w" )
                 for ibox=1:nb_box
                     Base.write( file_out_hist, string( (ibox*delta_)+min_," ", hist_nb[ibox],"\n" ) )
                 end
-                close( file_out_hist )
             end
         end
-        if size(lengths_total)[1] == 0
-            continue
-        end
+        close(file_avg_length)
         max_=maximum(lengths_total)
         min_=minimum(lengths_total)
         delta_=(max_-min_)/nb_box
-        if delta_ == 0
-            print("Check: ",V," ",T,"K\n")
-            continue
-        end
         hist_nb=zeros(Real,nb_box+1)
         file_out_lengths = open( string(folder_target_mol, "lengths_global_mol_fin.dat"), "w")
         for i=1:size(lengths_total)[1]
