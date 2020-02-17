@@ -209,6 +209,9 @@ nb_box=50
 for T in Temperatures
     for V in Volumes
         folder_target = string( folder_base, V, "/", T, "K/" )
+        if ! isfile( string(folder_target, "TRAJEC_fdb.xyz") )
+            continue
+        end
         folder_target_mol = string( folder_target, "Data/Molecules/" )
         lengths_total=Vector{Real}(undef,0)
         for size_=1:nb_atoms
@@ -227,7 +230,7 @@ for T in Temperatures
                 length=getMoleculeLength( molecules )
                 lengths_total=vcat(length)
                 file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
-                Base.write( file_out_lengths, string(lengths[i], "\n"))
+                Base.write( file_out_lengths, string(length, "\n"))
                 close( file_out_lengths )
             else
                 lengths=getMoleculeLength(molecules)
@@ -258,6 +261,10 @@ for T in Temperatures
         hist_nb=zeros(Real,nb_box+1)
         file_out_lengths = open( string(folder_target_mol, "lengths_global_mol_fin.dat"), "w")
         for i=1:size(lengths_total)[1]
+            if lengths_total[i] == NaN
+                print(V," ",T,"K\n")
+                continue
+            end
             Base.write( file_out_lengths, string(lengths_total[i], "\n"))
             hist_nb[ Int( trunc( (lengths_total[i]-min_)/delta_ )+1 ) ] += 1
         end
