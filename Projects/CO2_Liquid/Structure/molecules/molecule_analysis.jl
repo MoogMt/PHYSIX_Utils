@@ -246,7 +246,7 @@ for T in Temperatures
         delta_=(max_-min_)/nb_box
         hist_nb=zeros(Real,nb_box+1)
         file_out_lengths = open( string(folder_target_mol, "lengths_global_mol_fin.dat"), "w")
-        for i=1:size(lengths)[1]
+        for i=1:size(lengths_total)[1]
             Base.write( file_out_lengths, string(lengths_total[i], "\n"))
             hist_nb[ Int( trunc( (lengths_total[i]-min_)/delta_ )+1 ) ] += 1
         end
