@@ -81,7 +81,10 @@ function getMaxDistance( positions::Array{T1,2} ) where { T1 <: Real }
     end
     return max_dist
 end
-function getMoleculeLength( traj::Vector{T1} ) where { T1 <: AtomList }
+function getMoleculeLength( atoms::T1 ) where { T1 <: atom_mod.AtomList }
+    return getMaxDistance( atoms.positions )
+end
+function getMoleculeLength( traj::Vector{T1} ) where { T1 <: atom_mod.AtomList }
     nb_step=size(traj)[1]
     lengths=Vector{Real}(undef,0)
     for step=1:nb_step
@@ -220,23 +223,31 @@ for T in Temperatures
                 continue
             end
             molecules = filexyz.readFileAtomList( target_file )
-            lengths=getMoleculeLength(molecules)
-            lengths_total=vcat(lengths)
-            file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
-            max_=maximum(lengths)
-            min_=minimum(lengths)
-            delta_=(max_-min_)/nb_box
-            hist_nb=zeros(Real,nb_box+1)
-            for i=1:size(lengths)[1]
+            if typeof( molecules ) == AtomList
+                length=getMoleculeLength( molecules )
+                lengths_total=vcat(length)
+                file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
                 Base.write( file_out_lengths, string(lengths[i], "\n"))
-                hist_nb[ Int( trunc( (lengths[i]-min_)/delta_ )+1 ) ] += 1
+                close( file_out_lengths )
+            else
+                lengths=getMoleculeLength(molecules)
+                lengths_total=vcat(lengths)
+                file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
+                max_=maximum(lengths)
+                min_=minimum(lengths)
+                delta_=(max_-min_)/nb_box
+                hist_nb=zeros(Real,nb_box+1)
+                for i=1:size(lengths)[1]
+                    Base.write( file_out_lengths, string(lengths[i], "\n"))
+                    hist_nb[ Int( trunc( (lengths[i]-min_)/delta_ )+1 ) ] += 1
+                end
+                close( file_out_lengths )
+                file_out_hist = open( string(folder_target_mol, "hist_mol_fin_",size_,".dat"), "w" )
+                for ibox=1:nb_box
+                    Base.write( file_out_hist, string( (ibox*delta_)+min_," ", hist_nb[ibox],"\n" ) )
+                end
+                close( file_out_hist )
             end
-            close( file_out_lengths )
-            file_out_hist = open( string(folder_target_mol, "hist_mol_fin_",size_,".dat"), "w" )
-            for ibox=1:nb_box
-                Base.write( file_out_hist, string( (ibox*delta_)+min_," ", hist_nb[ibox],"\n" ) )
-            end
-            close( file_out_hist )
         end
         if size(lengths_total)[1] == 0
             continue
