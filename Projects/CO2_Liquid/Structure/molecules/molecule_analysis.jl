@@ -205,33 +205,56 @@ nb_atoms=96
 nb_box=50
 for T in Temperatures
     for V in Volumes
+        folder_target = string( folder_base, V, "/", T, "K/" )
+        folder_target_mol = string( folder_target, "Data/Molecules/" )
+        lengths_total=Vector{Real}(undef,0)
         for size_=1:nb_atoms
-            folder_target = string( folder_base, V, "/", T, "K/" )
-            folder_target_mol = string( folder_target, "Data/Molecules/" )
             target_file = string( folder_target_mol, "mol_fin_",size_,".xyz")
             if ! isfile( target_file )
+                if isfile( string(folder_target_mol, "lengths_global_mol_fin_",size_,".dat") )
+                    Base.Filesystem.rm( string(folder_target_mol, "lengths_global_mol_fin_",size_,".dat") )
+                end
+                if isfile( string(folder_target_mol, "hist_mol_fin_all.dat") )
+                    Base.Filesystem.rm( string(folder_target_mol, "hist_mol_fin_all.dat") )
+                end
                 continue
             end
-            file_in=open( target_file )
-            molecules = filexyz.readFileAtomList( file_traj )
-            close(file_in)
+            molecules = filexyz.readFileAtomList( target_file )
             lengths=getMoleculeLength(molecules)
-            file_out_lengths = open( folder_target_mol, "lengths_mol_fin_",size_,".dat")
+            lengths_total=vcat(lengths)
+            file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
             max_=maximum(lengths)
             min_=minimum(lengths)
             delta_=(max_-min_)/nb_box
-            hist_nb=zeros(Real,nb_box)
+            hist_nb=zeros(Real,nb_box+1)
             for i=1:size(lengths)[1]
                 Base.write( file_out_lengths, string(lengths[i], "\n"))
-                hist_nb[ Int(trunc( (lengths-min_)/delta_ )+1) ] += 1
+                hist_nb[ Int( trunc( (lengths[i]-min_)/delta_ )+1 ) ] += 1
             end
             close( file_out_lengths )
-            hist_nb /= sum(hist_nb)
-            file_out_hist = open( folder_target_mol, "hist_mol_fin_",size_,".dat")
+            file_out_hist = open( string(folder_target_mol, "hist_mol_fin_",size_,".dat"), "w" )
             for ibox=1:nb_box
-                Base.write( file_out_hist, string( (ibox*delta_)+min_," ", hist_nb[i],"\n" ) )
+                Base.write( file_out_hist, string( (ibox*delta_)+min_," ", hist_nb[ibox],"\n" ) )
             end
             close( file_out_hist )
         end
+        if size(lengths_total)[1] == 0
+            continue
+        end
+        max_=maximum(lengths_total)
+        min_=minimum(lengths_total)
+        delta_=(max_-min_)/nb_box
+        hist_nb=zeros(Real,nb_box+1)
+        file_out_lengths = open( string(folder_target_mol, "lengths_global_mol_fin.dat"), "w")
+        for i=1:size(lengths)[1]
+            Base.write( file_out_lengths, string(lengths_total[i], "\n"))
+            hist_nb[ Int( trunc( (lengths_total[i]-min_)/delta_ )+1 ) ] += 1
+        end
+        close(file_out_lengths)
+        file_out_hist = open( string(folder_target_mol, "hist_mol_fin_all.dat"), "w" )
+        for ibox=1:nb_box
+            Base.write( file_out_hist, string( (ibox*delta_)+min_," ", hist_nb[ibox],"\n" ) )
+        end
+        close( file_out_hist )
     end
 end
