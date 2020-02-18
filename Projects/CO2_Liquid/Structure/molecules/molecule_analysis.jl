@@ -206,10 +206,6 @@ close(handle_inf)
 # Computing length and comparing
 nb_atoms=96
 nb_box=50
-
-T=3000
-V=8.82
-
 for V in Volumes
     for T in Temperatures
         folder_target = string( folder_base, V, "/", T, "K/" )
@@ -219,7 +215,7 @@ for V in Volumes
         print("Processing: ",V," ",T,"K\n")
         folder_out = string( folder_target, "Data/Molecules/")
         lengths_total=Vector{Real}(undef,0)
-        file_avg_length = open( string(folder_target_mol, "lengths_avg_mol_fin.dat"), "w")
+        handle_out_avg = open( string( folder_out, "lengths_avg_mol_fin.dat"), "w")
         for size_ = 1:nb_atoms
             target_file = string( folder_out, "mol_fin_",size_,".xyz")
             if ! isfile( target_file )
@@ -232,12 +228,15 @@ for V in Volumes
                 continue
             end
             molecules = filexyz.readFileAtomList( target_file )
+            if molecules == false
+                continue
+            end
             lengths=getMoleculeLength(molecules)
             if typeof(molecules) == AtomList
                 push!( lengths_total, lengths )
-                Base.write( file_avg_length, string( size_," ",lengths," ",0,"\n" ) )
+                Base.write( handle_out_avg, string( size_," ",lengths," ",0,"\n" ) )
                 file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
-                Base.write( file_out_lengths, string(lengths[i], "\n"))
+                Base.write( file_out_lengths, string(lengths, "\n"))
                 close( file_out_lengths )
             else
                 # Add the sizes to the general size vector
@@ -245,7 +244,11 @@ for V in Volumes
                     push!(lengths_total,lengths[i])
                 end
                 # Prints the average and standard deviation of lengths for a given size
-                Base.write( file_avg_length, string( size_, " ", Statistics.mean(lengths), " ", Statistics.std(lengths), "\n" ) )
+                Base.write( handle_out_avg, string( size_, " ", Statistics.mean(lengths), " ", Statistics.std(lengths), "\n" ) )
+                max_=maximum(lengths)
+                min_=minimum(lengths)
+                delta_=(max_-min_)/nb_box
+                hist_nb=zeros(Real,nb_box+1)
                 # Write all lengths for the size in a specific file and compute length histogram for size
                 file_out_lengths = open( string(folder_target_mol, "lengths_mol_fin_",size_,".dat"), "w")
                 for i=1:size(lengths)[1]
@@ -260,7 +263,7 @@ for V in Volumes
                 end
             end
         end
-        close(file_avg_length)
+        close(handle_out_avg)
         max_=maximum(lengths_total)
         min_=minimum(lengths_total)
         delta_=(max_-min_)/nb_box
