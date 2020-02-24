@@ -1,37 +1,177 @@
-GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
-push!(LOAD_PATH, GPfolder)
-
-# Computes the distances of the four nearest oxygen atoms to carbon atoms,
-# Along with their angles
-
-# Loading necessary stuff
+# Loading necessary libraries from LibAtomicSim
 using atom_mod
 using cell_mod
 using cube_mod
 using clustering
 using contact_matrix
 using filexyz
+using geom
+
+# Objective:
+# This code computes the distribution of distances and angles around carbon
+# and oxygen atoms
 
 # Sim parameters to analyze
-volumes=[8.82]
-temperatures=[3000]
+Volumes=[10.0,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.8,8.82,8.6]
+Temperatures=[1750,2000,2500,3000]
 
 # Max number of neighbors
-max_neigh=4
-
-# Time stuff
-ps2fs=0.001
-timestep=0.5
-unit=ps2fs*timestep*stride
-stride = 1
-
-# Number of atoms (and of each types)
 nbC=32
 nbO=64
-nb_atoms=nbC+nbO
 
-folder_base=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/")
-folder_base=string("/home/moogmt/Data/CO2/CO2_AIMD/")
+max_neigh=4
+
+cut_off = 1.75
+cut_off_low = 1.6
+
+folder_base=string("/media/mathieu/Elements/CO2/")
+
+V=8.82
+T=3000
+
+folder_target=string( folder_base, V, "/", T, "K/" )
+file_traj = string( folder_target, "TRAJEC_fdb_wrapped.xyz" )
+
+# if isfile( file_traj )
+traj = filexyz.readFileAtomList( file_traj )
+species = atom_mod.getSpecies(traj[1])
+species_nb = atom_mod.getNbElementSpecies( traj[1], species )
+
+folder_out = string( folder_target, "Data/Geometry" )
+folder_out_matrix = string( folder_target, "Data/Matrix/" )
+
+if !isdir( folder_out )
+    Base.Filesystem.mkdir( folder_out )
+end
+if !isdir( folder_out_matrix )
+    Base.Filesystem.mkdir( folder_out_matrix )
+end
+
+handle_C2_X = open( string( folder_out, "C2_X.dat" ), "w" )
+handle_C3_X = open( string( folder_out, "C3_X.dat" ), "w" )
+handle_C4_X = open( string( folder_out, "C4_X.dat" ), "w" )
+handle_C2_Y = open( string( folder_out, "C2_Y.dat" ), "w" )
+handle_C3_Y = open( string( folder_out, "C3_Y.dat" ), "w" )
+handle_C4_Y = open( string( folder_out, "C4_Y.dat" ), "w" )
+
+handle_O1_X = open( string( folder_out, "O1_X.dat" ), "w" )
+handle_O2_X = open( string( folder_out, "O2_X.dat" ), "w" )
+handle_O1_Y = open( string( folder_out, "O1_Y.dat" ), "w" )
+handle_O2_Y = open( string( folder_out, "O2_Y.dat" ), "w" )
+
+handle_angle_C2   = open( string( folder_out, "angleC2_X.dat" ), "w" )
+handle_angle_C2_Y = open( string( folder_out, "angleC2_Y.dat" ), "w" )
+handle_angle_C3   = open( string( folder_out, "angleC3_X.dat" ), "w" )
+handle_angle_C3_Y = open( string( folder_out, "angleC3_Y.dat" ), "w" )
+handle_angle_C4   = open( string( folder_out, "angleC4_X.dat" ), "w" )
+handle_angle_C4_Y = open( string( folder_out, "angleC4_Y.dat" ), "w" )
+
+handle_angle_O2   = open( string( folder_out, "angleO2_X.dat" ), "w" )
+handle_angle_O2_Y = open( string( folder_out, "angleO2_Y.dat" ), "w" )
+
+handle_matrix = open( string( folder_out_matrix, "distance_matrix.dat" ), "w" )
+
+nb_step = size(traj)[1]
+nb_atoms=sum(species_nb)
+
+cell = cell_mod.Cell_param(V,V,V)
+
+
+for step=1:nb_step
+    distance_matrix = contact_matrix.buildMatrix( traj[step], cell)
+    for carbon=1:nbC
+        distances = distance_matrix[carbon,:]
+        nb_neighbors = sum(ones(size(distances)[1])[ distances .< cut_off ] ) - 1
+        index_nearest = sortperm(distances)
+        if nb_neighbors == 1
+            continue
+        elseif nb_neighbors == 2
+            check = true
+            for neigh = 1:2
+                write( handle_C2_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                if distances[ index[ neigh + 1 ]  ] > cut_off_low
+                    check = false
+                end
+            end
+            a = distance_matrix[ carbon, index[2] ] # dC-O1
+            b = distance_matrix[ carbon, index[3] ] # dC-O2
+            c = cell_mod.distance(traj[step],cell,Int(index[i]+1),Int(index[j]+1 ) ) # dO1-O2
+            # Angle through Al-Kashi
+            alkash_angle = geom.angleAlKash( a, b,c )
+            write( handle_angle_C2, string( alkash_angle, " " ) )
+            if check
+                write( handle_C2_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_angle_C2_Y, string( alkash_angle, " " ) )
+            end
+        elseif nb_neighbors == 3
+            check = true
+            for neigh = 1:3
+                write( handle_C3_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                if distances[ index[ neigh + 1 ]  ] > cut_off_low
+                    check = false
+                end
+            end
+            if check
+                write( handle_C3_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+            end
+        elseif nb_neighbors >= 4
+            check = true
+            for neigh = 1:4
+                write( handle_C4_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                if distances[ index[ neigh + 1 ]  ] > cut_off_low
+                    check = false
+                end
+            end
+            if check
+                write( handle_C4_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+            end
+        end
+    end
+    for oxygen=1:nbO
+        distances = distance_matrix[ nbC+oxygen,:]
+        nb_neighbors = sum( ones( size( distances )[1] )[ distances .< cut_off ] ) - 1
+        index_nearest = sortperm( distances )
+        if nb_neighbors == 1
+            check = true
+            for neigh = 1:2
+                write( handle_O1_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                if distances[ index[ neigh + 1 ]  ] > cut_off_low
+                    check = false
+                end
+            end
+            if check
+                write( handle_O1_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+            end
+        end
+    end
+    contact_matrix.writeMatrix( handle_matrix, distance_matrix )
+end
+
+close( handle_C2_X )
+close( handle_C3_X )
+close( handle_C4_X )
+close( handle_C2_Y )
+close( handle_C3_Y )
+close( handle_C4_Y )
+
+close( handle_O1_X )
+close( handle_O2_X )
+close( handle_O1_Y )
+close( handle_O2_Y )
+
+close( handle_angle_C2 )
+close( handle_angle_C2_Y )
+close( handle_angle_C3 )
+close( handle_angle_C3_Y )
+close( handle_angle_C4 )
+close( handle_angle_C4_Y )
+
+close( handle_angle_O2 ) 
+close( handle_angle_O2_Y )
+
+close( handle_matrix )
+
+# end
 
 function getCO3( file_out, nb_steps, nb_atoms , nbC, nbO,  nb_steps, )
     fileC=open( file_out ,"w")
@@ -68,32 +208,4 @@ function getCO3( file_out, nb_steps, nb_atoms , nbC, nbO,  nb_steps, )
         end
     end
     close(fileC)
-end
-
-for V in volumes
-    for T in temperatures
-
-        folder_in=string(folder_base,V,"/",T,"K/")
-        file=string(folder_in,"TRAJEC_wrapped.xyz")
-
-        if ! isfile( string(file) )
-            continue
-        end
-
-        # Reading trajectory
-        traj = filexyz.readFastFile(file)
-        cell = cell_mod.Cell_param(V,V,V)
-
-        nb_steps=size(traj)[1]
-
-        # Folder for output data
-        folder_out=string(folder_in,"Data/")
-
-        file_out=string(folder_out,"distanglesC-",V,"-",T,"K.dat")
-        nb_atoms=
-        nb_steps=size(traj)[1]
-
-        getCO3( file_out, nb_steps, nb_atoms, nbC, nbO, nb_steps )
-
-    end
 end
