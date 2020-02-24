@@ -98,10 +98,10 @@ for step=1:nb_step
             c = distance_matrix[ index[2], index[3] ] # dO1-O2
             # Angle through Al-Kashi
             alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C2, string( alkash_angle, " " ) )
+            write( handle_angle_C2, string( alkash_angle, "\n" ) )
             if check
                 write( handle_C2_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_angle_C2_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C2_Y, string( alkash_angle, "\n" ) )
             end
         elseif nb_neighbors == 3
             check = true
@@ -119,19 +119,19 @@ for step=1:nb_step
             f = distance_matrix[ index[2], index[4] ] # dO1-O3
             # Angle through Al-Kashi
             alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C2, string( alkash_angle, " " ) )
+            write( handle_angle_C2, string( alkash_angle, "\n" ) )
             alkash_angle = geom.angleAlKash( a, d, f )
-            write( handle_angle_C2, string( alkash_angle, " " ) )
+            write( handle_angle_C2, string( alkash_angle, "\n" ) )
             alkash_angle = geom.angleAlKash( b, d, e )
-            write( handle_angle_C2, string( alkash_angle, " " ) )
+            write( handle_angle_C2, string( alkash_angle, "\n" ) )
             if check
                 write( handle_C3_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
                 alkash_angle = geom.angleAlKash( a, b, c )
-                write( handle_angle_C3_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C3_Y, string( alkash_angle, "\n" ) )
                 alkash_angle = geom.angleAlKash( a, d, f )
-                write( handle_angle_C3_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C3_Y, string( alkash_angle, "\n" ) )
                 alkash_angle = geom.angleAlKash( b, d, e )
-                write( handle_angle_C3_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C3_Y, string( alkash_angle, "\n" ) )
             end
         elseif nb_neighbors >= 4
             check = true
@@ -153,31 +153,31 @@ for step=1:nb_step
             j = distance_matrix[ index[2], index[5] ] # dO1-O4
             # Angle through Al-Kashi
             alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C4, string( alkash_angle, " " ) )
+            write( handle_angle_C4, string( alkash_angle, "\n" ) )
             alkash_angle = geom.angleAlKash( a, d, f )
-            write( handle_angle_C4, string( alkash_angle, " " ) )
+            write( handle_angle_C4, string( alkash_angle, "\n" ) )
             alkash_angle = geom.angleAlKash( b, d, e )
-            write( handle_angle_C4, string( alkash_angle, " " ) )
+            write( handle_angle_C4, string( alkash_angle, "\n" ) )
             alkash_angle = geom.angleAlKash( a, g, j )
-            write( handle_angle_C4, string( alkash_angle, " " ) )
+            write( handle_angle_C4, string( alkash_angle, "\n" ) )
             alkash_angle = geom.angleAlKash( b, g, h )
-            write( handle_angle_C4, string( alkash_angle, " " ) )
+            write( handle_angle_C4, string( alkash_angle, "\n" ) )
             alkash_angle = geom.angleAlKash( d, g, i )
-            write( handle_angle_C4, string( alkash_angle, " " ) )
+            write( handle_angle_C4, string( alkash_angle, "\n" ) )
             if check
                 write( handle_C4_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
                 alkash_angle = geom.angleAlKash( a, b, c )
-                write( handle_angle_C4_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
                 alkash_angle = geom.angleAlKash( a, d, f )
-                write( handle_angle_C4_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
                 alkash_angle = geom.angleAlKash( b, d, e )
-                write( handle_angle_C4_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
                 alkash_angle = geom.angleAlKash( a, g, j )
-                write( handle_angle_C4_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
                 alkash_angle = geom.angleAlKash( b, g, h )
-                write( handle_angle_C4_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
                 alkash_angle = geom.angleAlKash( d, g, i )
-                write( handle_angle_C4_Y, string( alkash_angle, " " ) )
+                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
             end
         end
     end
@@ -204,8 +204,14 @@ for step=1:nb_step
                     check = false
                 end
             end
+            a = distance_matrix[ carbon, index[2] ] # dO-C1
+            b = distance_matrix[ carbon, index[3] ] # dO-C2
+            c = distance_matrix[ index[2], index[3] ] # dC1-C2
+            alkash_angle = geom.angleAlKash( a, b, c )
+            write( handle_angle_O2 string( alkash_angle, "\n" ) )
             if check
                 write( handle_O2_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_angle_O2_Y string( alkash_angle, "\n" ) )
             end
         else
             continue
@@ -237,42 +243,3 @@ close( handle_angle_O2 )
 close( handle_angle_O2_Y )
 
 close( handle_matrix )
-
-# end
-
-function getCO3( file_out, nb_steps, nb_atoms , nbC, nbO,  nb_steps, )
-    fileC=open( file_out ,"w")
-    # Loop over steps
-    for step=1:nb_steps
-        print("Progres: ",step/nb_steps*100,"%\n")
-        # Loop over carbons
-        for carbon=1:nbC
-            # Keep distances of oxygen to carbon
-            distances = zeros(nbO)
-            for oxygen=1:nbO
-                distances[oxygen] = cell_mod.distance(traj[step],cell,carbon,oxygen+nbC)
-            end
-            # get the index of the oxygen sorted by distances
-            index=sortperm(distances)
-
-            # write distances to file
-            write(fileC, string(step*unit," ") )
-            for i=1:max_neigh
-                write(fileC, string(distances[index[i]]," ") )
-            end
-
-            # Computes and write the angles between the N nearest oxygen
-            for i=1:max_neigh-1
-                for j=i+1:max_neigh
-                    a=cell_mod.distance(traj[step],cell,carbon,Int(index[i]+nbC))
-                    b=cell_mod.distance(traj[step],cell,carbon,Int(index[j]+nbC))
-                    c=cell_mod.distance(traj[step],cell,Int(index[i]+nbC),Int(index[j]+nbC))
-                    write(fileC,string(acosd((a*a+b*b-c*c)/(2*a*b))," "))
-                end
-            end
-
-            write(fileC,string("\n"))
-        end
-    end
-    close(fileC)
-end
