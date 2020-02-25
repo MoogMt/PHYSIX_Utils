@@ -97,7 +97,6 @@ nb_atoms=sum(species_nb)
 
 cell = cell_mod.Cell_param(V,V,V)
 
-
 for step=1:nb_step
     print("Progress: ",round(step/nb_step*100,digits=3),"%\n")
     distance_matrix = contact_matrix.buildMatrix( traj[step], cell)
@@ -110,7 +109,7 @@ for step=1:nb_step
         elseif nb_neighbors == 2
             check = true
             for neigh = 1:2
-                write( handle_C2_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_C2_X, string( distances[ index[ neigh+1] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
                 if distances[ index[ neigh + 1 ]  ] > cut_off_low
                     check = false
                 end
@@ -120,15 +119,15 @@ for step=1:nb_step
             c = distance_matrix[ index[2], index[3] ] # dO1-O2
             # Angle through Al-Kashi
             alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C2, string( alkash_angle, "\n" ) )
+            write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
             if check
-                write( handle_C2_Y, string( distances[ index[ 2 ] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_C2_Y, string( distances[ index[ 2 ] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
                 write( handle_angle_C2_Y, string( alkash_angle, "\n" ) )
             end
         elseif nb_neighbors == 3
             check = true
             for neigh = 1:3
-                write( handle_C3_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_C3_X, string( distances[ index[ neigh+1] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
                 if distances[ index[ neigh + 1 ]  ] > cut_off_low
                     check = false
                 end
@@ -141,19 +140,19 @@ for step=1:nb_step
             f = distance_matrix[ index[2], index[4] ] # dO1-O3
             # Angle through Al-Kashi
             alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C2, string( alkash_angle, "\n" ) )
+            write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
             alkash_angle = geom.angleAlKash( a, d, f )
-            write( handle_angle_C2, string( alkash_angle, "\n" ) )
+            write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
             alkash_angle = geom.angleAlKash( b, d, e )
-            write( handle_angle_C2, string( alkash_angle, "\n" ) )
-            write( handle_C3_short_X, string( distances[ index[ 2 ] ] ," " ) ) # neigh +1 because we ignore the 0
+            write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
+            write( handle_C3_short_X, string( distances[ index[ 2 ] ], " " ) ) # neigh +1 because we ignore the 0
             if index[2] < nbC
-                write( handle_C3_short_X, string( 0 ,"\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_C3_short_X, string( 0, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             else
-                write( handle_C3_short_X, string( 1 ,"\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_C3_short_X, string( 1, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             end
-            write( handle_C3_long_X, string( distances[ index[ 3 ] ] ,"\n" ) ) # neigh +1 because we ignore the 0
-            write( handle_C3_long_X, string( distances[ index[ 4 ] ] ,"\n" ) ) # neigh +1 because we ignore the 0
+            write( handle_C3_long_X, string( distances[ index[ 3 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
+            write( handle_C3_long_X, string( distances[ index[ 4 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             center_C = traj[step].positions[carbon,:]
             neigh_positions = zeros(Real,3,3)
             for neighb=1:3
@@ -181,11 +180,11 @@ for step=1:nb_step
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
             dist = dot( v_oc, normal_v )
-            write( handle_base_C3_X, string( dist ,"\n") ) # Writting to disk
+            write( handle_base_C3_X, string( dist, " ", step, "\n") ) # Writting to disk
             if check
-                write( handle_C3_Y, string( distances[ index[ 2 ] ] , "\n" ) ) # neigh +1 because we ignore the 0
-                write( handle_C3_Y, string( distances[ index[ 3 ] ] , "\n" ) ) # neigh +1 because we ignore the 0
-                write( handle_C3_Y, string( distances[ index[ 4 ] ] , "\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_C3_Y, string( distances[ index[ 2 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_C3_Y, string( distances[ index[ 3 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_C3_Y, string( distances[ index[ 4 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
                 write( handle_C3_short_Y, string( distances[ index[ 2 ] ] , " " ) ) # neigh +1 because we ignore the 0
                 if index[2] < nbC
                     write( handle_C3_short_Y, string( 0 ,"\n" ) ) # neigh +1 because we ignore the 0
@@ -195,17 +194,17 @@ for step=1:nb_step
                 write( handle_C3_long_Y, string( distances[ index[ 3 ] ] , "\n" ) ) # neigh +1 because we ignore the 0
                 write( handle_C3_long_Y, string( distances[ index[ 4 ] ] , "\n" ) ) # neigh +1 because we ignore the 0
                 alkash_angle = geom.angleAlKash( a, b, c )
-                write( handle_angle_C3_Y, string( alkash_angle, "\n" ) )
+                write( handle_angle_C3_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( a, d, f )
-                write( handle_angle_C3_Y, string( alkash_angle, "\n" ) )
+                write( handle_angle_C3_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( b, d, e )
-                write( handle_angle_C3_Y, string( alkash_angle, "\n" ) )
-                write( handle_base_C3_Y, string( dist ,"\n") )
+                write( handle_angle_C3_Y, string( alkash_angle, " ", step, "\n" ) )
+                write( handle_base_C3_Y, string( dist, " ", step, "\n") )
             end
         elseif nb_neighbors >= 4
             check = true
             for neigh = 1:4
-                write( handle_C4_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_C4_X, string( distances[ index[ neigh+1] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
                 if distances[ index[ neigh + 1 ]  ] > cut_off_low
                     check = false
                 end
@@ -222,17 +221,17 @@ for step=1:nb_step
             j = distance_matrix[ index[2], index[5] ] # dO1-O4
             # Angle through Al-Kashi
             alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C4, string( alkash_angle, "\n" ) )
+            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
             alkash_angle = geom.angleAlKash( a, d, f )
-            write( handle_angle_C4, string( alkash_angle, "\n" ) )
+            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
             alkash_angle = geom.angleAlKash( b, d, e )
-            write( handle_angle_C4, string( alkash_angle, "\n" ) )
+            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
             alkash_angle = geom.angleAlKash( a, g, j )
-            write( handle_angle_C4, string( alkash_angle, "\n" ) )
+            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
             alkash_angle = geom.angleAlKash( b, g, h )
-            write( handle_angle_C4, string( alkash_angle, "\n" ) )
+            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
             alkash_angle = geom.angleAlKash( d, g, i )
-            write( handle_angle_C4, string( alkash_angle, "\n" ) )
+            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
             # Select the target carbon positions
             center_C = traj[step].positions[carbon,:]
             # Wrap the positions of the target oxygens with regard to the positions of C
@@ -258,7 +257,7 @@ for step=1:nb_step
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
             dist1 = dot( v_oc, normal_v )
-            write( handle_base_C4_X, string( dist1 ,"\n") ) # Writting to disk
+            write( handle_base_C4_X, string( dist1, " ", step, "\n") ) # Writting to disk
             #
             v1 = neigh_positions[ 1, : ] - neigh_positions[ 3, : ]
             v2 = neigh_positions[ 1, : ] - neigh_positions[ 4, : ]
@@ -268,7 +267,7 @@ for step=1:nb_step
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
             dist2 = dot( v_oc, normal_v )
-            write( handle_base_C4_X, string( dist2 ,"\n") ) # Writting to disk
+            write( handle_base_C4_X, string( dist2, " ", step, "\n") ) # Writting to disk
             #
             v1 = neigh_positions[ 2, : ] - neigh_positions[ 3, : ]
             v2 = neigh_positions[ 2, : ] - neigh_positions[ 4, : ]
@@ -278,7 +277,7 @@ for step=1:nb_step
             v_oc = neigh_positions[ 2, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
             dist3 = dot( v_oc, normal_v )
-            write( handle_base_C4_X, string( dist3 ,"\n") ) # Writting to disk
+            write( handle_base_C4_X, string( dist3, " ", step, "\n") ) # Writting to disk
             #
             v1 = neigh_positions[ 1, : ] - neigh_positions[ 2, : ]
             v2 = neigh_positions[ 1, : ] - neigh_positions[ 4, : ]
@@ -288,28 +287,28 @@ for step=1:nb_step
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
             dist4 = dot( v_oc, normal_v )
-            write( handle_base_C4_X, string( dist4 ,"\n") ) # Writting to disk
+            write( handle_base_C4_X, string( dist4, " ", step, "\n") ) # Writting to disk
             if check
-                write( handle_C4_Y, string( distances[ index[ 2 ] ] ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_C4_Y, string( distances[ index[ 3 ] ] ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_C4_Y, string( distances[ index[ 4 ] ] ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_C4_Y, string( distances[ index[ 5 ] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_C4_Y, string( distances[ index[ 2 ] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
+                write( handle_C4_Y, string( distances[ index[ 3 ] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
+                write( handle_C4_Y, string( distances[ index[ 4 ] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
+                write( handle_C4_Y, string( distances[ index[ 5 ] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
                 alkash_angle = geom.angleAlKash( a, b, c )
-                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
+                write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( a, d, f )
-                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
+                write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( b, d, e )
-                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
+                write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( a, g, j )
-                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
+                write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( b, g, h )
-                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
+                write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( d, g, i )
-                write( handle_angle_C4_Y, string( alkash_angle, "\n" ) )
-                write( handle_base_C4_Y, string( dist1 ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_base_C4_Y, string( dist2 ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_base_C4_Y, string( dist3 ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_base_C4_Y, string( dist4 ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
+                write( handle_base_C4_Y, string( dist1, " ", step, "\n") ) # neigh +1 because we ignore the 0
+                write( handle_base_C4_Y, string( dist2, " ", step, "\n") ) # neigh +1 because we ignore the 0
+                write( handle_base_C4_Y, string( dist3, " ", step, "\n") ) # neigh +1 because we ignore the 0
+                write( handle_base_C4_Y, string( dist4, " ", step, "\n") ) # neigh +1 because we ignore the 0
             end
         end
     end
@@ -320,18 +319,18 @@ for step=1:nb_step
         if nb_neighbors == 1
             check = true
             for neigh = 1:2
-                write( handle_O1_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_O1_X, string( distances[ index[ neigh+1] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
                 if distances[ index[ neigh + 1 ]  ] > cut_off_low
                     check = false
                 end
             end
             if check
-                write( handle_O1_Y, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_O1_Y, string( distances[ index[ neigh+1] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             end
         elseif nb_neighbors == 2
             check = true
             for neigh = 1:2
-                write( handle_O2_X, string( distances[ index[ neigh+1] ] ,"\n") ) # neigh +1 because we ignore the 0
+                write( handle_O2_X, string( distances[ index[ neigh+1] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
                 if distances[ index[ neigh + 1 ]  ] > cut_off_low
                     check = false
                 end
@@ -342,15 +341,15 @@ for step=1:nb_step
             alkash_angle = geom.angleAlKash( a, b, c )
             write( handle_angle_O2, string( alkash_angle, "\n" ) )
             if check
-                write( handle_O2_Y, string( distances[ index[ 2 ] ] ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_O2_Y, string( distances[ index[ 3 ] ] ,"\n") ) # neigh +1 because we ignore the 0
-                write( handle_angle_O2_Y, string( alkash_angle, "\n" ) )
+                write( handle_O2_Y, string( distances[ index[ 2 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_O2_Y, string( distances[ index[ 3 ] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
+                write( handle_angle_O2_Y, string( alkash_angle, " ", step, "\n" ) )
             end
         else
             continue
         end
     end
-    contact_matrix.writeMatrix( handle_matrix, distance_matrix )
+    contact_matrix.writeStepMatrix( handle_matrix, distance_matrix )
 end
 
 close( handle_C2_X )
