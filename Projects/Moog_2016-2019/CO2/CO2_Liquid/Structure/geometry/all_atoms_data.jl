@@ -6,6 +6,10 @@ using clustering
 using contact_matrix
 using filexyz
 using geom
+using utils
+
+using LinearAlgebra
+using Statistics
 
 # Objective:
 # This code computes the distribution of distances and angles around carbon
@@ -147,8 +151,10 @@ for step=1:nb_step
             write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
             write( handle_C3_short_X, string( distances[ index[ 2 ] ], " " ) ) # neigh +1 because we ignore the 0
             if index[2] < nbC
+                print("test\n")
                 write( handle_C3_short_X, string( 0, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             else
+                print("test2\n")
                 write( handle_C3_short_X, string( 1, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             end
             write( handle_C3_long_X, string( distances[ index[ 3 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
@@ -176,6 +182,7 @@ for step=1:nb_step
             v2 = neigh_positions[ 1, : ] - neigh_positions[ 3, : ]
             # Computing the normal to the plan
             normal_v = cross( v1, v2 )
+            normal_v = normal_v./norm( normal_v)
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
@@ -253,6 +260,7 @@ for step=1:nb_step
             v2 = neigh_positions[ 1, : ] - neigh_positions[ 3, : ]
             # Computing the normal to the plan
             normal_v = cross( v1, v2 )
+            normal_v = normal_v./norm( normal_v)
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
@@ -263,6 +271,7 @@ for step=1:nb_step
             v2 = neigh_positions[ 1, : ] - neigh_positions[ 4, : ]
             # Computing the normal to the plan
             normal_v = cross( v1, v2 )
+            normal_v /= norm( normal_v)
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
@@ -273,6 +282,7 @@ for step=1:nb_step
             v2 = neigh_positions[ 2, : ] - neigh_positions[ 4, : ]
             # Computing the normal to the plan
             normal_v = cross( v1, v2 )
+            normal_v = normal_v./norm( normal_v)
             # Compute vector C-O1
             v_oc = neigh_positions[ 2, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
@@ -283,6 +293,7 @@ for step=1:nb_step
             v2 = neigh_positions[ 1, : ] - neigh_positions[ 4, : ]
             # Computing the normal to the plan
             normal_v = cross( v1, v2 )
+            normal_v = normal_v./norm( normal_v)
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
@@ -394,3 +405,221 @@ close( handle_base_C4_X )
 close( handle_base_C4_Y )
 
 close( handle_matrix )
+
+function readData( file_in::T1, nb_dim::T2 ) where { T1 <: AbstractString, T2 <: Int }
+    nb_lines = utils.getNbLines( file_in )
+    if nb_lines == false || nb_lines == 0
+        return false
+    end
+    handle_in = open( file_in)
+    data = zeros(Real, nb_lines, nb_dim )
+    for line=1:nb_lines
+        keywords = split( readline( handle_in ) )
+        for i=1:nb_dim
+            data[ line, i ] = parse(Float64, keywords[i] )
+        end
+    end
+    close( handle_in )
+    return data
+end
+
+function makeHist( data::Array{T1,2}, nb_box_hist::T2, max_step::T3, block_size::T4 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int }
+    min_ = minimum( data[:,1] )
+    max_ = maximum( data[:,1])
+    delta_ = (max_ - min_)/nb_box_hist
+    nb_block = round(Int,max_step/block_size)
+    hist_boxes = zeros(Real, nb_box_hist+1, nb_block+1 )
+    for i=1:size(data[:,1])[1]
+        hist_boxes[ round(Int,( data[i,1] - min_ )/delta_ )+1, Int( trunc( data[i,2]/block_size ) )+1  ] += 1
+    end
+    for i_block=1:nb_block+1
+         sum_  = sum( hist_boxes[ :, i_block ] )
+         #print("sum: ",sum_,"\n")
+         for i_box=1:nb_box_hist+1
+             hist_boxes[ i_box, i_block ] = hist_boxes[ i_box, i_block ]/sum_
+         end
+    end
+    hist_avg = zeros( nb_box_hist+1 )
+    hist_std = zeros( nb_box_hist+1 )
+    for i_box=1:nb_box_hist+1
+        hist_avg[ i_box ] = Statistics.mean( hist_boxes[ i_box, : ] )
+        hist_std[ i_box ] = Statistics.std(   hist_boxes[ i_box, : ] )
+    end
+    return hist_avg, hist_std, delta_, min_
+end
+
+function writeHist( file_out::T1, hist_avg::Vector{T2}, hist_err::Vector{T3} , delta_::T4, min_::T5 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real }
+    handle_out = open( file_out, "w" )
+    nb_box=size(hist_avg)[1]
+    for i_box=1:nb_box
+        Base.write( handle_out, string( i_box*delta_+min_, " ", hist_avg[ i_box ], " ", hist_err[ i_box ], "\n" ) )
+    end
+    close( handle_out )
+    return true
+end
+
+nb_box = 50
+max_step = 20000
+block_size = 100
+
+data = readData( string( folder_out, "C2_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "C2_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "C3_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "C3_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "C4_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "C4_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+
+data = readData( string( folder_out, "C2_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "C2_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "C3_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "C3_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "C4_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "C4_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "O1_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "O1_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "O2_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "O2_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+
+data = readData( string( folder_out, "O1_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "O1_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "O2_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "O2_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "distance_C3_short_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C3_short_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "distance_C3_long_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C3_long_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "distance_C3_short_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C3_short_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "distance_C3_long_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C3_long_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+
+
+data = readData( string( folder_out, "distance_C4_short_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C4_short_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "distance_C4_long_X.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C4_long_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "distance_C4_short_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C4_short_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "distance_C4_long_Y.dat" ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "distance_C4_long_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "base_dist_C3_X.dat"  ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "base_C3_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "base_dist_C3_Y.dat"  ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "base_C3_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "base_dist_C4_X.dat"  ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "base_C4_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "base_dist_C4_Y.dat"  ), 2 )
+if data != false
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    file_hist = string( folder_out, "base_C4_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+
+
+
+# handle_angle_C2   = open( string( folder_out, "angleC2_X.dat" ), "w" )
+# handle_angle_C2_Y = open( string( folder_out, "angleC2_Y.dat" ), "w" )
+#
+# handle_angle_C3   = open( string( folder_out, "angleC3_X.dat" ), "w" )
+# handle_angle_C3_Y = open( string( folder_out, "angleC3_Y.dat" ), "w" )
+#
+# handle_angle_C4   = open( string( folder_out, "angleC4_X.dat" ), "w" )
+# handle_angle_C4_Y = open( string( folder_out, "angleC4_Y.dat" ), "w" )
+#
+# handle_angle_O2   = open( string( folder_out, "angleO2_X.dat" ), "w" )
+# handle_angle_O2_Y = open( string( folder_out, "angleO2_Y.dat" ), "w" )
