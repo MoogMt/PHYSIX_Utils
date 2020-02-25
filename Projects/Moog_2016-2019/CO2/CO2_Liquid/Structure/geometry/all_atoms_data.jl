@@ -184,7 +184,7 @@ for step=1:nb_step
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
-            dist = np.abs( dot( v_oc, normal_v ) )
+            dist = abs( dot( v_oc, normal_v ) )
             write( handle_base_C3_X, string( dist, " ", step, "\n") ) # Writting to disk
             if check
                 write( handle_C3_Y, string( distances[ index[ 2 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
@@ -192,12 +192,12 @@ for step=1:nb_step
                 write( handle_C3_Y, string( distances[ index[ 4 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
                 write( handle_C3_short_Y, string( distances[ index[ 2 ] ] , " " ) ) # neigh +1 because we ignore the 0
                 if index[2] < nbC
-                    write( handle_C3_short_Y, string( 0 ,"\n" ) ) # neigh +1 because we ignore the 0
+                    write( handle_C3_short_Y, string( 0, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
                 else
-                    write( handle_C3_short_Y, string( 1 ,"\n" ) ) # neigh +1 because we ignore the 0
+                    write( handle_C3_short_Y, string( 1, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
                 end
-                write( handle_C3_long_Y, string( distances[ index[ 3 ] ] , "\n" ) ) # neigh +1 because we ignore the 0
-                write( handle_C3_long_Y, string( distances[ index[ 4 ] ] , "\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_C3_long_Y, string( distances[ index[ 3 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
+                write( handle_C3_long_Y, string( distances[ index[ 4 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
                 alkash_angle = geom.angleAlKash( a, b, c )
                 write( handle_angle_C3_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( a, d, f )
@@ -427,8 +427,9 @@ function makeHist( data::Array{T1,2}, nb_box_hist::T2, max_step::T3, block_size:
     delta_ = (max_ - min_)/nb_box_hist
     nb_block = round(Int,max_step/block_size)
     hist_boxes = zeros(Real, nb_box_hist+1, nb_block+1 )
+    size_data=size(data)[2]
     for i=1:size(data[:,1])[1]
-        hist_boxes[ round(Int,( data[i,1] - min_ )/delta_ )+1, Int( trunc( data[i,2]/block_size ) )+1  ] += 1
+        hist_boxes[ round(Int,( data[i,1] - min_ )/delta_ )+1, Int( trunc( data[i,size_data]/block_size ) )+1  ] += 1
     end
     for i_block=1:nb_block+1
          sum_  = sum( hist_boxes[ :, i_block ] )
@@ -526,53 +527,51 @@ if data != false
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 
-data = readData( string( folder_out, "distance_C3_short_X.dat" ), 2 )
+data = readData( string( folder_out, "distance_C3_short_X.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_short_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-data = readData( string( folder_out, "distance_C3_long_X.dat" ), 2 )
+data = readData( string( folder_out, "distance_C3_long_X.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_long_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 
-data = readData( string( folder_out, "distance_C3_short_Y.dat" ), 2 )
+data = readData( string( folder_out, "distance_C3_short_Y.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_short_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-data = readData( string( folder_out, "distance_C3_long_Y.dat" ), 2 )
+data = readData( string( folder_out, "distance_C3_long_Y.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_long_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 
-
-
-data = readData( string( folder_out, "distance_C4_short_X.dat" ), 2 )
+data = readData( string( folder_out, "distance_C4_short_X.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_short_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-data = readData( string( folder_out, "distance_C4_long_X.dat" ), 2 )
+data = readData( string( folder_out, "distance_C4_long_X.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_long_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-data = readData( string( folder_out, "distance_C4_short_Y.dat" ), 2 )
+data = readData( string( folder_out, "distance_C4_short_Y.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_short_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-data = readData( string( folder_out, "distance_C4_long_Y.dat" ), 2 )
+data = readData( string( folder_out, "distance_C4_long_Y.dat" ), 3 )
 if data != false
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_long_Y_hist.dat" )
