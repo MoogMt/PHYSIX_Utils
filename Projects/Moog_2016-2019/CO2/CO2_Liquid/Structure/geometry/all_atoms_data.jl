@@ -151,10 +151,8 @@ for step=1:nb_step
             write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
             write( handle_C3_short_X, string( distances[ index[ 2 ] ], " " ) ) # neigh +1 because we ignore the 0
             if index[2] < nbC
-                print("test\n")
                 write( handle_C3_short_X, string( 0, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             else
-                print("test2\n")
                 write( handle_C3_short_X, string( 1, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
             end
             write( handle_C3_long_X, string( distances[ index[ 3 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
@@ -186,7 +184,7 @@ for step=1:nb_step
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
-            dist = dot( v_oc, normal_v )
+            dist = np.abs( dot( v_oc, normal_v ) )
             write( handle_base_C3_X, string( dist, " ", step, "\n") ) # Writting to disk
             if check
                 write( handle_C3_Y, string( distances[ index[ 2 ] ], " ", step, "\n" ) ) # neigh +1 because we ignore the 0
@@ -264,7 +262,7 @@ for step=1:nb_step
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
-            dist1 = dot( v_oc, normal_v )
+            dist1 = abs( dot( v_oc, normal_v ) )
             write( handle_base_C4_X, string( dist1, " ", step, "\n") ) # Writting to disk
             #
             v1 = neigh_positions[ 1, : ] - neigh_positions[ 3, : ]
@@ -275,7 +273,7 @@ for step=1:nb_step
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
-            dist2 = dot( v_oc, normal_v )
+            dist2 = abs( dot( v_oc, normal_v ) )
             write( handle_base_C4_X, string( dist2, " ", step, "\n") ) # Writting to disk
             #
             v1 = neigh_positions[ 2, : ] - neigh_positions[ 3, : ]
@@ -286,7 +284,7 @@ for step=1:nb_step
             # Compute vector C-O1
             v_oc = neigh_positions[ 2, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
-            dist3 = dot( v_oc, normal_v )
+            dist3 = abs( dot( v_oc, normal_v ) )
             write( handle_base_C4_X, string( dist3, " ", step, "\n") ) # Writting to disk
             #
             v1 = neigh_positions[ 1, : ] - neigh_positions[ 2, : ]
@@ -297,7 +295,7 @@ for step=1:nb_step
             # Compute vector C-O1
             v_oc = neigh_positions[ 1, : ] - center_C
             # The distance to the base is the scalar product of C-O1 by the norm
-            dist4 = dot( v_oc, normal_v )
+            dist4 = abs( dot( v_oc, normal_v ) )
             write( handle_base_C4_X, string( dist4, " ", step, "\n") ) # Writting to disk
             if check
                 write( handle_C4_Y, string( distances[ index[ 2 ] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
