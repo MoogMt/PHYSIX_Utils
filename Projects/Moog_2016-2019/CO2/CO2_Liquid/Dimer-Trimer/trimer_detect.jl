@@ -1,110 +1,110 @@
-GPfolder=string("/home/moogmt/PHYSIX_Utils/GPlib/Julia/")
-push!(LOAD_PATH, GPfolder)
-
-# Detect and compute the number of occurences of trimers in simulations
-
+# Compute the number of occurences of trimers
 using atom_mod
 using cell_mod
 using cube_mod
 using clustering
 using filexyz
 using pdb
-
-function sortIndex( indexes, x )
-    sizex=size(x)[1]
-    for i=1:sizex
-        for j=i:sizex
-            if x[i] > x[j]
-                stock=x[i]
-                stock2=indexes[i]
-                indexes[i]=indexes[j]
-                x[i]=x[j]
-                indexes[j]=stock2
-                x[j]=stock
-            end
-        end
-    end
-    return
-end
-
-
-Volumes=[9.8]
-Temperatures=[3000]
-
-# for V in Volumes
-#     for T in Temperatures
-
-V=9.3
-T=3000
-
-folder=string("/media/moogmt/Stock/CO2/AIMD/Liquid/PBE-MT/",V,"/",T,"K/")
-file=string(folder,"TRAJEC_wrapped.xyz")
-
-# if isfile( file )
-
-traj = filexyz.readFastFile(file)
-cell=cell_mod.Cell_param(V,V,V)
-
-nb_steps=size(traj)[1]
-nb_atoms=size(traj[1].names)[1]
+using contact_matrix
 
 nbC=32
 nbO=64
 
-cut_off = 1.8
+cut_off=1.75
 
-distances_C1=zeros(nbO)
-distances_C2=zeros(nbO)
-index1=zeros(Int,nbO)
-index2=zeros(Int,nbO)
-common_neighbor=zeros(Int,2)
+Volumes=[8.6,8.82,9.0,9.05,9.1,9.15,9.2,9.25,9.3,9.35,9.375,9.4,9.5,9.8,10.0]
+Temperatures=[1750,2000,2250,2500,2750,3000]
 
-out_file=open(string(folder,"trimer_detect.dat"),"w")
+folder_base=string("/media/mathieu/Elements/CO2/")
 
-for step=1:nb_steps
-    print("V: ",V," T: ",T," Progress: ",step/nb_steps*100,"%\n")
-    count_dimer = 0
-    for carbon1 = 1:nbC
-        for oxygen = 1:nbO
-            distances_C1[oxygen] = cell_mod.distance(traj[step],cell,carbon1,oxygen)
+for T in Temperatures
+    for V in Volumes
+
+        folder_in=string(folder_base,V,"/",T,"K/")
+        folder_out=string( folder_in, "/Data/Trimer/" )
+
+        file_traj = string( folder_in, "TRAJEC_fdb_wrapped.xyz" )
+
+        if ! isfile( file_traj )
+            continue
         end
-        for i=1:nbO
-            index1[i]=i
+
+        if !isdir( folder_out )
+            Base.Filesystem.mkdir( folder_out )
         end
-        sortIndex(index1, distances_C1)
-        for carbon2 = carbon1+1:nbC
-            for oxygen = 1:nbO
-                distances_C2[oxygen] = cell_mod.distance(traj[step],cell,carbon2,oxygen)
-            end
-            for i=1:nbO
-                index2[i]=i
-            end
-            sortIndex(index2, distances_C2)
-            count = 0
-            for neighbor1=2:5
-                for neighbor2=neighbor1+1:5
-                    if index1[neighbor1] == index2[neighbor2]
-                        if cell_mod.distance(traj[step],cell,carbon1,index1[neighbor1]) < cut_off && cell_mod.distance(traj[step],cell,carbon2,index1[neighbor1]) < cut_off
-                            count += 1
-                            common_neighbor[count] = index1[neighbor1]
+
+        cell=cell_mod.Cell_param(V,V,V)
+
+        if ! isfile( file_traj )
+            continue
+        end
+
+        traj = filexyz.readFileAtomList( file_traj )
+
+        nb_steps = size( traj )[1]
+        nb_atoms = size( traj[1].names)[1]
+
+        handle_out = open( string( folder_out, "trimers_time.dat" ), "w" )
+
+        for step=1:nb_steps
+            print("Volume :",V," Temperature: ",T,"K Progress: ",round(step/nb_steps*100,digits=3),"% \n")
+
+            cm = contact_matrix.buildMatrix( traj[step] , cell, cut_off )
+
+            used=zeros( nb_atoms )
+            for carbon1=1:nbC-1
+                if used[ carbon1 ] == 1
+                    continue
+                end
+                for carbon2=carbon1+1:nbC
+                    if used[ carbon2 ] == 1
+                        continue
+                    end
+                    for oxygen1=1:nbO
+                        if used[ nbC + oxygen1 ] == 1
+                            continue
+                        end
+                        if cm[ carbon1, nbC+oxygen1 ] > 0  && cm[ carbon2, nbC+oxygen1 ] > 0
+                            for carbon3=carbon2+1:nbC
+                                if used[ carbon3 ] == 1
+                                    continue
+                                end
+                                for oxygen2=1:nbO
+                                    if used[ nbC + oxygen2 ] == 1
+                                        continue
+                                    end
+                                    if cm[ carbon2, nbC+oxygen2 ] > 0  && cm[ carbon3, nbC+oxygen2 ] > 0
+                                        for oxygen3=1:nbO
+                                            if used[ nbC + oxygen3 ] == 1
+                                                continue
+                                            end
+                                            if cm[ carbon1, oxygen3 ] > 0 && cm[ carbon3, oxygen3 ] > 0
+                                                write( handle_out, string( step, " " ) )
+                                                write( handle_out, string( carbon1, " " ) )
+                                                write( handle_out, string( carbon2, " " ) )
+                                                write( handle_out, string( carbon3, " " ) )
+                                                write( handle_out, string( oxygen1+nbC, " " ) )
+                                                write( handle_out, string( oxygen2+nbC, " " ) )
+                                                write( handle_out, string( oxygen3+nbC, "\n") )
+                                                used[ carbon1 ] = 1
+                                                used[ carbon2 ] = 1
+                                                used[ carbon3 ] = 1
+                                                used[ nbC + oxygen1 ] = 1
+                                                used[ nbC + oxygen2 ] = 1
+                                                used[ nbC + oxygen3 ] = 1
+                                                break
+                                            end
+                                        end
+                                    end
+                                end
+                            end
                         end
                     end
                 end
             end
-            if count > 1
-                count_dimer += 1
-                write(out_file,string(step," "))
-                # print("Found at step :",step," with count of : ",count, " \n")
-                write(out_file,string(carbon1," ",carbon2," ",common_neighbor[1]," ",common_neighbor[2]," ")    )
-                write(out_file,string("\n"))
-            end
+
         end
+        close( handle_out )
+
     end
-    # if count_dimer > 1
-    #     print("At step ",step," counted: ",count_dimer,"\n")
-    # end
 end
-close(out_file)
-#         end
-#     end
-# end
