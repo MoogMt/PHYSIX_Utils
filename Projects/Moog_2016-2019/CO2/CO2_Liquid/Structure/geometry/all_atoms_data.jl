@@ -34,37 +34,23 @@ function readData( file_in::T1, nb_dim::T2 ) where { T1 <: AbstractString, T2 <:
     return data
 end
 
-function makeHist( data::Array{T1,2}, nb_box_hist::T2, max_step::T3, block_size::T4 ) where { T1 <: Real, T2 <: Int, T3 <: Int, T4 <: Int }
+function makeHist( data::Array{T1,2}, nb_box_hist::T2 ) where { T1 <: Real, T2 <: Int }
     min_ = minimum( data[:,1] )
     max_ = maximum( data[:,1])
     delta_ = (max_ - min_)/nb_box_hist
     nb_block = round(Int,max_step/block_size)
-    hist_boxes = zeros(Real, nb_box_hist+1, nb_block+1 )
-    size_data=size(data)[2]
+    hist_ = zeros(Real, nb_box_hist+1 )
     for i=1:size(data[:,1])[1]
-        hist_boxes[ round(Int,( data[i,1] - min_ )/delta_ )+1, Int( trunc( data[i,size_data]/block_size ) )+1  ] += 1
+        hist_[ round(Int,( data[i,1] - min_ )/delta_ )+1 ] += 1
     end
-    for i_block=1:nb_block+1
-         sum_  = sum( hist_boxes[ :, i_block ] )
-         #print("sum: ",sum_,"\n")
-         for i_box=1:nb_box_hist+1
-             hist_boxes[ i_box, i_block ] = hist_boxes[ i_box, i_block ]/sum_
-         end
-    end
-    hist_avg = zeros( nb_box_hist+1 )
-    hist_std = zeros( nb_box_hist+1 )
-    for i_box=1:nb_box_hist+1
-        hist_avg[ i_box ] = Statistics.mean( hist_boxes[ i_box, : ] )
-        hist_std[ i_box ] = Statistics.std(   hist_boxes[ i_box, : ] )
-    end
-    return hist_avg, hist_std, delta_, min_
+    return hist_, delta_, min_
 end
 
-function writeHist( file_out::T1, hist_avg::Vector{T2}, hist_err::Vector{T3} , delta_::T4, min_::T5 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real, T5 <: Real }
+function writeHist( file_out::T1, hist_avg::Vector{T2}, delta_::T3, min_::T4 ) where { T1 <: AbstractString, T2 <: Real, T3 <: Real, T4 <: Real }
     handle_out = open( file_out, "w" )
     nb_box=size(hist_avg)[1]
     for i_box=1:nb_box
-        Base.write( handle_out, string( i_box*delta_+min_, " ", hist_avg[ i_box ], " ", hist_err[ i_box ], "\n" ) )
+        Base.write( handle_out, string( (i_box-0.5)*delta_+min_, " ", hist_avg[ i_box ], "\n" ) )
     end
     close( handle_out )
     return true
@@ -123,7 +109,7 @@ handle_O2_Y = open( string( folder_out, "O2_Y.dat" ), "w" )
 handle_angle_C2_X = open( string( folder_out, "angleC2_X.dat" ), "w" )
 handle_angle_C2_Y = open( string( folder_out, "angleC2_Y.dat" ), "w" )
 
-handle_angle_C3   = open( string( folder_out, "angleC3_X.dat" ), "w" )
+handle_angle_C3_X   = open( string( folder_out, "angleC3_X.dat" ), "w" )
 handle_angle_C3_Y = open( string( folder_out, "angleC3_Y.dat" ), "w" )
 
 handle_angle_C3_shortlong_X   = open( string( folder_out, "angleC3_X_shortlong.dat" ), "w" )
@@ -140,7 +126,7 @@ handle_angle_C3_23_Y   = open( string( folder_out, "angleC3_23_Y.dat" ), "w" )
 handle_angle_C3_24_Y   = open( string( folder_out, "angleC3_24_Y.dat" ), "w" )
 handle_angle_C3_34_Y   = open( string( folder_out, "angleC3_34_Y.dat" ), "w" )
 
-handle_angle_C4   = open( string( folder_out, "angleC4_X.dat" ), "w" )
+handle_angle_C4_X   = open( string( folder_out, "angleC4_X.dat" ), "w" )
 handle_angle_C4_Y = open( string( folder_out, "angleC4_Y.dat" ), "w" )
 
 handle_angle_C4_23_X = open( string( folder_out, "angleC4_23_X.dat" ), "w" )
@@ -229,15 +215,15 @@ for step=1:nb_step
             f = distance_matrix[ index[2], index[4] ] # dO1-O3
             # Angle through Al-Kashi
             alpha1 = geom.angleAlKash( a, b, c )
-            write( handle_angle_C2, string( alpha1, " ", step, "\n" ) )
+            write( handle_angle_C3_X, string( alpha1, " ", step, "\n" ) )
             write( handle_angle_C3_shortlong_X , string( alpha1, " ", step, "\n" ) )
             write( handle_angle_C3_23_X, string( alpha1, " ", step, "\n" ) )
             alpha2 = geom.angleAlKash( a, d, f )
-            write( handle_angle_C2, string( alpha2, " ", step, "\n" ) )
+            write( handle_angle_C3_X, string( alpha2, " ", step, "\n" ) )
             write( handle_angle_C3_shortlong_X , string( alpha2, " ", step, "\n" ) )
             write( handle_angle_C3_24_X, string( alpha2, " ", step, "\n" ) )
             alpha3 = geom.angleAlKash( b, d, e )
-            write( handle_angle_C2, string( alpha3, " ", step, "\n" ) )
+            write( handle_angle_C3_X, string( alpha3, " ", step, "\n" ) )
             write( handle_angle_C3_longlong_X , string( alpha3, " ", step, "\n" ) )
             write( handle_angle_C3_34_X, string( alpha3, " ", step, "\n" ) )
             #
@@ -331,27 +317,27 @@ for step=1:nb_step
             # Angle through Al-Kashi
 
             angle23 = geom.angleAlKash( a, b, c )
-            write( handle_angle_C4, string( angle23, " ", step, "\n" ) )
+            write( handle_angle_C4_X, string( angle23, " ", step, "\n" ) )
             write( handle_angle_C4_23_X, string( angle23, " ", step, "\n" ) )
 
             angle24 = geom.angleAlKash( a, d, f )
-            write( handle_angle_C4, string( angle24, " ", step, "\n" ) )
+            write( handle_angle_C4_X, string( angle24, " ", step, "\n" ) )
             write( handle_angle_C4_24_X, string( angle24, " ", step, "\n" ) )
 
             angle34 = geom.angleAlKash( b, d, e )
-            write( handle_angle_C4, string( angle34, " ", step, "\n" ) )
+            write( handle_angle_C4_X, string( angle34, " ", step, "\n" ) )
             write( handle_angle_C4_34_X, string( angle34, " ", step, "\n" ) )
 
             angle25 = geom.angleAlKash( a, g, j )
-            write( handle_angle_C4, string( angle25, " ", step, "\n" ) )
+            write( handle_angle_C4_X, string( angle25, " ", step, "\n" ) )
             write( handle_angle_C4_34_X, string( angle25, " ", step, "\n" ) )
 
             angle35 = geom.angleAlKash( b, g, h )
-            write( handle_angle_C4, string( angle35, " ", step, "\n" ) )
+            write( handle_angle_C4_X, string( angle35, " ", step, "\n" ) )
             write( handle_angle_C4_35_X, string( angle35, " ", step, "\n" ) )
 
             angle45 = geom.angleAlKash( d, g, i )
-            write( handle_angle_C4, string( angle45, " ", step, "\n" ) )
+            write( handle_angle_C4_X, string( angle45, " ", step, "\n" ) )
             write( handle_angle_C4_45_X, string( angle45, " ", step, "\n" ) )
 
             # Select the target carbon positions
@@ -497,10 +483,10 @@ close( handle_O2_X )
 close( handle_O1_Y )
 close( handle_O2_Y )
 
-close( handle_angle_C2 )
+close( handle_angle_C2_X )
 close( handle_angle_C2_Y )
 
-close( handle_angle_C3 )
+close( handle_angle_C3_X )
 close( handle_angle_C3_Y )
 
 close( handle_angle_C3_23_X )
@@ -511,7 +497,7 @@ close( handle_angle_C3_23_Y )
 close( handle_angle_C3_24_Y )
 close( handle_angle_C3_34_Y )
 
-close( handle_angle_C4 )
+close( handle_angle_C4_X )
 close( handle_angle_C4_Y )
 
 close( handle_angle_C4_23_X )
@@ -560,153 +546,151 @@ close( handle_matrix )
 
 
 nb_box = 50
-max_step = 20000
-block_size = 100
-min_nb = 5
+
 max_angle = 179.5
 
 data = readData( string( folder_out, "C2_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "C2_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C3_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "C3_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C4_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "C4_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "C2_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "C2_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C3_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, )
     file_hist = string( folder_out, "C3_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C4_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "C4_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "O1_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "O1_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "O2_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "O2_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 
 data = readData( string( folder_out, "O1_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "O1_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "O2_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "O2_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "distance_C3_short_X.dat" ), 3 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "distance_C3_short_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C3_long_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "distance_C3_long_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "distance_C3_short_Y.dat" ), 3 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_short_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C3_long_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_long_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_short_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_short_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_long_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_long_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_short_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_short_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_long_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_long_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C3_X.dat"  ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C3_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C3_Y.dat"  ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C3_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C4_X.dat"  ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C4_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C4_Y.dat"  ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C4_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC2_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     nb_box = size(hist_avg)[1]
     sum_ = 0
     for i_box=1:nb_box
@@ -719,11 +703,11 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC2_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleC2_Y.dat" ), 1 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -735,12 +719,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC2_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -752,11 +736,11 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleC3_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -768,12 +752,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -785,11 +769,11 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleC4_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -801,12 +785,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleO2_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -818,11 +802,11 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleO2_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleO2_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -834,13 +818,13 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleO2_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 
 data = readData( string( folder_out, "angleC3_X_shortlong.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -852,12 +836,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_X_shortlong_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_X_longlong.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -869,12 +853,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_X_longlong_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_Y_shortlong.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -886,12 +870,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_Y_shortlong_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_Y_longlong.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -903,12 +887,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_Y_longlong_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_23_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -920,12 +904,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_23_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_24_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -937,12 +921,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_24_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_34_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -954,12 +938,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_34_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_23_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -971,12 +955,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_23_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_24_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -988,12 +972,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_24_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_34_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1005,12 +989,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC3_34_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_23_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1022,12 +1006,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_23_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_24_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1039,12 +1023,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_24_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_25_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1056,12 +1040,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_25_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_34_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1073,12 +1057,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_34_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_35_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1090,12 +1074,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_35_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1107,13 +1091,13 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 handle_angle_C4_23_Y = open( string( folder_out, "angleC4_23_Y.dat" ), "w" )
 data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1125,12 +1109,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_24_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1142,12 +1126,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_24_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_25_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1159,12 +1143,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_25_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_34_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1176,12 +1160,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_34_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_35_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false &&
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1193,12 +1177,12 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_35_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_45_Y.dat" ), 2 )
-if data != false && size(data)[1] > min_nb*block_size
-    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+if data != false
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
@@ -1210,5 +1194,5 @@ if data != false && size(data)[1] > min_nb*block_size
         hist_avg[i_box] = hist_avg[i_box]/sum_
     end
     file_hist = string( folder_out, "angleC4_45_Y_hist.dat" )
-    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+    writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
