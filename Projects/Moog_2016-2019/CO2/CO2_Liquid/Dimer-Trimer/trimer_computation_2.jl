@@ -21,7 +21,7 @@ for T in Temperatures
     for V in Volumes
 
         folder_in=string(folder_base,V,"/",T,"K/")
-        folder_out=string( folder_in, "/Data/Trimer" )
+        folder_out=string( folder_in, "/Data/Trimer/" )
 
         file_traj = string( folder_in, "TRAJEC_fdb_wrapped.xyz" )
 
