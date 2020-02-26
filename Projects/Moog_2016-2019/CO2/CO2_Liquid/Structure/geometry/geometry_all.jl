@@ -49,7 +49,7 @@ end
 function makeHistAngle( data::Array{T1,2}, nb_box_hist::T2 ) where { T1 <: Real, T2 <: Int }
     min_ = minimum( data[:,1] )
     max_ = maximum( data[:,1])
-    delta_ = (max_ - min_)/nb_box_hist
+    delta_ = (max_ - min_)/(nb_box_hist-1)
     hist_ = zeros(Real, nb_box_hist )
     for i=1:size(data[:,1])[1]
         hist_[ Int(trunc(( data[i,1] - min_ )/delta_) )+1 ] += 1
@@ -71,7 +71,7 @@ function writeHist( file_out::T1, hist_avg::Vector{T2}, delta_::T3, min_::T4 ) w
     return true
 end
 
-
+folder_base=string("/media/mathieu/Elements/CO2/")
 
 # Sim parameters to analyze
 Volumes=[10.0,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.8,8.82,8.6]
@@ -80,15 +80,13 @@ Temperatures=[1750,2000,2500,3000]
 # Max number of neighbors
 nbC=32
 nbO=64
-
 max_neigh=4
-
 cut_off = 1.75
 cut_off_low = 1.6
+nb_box = 50
+max_angle = 179.5
 
-folder_base=string("/media/mathieu/Elements/CO2/")
-
-V=8.82
+V=9.8
 T=3000
 
 folder_target=string( folder_base, V, "/", T, "K/" )
@@ -558,11 +556,6 @@ close( handle_base_C4_Y )
 
 close( handle_matrix )
 
-
-
-nb_box = 50
-
-max_angle = 179.5
 
 data = readData( string( folder_out, "C2_X.dat" ), 2 )
 if data != false
