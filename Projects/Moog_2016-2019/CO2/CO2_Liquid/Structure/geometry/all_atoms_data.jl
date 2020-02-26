@@ -38,7 +38,6 @@ function makeHist( data::Array{T1,2}, nb_box_hist::T2 ) where { T1 <: Real, T2 <
     min_ = minimum( data[:,1] )
     max_ = maximum( data[:,1])
     delta_ = (max_ - min_)/nb_box_hist
-    nb_block = round(Int,max_step/block_size)
     hist_ = zeros(Real, nb_box_hist+1 )
     for i=1:size(data[:,1])[1]
         hist_[ round(Int,( data[i,1] - min_ )/delta_ )+1 ] += 1
@@ -629,61 +628,61 @@ end
 
 data = readData( string( folder_out, "distance_C3_short_Y.dat" ), 3 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box)
     file_hist = string( folder_out, "distance_C3_short_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C3_long_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "distance_C3_long_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_short_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "distance_C4_short_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_long_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "distance_C4_long_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_short_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box)
     file_hist = string( folder_out, "distance_C4_short_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_long_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "distance_C4_long_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C3_X.dat"  ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "base_C3_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C3_Y.dat"  ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "base_C3_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C4_X.dat"  ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "base_C4_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "base_dist_C4_Y.dat"  ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     file_hist = string( folder_out, "base_C4_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
@@ -1164,7 +1163,7 @@ if data != false
 end
 
 data = readData( string( folder_out, "angleC4_35_Y.dat" ), 2 )
-if data != false &&
+if data != false 
     hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
     sum_ = 0
     for i_box=1:nb_box
