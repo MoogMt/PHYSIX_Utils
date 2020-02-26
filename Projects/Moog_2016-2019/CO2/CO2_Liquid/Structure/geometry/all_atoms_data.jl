@@ -712,7 +712,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -728,7 +728,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -745,7 +745,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -761,7 +761,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -778,7 +778,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -794,7 +794,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -811,7 +811,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -827,7 +827,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -845,7 +845,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -862,7 +862,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -879,7 +879,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -896,7 +896,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -913,7 +913,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -930,7 +930,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -947,7 +947,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -964,7 +964,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -981,7 +981,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -998,7 +998,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1015,7 +1015,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1032,7 +1032,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1049,7 +1049,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1066,7 +1066,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1083,7 +1083,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1100,7 +1100,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1118,7 +1118,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1135,7 +1135,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1152,7 +1152,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1169,7 +1169,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1186,7 +1186,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
@@ -1203,7 +1203,7 @@ if data != false && size(data)[1] > min_nb*block_size
     for i_box=1:nb_box
         if i_box*delta_hist+min_hist < max_angle
             hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            sum_ += hist_avg[i_box]
+            global sum_ += hist_avg[i_box]
         end
     end
     for i_box=1:nb_box
