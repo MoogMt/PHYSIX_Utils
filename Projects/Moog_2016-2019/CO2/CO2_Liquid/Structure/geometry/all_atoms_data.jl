@@ -7,6 +7,7 @@ using contact_matrix
 using filexyz
 using geom
 using utils
+using conversion
 
 using LinearAlgebra
 using Statistics
@@ -69,8 +70,36 @@ handle_angle_C2_Y = open( string( folder_out, "angleC2_Y.dat" ), "w" )
 handle_angle_C3   = open( string( folder_out, "angleC3_X.dat" ), "w" )
 handle_angle_C3_Y = open( string( folder_out, "angleC3_Y.dat" ), "w" )
 
+handle_angle_C3_shortlong_X   = open( string( folder_out, "angleC3_X_shortlong.dat" ), "w" )
+handle_angle_C3_longlong_X    = open( string( folder_out, "angleC3_X_longlong.dat" ), "w" )
+
+handle_angle_C3_shortlong_Y   = open( string( folder_out, "angleC3_Y_shortlong.dat" ), "w" )
+handle_angle_C3_longlong_Y    = open( string( folder_out, "angleC3_Y_longlong.dat" ), "w" )
+
+handle_angle_C3_23_X   = open( string( folder_out, "angleC3_23_X.dat" ), "w" )
+handle_angle_C3_24_X   = open( string( folder_out, "angleC3_24_X.dat" ), "w" )
+handle_angle_C3_34_X   = open( string( folder_out, "angleC3_34_X.dat" ), "w" )
+
+handle_angle_C3_23_Y   = open( string( folder_out, "angleC3_23_Y.dat" ), "w" )
+handle_angle_C3_24_Y   = open( string( folder_out, "angleC3_24_Y.dat" ), "w" )
+handle_angle_C3_34_Y   = open( string( folder_out, "angleC3_34_Y.dat" ), "w" )
+
 handle_angle_C4   = open( string( folder_out, "angleC4_X.dat" ), "w" )
 handle_angle_C4_Y = open( string( folder_out, "angleC4_Y.dat" ), "w" )
+
+handle_angle_C4_23_X = open( string( folder_out, "angleC4_23_X.dat" ), "w" )
+handle_angle_C4_24_X = open( string( folder_out, "angleC4_24_X.dat" ), "w" )
+handle_angle_C4_25_X = open( string( folder_out, "angleC4_25_X.dat" ), "w" )
+handle_angle_C4_34_X = open( string( folder_out, "angleC4_34_X.dat" ), "w" )
+handle_angle_C4_35_X = open( string( folder_out, "angleC4_35_X.dat" ), "w" )
+handle_angle_C4_45_X = open( string( folder_out, "angleC4_45_X.dat" ), "w" )
+
+handle_angle_C4_23_Y = open( string( folder_out, "angleC4_23_Y.dat" ), "w" )
+handle_angle_C4_24_Y = open( string( folder_out, "angleC4_24_Y.dat" ), "w" )
+handle_angle_C4_25_Y = open( string( folder_out, "angleC4_25_Y.dat" ), "w" )
+handle_angle_C4_34_Y = open( string( folder_out, "angleC4_34_Y.dat" ), "w" )
+handle_angle_C4_35_Y = open( string( folder_out, "angleC4_35_Y.dat" ), "w" )
+handle_angle_C4_45_Y = open( string( folder_out, "angleC4_45_Y.dat" ), "w" )
 
 handle_angle_O2   = open( string( folder_out, "angleO2_X.dat" ), "w" )
 handle_angle_O2_Y = open( string( folder_out, "angleO2_Y.dat" ), "w" )
@@ -143,12 +172,19 @@ for step=1:nb_step
             e = distance_matrix[ index[3], index[4] ] # dO2-O3
             f = distance_matrix[ index[2], index[4] ] # dO1-O3
             # Angle through Al-Kashi
-            alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
-            alkash_angle = geom.angleAlKash( a, d, f )
-            write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
-            alkash_angle = geom.angleAlKash( b, d, e )
-            write( handle_angle_C2, string( alkash_angle, " ", step, "\n" ) )
+            alpha1 = geom.angleAlKash( a, b, c )
+            write( handle_angle_C2, string( alpha1, " ", step, "\n" ) )
+            write( handle_angle_C3_shortlong_X , string( alpha1, " ", step, "\n" ) )
+            write( handle_angle_C3_23_X, string( alpha1, " ", step, "\n" ) )
+            alpha2 = geom.angleAlKash( a, d, f )
+            write( handle_angle_C2, string( alpha2, " ", step, "\n" ) )
+            write( handle_angle_C3_shortlong_X , string( alpha2, " ", step, "\n" ) )
+            write( handle_angle_C3_24_X, string( alpha2, " ", step, "\n" ) )
+            alpha3 = geom.angleAlKash( b, d, e )
+            write( handle_angle_C2, string( alpha3, " ", step, "\n" ) )
+            write( handle_angle_C3_longlong_X , string( alpha3, " ", step, "\n" ) )
+            write( handle_angle_C3_34_X, string( alpha3, " ", step, "\n" ) )
+            #
             write( handle_C3_short_X, string( distances[ index[ 2 ] ], " " ) ) # neigh +1 because we ignore the 0
             if index[2] < nbC
                 write( handle_C3_short_X, string( 0, " ", step, "\n" ) ) # neigh +1 because we ignore the 0
@@ -204,9 +240,16 @@ for step=1:nb_step
                 write( handle_angle_C3_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( b, d, e )
                 write( handle_angle_C3_Y, string( alkash_angle, " ", step, "\n" ) )
+                write( handle_angle_C3_shortlong_Y , string( alpha1, " ", step, "\n" ) )
+                write( handle_angle_C3_shortlong_Y , string( alpha2, " ", step, "\n" ) )
+                write( handle_angle_C3_longlong_Y , string( alpha3, " ", step, "\n" ) )
+                write( handle_angle_C3_23_X, string( alpha1, " ", step, "\n" ) )
+                write( handle_angle_C3_24_X, string( alpha2, " ", step, "\n" ) )
+                write( handle_angle_C3_34_X, string( alpha3, " ", step, "\n" ) )
                 write( handle_base_C3_Y, string( dist, " ", step, "\n") )
             end
         elseif nb_neighbors >= 4
+
             check = true
             for neigh = 1:4
                 write( handle_C4_X, string( distances[ index[ neigh+1] ], " ", step, "\n") ) # neigh +1 because we ignore the 0
@@ -214,6 +257,11 @@ for step=1:nb_step
                     check = false
                 end
             end
+
+            write( handle_C4_short_X, string( distances[2], " ", step, "\n" ) )
+            write( handle_C4_long_X, string( distances[3], " ", step, "\n" ) )
+            write( handle_C4_long_X, string( distances[4], " ", step, "\n" ) )
+
             a = distance_matrix[ carbon, index[2] ] # dC-O1
             b = distance_matrix[ carbon, index[3] ] # dC-O2
             c = distance_matrix[ index[2], index[3] ] # dO1-O2
@@ -225,18 +273,31 @@ for step=1:nb_step
             i = distance_matrix[ index[4], index[5] ] # dO3-O4
             j = distance_matrix[ index[2], index[5] ] # dO1-O4
             # Angle through Al-Kashi
-            alkash_angle = geom.angleAlKash( a, b, c )
-            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
-            alkash_angle = geom.angleAlKash( a, d, f )
-            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
-            alkash_angle = geom.angleAlKash( b, d, e )
-            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
-            alkash_angle = geom.angleAlKash( a, g, j )
-            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
-            alkash_angle = geom.angleAlKash( b, g, h )
-            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
-            alkash_angle = geom.angleAlKash( d, g, i )
-            write( handle_angle_C4, string( alkash_angle, " ", step, "\n" ) )
+
+            angle23 = geom.angleAlKash( a, b, c )
+            write( handle_angle_C4, string( angle23, " ", step, "\n" ) )
+            write( handle_angle_C4_23_X, string( angle23, " ", step, "\n" ) )
+
+            angle24 = geom.angleAlKash( a, d, f )
+            write( handle_angle_C4, string( angle24, " ", step, "\n" ) )
+            write( handle_angle_C4_24_X, string( angle24, " ", step, "\n" ) )
+
+            angle34 = geom.angleAlKash( b, d, e )
+            write( handle_angle_C4, string( angle34, " ", step, "\n" ) )
+            write( handle_angle_C4_34_X, string( angle34, " ", step, "\n" ) )
+
+            angle25 = geom.angleAlKash( a, g, j )
+            write( handle_angle_C4, string( angle25, " ", step, "\n" ) )
+            write( handle_angle_C4_34_X, string( angle25, " ", step, "\n" ) )
+
+            angle35 = geom.angleAlKash( b, g, h )
+            write( handle_angle_C4, string( angle35, " ", step, "\n" ) )
+            write( handle_angle_C4_35_X, string( angle35, " ", step, "\n" ) )
+
+            angle45 = geom.angleAlKash( d, g, i )
+            write( handle_angle_C4, string( angle45, " ", step, "\n" ) )
+            write( handle_angle_C4_45_X, string( angle45, " ", step, "\n" ) )
+
             # Select the target carbon positions
             center_C = traj[step].positions[carbon,:]
             # Wrap the positions of the target oxygens with regard to the positions of C
@@ -314,6 +375,12 @@ for step=1:nb_step
                 write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
                 alkash_angle = geom.angleAlKash( d, g, i )
                 write( handle_angle_C4_Y, string( alkash_angle, " ", step, "\n" ) )
+                write( handle_angle_C4_23_Y, string( angle23, " ", step, "\n" ) )
+                write( handle_angle_C4_24_Y, string( angle24, " ", step, "\n" ) )
+                write( handle_angle_C4_25_Y, string( angle25, " ", step, "\n" ) )
+                write( handle_angle_C4_34_Y, string( angle34, " ", step, "\n" ) )
+                write( handle_angle_C4_35_Y, string( angle35, " ", step, "\n" ) )
+                write( handle_angle_C4_45_Y, string( angle45, " ", step, "\n" ) )
                 write( handle_base_C4_Y, string( dist1, " ", step, "\n") ) # neigh +1 because we ignore the 0
                 write( handle_base_C4_Y, string( dist2, " ", step, "\n") ) # neigh +1 because we ignore the 0
                 write( handle_base_C4_Y, string( dist3, " ", step, "\n") ) # neigh +1 because we ignore the 0
@@ -376,13 +443,43 @@ close( handle_O2_Y )
 
 close( handle_angle_C2 )
 close( handle_angle_C2_Y )
+
 close( handle_angle_C3 )
 close( handle_angle_C3_Y )
+
+close( handle_angle_C3_23_X )
+close( handle_angle_C3_24_X )
+close( handle_angle_C3_34_X )
+
+close( handle_angle_C3_23_Y )
+close( handle_angle_C3_24_Y )
+close( handle_angle_C3_34_Y )
+
 close( handle_angle_C4 )
 close( handle_angle_C4_Y )
 
+close( handle_angle_C4_23_X )
+close( handle_angle_C4_24_X )
+close( handle_angle_C4_25_X )
+close( handle_angle_C4_34_X )
+close( handle_angle_C4_35_X )
+close( handle_angle_C4_45_X )
+
+close( handle_angle_C4_23_Y )
+close( handle_angle_C4_24_Y )
+close( handle_angle_C4_25_Y )
+close( handle_angle_C4_34_Y )
+close( handle_angle_C4_35_Y )
+close( handle_angle_C4_45_Y )
+
 close( handle_angle_O2 )
 close( handle_angle_O2_Y )
+
+close( handle_angle_C3_shortlong_X )
+close( handle_angle_C3_longlong_X )
+
+close( handle_angle_C3_shortlong_Y )
+close( handle_angle_C3_longlong_Y )
 
 close( handle_C3_short_X )
 close( handle_C3_long_X )
@@ -460,54 +557,54 @@ end
 nb_box = 50
 max_step = 20000
 block_size = 100
+min_nb = 5
 
 data = readData( string( folder_out, "C2_X.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "C2_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C3_X.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "C3_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C4_X.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "C4_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 
-
 data = readData( string( folder_out, "C2_Y.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "C2_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C3_Y.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "C3_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "C4_Y.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "C4_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "O1_X.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "O1_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "O2_X.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "O2_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
@@ -515,92 +612,87 @@ end
 
 
 data = readData( string( folder_out, "O1_Y.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "O1_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "O2_Y.dat" ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "O2_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "distance_C3_short_X.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_short_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C3_long_X.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_long_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "distance_C3_short_Y.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_short_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C3_long_Y.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C3_long_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-
 data = readData( string( folder_out, "distance_C4_short_X.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_short_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_long_X.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_long_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_short_Y.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_short_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "distance_C4_long_Y.dat" ), 3 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "distance_C4_long_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-
 data = readData( string( folder_out, "base_dist_C3_X.dat"  ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C3_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-
 data = readData( string( folder_out, "base_dist_C3_Y.dat"  ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C3_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-
 data = readData( string( folder_out, "base_dist_C4_X.dat"  ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C4_X_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
 end
-
 data = readData( string( folder_out, "base_dist_C4_Y.dat"  ), 2 )
-if data != false
+if data != false && size(data)[1] > min_nb*block_size
     hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
     file_hist = string( folder_out, "base_C4_Y_hist.dat" )
     writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
@@ -608,15 +700,301 @@ end
 
 
 
+data = readData( string( folder_out, "angleC2_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    nb_box = size(hist_avg)[1]
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC2_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "angleC2_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC2_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
 
-# handle_angle_C2   = open( string( folder_out, "angleC2_X.dat" ), "w" )
-# handle_angle_C2_Y = open( string( folder_out, "angleC2_Y.dat" ), "w" )
-#
-# handle_angle_C3   = open( string( folder_out, "angleC3_X.dat" ), "w" )
-# handle_angle_C3_Y = open( string( folder_out, "angleC3_Y.dat" ), "w" )
-#
-# handle_angle_C4   = open( string( folder_out, "angleC4_X.dat" ), "w" )
-# handle_angle_C4_Y = open( string( folder_out, "angleC4_Y.dat" ), "w" )
-#
-# handle_angle_O2   = open( string( folder_out, "angleO2_X.dat" ), "w" )
-# handle_angle_O2_Y = open( string( folder_out, "angleO2_Y.dat" ), "w" )
+data = readData( string( folder_out, "angleC3_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "angleC3_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "angleC4_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleO2_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleO2_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+data = readData( string( folder_out, "angleO2_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleO2_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+
+data = readData( string( folder_out, "angleC3_X_shortlong.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_X_shortlong_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_X_longlong.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_X_longlong_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_Y_shortlong.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_Y_shortlong_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_Y_longlong.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_Y_longlong_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_23_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_23_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_24_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_24_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_34_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_34_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_23_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_23_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_24_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_24_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC3_34_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC3_34_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_23_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_23_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_24_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_24_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_25_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_25_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_34_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_34_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_35_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_35_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+handle_angle_C4_23_Y = open( string( folder_out, "angleC4_23_Y.dat" ), "w" )
+data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_24_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_24_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_25_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_25_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_34_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_34_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_35_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_35_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
+
+data = readData( string( folder_out, "angleC4_45_Y.dat" ), 2 )
+if data != false && size(data)[1] > min_nb*block_size
+    hist_avg, hist_std, delta_hist, min_hist = makeHist( data, nb_box, max_step, block_size )
+    for i_box=1:nb_box
+        hist_avg[i] = hist_avg[i]/( sin( (i*delta_hist+min_hist)*conversion.degr2rad ) )
+    end
+    file_hist = string( folder_out, "angleC4_45_Y_hist.dat" )
+    writeHist( file_hist, hist_avg, hist_std, delta_hist, min_hist )
+end
