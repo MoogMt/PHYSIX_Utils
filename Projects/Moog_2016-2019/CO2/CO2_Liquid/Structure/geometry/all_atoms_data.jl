@@ -42,6 +42,22 @@ function makeHist( data::Array{T1,2}, nb_box_hist::T2 ) where { T1 <: Real, T2 <
     for i=1:size(data[:,1])[1]
         hist_[ round(Int,( data[i,1] - min_ )/delta_ )+1 ] += 1
     end
+    hist_ /= sum(hist_[:])
+    return hist_, delta_, min_
+end
+
+function makeHistAngle( data::Array{T1,2}, nb_box_hist::T2 ) where { T1 <: Real, T2 <: Int }
+    min_ = minimum( data[:,1] )
+    max_ = maximum( data[:,1])
+    delta_ = (max_ - min_)/nb_box_hist
+    hist_ = zeros(Real, nb_box_hist )
+    for i=1:size(data[:,1])[1]
+        hist_[ Int(trunc(( data[i,1] - min_ )/delta_) )+1 ] += 1
+    end
+    for i_box=1:nb_box
+        hist_[i_box] = hist_[i_box]/sin( conversion.degr2rad*(i_box*delta_+min_))
+    end
+    hist_ /= sum(hist_[:])
     return hist_, delta_, min_
 end
 
@@ -689,133 +705,52 @@ end
 
 data = readData( string( folder_out, "angleC2_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    nb_box = size(hist_avg)[1]
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC2_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleC2_Y.dat" ), 1 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC2_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleC3_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleC4_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleO2_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleO2_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 data = readData( string( folder_out, "angleO2_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleO2_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
@@ -823,272 +758,112 @@ end
 
 data = readData( string( folder_out, "angleC3_X_shortlong.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_X_shortlong_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_X_longlong.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_X_longlong_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_Y_shortlong.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_Y_shortlong_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_Y_longlong.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_Y_longlong_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_23_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_23_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_24_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_24_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_34_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_34_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_23_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_23_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_24_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_24_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC3_34_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC3_34_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_23_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_23_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_24_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_24_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_25_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_25_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_34_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_34_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_35_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_35_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
@@ -1096,102 +871,42 @@ end
 handle_angle_C4_23_Y = open( string( folder_out, "angleC4_23_Y.dat" ), "w" )
 data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_24_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_24_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_25_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_25_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_34_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_34_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_35_Y.dat" ), 2 )
-if data != false 
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+if data != false
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_35_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
 
 data = readData( string( folder_out, "angleC4_45_Y.dat" ), 2 )
 if data != false
-    hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
-    sum_ = 0
-    for i_box=1:nb_box
-        if i_box*delta_hist+min_hist < max_angle
-            hist_avg[i_box] = hist_avg[i_box]/( sin( (i_box*delta_hist+min_hist)*conversion.degr2rad ) )
-            global sum_ += hist_avg[i_box]
-        end
-    end
-    for i_box=1:nb_box
-        hist_avg[i_box] = hist_avg[i_box]/sum_
-    end
+    hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
     file_hist = string( folder_out, "angleC4_45_Y_hist.dat" )
     writeHist( file_hist, hist_avg, delta_hist, min_hist )
 end
