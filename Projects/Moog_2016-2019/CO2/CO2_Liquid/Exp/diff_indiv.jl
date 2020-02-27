@@ -16,22 +16,22 @@ using LsqFit
 
 function computingMSD( V::T1, T::T2, file_traj::T3 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString }
 
-    traj,test=filexyz.readFastFile(file_traj)
-    if ! test
-        return zeros(1,1), false
+    traj = filexyz.readFileAtomList( file_traj )
+    if traj == false
+        return false
     end
 
     cell=cell_mod.Cell_param(V,V,V)
 
     msd_global=exp_data.computeMSD( traj, ["C","O"],[6.0,8.0] )
 
-    return msd_global, true
+    return msd_global
 end
 function computingMSD( V::T1, T::T2, file_traj::T3, file_out::T4 ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString, T4 <: AbstractString }
 
-    msd,test=computingMSD(V,T,file_traj)
-    if ! test
-        return zeros(1,1), false
+    msd  = computingMSD(V,T,file_traj)
+    if msd == false
+        return false
     end
 
     nb_step=size(msd)[1]
@@ -41,26 +41,26 @@ function computingMSD( V::T1, T::T2, file_traj::T3, file_out::T4 ) where { T1 <:
     end
     close(file_o)
 
-    return msd, true
+    return msd
 end
 function computingMSD( V::T1, T::T2, file_traj::T3, names::Vector{T4}, masses::Vector{T5} ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString, T4 <: AbstractString, T5 <: Real }
 
-    traj,test=filexyz.readFastFile(file_traj)
-    if ! test
-        return zeros(1,1), false
+    traj = filexyz.readFileAtomList( file_traj )
+    if traj == false
+        return false
     end
 
     cell=cell_mod.Cell_param(V,V,V)
 
     msd_global=exp_data.computeMSD( traj, names, masses )
 
-    return msd_global, true
+    return msd_global
 end
 function computingMSD( V::T1, T::T2, file_traj::T3, file_out::T4, names::Vector{T5}, masses::Vector{T6} ) where { T1 <: Real, T2 <: Real, T3 <: AbstractString, T4 <: AbstractString, T5 <: AbstractString, T6 <: Real }
 
-    msd,test=computingMSD( V, T, file_traj, names, masses )
-    if ! test
-        return zeros(1,1), false
+    msd = computingMSD( V, T, file_traj, names, masses )
+    if msd == false
+        return false
     end
 
     nb_step=size(msd)[1]
@@ -70,7 +70,7 @@ function computingMSD( V::T1, T::T2, file_traj::T3, file_out::T4, names::Vector{
     end
     close(file_o)
 
-    return msd, true
+    return msd
 end
 
 # Model for a linear fit
@@ -101,34 +101,30 @@ for V in Volumes
     end
 end
 
-function blockAverage( data::Vector{T1}, max_block_size::T2 ) where { T1 <: Real, T2 <: Int }
-    size_record=[]
-    sigma_record=[]
-    for size_block=2:1:max_block_size
-        nb_block=Int(trunc(size(data)[1]/size_block))
-        meta_avg=0
-        avg_all_blocks=0
-        count_=1
-        for block=1:nb_block
-            avg_block=0
-            var_block=0
-            for i=1:size_block
-                avg_block += data[count_]
-                var_block += data[count_]*data[count_]
-                count_ += 1
-            end
-            avg_block=avg_block/size_block
-            meta_avg+=sqrt(var_block/size_block - avg_block*avg_block)
-            avg_all_blocks = avg_all_blocks + avg_block
-        end
-        avg_all_blocks = avg_all_blocks/nb_block
-        sigma = sqrt( meta_avg/nb_block )
-        push!(size_record,size_block)
-        push!(sigma_record,sigma)
-    end
-    return size_record,sigma_record
-end
-
-
-# end
+# function blockAverage( data::Vector{T1}, max_block_size::T2 ) where { T1 <: Real, T2 <: Int }
+#     size_record=[]
+#     sigma_record=[]
+#     for size_block=2:1:max_block_size
+#         nb_block=Int(trunc(size(data)[1]/size_block))
+#         meta_avg=0
+#         avg_all_blocks=0
+#         count_=1
+#         for block=1:nb_block
+#             avg_block=0
+#             var_block=0
+#             for i=1:size_block
+#                 avg_block += data[count_]
+#                 var_block += data[count_]*data[count_]
+#                 count_ += 1
+#             end
+#             avg_block=avg_block/size_block
+#             meta_avg+=sqrt(var_block/size_block - avg_block*avg_block)
+#             avg_all_blocks = avg_all_blocks + avg_block
+#         end
+#         avg_all_blocks = avg_all_blocks/nb_block
+#         sigma = sqrt( meta_avg/nb_block )
+#         push!(size_record,size_block)
+#         push!(sigma_record,sigma)
+#     end
+#     return size_record,sigma_record
 # end
