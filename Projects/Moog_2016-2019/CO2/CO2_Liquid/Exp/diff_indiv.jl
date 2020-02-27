@@ -79,25 +79,35 @@ end
 # Folder for data
 folder_base="/media/moogmt/Stock/Mathieu/CO2/AIMD/Liquid/PBE-MT/"
 folder_base="/home/moogmt/Data/CO2/CO2_AIMD/"
+folder_base="/media/mathieu/Elements/CO2/"
+
 
 Volumes=[9.8]
 Temperatures=[3000]
 
 for V in Volumes
     for T in Temperatures
-        file_traj=string(folder_base,"/",V,"/",T,"K/TRAJEC.xyz")
-        file_out=string(folder_base,"/",V,"/",T,"K/Data/MSD.dat")
-        msd,test=computingMSD(V,T,file_traj,file_out)
-        file_outC=string(folder_base,"/",V,"/",T,"K/Data/MSD_C.dat")
-        msd_C,test=computingMSD(V,T,file_traj,file_outC,["C"],[6])
-        file_outO=string(folder_base,"/",V,"/",T,"K/Data/MSD_O.dat")
-        msd_O,test=computingMSD(V,T,file_traj,file_outO,["O"],[8])
-        msd_CO=msd_C-msd_O
-        file_o=open(string(folder_base,"/",V,"/",T,"K/Data/MSD_CO.dat"),"w")
-        for i=1:size(msd_C)[1]
-            Base.write(file_o,string(i," ",msd_CO[i],"\n"))
+        folder_target = string( folder_base, V, "/", T, "K/" )
+        file_traj = string( folder_target, "/TRAJEC_fdb.xyz" )
+        if ! isfile(file_traj)
+            continue
         end
-        close(file_o)
+        folder_out=string(folder_target,"Data/Exp/")
+        if ! isdir( folder_out )
+            Base.Filesystem.mkdir( folder_out )
+        end
+        file_out = string(folder_out,"MSD.dat")
+        msd,test = computingMSD( V, T, file_traj, file_out )
+        file_outC = string( folder_out, "MSD_C.dat")
+        msd_C,test=computingMSD( V, T, file_traj, file_outC, ["C"], [6] )
+        file_outO = string( folder_out, "MSD_O.dat" )
+        msd_O,test=computingMSD( V, T, file_traj, file_outO, ["O"], [8] )
+        msd_CO = msd_C - msd_O
+        file_o = open( string(folder_out,"MSD_CO.dat"), "w" )
+        for i=1:size( msd_C )[1]
+            Base.write( file_o, string( i, " ", msd_CO[i], "\n" ) )
+        end
+        close( file_o )
     end
 end
 
