@@ -108,6 +108,8 @@ cut_off_low = 1.6
 nb_box = 100
 max_angle = 179.5
 
+min_data_size=1000
+
 for V in Volumes
     for T in Temperatures
 
@@ -584,51 +586,51 @@ for V in Volumes
 
 
         data = readData( string( folder_out, "C2_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "C2_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "C3_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "C3_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "C4_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "C4_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "C2_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "C2_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "C3_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box, )
             file_hist = string( folder_out, "C3_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "C4_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "C4_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "O1_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "O1_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "O2_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "O2_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
@@ -636,139 +638,139 @@ for V in Volumes
 
 
         data = readData( string( folder_out, "O1_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "O1_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "O2_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "O2_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "distance_C3_short_X.dat" ), 3 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "distance_C3_short_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "distance_C3_long_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "distance_C3_long_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "distance_C3_short_Y.dat" ), 3 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box)
             file_hist = string( folder_out, "distance_C3_short_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "distance_C3_long_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "distance_C3_long_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "distance_C4_short_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "distance_C4_short_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "distance_C4_long_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "distance_C4_long_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "distance_C4_short_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box)
             file_hist = string( folder_out, "distance_C4_short_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "distance_C4_long_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "distance_C4_long_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "base_dist_C3_X.dat"  ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "base_C3_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "base_dist_C3_Y.dat"  ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "base_C3_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "base_dist_C4_X.dat"  ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "base_C4_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "base_dist_C4_Y.dat"  ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHist( data, nb_box )
             file_hist = string( folder_out, "base_C4_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC2_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngleCO2( data )
             file_hist = string( folder_out, "angleC2_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "angleC2_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngleCO2( data )
             file_hist = string( folder_out, "angleC2_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "angleC3_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "angleC4_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleO2_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleO2_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
         data = readData( string( folder_out, "angleO2_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleO2_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
@@ -776,112 +778,112 @@ for V in Volumes
 
 
         data = readData( string( folder_out, "angleC3_X_shortlong.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_X_shortlong_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_X_longlong.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_X_longlong_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_Y_shortlong.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_Y_shortlong_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_Y_longlong.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_Y_longlong_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_23_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_23_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_24_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_24_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_34_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_34_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_23_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_23_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_24_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_24_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC3_34_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC3_34_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_23_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_23_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_24_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_24_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_25_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_25_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_34_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_34_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_35_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_35_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
@@ -889,42 +891,42 @@ for V in Volumes
 
         handle_angle_C4_23_Y = open( string( folder_out, "angleC4_23_Y.dat" ), "w" )
         data = readData( string( folder_out, "angleC4_45_X.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_45_X_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_24_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_24_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_25_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_25_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_34_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_34_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_35_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_35_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )
         end
 
         data = readData( string( folder_out, "angleC4_45_Y.dat" ), 2 )
-        if data != false
+        if data != false && size(data)[1] > min_data_size
             hist_avg, delta_hist, min_hist = makeHistAngle( data, nb_box )
             file_hist = string( folder_out, "angleC4_45_Y_hist.dat" )
             writeHist( file_hist, hist_avg, delta_hist, min_hist )

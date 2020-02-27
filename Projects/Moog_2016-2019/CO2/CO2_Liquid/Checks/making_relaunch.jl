@@ -1,6 +1,3 @@
-GPfolder=string("/home/moogmt/LibAtomicSim/Julia/")
-push!(LOAD_PATH, GPfolder)
-
 # Aims at fixing stuff
 using utils
 using atom_mod
@@ -12,23 +9,11 @@ using cpmd
 using press_stress
 using exp_data
 
-Local_Params=string("/home/moogmt/PHYSIX_Utils/Projects/")
-push!(LOAD_PATH, Local_Params )
-
-using computerDB
-
-#==============================================================================#
-folder_base = utils.determineFolderPath( computerDB.computers_names, computerDB.computers_pathsCO2 )
-if folder_base == false
-    print("Computer is not known, add it to the database.")
-    exit()
-end
-#==============================================================================#
-
+folder_base = string("/media/mathieu/Elements/CO2/")
 
 # T,V
-Volumes=[9.15,9.1,9.05,9.0,8.82,8.8,8.6]
-Temperatures=[ 3000, 2500, 2000, 1750 ]
+Volumes=[9.05]
+Temperatures=[ 2000 ]
 
 # Target Timestep
 for V in Volumes
@@ -41,6 +26,7 @@ for V in Volumes
                 if isfile( string(folder_target,"FLAG") )
                     cpmd.relaunchRunTrajec( folder_target, string(folder_target,"input_restart") )
                 else
+                    print("V: ",V," T: ",T,"K\n")
                     cpmd.relaunchRunFtraj( folder_target, string(folder_target,"input_restart") )
                 end
                 print("Ok for V:",V," T:",T,"K run:",run_,"\n")
