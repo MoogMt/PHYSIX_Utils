@@ -44,13 +44,12 @@ for V in Volumes
 
         rmax=V/2
 
-        gr,test=exp_data.computeGr( file_in, file_out_gr, V, rmin, rmax, dr )
+        gr = exp_data.computeGr( file_in, file_out_gr, V, rmin, rmax, dr )
 
         file_out_fq=string(folder_out,"fq.dat")
 
         rho=96/V^3
 
-        q,fq=exp_data.computeFQ(file_out_fq,gr,rmin,rmax,dr,rho)
-
+        q, fq = exp_data.computeFQ( file_out_fq, gr, rmin, rmax, dr, rho )
     end
 end
