@@ -54,7 +54,7 @@ for T in Temperatures
                                 if used[ oxygen2 ] == 1
                                     continue
                                 end
-                                if cm[ carbon1, oxygen2 ] > 0  && bonds[ carbon2, nbC+oxygen2 ] > 0
+                                if cm[ carbon1, oxygen2 ] > 0  && cm[ carbon2, nbC+oxygen2 ] > 0
                                     write( dimer_out, string( step, " ", carbon1, " ", carbon2," ", nbC+oxygen1, " ", nbC+oxygen2, "\n" ) )
                                     used[ carbon1 ] = 1
                                     used[ carbon2 ] = 1
