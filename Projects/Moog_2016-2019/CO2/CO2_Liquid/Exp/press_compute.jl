@@ -1,6 +1,3 @@
-GPfolder=string("/home/mathieu/LibAtomicSim/Julia/")
-push!(LOAD_PATH, GPfolder)
-
 using filexyz
 using cpmd
 using utils
@@ -17,8 +14,6 @@ using Statistics
 Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
 Temperatures=[3000,2500,2000,1750]
 
-prefix_count_raw = string("counts_coord_raw")
-prefix_frac_raw = string("frac_coord_raw")
 folder_base=string("/media/mathieu/Elements/CO2/")
 
 nb_atoms=96
