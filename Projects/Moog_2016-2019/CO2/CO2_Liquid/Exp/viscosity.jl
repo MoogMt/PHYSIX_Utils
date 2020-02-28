@@ -42,7 +42,7 @@ for T in Temperatures
         folder_target = string( folder_base, V, "/", T, "K/" )
         cst = volume/(kb*T)
         stress_tensor = readStress( string( folder_target, "STRESS_fdb" ) )
-        visc = computeViscosity( stres_tensor, cst, max_lag, dt )
+        visc = computeViscosity( stress_tensor, cst, max_lag, dt )
         write( file_out, string( V, " ", T, " ", visc, "\n" ) )
         write( file_t, string( V, " ", visc, "\n" ) )
     end
