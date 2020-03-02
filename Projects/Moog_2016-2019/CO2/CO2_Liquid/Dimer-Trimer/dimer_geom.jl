@@ -64,18 +64,18 @@ for T in Temperatures
         # Angle through Al-Kashi
         for step_=1:nb_lines
             # Angle O-C-O
-            distC1O1 = cell_mod.distance( traj[ step[ step_ ] ], cell, index_C[1], index_O[1] )
-            distC1O2 = cell_mod.distance( traj[ step[ step_ ] ], cell, index_C[1], index_O[2] )
-            distO1O2 = cell_mod.distance( traj[ step[ step_ ] ], cell, index_O[1], index_O[2] )
+            distC1O1 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[1], index_O[1] )
+            distC1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[1], index_O[2] )
+            distO1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_O[1], index_O[2] )
             angle_C1 = geom.angleAlKash( distC1O1, distC1O2, distO1O2)
             angleOCO[ round( Int, ( angle_C1 - min_angle )/delta_angle ) + 1 ] += 1
-            distC2O1 = cell_mod.distance( traj[ step[ step_ ] ], cell, index_C[2], index_O[1] )
-            distC2O2 = cell_mod.distance( traj[ step[ step_ ] ], cell, index_C[2], index_O[2] )
-            distO1O2 = cell_mod.distance( traj[ step[ step_ ] ], cell, index_O[1], index_O[2] )
+            distC2O1 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[2], index_O[1] )
+            distC2O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[2], index_O[2] )
+            distO1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_O[1], index_O[2] )
             angle_C2 = geom.angleAlKash( distC2O1, distC2O2, distO1O2)
             angleOCO[ round( Int, ( angle_C2 - min_angle )/delta_angle ) + 1 ] += 1
             # Angle C-O-C
-            distC1C2 = cell_mod.distance( traj[ step[ step_ ] ], cell, index_C[1], index_C[2] )
+            distC1C2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[1], index_C[2] )
             angle_O1 = geom.angleAlKash( distC1O1, distC2O1, distC1C2 )
             angle_O2 = geom.angleAlKash( distC1O2, distC2O2, distC1C2 )
             angleCOC[ round( Int, (angle_O1 - min_angle)/delta_angle ) + 1 ] += 1
