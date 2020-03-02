@@ -6,14 +6,15 @@ using clustering
 using filexyz
 using pdb
 using contact_matrix
+using geom
 
 max_step=20000
 
 Volumes=[ 9.375, 9.4, 9.5, 9.8, 10.0 ]
 Temperatures=[ 1750, 2000, 2500, 3000 ]
 
-min_angle=90
-max_angle=180
+min_angle=0
+max_angle=181
 delta_angle=1
 nb_box = round(Int, ( max_angle - min_angle )/delta_angle )
 
@@ -32,8 +33,8 @@ for T in Temperatures
         if ! isfile( string( target_traj ) )
             continue
         end
-        folder_target = string( folder_in, "/Data/Trimer/" )
-        target_file = string( folder_target, "trimers_time.dat" )
+        folder_target = string( folder_in, "/Data/Dimers/" )
+        target_file = string( folder_target, "dimer-",cut_off,".dat" )
         if ! isfile( target_file )
             continue
         end
@@ -62,40 +63,50 @@ for T in Temperatures
         traj=filexyz.readFileAtomList( target_traj )
 
         # Angle through Al-Kashi
+        target2_file = string( folder_target, "dimer-",cut_off,"-anglesCOC_mol.dat" )
+        target3_file = string( folder_target, "dimer-",cut_off,"-anglesOCC_mol.dat" )
+        handle_out_2 = open( target2_file, "w" )
+        handle_out_3 = open( target3_file, "w" )
         for step_=1:nb_lines
             # Angle O-C-O
-            distC1O1 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[1], index_O[1] )
-            distC1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[1], index_O[2] )
-            distO1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_O[1], index_O[2] )
+            distC1O1 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[ step_, 1 ], index_O[ step_, 1 ] )
+            distC1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[ step_, 1 ], index_O[ step_, 2 ] )
+            distO1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_O[ step_, 1 ], index_O[ step_, 2 ] )
             angle_C1 = geom.angleAlKash( distC1O1, distC1O2, distO1O2)
-            angleOCO[ round( Int, ( angle_C1 - min_angle )/delta_angle ) + 1 ] += 1
-            distC2O1 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[2], index_O[1] )
-            distC2O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[2], index_O[2] )
-            distO1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_O[1], index_O[2] )
+            Base.write( handle_out_2, string( steps[step_], " ", angle_C1, "\n" ) )
+            anglesOCO[ round( Int, ( angle_C1 - min_angle )/delta_angle ) + 1 ] += 1
+            distC2O1 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[ step_, 2 ], index_O[ step_, 1 ] )
+            distC2O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[ step_, 2 ], index_O[ step_, 2 ] )
+            distO1O2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_O[ step_, 1 ], index_O[ step_, 2 ] )
             angle_C2 = geom.angleAlKash( distC2O1, distC2O2, distO1O2)
-            angleOCO[ round( Int, ( angle_C2 - min_angle )/delta_angle ) + 1 ] += 1
+            Base.write( handle_out_2, string( steps[step_], " ", angle_C2, "\n" ) )
+            anglesOCO[ round( Int, ( angle_C2 - min_angle )/delta_angle ) + 1 ] += 1
             # Angle C-O-C
-            distC1C2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[1], index_C[2] )
+            distC1C2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[ step_, 1 ], index_C[ step_, 2 ] )
             angle_O1 = geom.angleAlKash( distC1O1, distC2O1, distC1C2 )
             angle_O2 = geom.angleAlKash( distC1O2, distC2O2, distC1C2 )
-            angleCOC[ round( Int, (angle_O1 - min_angle)/delta_angle ) + 1 ] += 1
-            angleCOC[ round( Int, (angle_O2 - min_angle)/delta_angle ) + 1 ] += 1
+            Base.write( handle_out_2, string( steps[step_], " ", angle_O1, "\n" ) )
+            Base.write( handle_out_2, string( steps[step_], " ", angle_O2, "\n" ) )
+            anglesCOC[ round( Int, (angle_O1 - min_angle)/delta_angle ) + 1 ] += 1
+            anglesCOC[ round( Int, (angle_O2 - min_angle)/delta_angle ) + 1 ] += 1
         end
+        close( handle_out_2 )
+        close( handle_out_3 )
     end
 end
 
-for ibox = 1:nb_box
-    angleCOC[ ibox ] = angleCOC[ ibox ]/( sind( ibox*delta_angle + min_angle ) )
-    angleOCO[ ibox ] = angleOCO[ ibox ]/( sind( ibox*delta_angle + min_angle ) )
+for ibox = 1:nb_box-1
+    anglesCOC[ ibox ] = anglesCOC[ ibox ]/( sind( (ibox-0.5)*delta_angle + min_angle ) )
+    anglesOCO[ ibox ] = anglesOCO[ ibox ]/( sind( (ibox-0.5)*delta_angle + min_angle ) )
 end
-angleCOC /= sum( angleCOC )
-angleOCO /= sum( angleOCO )
+anglesCOC /= sum( anglesCOC )
+anglesOCO /= sum( anglesOCO )
 
-file_out_COC = open( string( folder_out, "angleCOC.dat" ), "w" )
-file_out_OCO = open( string( folder_out, "angleOCO.dat" ), "w" )
+file_out_COC = open( string( folder_out, "anglesCOC_moleculars.dat" ), "w" )
+file_out_OCO = open( string( folder_out, "anglesOCO_moleculars.dat" ), "w" )
 for ibox = 1:nb_box
-    Base.write( file_out_COC, string( ibox*delta_angle + min_angle, " ", angleCOC[ ibox ], "\n" ) )
-    Base.write( file_out_OCO, string( ibox*delta_angle + min_angle, " ", angleOCO[ ibox ], "\n" ) )
+    Base.write( file_out_COC, string( ibox*delta_angle + min_angle, " ", anglesCOC[ ibox ], "\n" ) )
+    Base.write( file_out_OCO, string( ibox*delta_angle + min_angle, " ", anglesOCO[ ibox ], "\n" ) )
 end
 close( file_out_COC )
 close( file_out_OCO )

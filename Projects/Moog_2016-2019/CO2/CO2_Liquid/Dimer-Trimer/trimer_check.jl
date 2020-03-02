@@ -51,33 +51,14 @@ for T in Temperatures
 
             cm = contact_matrix.buildMatrix( traj[step] , cell, cut_off )
 
-            used=zeros( nb_atoms )
             for carbon1=1:nbC-1
-                if used[ carbon1 ] == 1
-                    continue
-                end
                 for carbon2=carbon1+1:nbC
-                    if used[ carbon2 ] == 1
-                        continue
-                    end
                     for oxygen1=1:nbO
-                        if used[ nbC + oxygen1 ] == 1
-                            continue
-                        end
                         if cm[ carbon1, nbC+oxygen1 ] > 0  && cm[ carbon2, nbC+oxygen1 ] > 0
                             for carbon3=carbon2+1:nbC
-                                if used[ carbon3 ] == 1
-                                    continue
-                                end
                                 for oxygen2=1:nbO
-                                    if used[ nbC + oxygen2 ] == 1
-                                        continue
-                                    end
                                     if cm[ carbon2, nbC+oxygen2 ] > 0  && cm[ carbon3, nbC+oxygen2 ] > 0
                                         for oxygen3=1:nbO
-                                            if used[ nbC + oxygen3 ] == 1
-                                                continue
-                                            end
                                             if cm[ carbon1, oxygen3 ] > 0 && cm[ carbon3, oxygen3 ] > 0
                                                 write( handle_out, string( step, " " ) )
                                                 write( handle_out, string( carbon1, " " ) )
@@ -86,13 +67,6 @@ for T in Temperatures
                                                 write( handle_out, string( oxygen1+nbC, " " ) )
                                                 write( handle_out, string( oxygen2+nbC, " " ) )
                                                 write( handle_out, string( oxygen3+nbC, "\n") )
-                                                used[ carbon1 ] = 1
-                                                used[ carbon2 ] = 1
-                                                used[ carbon3 ] = 1
-                                                used[ nbC + oxygen1 ] = 1
-                                                used[ nbC + oxygen2 ] = 1
-                                                used[ nbC + oxygen3 ] = 1
-                                                break
                                             end
                                         end
                                     end
@@ -102,8 +76,8 @@ for T in Temperatures
                     end
                 end
             end
-
         end
+
         close( handle_out )
 
     end
