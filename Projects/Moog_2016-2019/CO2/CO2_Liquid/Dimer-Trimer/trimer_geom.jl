@@ -47,7 +47,7 @@ for T in Temperatures
             continue
         end
 
-        print("V: ", V, " T: ", T, "K/\n")
+        print("V: ", V, " T: ", T, "K\n")
 
         index_C = zeros(Int, nb_lines, 3 )
         index_O = zeros(Int, nb_lines, 3 )
@@ -120,7 +120,7 @@ for T in Temperatures
     end
 end
 
-for ibox = 1:nb_box-1
+for ibox = 5:nb_box-1
     anglesCOC[ ibox ] = anglesCOC[ ibox ]/( sind( (ibox-0.5)*delta_angle + min_angle ) )
     anglesOCO[ ibox ] = anglesOCO[ ibox ]/( sind( (ibox-0.5)*delta_angle + min_angle ) )
 end

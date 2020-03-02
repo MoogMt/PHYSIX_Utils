@@ -14,7 +14,7 @@ folder_base = string( "/media/mathieu/Elements/CO2/" )
 
 cut_off=1.75
 
-Volumes      = [ 10.0, 9.8, 9.5, 9.4, 9.375, 9.35]#, 9.325, 9.3, 9.25, 9.2, 9.15, 9.1, 9.05, 9.0, 8.82, 8.8, 8.6 ]
+Volumes      = [ 9.325, 9.3, 9.25, 9.2, 9.15, 9.1, 9.05, 9.0, 8.82, 8.8, 8.6 ] #10.0, 9.8, 9.5, 9.4, 9.375, 9.35]#, 
 Temperatures = [ 1750, 2000, 2500, 3000 ]
 
 for T in Temperatures
@@ -42,7 +42,7 @@ for T in Temperatures
                     for oxygen1=1:nbO
                         if cm[ carbon1, nbC+oxygen1 ] > 0  && cm[ carbon2, nbC+oxygen1 ] > 0
                             for oxygen2=oxygen1+1:nbO
-                                if cm[ carbon1, oxygen2 ] > 0  && cm[ carbon2, nbC+oxygen2 ] > 0
+                                if cm[ carbon1, nbC+oxygen2 ] > 0  && cm[ carbon2, nbC+oxygen2 ] > 0
                                     write( dimer_out, string( step, " ", carbon1, " ", carbon2," ", nbC+oxygen1, " ", nbC+oxygen2, "\n" ) )
                                 end
                             end

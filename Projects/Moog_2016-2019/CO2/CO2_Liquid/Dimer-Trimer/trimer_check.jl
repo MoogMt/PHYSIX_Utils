@@ -47,7 +47,7 @@ for T in Temperatures
                                 for oxygen2=1:nbO
                                     if cm[ carbon2, nbC+oxygen2 ] > 0  && cm[ carbon3, nbC+oxygen2 ] > 0
                                         for oxygen3=1:nbO
-                                            if cm[ carbon1, oxygen3 ] > 0 && cm[ carbon3, oxygen3 ] > 0
+                                            if cm[ carbon1, nbC+oxygen3 ] > 0 && cm[ carbon3, nbC+oxygen3 ] > 0
                                                 write( handle_out, string( step, " " ) )
                                                 write( handle_out, string( carbon1, " " ) )
                                                 write( handle_out, string( carbon2, " " ) )
