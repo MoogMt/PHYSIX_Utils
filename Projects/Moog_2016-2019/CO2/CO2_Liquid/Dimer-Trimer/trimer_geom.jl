@@ -173,8 +173,6 @@ for T in Temperatures
             continue
         end
 
-        print("V: ", V, " T: ", T, "K\n")
-
         index_C = zeros(Int, nb_lines, 3 )
         index_O = zeros(Int, nb_lines, 3 )
         steps = zeros(Int, nb_lines )
