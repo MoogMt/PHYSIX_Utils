@@ -52,14 +52,14 @@ for T in Temperatures
                 index_C[ line, carbon ] = parse(Int, keywords[ carbon + 1 ] )
             end
             for oxygen=1:2
-                index_O[ line, carbon ] = parse(Int, keywords[ oxygen + 3 ] )
+                index_O[ line, oxygen ] = parse(Int, keywords[ oxygen + 3 ] )
             end
         end
         close( handle_in )
 
         cell = cell_mod.Cell_param( V, V, V )
 
-        filexyz.readFileAtomList( target_traj )
+        traj=filexyz.readFileAtomList( target_traj )
 
         # Angle through Al-Kashi
         for step_=1:nb_lines
