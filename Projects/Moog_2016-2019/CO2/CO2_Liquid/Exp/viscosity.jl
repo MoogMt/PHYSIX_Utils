@@ -10,6 +10,8 @@ using correlation
 
 using Statistics
 
+# DOES NOT WORK...
+
 function computeViscosity( stress_tensor::Array{T1,3}, cst::T2, max_lag::T3, dt::T4 ) where { T1 <: Real, T2 <: Real, T3 <: Int, T4 <: Real  }
     corr_total=zeros(max_lag)
     count_=0

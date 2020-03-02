@@ -12,7 +12,7 @@ using exp_data
 folder_base = string("/media/mathieu/Elements/CO2/")
 
 # T,V
-Volumes=[ 9.05 ]
+Volumes=[ 9.5 ]
 Temperatures=[ 3000 ]
 
 # Target Timestep

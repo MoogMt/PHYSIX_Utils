@@ -1,7 +1,3 @@
-GPfolder=string("/home/moogmt/LibAtomicSim/Julia/")
-push!(LOAD_PATH, GPfolder)
-
-# Aims at fixing stuff
 using utils
 using atom_mod
 using cell_mod
@@ -12,18 +8,7 @@ using cpmd
 using press_stress
 using exp_data
 
-Local_Params=string("/home/moogmt/PHYSIX_Utils/Projects/")
-push!(LOAD_PATH, Local_Params )
-
-using computerDB
-
-#==============================================================================#
-folder_base = utils.determineFolderPath( computerDB.computers_names, computerDB.computers_pathsCO2 )
-if folder_base == false
-    print("Computer is not known, add it to the database.")
-    exit()
-end
-#==============================================================================#
+folder_base = "/media/mathieu/Elements/CO2/"
 
 # Timesteps
 standard_timestep = 40
@@ -31,20 +16,18 @@ standard_stride   = 5
 
 # T,V
 V = 9.5
-T = 1750
-run_ = 1
+T = 3000
+run_ = 2
 
 timestep_target=conversion.hatime2fs*standard_timestep*standard_stride
 
 folder_target=string(folder_base,V,"/",T,"K/",run_,"-run/")
 
-#--------------------------------------------------------------------------------
 file_stress_out = string(folder_target, "STRESS_db")
 file_pressure_out = string(folder_target, "Pressure_db.dat")
 file_traj_out = string(folder_target,"TRAJEC_db.xyz")
 file_ftraj_out = string(folder_target,"FTRAJECTORY_db")
 file_energy_out = string(folder_target,"ENERGIES_db")
-#--------------------------------------------------------------------------------
 
 # Input parameters
 #--------------------------------------------------------------------------------
@@ -99,7 +82,7 @@ print("stress_step: ",nb_step_stress,"\n")
 #-------------------------------------------
 
 #-------------------------------------------
-target_length = min( nb_step_traj, nb_step_energy, nb_step_stress ) #nb_step_ftraj, 
+target_length = min( nb_step_traj, nb_step_energy, nb_step_stress ) #nb_step_ftraj,
 if target_length == 0
     print("Error: target_length = 0.\n")
 end
