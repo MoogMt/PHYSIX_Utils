@@ -7,11 +7,14 @@ using filexyz
 using pdb
 using contact_matrix
 using geom
+using utils
 
 max_step=20000
 
 Volumes=[ 9.3,9.35, 9.375, 9.4, 9.5, 9.8, 10.0 ]
 Temperatures=[ 1750, 2000, 2500, 3000 ]
+
+cut_off = 1.75
 
 min_angle=0
 max_angle=181
@@ -40,9 +43,14 @@ for T in Temperatures
         end
 
         nb_lines = utils.getNbLines( target_file )
+        if nb_lines == 0
+            continue
+        end
 
-        index_C = zeros(Int, nb_lines, 2 )
-        index_O = zeros(Int, nb_lines, 2 )
+        print("V: ", V, " T: ", T, "K/\n")
+
+        index_C = zeros(Int, nb_lines, 3 )
+        index_O = zeros(Int, nb_lines, 3 )
         steps = zeros(Int, nb_lines )
 
         handle_in = open( target_file )

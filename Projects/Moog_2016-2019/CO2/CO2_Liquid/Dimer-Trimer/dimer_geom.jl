@@ -40,6 +40,11 @@ for T in Temperatures
         end
 
         nb_lines = utils.getNbLines( target_file )
+        if nb_lines==0
+            continue
+        end
+
+        print("V: ",V," T: ",T,"K\n")
 
         index_C = zeros(Int, nb_lines, 2 )
         index_O = zeros(Int, nb_lines, 2 )
@@ -64,7 +69,7 @@ for T in Temperatures
 
         # Angle through Al-Kashi
         target2_file = string( folder_target, "dimer-",cut_off,"-anglesCOC_mol.dat" )
-        target3_file = string( folder_target, "dimer-",cut_off,"-anglesOCC_mol.dat" )
+        target3_file = string( folder_target, "dimer-",cut_off,"-anglesOCO_mol.dat" )
         handle_out_2 = open( target2_file, "w" )
         handle_out_3 = open( target3_file, "w" )
         for step_=1:nb_lines
@@ -85,8 +90,8 @@ for T in Temperatures
             distC1C2 = cell_mod.distance( traj[ steps[ step_ ] ], cell, index_C[ step_, 1 ], index_C[ step_, 2 ] )
             angle_O1 = geom.angleAlKash( distC1O1, distC2O1, distC1C2 )
             angle_O2 = geom.angleAlKash( distC1O2, distC2O2, distC1C2 )
-            Base.write( handle_out_2, string( steps[step_], " ", angle_O1, "\n" ) )
-            Base.write( handle_out_2, string( steps[step_], " ", angle_O2, "\n" ) )
+            Base.write( handle_out_3, string( steps[step_], " ", angle_O1, "\n" ) )
+            Base.write( handle_out_3, string( steps[step_], " ", angle_O2, "\n" ) )
             anglesCOC[ round( Int, (angle_O1 - min_angle)/delta_angle ) + 1 ] += 1
             anglesCOC[ round( Int, (angle_O2 - min_angle)/delta_angle ) + 1 ] += 1
         end

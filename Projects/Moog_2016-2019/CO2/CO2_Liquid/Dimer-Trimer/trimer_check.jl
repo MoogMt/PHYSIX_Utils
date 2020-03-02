@@ -19,38 +19,26 @@ folder_base=string("/media/mathieu/Elements/CO2/")
 
 for T in Temperatures
     for V in Volumes
-
         folder_in=string(folder_base,V,"/",T,"K/")
         folder_out=string( folder_in, "/Data/Trimer/" )
-
         file_traj = string( folder_in, "TRAJEC_fdb_wrapped.xyz" )
-
         if ! isfile( file_traj )
             continue
         end
-
         if !isdir( folder_out )
             Base.Filesystem.mkdir( folder_out )
         end
-
         cell=cell_mod.Cell_param(V,V,V)
-
         if ! isfile( file_traj )
             continue
         end
-
         traj = filexyz.readFileAtomList( file_traj )
-
         nb_steps = size( traj )[1]
         nb_atoms = size( traj[1].names)[1]
-
         handle_out = open( string( folder_out, "trimers_time.dat" ), "w" )
-
         for step=1:nb_steps
             print("Volume :",V," Temperature: ",T,"K Progress: ",round(step/nb_steps*100,digits=3),"% \n")
-
             cm = contact_matrix.buildMatrix( traj[step] , cell, cut_off )
-
             for carbon1=1:nbC-1
                 for carbon2=carbon1+1:nbC
                     for oxygen1=1:nbO
@@ -77,8 +65,6 @@ for T in Temperatures
                 end
             end
         end
-
         close( handle_out )
-
     end
 end
