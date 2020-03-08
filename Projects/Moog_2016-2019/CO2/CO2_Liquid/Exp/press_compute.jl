@@ -53,7 +53,7 @@ total_mass *= conversion.amu2gram
 #     close( handle_out_gen )
 # end
 
-frac = 0.05
+frac = 0.10
 max_size = 20000
 block_size = round(Int, frac*max_size)
 n_block = 20
