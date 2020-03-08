@@ -56,7 +56,7 @@ total_mass *= conversion.amu2gram
 frac = 0.10
 max_size = 20000
 block_size = round(Int, frac*max_size)
-n_block = 20
+n_block = round(Int, max_size/block_size)
 
 for T in Temperatures
     folder_out_general = string( folder_base, "Data/Pressure/" )
