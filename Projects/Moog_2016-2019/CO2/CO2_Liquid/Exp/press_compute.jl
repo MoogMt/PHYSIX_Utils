@@ -83,7 +83,7 @@ for T in Temperatures
         for i_block=1:n_block
             err += Statistics.std(pressure[ (i_block-1)*block_size+1:i_block*block_size ])
         end
-        err /= sqrt(n_block)
+        err /= n_block
         Base.write( handle_out_loc, string( pressure_avg," ",err,"\n"))
         Base.write( handle_out_gen, string( V, " ", V*V*V/(nb_atoms), " ", pressure_avg, " ", err, " ", total_mass/(V*V*V*conversion.a3tocm3 ), "\n" ) )
         close( handle_out_loc )
