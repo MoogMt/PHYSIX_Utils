@@ -81,7 +81,7 @@ for T in Temperatures
         pressure_avg = Statistics.mean(pressure)
         err = 0
         for i_block=1:n_block
-            err += Statistics.std(pressure[ (i_block-1)*block_size:i_block*block_size ])
+            err += Statistics.std(pressure[ (i_block-1)*block_size+1:i_block*block_size ])
         end
         err /= sqrt(n_block)
         Base.write( handle_out_loc, string( pressure_avg," ",err,"\n"))
