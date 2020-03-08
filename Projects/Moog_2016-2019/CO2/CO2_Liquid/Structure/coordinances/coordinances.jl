@@ -215,11 +215,11 @@ for T in Temperatures
                 end
             end
             handle_out_loc = open( string(folder_out_loc,"stat_global_coord_",species[i_spec],"_",cut_off,".dat"), "w" )
-            Base.write( handle_out_temp[i_spec],  string( Statistics.mean(coord_global)," ",Statistics.std(coord_global),"\n" ) )
+            Base.write( handle_out_temp[i_spec],  string( V, " ", Statistics.mean(coord_global)," ",Statistics.std(coord_global),"\n" ) )
             Base.write( handle_out_loc, string( Statistics.mean(coord_global)," ",Statistics.std(coord_global) ) )
             close( handle_out_loc )
             handle_out_loc_div = open( string(folder_out_loc,"stat_div_coord_",species[i_spec],"_",cut_off,".dat"), "w" )
-            Base.write( handle_out_temp[i_spec,2], string( press, " ", dp, " " ))
+            Base.write( handle_out_temp[i_spec,2], string( V, " " ))
             for i=1:max_nb
                 Base.write( handle_out_temp[i_spec,2],  string( Statistics.mean(coord_div[:,i])," ",Statistics.std(coord_div[:,i])," " ) )
                 Base.write( handle_out_loc_div, string( Statistics.mean(coord_div[:,i])," ",Statistics.std(coord_div[:,i])," " ) )

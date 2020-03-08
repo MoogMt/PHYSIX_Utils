@@ -94,8 +94,8 @@ function getMoleculeLength( traj::Vector{T1} ) where { T1 <: atom_mod.AtomList }
 end
 
 # Thermodynamical values
-Volumes=[10.0,9.8,9.5,9.4,9.375,9.35,9.325,9.3,9.25,9.2,9.15,9.1,9.05,9.0,8.82,8.8,8.6]
-Temperatures=[1750,2000,2500,3000,3500]
+Volumes=[ 10.0, 9.8, 9.5, 9.4, 9.375, 9.35, 9.325, 9.3, 9.25, 9.2, 9.15, 9.1, 9.05, 9.0, 8.82, 8.8, 8.6 ]
+Temperatures=[ 1750, 2000, 2500, 3000 ]
 cut_off=1.75
 
 
@@ -137,16 +137,15 @@ for T in Temperatures
         hist_fin=zeros( Int, nb_step, nb_atoms )
         hist_inf=zeros( Int, nb_step, nb_atoms )
         hist_gen=zeros( Int, nb_step, nb_atoms )
+        count_inf = 0
         # Analyzing molecules
         for step=1:nb_step
-
             # Computing the molecules through graph exploration
             positions_local=copy(traj[step].positions)
             matrix = contact_matrix.buildMatrix( traj[step], cell, cut_off )
             molecules=graph.getGroupsFromMatrix(matrix)
             nb_molecules=size(molecules)[1]
             matrices=graph.extractAllMatrixForTrees( matrix, molecules )
-
             # Loop over mmolecules
             for molecule=1:nb_molecules
                 size_molecule = size( molecules[molecule] )[1]
@@ -171,6 +170,9 @@ for T in Temperatures
                 # NB: here we only count the molecule by size, however that isn't fair, as a large molecule may take the
                 # totality of the atoms. Therefore, a corrective factor will be needed when computing fair statistics.
             end
+            if sum( hist_inf[ step, : ] ) > 1
+                count_inf += 1
+            end
         end
         # Removing useless files
         for atom=1:nb_atoms
@@ -194,9 +196,9 @@ for T in Temperatures
         # Computing Pressure
         press = pressure[ volumes.== V ][1]
         if sum(hist_inf[:,:]) > 0
-            Base.write( handle_inf, string(press," ",V," ",T," ",1,"\n") )
+            Base.write( handle_inf, string( press, " ", V, " ", T, " ", round( 1, digits=3 ), "\n" ) )
         else
-            Base.write( handle_inf, string(press," ",V," ",T," ",0,"\n") )
+            Base.write( handle_inf, string( press, " ", V, " ", T, " ", round( 0, digits=3 ), "\n" ) )
         end
     end
     write(handle_inf,string("\n"))
