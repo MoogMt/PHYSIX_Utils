@@ -71,6 +71,7 @@ for T in Temperatures
         if ! isfile(file_target)
             continue
         end
+        print("V: ",V," T:",T,"K \n")
         pressure = press_stress.readPressure( file_target )
         folder_out = string( folder_target, "Data/Pressure/")
         if !isdir( folder_out )
