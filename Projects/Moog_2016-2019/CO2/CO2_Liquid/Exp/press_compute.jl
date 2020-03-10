@@ -79,12 +79,12 @@ for T in Temperatures
         end
         file_out_loc = string( folder_out, "P_global.dat" )
         handle_out_loc = open( file_out_loc, "w")
-        pressure_avg = Statistics.mean(pressure)
-        err = 0
+        pressure_avgs=zeros(n_block)
         for i_block=1:n_block
-            err += Statistics.std(pressure[ (i_block-1)*block_size+1:i_block*block_size ])
+            pressure_avgs[ i_block ] = Statistics.mean(pressure[ (i_block-1)*block_size+1:i_block*block_size ])
         end
-        err /= n_block
+        pressure_avg = Statistics.mean( pressure_avgs )
+        err = Statistics.std( pressure_avgs )/sqrt( n_block )
         Base.write( handle_out_loc, string( pressure_avg," ",err,"\n"))
         Base.write( handle_out_gen, string( V, " ", V*V*V/(nb_atoms), " ", pressure_avg, " ", err, " ", total_mass/(V*V*V*conversion.a3tocm3 ), "\n" ) )
         close( handle_out_loc )
