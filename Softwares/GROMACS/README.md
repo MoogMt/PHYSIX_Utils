@@ -94,7 +94,9 @@ cd gromacs
 -> Making compilation and installation folder
 
 mkdir build
+
 mkdir install_build
+
 grmx_install=$(pwd)"/grmx_install"
 
 -> configuring
@@ -103,7 +105,7 @@ fftw_include=$fftw_folder"/include"
 
 fftw_lib=$fftw_folder"/lib"
 
-cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=$grmx_install -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=$fftw_lib        -DFFTWF_INCLUDE_DIR=$fftw_folder -DGMX_DEFAULT_SUFFIX=OFF -DGMX_BINARY_SUFFIX=_piv -DGMX_LIBS_SUFFIX=_piv
+cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=$grmx_install -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=$fftw_lib -DFFTWF_INCLUDE_DIR=$fftw_folder -DGMX_DEFAULT_SUFFIX=OFF -DGMX_BINARY_SUFFIX=_piv -DGMX_LIBS_SUFFIX=_piv
 
 -> Compiling
 
