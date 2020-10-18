@@ -21,9 +21,10 @@ cd fftw3_folder
 fftw_folder=$(pwd)"/install_fftw" 
 
 mkdir $fftw_folder 
+
 -> Configure with float, mpi, shared version and in install folder
 
-./configure --prefix=$folder --enable-shared --enable-sse2 --enable-float --enable-mpi
+./configure --prefix=$fftw_folder --enable-shared --enable-sse2 --enable-float --enable-mpi
 
 -> Compiling f
 
@@ -105,7 +106,9 @@ fftw_include=$fftw_folder"/include"
 
 fftw_lib=$fftw_folder"/lib"
 
-cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=$grmx_install -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=$fftw_lib -DFFTWF_INCLUDE_DIR=$fftw_folder -DGMX_DEFAULT_SUFFIX=OFF -DGMX_BINARY_SUFFIX=_piv -DGMX_LIBS_SUFFIX=_piv
+cmake .. -DGMX_MPI=on -DCMAKE_INSTALL_PREFIX=$grmx_install -DGMX_FFT_LIBRARY=fftw3 -DCMAKE_PREFIX_PATH=$fftw_lib -DFFTWF_INCLUDE_DIR=$fftw_include -DGMX_DEFAULT_SUFFIX=OFF -DGMX_BINARY_SUFFIX=_piv -DGMX_LIBS_SUFFIX=_piv
+
+-> Note that you can replace the DGMX_BINARY_SUFFIX AND DGMX_LIBS_SUFFIX by any string that you want, including OFF if you want no suffix. Similar installation is feasible with MKL library, where you need to change DGMX_FFT_LIBRARY to mkl, and put the path of the include and lib folders of mkl in the DCMAKE_PREFIX_PATH and DFFTW_INCLUDE_DIR (use module mkl info on super computers that uses modules).
 
 -> Compiling
 
