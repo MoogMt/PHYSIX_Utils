@@ -47,7 +47,7 @@ git clone https://github.com/gromacs/gromacs
 ----------------------------------------
 
 --------------------------------------
-3 - Optionnal - PLUMED PATCHING
+3 - PLUMED PATCHING ( Optionnal )
 --------------------------------------
 
 -> Get archive from plumed repository
@@ -85,7 +85,7 @@ plumed-patch -p --shared
 --------------------------------------
 
 --------------------------------------
-3 - Bis - Installing GROMACS
+4 - Installing GROMACS
 --------------------------------------
 
 -> Moving to gromacs folder
