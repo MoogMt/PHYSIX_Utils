@@ -23,7 +23,7 @@ for frame_num in frames
     output_path_file_3 = string( path_to_trimer_folder, "cELF_", frame_num, "_treated_mod.cube" )
 
     # Reading volume
-    atoms, cell, volume = cube_mod.readCube( path_to_file )
+    atoms, cell, volume = cube_mod.readCubeVolume( path_to_file )
 
     # Rewrite the same volume
     cube_mod.writeCube( output_path_file_3, atoms, cell, volume )
