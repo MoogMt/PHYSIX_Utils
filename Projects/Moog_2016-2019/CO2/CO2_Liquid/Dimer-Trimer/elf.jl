@@ -12,19 +12,26 @@ using LinearAlgebra
 
 path_to_trimer_folder = "F:\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\Rings\\"
 
-frames = [ 5, 9, 86, 91, 96 ]
+frames = [9, 50, 86, 91, 96]
 
 for frame_num in frames
 
     print( "Handling frame: ", frame_num, "\n" )
     path_to_file = string( path_to_trimer_folder, "ELF_", frame_num, ".cube")
     output_path_file = string( path_to_trimer_folder, "aELF_", frame_num, "_treated_mod.cube" )
+    output_path_file_2 = string( path_to_trimer_folder, "bELF_", frame_num, "_treated_mod.cube" )
+    output_path_file_3 = string( path_to_trimer_folder, "cELF_", frame_num, "_treated_mod.cube" )
 
+    # Reading volume
     atoms, cell, volume = cube_mod.readCube( path_to_file )
 
-    # Carbon index
+    # Rewrite the same volume
+    cube_mod.writeCube( output_path_file_3, atoms, cell, volume )
+
+    # Index of the carbon in the trimer
     carbons = [ 7, 10, 14 ]
 
+    # Index of the oxygen in the trimer
     oxygens = [ 72, 60, 59, 51, 52, 46 ]
 
     # Compute position of the barycenter of carbon atoms
@@ -51,7 +58,7 @@ for frame_num in frames
     end
 
     # Compute the move vector
-    move_vector_real = center_ - ( carbon_barycenter - volume.origin )
+    move_vector_real = center_ - ( carbon_barycenter + volume.origin )
 
     # Moving atoms in order to recenter
     # - Loop over atoms
@@ -75,6 +82,8 @@ for frame_num in frames
     # Recentring values of the grid
     volume = cube_mod.moveValues( volume, move_vector )
 
+    cube_mod.writeCube( output_path_file_2, atoms, cell, volume )
+
     atoms_positions_grid = zeros(Int,3,9)
     # Computing grid positions of target atoms
     # - Adding the position in the grid of carbon atom
@@ -96,5 +105,4 @@ for frame_num in frames
 
     # Writting new volume to file
     cube_mod.writeCube( output_path_file, atoms, cell, volume )
-
 end
