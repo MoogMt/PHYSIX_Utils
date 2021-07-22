@@ -1,0 +1,13 @@
+p "map.dat" ps 1.5 pt 7 lt rgb "black" title ""
+set xrange [20:80]
+set yrange [1800:3200]
+set output "background_map.png"
+set term png size 896,684 font "Arial 20,20"
+replot
+
+p "melting_curve_1.dat" w lp lw 2 ps 3.5 pt 11 lt rgb "red" title "", "melting_curve_2.dat" w l lw 5 dt 2 lt rgb "red" title ""
+set xrange [20:80]
+set yrange [1800:3200]
+set output "melting_curves.png"
+set term png size 896,684 font "Arial 20,20"
+replot
