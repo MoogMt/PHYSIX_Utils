@@ -1,3 +1,9 @@
+computer="win"
+
+if computer == "win"
+    push!(LOAD_PATH,"C:\\Users\\moogm\\OneDrive\\Documents\\GitHub\\LibAtomicSim\\Julia\\")
+end
+
 using utils
 using atom_mod
 using cell_mod
@@ -55,7 +61,13 @@ function lineBetweenAtoms( atoms::T1, cell_params::T2, volume::T3, nb_points::T4
     return data
 end
 
-folder_base=string("/Volumes/DATA2/PHYSIX/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/ELF/8.82/Trajectory_2/")
+folder_base=""
+
+if computer == "mac"
+    folder_base=string("/Volumes/DATA2/PHYSIX/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/ELF/8.82/Trajectory_2/")
+elseif computer == "win"
+    folder_base=string("F:\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\8.82\\Trajectory_2\\")
+end
 
 max_structure=200
 nb_points_lines=100
