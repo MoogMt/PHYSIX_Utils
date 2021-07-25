@@ -69,16 +69,30 @@ elseif computer == "win"
     folder_base=string("F:\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\8.82\\Trajectory_2\\")
 end
 
-max_structure=200
-nb_points_lines=100
+# Number of structures to loop over
+max_structure=1000
+
+# Number of points to take along a C-O line
+nb_points_lines=20
+
+# Number of atoms
 nbC=32
 nbO=64
+
+# Max number of neighbors to consider around carbon
 max_neigh=4
 
-data_distances = zeros(Real, max_neigh, nbC, max_structure )
-data_dens = zeros(Real, nb_points_lines, max_neigh, nbC, max_structure )
-data_elf  = zeros(Real, nb_points_lines, max_neigh, nbC, max_structure )
+# Parameters for bonding
+cut_off_bonded     = 1.6
+cut_off_not_bonded = 1.8
 
+# Initialize data tensors
+data_distances = zeros(Real, max_neigh, nbC, max_structure )
+data_bonded    = zeros(Real, max_neigh, nbC, max_structure )
+data_dens      = zeros(Real, nb_points_lines, max_neigh, nbC, max_structure )
+data_elf       = zeros(Real, nb_points_lines, max_neigh, nbC, max_structure )
+
+# Computing distance
 for step_ = 1:max_structure
     #folder_step = string( folder_base, step_, "_structure/" )
     #elf_path = string( folder_step, "density.cube")
@@ -97,35 +111,79 @@ for step_ = 1:max_structure
         for neigh=1:max_neigh
             data_dens[ :, neigh, carbon, step_ ] = lineBetweenAtoms( atoms, cell_params, volume_dens, nb_points_lines, carbon, nearest_neighbors[ neigh, carbon ] )
             data_elf[ :, neigh, carbon, step_ ]  = lineBetweenAtoms( atoms, cell_params, volume_elf,  nb_points_lines, carbon, nearest_neighbors[ neigh, carbon ] )
-            data_distances[ neigh, carbon, step_ ] = cell_mod.distanceOrtho( atoms.positions[ :, carbon ], atoms.positions[ :, nearest_neighbors[ neigh, carbon ] ], cell_params.length )
+            dist =  cell_mod.distanceOrtho( atoms.positions[ :, carbon ], atoms.positions[ :, nearest_neighbors[ neigh, carbon ] ], cell_params.length )
+            data_distances[ neigh, carbon, step_ ] = dist
+            if dist < cut_off_bonded
+                data_bonded[ neigh, carbon, step_ ] = 1
+            elseif dist > cut_off_not_bonded
+                data_bonded[ neigh, carbon, step_ ] = 0
+            end
         end
     end
 end
 
+# Writting data to file
+file_out_input_dens = string( folder_base, "input_dens.dat" )
+file_out_input_elf = string( folder_base, "input_elf.dat" )
+file_out_input = string( folder_base, "output.dat" )
+
+# Opening output files
+handle_input_dens_out  = open( file_out_input_dens, "w" )
+handle_input_elf_out  = open( file_out_input_elf, "w" )
+handle_output_out = open( file_out_output, "w" )
+
+# Loop over structures
+for structure=1:max_structure
+    # Loop over carbons
+    for carbon=1:nbC
+        # Loop over carbon (first) neighbors
+        for neigh=1:max_neigh
+            # - Loop over points
+            for point=1:nb_points_lines
+                # Writting data to files
+                write( handle_input_dens_out, string( data_dens[ point, neigh, carbon, structure ], " " ) )
+                write( handle_input_elf_out,  string( data_elf[ point, neigh, carbon, structure ], " " ) )
+            end
+
+            # Writting end of line for data files
+            write( handle_input_dens_out, "\n" )
+            write( handle_input_elf_out, "\n")
+
+            # Writting output data to file
+            write( handle_output_tout, string( data_bonded[ point, neigh, carbon, structure ], "\n" ) )
+        end
+    end
+end
+
+# Closing files
+close( handle_input_dens_out )
+close( handle_input_elf_out  )
+close( handle_output_out )
+
 # Histogram preparation
 nb_box    = 100
-#
+
+# Determines histogram parameters for density
 min_value_dens = minimum(data_dens)
 max_value_dens = maximum(data_dens)
 delta_box_dens = ( max_value_dens - min_value_dens )/nb_box
-#
+
+# Determines histogram parameters for ELF
 min_value_elf = minimum( data_elf )
 max_value_elf = maximum( data_elf )
 delta_box_elf = ( max_value_elf - min_value_elf )/nb_box
 
-# Initialize histograms
+# Initialize histograms tables for density
 hist_all_dens       = zeros(Real, nb_box + 1, nb_points_lines )
 hist_neighbors_dens = zeros(Real, nb_box + 1, nb_points_lines, max_neigh )
 hist_bonded_dens    = zeros(Real, nb_box + 1, nb_points_lines, 3 )
-#
+
+# Initialize histograms tables for ELF
 hist_all_elf       = zeros(Real, nb_box + 1, nb_points_lines )
 hist_neighbors_elf = zeros(Real, nb_box + 1, nb_points_lines, max_neigh )
 hist_bonded_elf    = zeros(Real, nb_box + 1, nb_points_lines, 3 )
 
-cut_off_bonded     = 1.6
-cut_off_not_bonded = 1.8
-
-# Making Histogram
+# Making Histogram for both density and ELF
 for point=1:nb_points_lines
     for neigh=1:max_neigh
         for carbon=1:nbC
@@ -163,7 +221,7 @@ for point=1:nb_points_lines
     hist_bonded_elf[  :, point, 3 ] = hist_bonded_elf[  :, point, 3 ]/sum( hist_bonded_elf[  :, point, 3 ] )
 end
 
-# Writting Histogram
+# Determining histogram files names
 file_hist_all_dens = string( folder_base, "all_hist_density.dat" )
 file_hist_all_elf  = string( folder_base, "all_hist_elf.dat" )
 file_hist_neighbors_dens = string( folder_base, "neigbors_hist_density.dat" )
@@ -171,12 +229,15 @@ file_hist_neighbors_elf  = string( folder_base, "neigbors_hist_elf.dat" )
 file_hist_bonded_dens = string( folder_base, "bonded_hist_dens.dat")
 file_hist_bonded_elf = string( folder_base, "bonded_hist_elf.dat")
 
+# Writting data out
+# Opening output files
 handle_out_dens  = open( file_hist_all_dens, "w" )
 handle_out_elf   = open( file_hist_all_elf,  "w" )
 handle_out2_dens = open( file_hist_neighbors_dens, "w" )
 handle_out2_elf  = open( file_hist_neighbors_elf,  "w" )
 handle_out3_dens = open( file_hist_bonded_dens, "w" )
 handle_out3_elf  = open( file_hist_bonded_elf,  "w" )
+# Loop over points
 for point=1:nb_points_lines
     for box=1:nb_box
         write( handle_out_dens,  string( point, " ", round( box*delta_box_dens + min_value_dens, digits=3 ), " ", hist_all_dens[ box, point ], "\n" ) )
@@ -205,6 +266,7 @@ for point=1:nb_points_lines
     write( handle_out2_elf, string("\n") )
     write( handle_out3_elf, string("\n") )
 end
+# Closing files
 close( handle_out_dens  )
 close( handle_out2_dens )
 close( handle_out3_dens )
