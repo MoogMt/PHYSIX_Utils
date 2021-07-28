@@ -125,7 +125,7 @@ end
 # Writting data to file
 file_out_input_dens = string( folder_base, "input_dens.dat" )
 file_out_input_elf = string( folder_base, "input_elf.dat" )
-file_out_input = string( folder_base, "output.dat" )
+file_out_output = string( folder_base, "output.dat" )
 
 # Opening output files
 handle_input_dens_out  = open( file_out_input_dens, "w" )
@@ -150,7 +150,7 @@ for structure=1:max_structure
             write( handle_input_elf_out, "\n")
 
             # Writting output data to file
-            write( handle_output_tout, string( data_bonded[ point, neigh, carbon, structure ], "\n" ) )
+            write( handle_output_out, string( data_bonded[ neigh, carbon, structure ], "\n" ) )
         end
     end
 end
@@ -159,6 +159,7 @@ end
 close( handle_input_dens_out )
 close( handle_input_elf_out  )
 close( handle_output_out )
+
 
 # Histogram preparation
 nb_box    = 100
