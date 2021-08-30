@@ -116,7 +116,7 @@ for step_ = 1:max_structure
             if dist < cut_off_bonded
                 data_bonded[ neigh, carbon, step_ ] = 1
             elseif dist > cut_off_not_bonded
-                data_bonded[ neigh, carbon, step_ ] = 0
+                data_bonded[ neigh, carbon, step_ ] = -1
             end
         end
     end
