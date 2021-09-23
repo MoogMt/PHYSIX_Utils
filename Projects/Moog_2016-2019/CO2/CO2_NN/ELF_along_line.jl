@@ -80,7 +80,7 @@ nbC=32
 nbO=64
 
 # Max number of neighbors to consider around carbon
-max_neigh=4
+max_neigh=5
 
 # Parameters for bonding
 cut_off_bonded     = 1.6
@@ -92,65 +92,80 @@ data_bonded    = zeros(Real, max_neigh, nbC, max_structure )
 data_dens      = zeros(Real, nb_points_lines, max_neigh, nbC, max_structure )
 data_elf       = zeros(Real, nb_points_lines, max_neigh, nbC, max_structure )
 
+# Writting data to file
+file_out_input_dens = string( folder_base, "input_dens.dat" )
+file_out_input_elf  = string( folder_base, "input_elf.dat"  )
+
+# Opening output files
+handle_input_dens_out  = open( file_out_input_dens, "w" )
+handle_input_elf_out   = open( file_out_input_elf,  "w" )
+
 # Computing distance
 for step_ = 1:max_structure
-    #folder_step = string( folder_base, step_, "_structure/" )
-    #elf_path = string( folder_step, "density.cube")
-    dens_path = string( folder_base, step_, "_density.cube")
+    # Write progress
+    print("Progress: ", step_/max_structure*100, "%\n" )
+
+    # Create path for the input path for density and elf files
+    dens_path = string( folder_base, step_, "_density.cube" )
+    elf_path  = string( folder_base, step_, "_elf.cube"     )
+
+    # Read ELF and DENSITY data
     atoms, cell_params, volume_dens = cube_mod.readCubeVolume( dens_path )
-    elf_path = string( folder_base, step_, "_elf.cube")
-    atoms, cell_params, volume_elf  = cube_mod.readCubeVolume( elf_path )
+    atoms, cell_params, volume_elf  = cube_mod.readCubeVolume( elf_path  )
+
+    # Initialize local data repository
     nearest_neighbors = zeros(Real, max_neigh, nbC )
-    dist_nearest = zeros(Real, max_neigh, nbC )
+    dist_nearest      = zeros(Real, max_neigh, nbC )
+
+    # Loop over carbons
     for carbon=1:nbC
+        # Local storing data
         distance_oxygen = zeros(Real, nbO )
+
+        # Loop over oxygen atoms
         for oxygen=1:nbO
             distance_oxygen[oxygen] = cell_mod.distanceOrtho( atoms.positions[:,carbon], atoms.positions[:,nbC+oxygen], cell_params.length )
         end
+
+        # Compute neighbors of local carbon
         nearest_neighbors[:, carbon] = sortperm( distance_oxygen )[1:max_neigh] .+ nbC
+
+        # Loop over neighbors
         for neigh=1:max_neigh
+            # Get ELF and DENSITY values
             data_dens[ :, neigh, carbon, step_ ] = lineBetweenAtoms( atoms, cell_params, volume_dens, nb_points_lines, carbon, nearest_neighbors[ neigh, carbon ] )
             data_elf[ :, neigh, carbon, step_ ]  = lineBetweenAtoms( atoms, cell_params, volume_elf,  nb_points_lines, carbon, nearest_neighbors[ neigh, carbon ] )
+
+            # Computing distances between carbon and its neighbor
             dist =  cell_mod.distanceOrtho( atoms.positions[ :, carbon ], atoms.positions[ :, nearest_neighbors[ neigh, carbon ] ], cell_params.length )
+
+            # Storing distance
             data_distances[ neigh, carbon, step_ ] = dist
+
+            # Determining if bonded or not or unknown
             if dist < cut_off_bonded
                 data_bonded[ neigh, carbon, step_ ] = 1
             elseif dist > cut_off_not_bonded
                 data_bonded[ neigh, carbon, step_ ] = -1
             end
-        end
-    end
-end
 
-# Writting data to file
-file_out_input_dens = string( folder_base, "input_dens.dat" )
-file_out_input_elf = string( folder_base, "input_elf.dat" )
-file_out_output = string( folder_base, "output.dat" )
+            # Begining of line
+            line_start = string( structure, " ", carbon, " ", neigh, " ", nearest_neighbors[:, carbon], " " )
 
-# Opening output files
-handle_input_dens_out  = open( file_out_input_dens, "w" )
-handle_input_elf_out  = open( file_out_input_elf, "w" )
-handle_output_out = open( file_out_output, "w" )
+            # Write basic carbon information
+            write( handle_input_dens_out, line_start )
+            write( handle_input_elf_out,  line_start )
 
-# Loop over structures
-for structure=1:max_structure
-    # Loop over carbons
-    for carbon=1:nbC
-        # Loop over carbon (first) neighbors
-        for neigh=1:max_neigh
             # - Loop over points
             for point=1:nb_points_lines
                 # Writting data to files
-                write( handle_input_dens_out, string( data_dens[ point, neigh, carbon, structure ], " " ) )
-                write( handle_input_elf_out,  string( data_elf[ point, neigh, carbon, structure ], " " ) )
+                write( handle_input_dens_out, string( data_dens[ point, neigh, carbon, step_ ], " " ) )
+                write( handle_input_elf_out,  string( data_elf[ point, neigh, carbon, step_ ],  " " ) )
             end
 
-            # Writting end of line for data files
-            write( handle_input_dens_out, "\n" )
-            write( handle_input_elf_out, "\n")
-
             # Writting output data to file
-            write( handle_output_out, string( data_bonded[ neigh, carbon, structure ], "\n" ) )
+            write( handle_input_dens_out, string( data_bonded[ neigh, carbon, step_ ], "\n" ) )
+            write( handle_input_elf_out,  string( data_bonded[ neigh, carbon, step_ ], "\n" ) )
         end
     end
 end
@@ -158,11 +173,9 @@ end
 # Closing files
 close( handle_input_dens_out )
 close( handle_input_elf_out  )
-close( handle_output_out )
-
 
 # Histogram preparation
-nb_box    = 100
+nb_box = 100
 
 # Determines histogram parameters for density
 min_value_dens = minimum(data_dens)
