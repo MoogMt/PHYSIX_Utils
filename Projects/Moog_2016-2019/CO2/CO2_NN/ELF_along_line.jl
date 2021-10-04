@@ -67,13 +67,15 @@ if computer == "mac"
     folder_base=string("/Volumes/DATA2/PHYSIX/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/ELF/8.82/Trajectory_2/")
 elseif computer == "win"
     folder_base=string("F:\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\8.82\\Trajectory_2\\")
+elseif computer == "ubuntu"
+    folder_base=string("/media/moogmt/DATA2/PHYSIX/Mathieu/CO2/AIMD/Liquid/PBE-MT/ELF/ELF/8.82/Trajectory_2/")
 end
 
 # Number of structures to loop over
 max_structure=1000
 
 # Number of points to take along a C-O line
-nb_points_lines=20
+nb_points_lines=50
 
 # Number of atoms
 nbC=32
@@ -84,7 +86,7 @@ max_neigh=5
 
 # Parameters for bonding
 cut_off_bonded     = 1.6
-cut_off_not_bonded = 1.8
+cut_off_not_bonded = 1.9
 
 # Initialize data tensors
 data_distances = zeros(Real, max_neigh, nbC, max_structure )
@@ -150,7 +152,7 @@ for step_ = 1:max_structure
             end
 
             # Begining of line
-            line_start = string( structure, " ", carbon, " ", neigh, " ", nearest_neighbors[:, carbon], " " )
+            line_start = string( step_, " ", carbon, " ", neigh, " ", nearest_neighbors[neigh, carbon], " ", dist, " " )
 
             # Write basic carbon information
             write( handle_input_dens_out, line_start )
