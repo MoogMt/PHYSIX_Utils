@@ -24,9 +24,10 @@ import matplotlib.pyplot as plt
 #============================================================================
 # Read CSV files
 #--------------------------------------------------------------------
+harddrive="E"
 # File path to the datasets
-density_filepath="F:\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\8.82\\Trajectory_2\\input_dens.dat"
-elf_filepath="F:\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\8.82\\Trajectory_2\\input_elf.dat"
+density_filepath = harddrive + ":\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\8.82\\Trajectory_2\\input_dens.dat"
+elf_filepath     = harddrive + ":\\PHYSIX\\Mathieu\\CO2\\AIMD\\Liquid\\PBE-MT\\ELF\\ELF\\8.82\\Trajectory_2\\input_elf.dat"
 # Reading data files 
 df_density = pd.read_csv( density_filepath, sep=" " )
 df_elf = pd.read_csv( elf_filepath, sep=" " )
@@ -40,7 +41,7 @@ nb_cols       = df_density.shape[1]
 
 # Set the names of the columns
 #--------------------------------------------------------------------
-# - First columns indicates the frame
+# - First columns indicates the frame, target carbon and target oxygen
 names_meta=["Step","Carbon","Neighbor","Oxygen","C-O Distance"]
 # - Create name for ELF/Density values on line
 nb_meta_cols=len(names_meta)
@@ -48,28 +49,35 @@ names = names_meta
 for i in range(nb_meta_cols+1,nb_cols):
     names.append("Line " + str(i-nb_meta_cols) )
 # Add output name
-names.append("Status")
+names.append("Bonded")
 # - Replace names of the columns in the DF
+# --> Density
 df_density = df_density.set_axis( names, axis=1, inplace=False )
-df_elf     = df_elf.set_axis(     names, axis=1, inplace=False )
+# --> ELF
+df_elf = df_elf.set_axis( names, axis=1, inplace=False )
 #--------------------------------------------------------------------
 
 # Separating between data between trainable and not trainable
 #--------------------------------------------------------------------
-mask_data = df_density["Status"] != 0
+# Create mask to separate data without clear output from data with clear ones
+mask_data = df_density["Bonded"] != 0
 # Separate between trainable and application sets
+# - density
 df_density_trainable = df_density[  mask_data ]
-df_density_test      = df_density[ ~mask_data ]
 df_elf_trainable = df_elf[  mask_data ]
-df_elf_test      = df_elf[ ~mask_data ]
+# Non trainable_sets
+df_density_non_trainable = df_density[ ~mask_data ]
+df_elf_non_trainable = df_elf[ ~mask_data ]
 #--------------------------------------------------------------------
 
 # Separate between bonded and not bonded sets
 #--------------------------------------------------------------------
-df_bonded_density     = df_density[ df_density["Prediction"] == 1 ]
-df_non_bonded_density = df_density[ df_density["Prediction"] == -1 ]
-df_bonded_elf     = df_elf[ df_elf["Prediction"] ==  1 ]
-df_non_bonded_elf = df_elf[ df_elf["Prediction"] == -1 ]
+# - Bonded
+df_bonded_density = df_density[ df_density["Bonded"] ==  1 ]
+df_bonded_elf = df_elf[ df_elf["Bonded"] ==  1 ]
+# - Non-bonded
+df_non_bonded_density = df_density[ df_density["Bonded"] == -1 ]
+df_non_bonded_elf = df_elf[ df_elf["Bonded"] == -1 ]
 #--------------------------------------------------------------------
 
 # Separating input and output 
@@ -93,40 +101,44 @@ shuffle = True
 
 # Functions
 #--------------------
-def fitMinMaxScaler( X ):
+def fitMinMaxScaler( X, y ):
     # Argument 
     # - X: input data
     # Output 
     # - Fitted Scaler (MinMax)
-    return preprocessing.MinMaxScaler().fit(X)
-def fitStdScaler( X ):
+    return preprocessing.MinMaxScaler().fit( X, y)
+def fitStdScaler( X, y ):
     # Argument
     # - X: input data
     # Output
     # - Fitter Scaler
-    return preprocessing.StandardScaler().fit(X)
+    return preprocessing.StandardScaler().fit( X, y)
 #--------------------
 
 # Content
 #--------------------
 # Separating Train and Test split
-# - density
 density_X_train, density_X_test, density_y_train, density_y_test = train_test_split( density_X, density_y, test_size=test_size, random_state=random_state, shuffle=shuffle)
-# - elf
 elf_X_train, elf_X_test, elf_y_train, elf_y_test = train_test_split( elf_X, elf_y, test_size=test_size, random_state=random_state, shuffle=shuffle)
+# Scaling data
+scaler_density = fitStdScaler( density_X_train, density_y_train )
+scaler_elf = fitStdScaler( elf_X_train, elf_y_train )
+# Applying Scaler
+density_X_train_scaled = scaler_density.transform( density_X_train )
+elf_X_train_scaled = scaler_elf.transform( elf_X_train )
 #============================================================================
 
 
 # Machine Learning Application
 #============================================================================
-# Functions
+# Parameters
 #----------------------------------------------------
-    # Arguments:
-    # - X: input data
-    # - n_components: number of components to keep
-    
-    # Returns PCA object, fitted on data
-    return PCA( n_components=n_components ).fit(X
+reg_parameter = 1.0
+kernel = "poly"
+#----------------------------------------------------
+
+# Functions
+#---------------------------------------------------
 def learnSVC( X, y, reg_param=1.0, kernel="rbf" ):
     # Arguments:
     # - X: input data
@@ -134,27 +146,32 @@ def learnSVC( X, y, reg_param=1.0, kernel="rbf" ):
     # - kernel: type of the kernel amongst ‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’, ‘precomputed’
     # Output
     # - SVC predictor trained
-    
     return svm.SVC( C=reg_param, kernel=kernel).fit( X, y )
 #----------------------------------------------------
 
 # Content
 #----------------------------------------------------
 # Create ML operator
-clf_dens = learnSVC( density_X_train, density_y_train, reg_param=1.5, kernel="linear" )
-clf_elf  = learnSVC( elf_X_train, elf_y_test, reg_param=1.5, kernel="linear" )
-
+clf_dens = learnSVC( density_X_train, density_y_train, reg_param=reg_parameter, kernel=kernel )
+clf_elf  = learnSVC( elf_X_train, elf_y_train, reg_param=reg_parameter, kernel=kernel )
 # Predicting output for the whole set (train+test+application)
-df_density["Prediction"] = clf_dens.predict( density_X )
-df_elf["Prediction"] = clf_elf.predict( elf_X )
-
+#df_density["Prediction"] = clf_dens.predict( density_X )
+#df_elf["Prediction"] = clf_elf.predict( elf_X )
 # Predicting on the train and test sets
 # - Density
-y_pred_train_dens = clf_dens.predict( density_X_train )
-y_pred_test_dens  = clf_dens.predict( density_X_test  )
+density_ypred_train = clf_dens.predict( density_X_train )
+density_ypred_test  = clf_dens.predict( density_X_test  )
 # - ELF
-y_pred_train_elf = clf_elf.predict( elf_X_train )
-y_pred_test_elf  = clf_elf.predict( elf_X_test  )
+elf_ypred_train = clf_elf.predict( elf_X_train )
+elf_ypred_test  = clf_elf.predict( elf_X_test  )
+# Scoring
+train_score_density = sum( density_ypred_train == density_y_train )/len( density_ypred_train )*100
+test_score_density  = sum( density_ypred_test == density_y_test   )/len( density_ypred_test  )*100
+train_score_elf = sum( elf_ypred_train == elf_y_train )/len( elf_ypred_train )*100
+test_score_elf  = sum( elf_ypred_test == elf_y_test   )/len( elf_ypred_test  )*100
+# Prints Score
+print("Density results - train:  " + str(train_score_density) + "% test: " + str(test_score_density) + "%" )
+print("ELF results - train:  " + str(train_score_elf) + "% test: " + str(test_score_elf) + "%" )
 #============================================================================
 
 # Post-Processing
